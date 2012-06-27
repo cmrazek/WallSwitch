@@ -1,0 +1,336 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ActiveTheme" xml:space="preserve">
+    <value>{0} (active)</value>
+    <comment>{0} = theme name</comment>
+  </data>
+  <data name="AppName" xml:space="preserve">
+    <value>Wall Switch</value>
+  </data>
+  <data name="AppNameIdent" xml:space="preserve">
+    <value>WallSwitch</value>
+  </data>
+  <data name="AppNameVersion" xml:space="preserve">
+    <value>Wall Switch - Version {0}</value>
+    <comment>{0} = version string</comment>
+  </data>
+  <data name="Confirm_DeleteTheme" xml:space="preserve">
+    <value>Are you sure you want to delete the theme '{0}'?</value>
+  </data>
+  <data name="Confirm_DeleteTheme_Caption" xml:space="preserve">
+    <value>Delete Theme?</value>
+  </data>
+  <data name="DefaultTheme" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="Error_CantDeleteLastTheme" xml:space="preserve">
+    <value>You cannot delete the last theme in the list. There must be at least one theme present.</value>
+  </data>
+  <data name="Error_Caption" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Error_Content" xml:space="preserve">
+    <value>{0}</value>
+    <comment>{0} = friendly error message</comment>
+  </data>
+  <data name="Error_ContentEx" xml:space="preserve">
+    <value>{0}
+
+{1}</value>
+    <comment>{0} = friendly error message, {1} = exception message</comment>
+  </data>
+  <data name="Error_DuplicateFolder" xml:space="preserve">
+    <value>This folder is already present in the list.</value>
+  </data>
+  <data name="Error_InvalidThemeFreq" xml:space="preserve">
+    <value>Invalid frequency</value>
+  </data>
+  <data name="Error_InvalidThemeOrder" xml:space="preserve">
+    <value>Invalid image order</value>
+  </data>
+  <data name="Error_InvalidThemePeriod" xml:space="preserve">
+    <value>Invalid period</value>
+  </data>
+  <data name="Error_LoadSettings" xml:space="preserve">
+    <value>An error occurred when loading the settings.</value>
+  </data>
+  <data name="Error_LoadTheme" xml:space="preserve">
+    <value>An error occurred when loading a theme. It may be lost.</value>
+  </data>
+  <data name="Error_NewTheme" xml:space="preserve">
+    <value>An error occurred when creating a new theme.</value>
+  </data>
+  <data name="Error_RenameTheme" xml:space="preserve">
+    <value>An error occurred when renaming the theme.</value>
+  </data>
+  <data name="Error_SaveSettings" xml:space="preserve">
+    <value>An error occurred when saving the settings.</value>
+  </data>
+  <data name="Exception_AboutDialog" xml:space="preserve">
+    <value>An error occurred when showing the about dialog.</value>
+  </data>
+  <data name="Exception_AddFile" xml:space="preserve">
+    <value>An error occurred when adding an image file to the list.</value>
+  </data>
+  <data name="Exception_AddFolder" xml:space="preserve">
+    <value>An error occurred when adding a folder to the list.</value>
+  </data>
+  <data name="Exception_GetAppVersion" xml:space="preserve">
+    <value>An error occurred when detecting the application version.
+
+{0}</value>
+    <comment>{0} = exception message</comment>
+  </data>
+  <data name="Exception_LoadTheme_InvalidFrequency" xml:space="preserve">
+    <value>Invalid theme frequency.</value>
+  </data>
+  <data name="Exception_LoadTheme_InvalidPeriod" xml:space="preserve">
+    <value>Invalid theme period.</value>
+  </data>
+  <data name="Exception_NoThemeName" xml:space="preserve">
+    <value>The theme does not have a name.</value>
+  </data>
+  <data name="Exception_OptionsDialog" xml:space="preserve">
+    <value>An error occurred when showing the options dialog.</value>
+  </data>
+  <data name="Exception_SelectNewCurrentTheme" xml:space="preserve">
+    <value>No current theme could be selected.</value>
+  </data>
+  <data name="Exception_SwitchNow" xml:space="preserve">
+    <value>An error occurred when signaling to switch wallpapers.</value>
+  </data>
+  <data name="Exception_SwitchNowTray" xml:space="preserve">
+    <value>An error occurred when signaling to switch wallpapers.</value>
+  </data>
+  <data name="Exception_ThemeFreqOutOfRange" xml:space="preserve">
+    <value>The theme frequency must be greater than zero.</value>
+  </data>
+  <data name="LogFile" xml:space="preserve">
+    <value>WallSwitch.log</value>
+  </data>
+  <data name="NewThemePrompt" xml:space="preserve">
+    <value>Enter a name for the new theme:</value>
+  </data>
+  <data name="NewThemeTitle" xml:space="preserve">
+    <value>New Theme</value>
+  </data>
+  <data name="OpenImageDlgFilter" xml:space="preserve">
+    <value>Image Files (jpg, png, gif, bmp)|*.jpg;*.png;*.gif;*.bmp|All Files|*.*</value>
+  </data>
+  <data name="RenameThemePrompt" xml:space="preserve">
+    <value>Enter the new name for the theme:</value>
+  </data>
+  <data name="RenameThemeTitle" xml:space="preserve">
+    <value>Rename Theme</value>
+  </data>
+  <data name="SettingsDir" xml:space="preserve">
+    <value>{0}\WallSwitch</value>
+    <comment>{0} = App data directory</comment>
+  </data>
+  <data name="SettingsFileName" xml:space="preserve">
+    <value>Settings.xml</value>
+    <comment>{0} = App data directory</comment>
+  </data>
+  <data name="WallpaperFileName" xml:space="preserve">
+    <value>Wallpaper.bmp</value>
+  </data>
+  <data name="Exception_SwitchPrev" xml:space="preserve">
+    <value>An error occurred when switching to the previous wallpaper.</value>
+  </data>
+  <data name="Exception_SwitchPrevTray" xml:space="preserve">
+    <value>An error occurred when switching to the previous wallpaper.</value>
+  </data>
+  <data name="Confirm_ChangeDirtyTheme" xml:space="preserve">
+    <value>You have made changes to this theme. Do you want to save changes before changing?</value>
+  </data>
+  <data name="Confirm_ChangeDirtyTheme_Caption" xml:space="preserve">
+    <value>Save Changes?</value>
+  </data>
+  <data name="Exception_InitSettings" xml:space="preserve">
+    <value>An error occurred when initializing the settings: {0}</value>
+    <comment>{0} = Exception message</comment>
+  </data>
+  <data name="Exception_LoadTheme_InvalidSeparateMonitors" xml:space="preserve">
+    <value>Invalid separate monitors flag.</value>
+  </data>
+  <data name="Exception_SwitchThread" xml:space="preserve">
+    <value>An error occurred within the background monitor thread: {0}</value>
+    <comment>{0} = Exception message</comment>
+  </data>
+  <data name="ImageSizePercent" xml:space="preserve">
+    <value>{0}%</value>
+    <comment>{0} = Image size (1 -&gt;100)</comment>
+  </data>
+  <data name="BackOpacityPercent" xml:space="preserve">
+    <value>{0}%</value>
+    <comment>{0} = Opacity percent</comment>
+  </data>
+  <data name="Exception_LoadTheme_InvalidBackOpacity" xml:space="preserve">
+    <value>Invalid background opacity value.</value>
+  </data>
+  <data name="Exception_LoadTheme_InvalidMaintainAspectRatio" xml:space="preserve">
+    <value>Invalid 'maintain aspect ratio' flag.</value>
+  </data>
+  <data name="Exception_Theme_BackOpacity" xml:space="preserve">
+    <value>Background opacity must be between 0 and 100.</value>
+  </data>
+  <data name="Exception_Theme_ImageSize" xml:space="preserve">
+    <value>Image size must be between 1 and 100.</value>
+  </data>
+  <data name="HotKey_Alt" xml:space="preserve">
+    <value>Alt</value>
+  </data>
+  <data name="HotKey_Control" xml:space="preserve">
+    <value>Ctrl</value>
+  </data>
+  <data name="HotKey_Delim" xml:space="preserve">
+    <value> + </value>
+  </data>
+  <data name="HotKey_Shift" xml:space="preserve">
+    <value>Shift</value>
+  </data>
+  <data name="Error_LocationMissing" xml:space="preserve">
+    <value>This location does not exist.</value>
+  </data>
+  <data name="Exception_Generic" xml:space="preserve">
+    <value>An unexpected error has occurred.</value>
+  </data>
+  <data name="Exception_GetIcon" xml:space="preserve">
+    <value>Couldn't get icon for location '{0}'</value>
+    <comment>{0} = Location</comment>
+  </data>
+  <data name="HistoryCleared" xml:space="preserve">
+    <value>Image history has been cleared successfully.</value>
+  </data>
+  <data name="HistoryCleared_Caption" xml:space="preserve">
+    <value>Clear History</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="AppIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\AppIcon.ico;System.Drawing.Icon, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="WallSwitch" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\WallSwitch.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="FeatherWidth" xml:space="preserve">
+    <value>{0} pixels</value>
+    <comment>{0} = Feather width</comment>
+  </data>
+</root>
