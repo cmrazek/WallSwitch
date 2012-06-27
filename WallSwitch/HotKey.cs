@@ -35,8 +35,6 @@ namespace WallSwitch
 		private const int MOD_NOREPEAT = 0x4000;
 		private const int MOD_SHIFT = 0x0004;
 		private const int MOD_WIN = 0x0008;
-
-		//private static int WM_HOTKEY = 0x0312;
 		#endregion
 
 		/// <summary>
@@ -142,7 +140,7 @@ namespace WallSwitch
 		/// Saves the hot key information to the theme element.
 		/// </summary>
 		/// <param name="xml"></param>
-		public void SaveTheme(XmlTextWriter xml)
+		public void SaveTheme(XmlWriter xml)
 		{
 			if (IsEnabled)
 			{

@@ -55,6 +55,9 @@
     <ApplicationIcon>AppIcon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="HtmlAgilityPack">
+      <HintPath>..\HtmlAgilityPack.1.4.0\HtmlAgilityPack.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
@@ -75,9 +78,28 @@
     <Compile Include="ColorSample.Designer.cs">
       <DependentUpon>ColorSample.cs</DependentUpon>
     </Compile>
+    <Compile Include="FeedDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FeedDialog.Designer.cs">
+      <DependentUpon>FeedDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FeedLoader.cs" />
+    <Compile Include="FileUtils.cs" />
+    <Compile Include="HistoryList.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="HistoryList.Designer.cs">
+      <DependentUpon>HistoryList.cs</DependentUpon>
+    </Compile>
     <Compile Include="HotKey.cs" />
     <Compile Include="IconReader.cs" />
+    <Compile Include="ImageCache.cs" />
     <Compile Include="ImageFit.cs" />
+    <Compile Include="ImageListView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ImageRec.cs" />
     <Compile Include="Location.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="MainWindow.cs">
@@ -95,6 +117,7 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="SettingsException.cs" />
     <Compile Include="SetWallpaper.cs" />
     <Compile Include="SwitchDir.cs" />
     <Compile Include="SwitchThread.cs" />
@@ -106,13 +129,19 @@
       <DependentUpon>Res.resx</DependentUpon>
     </Compile>
     <Compile Include="ThemeMode.cs" />
-    <Compile Include="ThemePeriod.cs" />
+    <Compile Include="Period.cs" />
     <Compile Include="Util.cs" />
     <EmbeddedResource Include="AboutDialog.resx">
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ColorSample.resx">
       <DependentUpon>ColorSample.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FeedDialog.resx">
+      <DependentUpon>FeedDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HistoryList.resx">
+      <DependentUpon>HistoryList.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
@@ -152,6 +181,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\AppIcon.ico" />
+    <None Include="Resources\RSS.ico" />
     <None Include="Resources\WallSwitch.png" />
   </ItemGroup>
   <ItemGroup>
@@ -183,7 +213,7 @@
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

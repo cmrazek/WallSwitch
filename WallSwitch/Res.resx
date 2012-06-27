@@ -241,7 +241,7 @@
     <value>Rename Theme</value>
   </data>
   <data name="SettingsDir" xml:space="preserve">
-    <value>{0}\WallSwitch</value>
+    <value>WallSwitch</value>
     <comment>{0} = App data directory</comment>
   </data>
   <data name="SettingsFileName" xml:space="preserve">
@@ -332,5 +332,23 @@
   <data name="FeatherWidth" xml:space="preserve">
     <value>{0} pixels</value>
     <comment>{0} = Feather width</comment>
+  </data>
+  <data name="Error_InvalidFeedUpdateFreq" xml:space="preserve">
+    <value>Invalid update frequency.</value>
+  </data>
+  <data name="Error_InvalidFeedUpdatePeriod" xml:space="preserve">
+    <value>Invalid update period.</value>
+  </data>
+  <data name="Error_InvalidFeedUrl" xml:space="preserve">
+    <value>Invalid feed URL.</value>
+  </data>
+  <data name="RSS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\RSS.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImageCacheDir" xml:space="preserve">
+    <value>ImageCache</value>
+  </data>
+  <data name="ImageFileMissing" xml:space="preserve">
+    <value>The image file has been moved or deleted.</value>
   </data>
 </root>

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WallSwitch
 {
-	enum ThemePeriod
+	enum Period
 	{
 		Seconds,
 		Minutes,

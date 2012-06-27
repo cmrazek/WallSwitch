@@ -106,9 +106,7 @@ namespace WallSwitch
 		{
 			get
 			{
-				string dir = String.Format(Res.SettingsDir, Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
-				if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-				return dir + Path.DirectorySeparatorChar + Res.LogFile;
+				return Path.Combine(Util.AppDataDir, Res.LogFile);
 			}
 		}
 
@@ -266,43 +264,17 @@ namespace WallSwitch
 			{ }
 		}
 
-		public static void Write(LogLevel level, string format, object a1)
+		public static void Write(LogLevel level, string format, params object[] args)
 		{
 			if (!_enabled || level < _level) return;
-			Write(level, String.Format(format, a1));
+			Write(level, String.Format(format, args));
 		}
 
-		public static void Write(LogLevel level, string format, object a1, object a2)
-		{
-			if (!_enabled || level < _level) return;
-			Write(level, String.Format(format, a1, a2));
-		}
-
-		public static void Write(LogLevel level, string format, object a1, object a2, object a3)
-		{
-			if (!_enabled || level < _level) return;
-			Write(level, String.Format(format, a1, a2, a3));
-		}
-
-		public static void Write(Exception ex, string format, object a1)
+		public static void Write(Exception ex, string format, params object[] args)
 		{
 			if (!_enabled) return;
-			Write(ex, String.Format(format, a1));
-		}
-
-		public static void Write(Exception ex, string format, object a1, object a2)
-		{
-			if (!_enabled) return;
-			Write(ex, String.Format(format, a1, a2));
-		}
-
-		public static void Write(Exception ex, string format, object a1, object a2, object a3)
-		{
-			if (!_enabled) return;
-			Write(ex, String.Format(format, a1, a2, a3));
+			Write(ex, String.Format(format, args));
 		}
 		#endregion
-
-
 	}
 }

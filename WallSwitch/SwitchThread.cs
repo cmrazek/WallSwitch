@@ -3,27 +3,42 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.IO;
+using Microsoft.Win32;
+using System.Runtime.InteropServices;
 
 namespace WallSwitch
 {
 	class SwitchThread
 	{
 		#region Variables
-		Thread _thread = null;
-		List<string> _files = new List<string>();
-		Random _rand = new Random();
+		private Thread _thread = null;
+		private List<string> _files = new List<string>();
+		private Random _rand = new Random();
 
-		object _controlLock = new object();
-		bool _kill = false;
-		SwitchDir _switchNow = SwitchDir.None;
-		
-		object _themeLock = new object();
-		Theme _theme = null;
-		DateTime _lastSwitch = DateTime.MinValue;
+		//private object _controlLock = new object();		TODO: remove
+		private volatile bool _kill = false;
+		private volatile SwitchDir _switchNow = SwitchDir.None;
+		private volatile bool _locked = false;
+		private volatile bool _screensaverRunning = false;
+
+		private object _themeLock = new object();
+		private Theme _theme = null;
+		private DateTime _lastSwitch = DateTime.MinValue;
 		#endregion
 
 		#region Constants
-		private const int k_sleepTime = 250;
+		private const int k_sleepTime = 1000;
+		#endregion
+
+		#region PInvoke
+		[DllImport("user32.dll", SetLastError = true)]
+		public static extern uint GetLastError();
+
+		[DllImport("user32.dll", SetLastError = true)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, ref bool pvParam, uint fWinIni);
+
+		public const uint SPI_GETSCREENSAVERRUNNING = 0x0072;
 		#endregion
 
 		#region Construction
@@ -32,10 +47,7 @@ namespace WallSwitch
 			if (theme == null) throw new ArgumentNullException("Theme is null.");
 			_theme = theme;
 
-			lock (_controlLock)
-			{
-				_kill = false;
-			}
+			_kill = false;
 
 			_thread = new Thread(new ThreadStart(ThreadProc));
 			_thread.Name = "Switch Thread";
@@ -48,10 +60,7 @@ namespace WallSwitch
 			{
 				if (_thread.IsAlive)
 				{
-					lock (_controlLock)
-					{
-						_kill = true;
-					}
+					_kill = true;
 					_thread.Join();
 				}
 
@@ -59,15 +68,16 @@ namespace WallSwitch
 			}
 		}
 
-		private bool CheckKill()
-		{
-			bool kill;
-			lock (_controlLock)
-			{
-				kill = _kill;
-			}
-			return kill;
-		}
+		// TODO: remove
+		//private bool CheckKill()
+		//{
+		//    bool kill;
+		//    lock (_controlLock)
+		//    {
+		//        kill = _kill;
+		//    }
+		//    return kill;
+		//}
 
 		public bool IsAlive
 		{
@@ -95,7 +105,9 @@ namespace WallSwitch
 			Log.Write(LogLevel.Info, "Switch thread has started.");
 			try
 			{
-				while (!CheckKill())
+				SystemEvents.SessionSwitch += SystemEvents_SessionSwitch;
+
+				while (!_kill)
 				{
 					sw = CheckSwitch();
 					if (sw != SwitchDir.None)
@@ -123,26 +135,79 @@ namespace WallSwitch
 			{
 				Log.Write(ex, "Exception in switch thread.");
 			}
+			finally
+			{
+				SystemEvents.SessionSwitch -= SystemEvents_SessionSwitch;
+			}
 
 			Log.Write(LogLevel.Info, "Switch thread has ended.");
 		}
 
+		void SystemEvents_SessionSwitch(object sender, Microsoft.Win32.SessionSwitchEventArgs e)
+		{
+			switch (e.Reason)
+			{
+				case SessionSwitchReason.SessionLogon:
+					Log.Write(LogLevel.Debug, "Detected session logon event.");
+					_locked = false;
+					break;
+
+				case SessionSwitchReason.SessionLogoff:
+					Log.Write(LogLevel.Debug, "Detected session logoff event.");
+					_locked = true;
+					break;
+
+				case SessionSwitchReason.SessionLock:
+					Log.Write(LogLevel.Debug, "Detected session lock event.");
+					_locked = true;
+					break;
+
+				case SessionSwitchReason.SessionUnlock:
+					Log.Write(LogLevel.Debug, "Detected session unlock event.");
+					_locked = false;
+					break;
+			}
+		}
+
 		private SwitchDir CheckSwitch()
 		{
-			lock (_controlLock)
+			// Check if the user initiated an early switch.
+			var switchNow = _switchNow;
+			if (switchNow != SwitchDir.None)
 			{
-				if (_switchNow != SwitchDir.None)
+				_switchNow = SwitchDir.None;
+				return switchNow;
+			}
+
+			// If the screensaver was last found to be running, then check now if the user has woken up.
+			if (_screensaverRunning)
+			{
+				if (!ScreenSaverRunning)
 				{
-					SwitchDir ret = _switchNow;
-					_switchNow = SwitchDir.None;
-					return ret;
+					Log.Write(LogLevel.Debug, "Screensaver has stopped running.");
+					_screensaverRunning = false;
 				}
 			}
 
-			lock (_themeLock)
+			// Check if it's time to switch
+			if (!_locked && !_screensaverRunning)
 			{
-				DateTime nextSwitch = _lastSwitch + _theme.Interval;
-				if (DateTime.Now >= nextSwitch) return SwitchDir.Next;
+				lock (_themeLock)
+				{
+					DateTime nextSwitch = _lastSwitch + _theme.Interval;
+					if (DateTime.Now >= nextSwitch)
+					{
+						// Check if the screensaver is running; if so, then don't switch now.
+						if (ScreenSaverRunning)
+						{
+							Log.Write(LogLevel.Debug, "Stopping wallpaper updating because the screensaver is running.");
+							_screensaverRunning = true;
+							return SwitchDir.None;
+						}
+
+						return SwitchDir.Next;
+					}
+				}
 			}
 
 			return SwitchDir.None;
@@ -156,15 +221,22 @@ namespace WallSwitch
 				Start(_theme);
 			}
 
-			lock (_controlLock)
+			_switchNow = dir;
+		}
+
+		private bool ScreenSaverRunning
+		{
+			get
 			{
-				_switchNow = dir;
+				bool ssRunning = false;
+				if (!SystemParametersInfo(SPI_GETSCREENSAVERRUNNING, 0, ref ssRunning, 0)) ssRunning = false;
+				return ssRunning;
 			}
 		}
 		#endregion
 
 		#region Wallpaper Switch
-		SetWallpaper sw = new SetWallpaper();
+		SetWallpaper wallpaperSetter = new SetWallpaper();
 		public delegate void SwitchEventHandler(object sender, EventArgs e);
 		public event SwitchEventHandler Switching;
 		public event SwitchEventHandler Switched;
@@ -185,21 +257,18 @@ namespace WallSwitch
 
 			try
 			{
-				lock (_controlLock)
-				{
-					_switching = true;
-				}
+				_switching = true;
 
 				// Fire the Switching event handler.
 				SwitchEventHandler ev = Switching;
 				if (ev != null) ev(this, new EventArgs());
 
 				// Get the list of images to display next.
-				string[] images = null;
+				IEnumerable<ImageRec> images = null;
 				switch (dir)
 				{
 					case SwitchDir.Next:
-						images = _theme.GetNextImages(sw.NumMonitors);
+						images = _theme.GetNextImages(wallpaperSetter.NumMonitors);
 						break;
 
 					case SwitchDir.Prev:
@@ -207,16 +276,19 @@ namespace WallSwitch
 						break;
 
 					default:
-						images = new string[0];
+						images = new ImageRec[0];
 						break;
 				}
 
 				// Display the images.
 				if (images != null)
 				{
-					foreach (string img in images) Log.Write(LogLevel.Debug, "  Image: " + img);
-					if (images != null) sw.Set(_theme, images);
+					foreach (var img in images) Log.Write(LogLevel.Debug, "  Image: {0}", img);
+					if (images != null) wallpaperSetter.Set(_theme, images);
 				}
+
+				// Now that everything's drawn, it's safe to release that memory.
+				foreach (var img in images) img.Release();
 
 				Log.Write(LogLevel.Debug, "Finished switching wallpaper.");
 			}
@@ -226,10 +298,7 @@ namespace WallSwitch
 			}
 			finally
 			{
-				lock (_controlLock)
-				{
-					_switching = false;
-				}
+				_switching = false;
 
 				// Fire the Switched event handler.
 				SwitchEventHandler ev = Switched;
@@ -239,7 +308,7 @@ namespace WallSwitch
 
 		public bool IsSwitching
 		{
-			get { lock (_controlLock) { return _switching; } }
+			get { return _switching; }
 		}
 		#endregion
 	}

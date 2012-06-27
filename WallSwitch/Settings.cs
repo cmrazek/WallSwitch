@@ -36,7 +36,7 @@ namespace WallSwitch
 		}
 
 		#region Save / Load
-		public static void Save(XmlTextWriter xml)
+		public static void Save(XmlWriter xml)
 		{
 			//xml.WriteElementString("Logging", _logging.ToString());
 		}

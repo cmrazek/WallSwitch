@@ -11,6 +11,7 @@ using System.Reflection;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Linq;
 
 namespace WallSwitch
 {
@@ -103,9 +104,6 @@ namespace WallSwitch
 				_switchThread.Switching += new SwitchThread.SwitchEventHandler(_switchThread_Switching);
 				_switchThread.Switched += new SwitchThread.SwitchEventHandler(_switchThread_Switched);
 
-				// Tell the active theme that it's time to activate.
-				activeTheme.OnAppLoadActivate();
-
 				// Update all the controls
 				RefreshControls();
 				Text = Res.AppName;
@@ -119,7 +117,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -146,7 +144,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -158,7 +156,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -170,7 +168,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -182,7 +180,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -194,7 +192,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -206,11 +204,12 @@ namespace WallSwitch
 				{
 					e.Cancel = true;
 					WindowState = FormWindowState.Minimized;
+					SaveSettings();
 				}
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -222,7 +221,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -250,7 +249,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -263,7 +262,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -278,12 +277,14 @@ namespace WallSwitch
 		{
 			WindowState = FormWindowState.Minimized;
 			Visible = false;
+			ShowInTaskbar = false;
 		}
 
 		private void ShowFromTray()
 		{
 			Visible = true;
 			WindowState = FormWindowState.Normal;
+			ShowInTaskbar = true;
 			BringWindowToTop(this.Handle);
 
 			// Select the active theme.
@@ -304,11 +305,6 @@ namespace WallSwitch
 
 			ShowFromTray();
 			SetForegroundWindow(this.Handle);
-
-			//WindowState = _windowState;
-			//Bounds = _windowBounds;
-
-			//SetForegroundWindow(this.Handle);
 		}
 		#endregion
 
@@ -365,16 +361,16 @@ namespace WallSwitch
 
 			switch (_currentTheme.Period)
 			{
-				case ThemePeriod.Seconds:
+				case Period.Seconds:
 					cmbThemePeriod.SelectedIndex = k_periodSeconds;
 					break;
-				case ThemePeriod.Minutes:
+				case Period.Minutes:
 					cmbThemePeriod.SelectedIndex = k_periodMinutes;
 					break;
-				case ThemePeriod.Hours:
+				case Period.Hours:
 					cmbThemePeriod.SelectedIndex = k_periodHours;
 					break;
-				case ThemePeriod.Days:
+				case Period.Days:
 					cmbThemePeriod.SelectedIndex = k_periodDays;
 					break;
 				default:
@@ -438,31 +434,31 @@ namespace WallSwitch
 				if (showErrors)
 				{
 					txtThemeFreq.Focus();
-					ShowError(Res.Error_InvalidThemeFreq);
+					this.ShowError(Res.Error_InvalidThemeFreq);
 				}
 				return false;
 			}
 
-			ThemePeriod period = ThemePeriod.Minutes;
+			Period period = Period.Minutes;
 			switch(cmbThemePeriod.SelectedIndex)
 			{
 				case k_periodSeconds:
-					period = ThemePeriod.Seconds;
+					period = Period.Seconds;
 					break;
 				case k_periodMinutes:
-					period = ThemePeriod.Minutes;
+					period = Period.Minutes;
 					break;
 				case k_periodHours:
-					period = ThemePeriod.Hours;
+					period = Period.Hours;
 					break;
 				case k_periodDays:
-					period = ThemePeriod.Days;
+					period = Period.Days;
 					break;
 				default:
 					if (showErrors)
 					{
 						cmbThemePeriod.Focus();
-						ShowError(Res.Error_InvalidThemePeriod);
+						this.ShowError(Res.Error_InvalidThemePeriod);
 					}
 					return false;
 			}
@@ -483,7 +479,7 @@ namespace WallSwitch
 					if (showErrors)
 					{
 						cmbThemeMode.Focus();
-						ShowError(Res.Error_InvalidThemeOrder);
+						this.ShowError(Res.Error_InvalidThemeOrder);
 					}
 					return false;
 			}
@@ -495,9 +491,8 @@ namespace WallSwitch
 			_currentTheme.BackColorBottom = clrBackBottom.Color;
 			_currentTheme.ImageSize = trkImageSize.Value;
 
-			List<String> locations = new List<string>(lstLocations.Items.Count);
-			foreach (ListViewItem lvi in lstLocations.Items) locations.Add(lvi.Text);
-			_currentTheme.Locations = locations.ToArray();
+			_currentTheme.Locations = (from l in lstLocations.Items.Cast<ListViewItem>()
+									   select l.Tag as Location).ToArray();
 
 			_currentTheme.SeparateMonitors = chkSeparateMonitors.Checked;
 			if (!_currentTheme.HotKey.Equals(_hotKey))
@@ -529,7 +524,7 @@ namespace WallSwitch
 			_locationImages.Images.Clear();
 			lstLocations.SmallImageList = _locationImages;
 
-			foreach (string loc in _currentTheme.Locations) AddImageItem(loc);
+			foreach (var loc in _currentTheme.Locations) AddLocationItem(loc);
 		}
 
 		private void btnApply_Click(object sender, EventArgs e)
@@ -540,7 +535,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -586,7 +581,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -598,7 +593,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -610,7 +605,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -622,7 +617,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -634,7 +629,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -647,7 +642,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -665,7 +660,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -682,7 +677,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -696,7 +691,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -711,73 +706,92 @@ namespace WallSwitch
 		{
 			try
 			{
-				XmlDocument xmlDoc = new XmlDocument();
-				xmlDoc.Load(ConfigFileName);
-
-				XmlElement xmlSettings = (XmlElement)xmlDoc.SelectSingleNode("Settings");
-				if (xmlSettings != null)
+				var fileName = ConfigFileName;
+				if (File.Exists(fileName))
 				{
-					Settings.Load(xmlSettings);
+					XmlDocument xmlDoc = new XmlDocument();
+					xmlDoc.Load(fileName);
 
-					foreach (XmlElement xmlTheme in xmlSettings.SelectNodes("Theme"))
+					XmlElement xmlSettings = (XmlElement)xmlDoc.SelectSingleNode("Settings");
+					if (xmlSettings != null)
 					{
-						try
-						{
-							Guid id = Guid.Empty;
-							if (xmlTheme.HasAttribute("ID"))
-							{
-								id = Guid.Parse(xmlTheme.GetAttribute("ID"));
-							}
+						Settings.Load(xmlSettings);
+						ImageCache.LoadSettings(xmlSettings);
 
-							Theme theme = new Theme(id);
-							theme.Load(xmlTheme);
-							_themes.Add(theme);
-						}
-						catch (Exception ex)
+						foreach (XmlElement xmlTheme in xmlSettings.SelectNodes("Theme"))
 						{
-							ShowError(ex, Res.Error_LoadTheme);
+							try
+							{
+								Guid id = Guid.Empty;
+								if (xmlTheme.HasAttribute("ID"))
+								{
+									id = Guid.Parse(xmlTheme.GetAttribute("ID"));
+								}
+
+								Theme theme = new Theme(id);
+								theme.Load(xmlTheme);
+								_themes.Add(theme);
+								AttachTheme(theme);
+							}
+							catch (Exception ex)
+							{
+								this.ShowError(ex, Res.Error_LoadTheme);
+							}
 						}
 					}
+				}
+				else
+				{
+					var theme = new Theme(Guid.NewGuid());
+					theme.Name = Res.DefaultTheme;
+					_themes.Add(theme);
 				}
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Error_LoadSettings);
+				this.ShowError(ex, Res.Error_LoadSettings);
 			}
 			
 		}
 
 		private void SaveSettings()
 		{
-			XmlTextWriter xml = null;
-			
 			try
 			{
-				xml = new XmlTextWriter(ConfigFileName, Encoding.UTF8);
-				xml.Formatting = Formatting.Indented;
-
-				xml.WriteStartDocument();
-				xml.WriteStartElement("Settings");
-				Settings.Save(xml);
-
-				foreach (Theme theme in _themes)
+				// Write to a buffer in memory before overwriting the actual file.
+				var memStream = new MemoryStream();
+				var xmlSettings = new XmlWriterSettings();
+				xmlSettings.Indent = true;
+				xmlSettings.Encoding = Encoding.UTF8;
+				using (var xml = XmlWriter.Create(memStream, xmlSettings))
 				{
-					xml.WriteStartElement("Theme");
-					xml.WriteAttributeString("ID", theme.ID.ToString());
-					theme.Save(xml);
-					xml.WriteEndElement();	// Theme
+					xml.WriteStartDocument();
+					xml.WriteStartElement("Settings");
+					Settings.Save(xml);
+
+					foreach (Theme theme in _themes)
+					{
+						xml.WriteStartElement("Theme");
+						xml.WriteAttributeString("ID", theme.ID.ToString());
+						theme.Save(xml);
+						xml.WriteEndElement();	// Theme
+					}
+
+					ImageCache.SaveSettings(xml);
+
+					xml.WriteEndElement();	// Settings
+					xml.WriteEndDocument();
 				}
 
-				xml.WriteEndElement();	// Settings
-				xml.WriteEndDocument();
+				// Save buffer to the file.
+				var data = new byte[memStream.Length];
+				memStream.Seek(0, SeekOrigin.Begin);
+				memStream.Read(data, 0, (int)memStream.Length);
+				File.WriteAllBytes(ConfigFileName, data);
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Error_SaveSettings);
-			}
-			finally
-			{
-				if (xml != null) xml.Close();
+				this.ShowError(ex, Res.Error_SaveSettings);
 			}
 		}
 
@@ -785,28 +799,22 @@ namespace WallSwitch
 		{
 			get
 			{
-				string dir = String.Format(Res.SettingsDir, Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
-				if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-				return dir + Path.DirectorySeparatorChar + Res.SettingsFileName;
+				return Path.Combine(Util.AppDataDir, Res.SettingsFileName);
 			}
 		}
 		#endregion
 
-		#region Errors
-		private void ShowError(string message)
-		{
-			Log.Write(LogLevel.Error, "Error: {0}", message);
-			MessageBox.Show(String.Format(Res.Error_Content, message), Res.Error_Caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
-		}
-
-		private void ShowError(Exception ex, string message)
-		{
-			Log.Write(ex, "Error: {0}", message);
-			MessageBox.Show(String.Format(Res.Error_ContentEx, message, ex.Message), Res.Error_Caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
-		}
-		#endregion
-
 		#region Theme Selection
+		private void AttachTheme(Theme theme)
+		{
+			theme.HistoryAdded += theme_HistoryAdded;
+		}
+
+		private void DetachTheme(Theme theme)
+		{
+			theme.HistoryAdded -= theme_HistoryAdded;
+		}
+
 		private void btnNewTheme_Click(object sender, EventArgs e)
 		{
 			try
@@ -820,6 +828,7 @@ namespace WallSwitch
 
 					Theme theme = new Theme(Guid.NewGuid());
 					theme.Name = name;
+					AttachTheme(theme);
 
 					_themes.Add(theme);
 					_currentTheme = theme;
@@ -829,7 +838,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Error_NewTheme);
+				this.ShowError(ex, Res.Error_NewTheme);
 			}
 		}
 
@@ -891,7 +900,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -913,7 +922,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Error_RenameTheme);
+				this.ShowError(ex, Res.Error_RenameTheme);
 			}
 		}
 
@@ -923,7 +932,7 @@ namespace WallSwitch
 			{
 				if (_themes.Count == 1)
 				{
-					ShowError(Res.Error_CantDeleteLastTheme);
+					this.ShowError(Res.Error_CantDeleteLastTheme);
 					return;
 				}
 
@@ -934,6 +943,7 @@ namespace WallSwitch
 					Res.Confirm_DeleteTheme_Caption, MessageBoxButtons.YesNo, MessageBoxIcon.Warning)
 					== DialogResult.Yes)
 				{
+					DetachTheme(deleteTheme);
 					_themes.Remove(deleteTheme);
 
 					// Remove the theme out of the combo box, and use the combo-box's trigger to select the next theme.
@@ -952,7 +962,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -973,35 +983,43 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
 		private void ActivateTheme(Theme setTheme)
 		{
-			_switchThread.Theme = setTheme;
-			setTheme.IsActive = true;
-
-			for (int i = 0; i < cmbTheme.Items.Count; i++)
+			_refreshing = true;
+			try
 			{
-				Theme theme = (Theme)((TagString)cmbTheme.Items[i]).Tag;
-				string name;
-				if (theme.Equals(setTheme))
+				_switchThread.Theme = setTheme;
+				setTheme.IsActive = true;
+
+				for (int i = 0; i < cmbTheme.Items.Count; i++)
 				{
-					theme.IsActive = true;
-					name = String.Format(Res.ActiveTheme, theme.Name);
+					Theme theme = (Theme)((TagString)cmbTheme.Items[i]).Tag;
+					string name;
+					if (theme.Equals(setTheme))
+					{
+						theme.IsActive = true;
+						name = String.Format(Res.ActiveTheme, theme.Name);
+					}
+					else
+					{
+						theme.IsActive = false;
+						name = theme.Name;
+					}
+					cmbTheme.Items[i] = new TagString(name, theme);
 				}
-				else
-				{
-					theme.IsActive = false;
-					name = theme.Name;
-				}
-				cmbTheme.Items[i] = new TagString(name, theme);
+
+				_switchThread.SwitchNow(SwitchDir.Next);
+
+				SaveSettings();
 			}
-
-			_switchThread.SwitchNow(SwitchDir.Next);
-
-			SaveSettings();
+			finally
+			{
+				_refreshing = false;
+			}
 		}
 
 		private void PopulateThemeContextMenu()
@@ -1043,7 +1061,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -1055,7 +1073,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -1067,7 +1085,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -1079,7 +1097,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -1091,21 +1109,22 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 		#endregion
 
 		#region Location Selection
-		private void AddImageItem(string location)
+		private void AddLocationItem(Location location)
 		{
-			ListViewItem lvi = new ListViewItem(location);
+			var lvi = new ListViewItem(location.ToString());
+			lvi.Tag = location;
 			lstLocations.Items.Add(lvi);
 
 			try
 			{
-				IconReader ir = new IconReader();
-				Icon icon = ir.GetFileIcon(location);
+				var ir = new IconReader();
+				var icon = location.GetIcon();
 				if (icon != null)
 				{
 					lvi.ImageIndex = _locationImages.Images.Count;
@@ -1114,7 +1133,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, String.Format(Res.Exception_GetIcon, location));
+				this.ShowError(ex, String.Format(Res.Exception_GetIcon, location));
 				Log.Write(LogLevel.Error, String.Format(Res.Exception_GetIcon, location) + ex.ToString());
 				throw;
 			}
@@ -1134,18 +1153,18 @@ namespace WallSwitch
 					{
 						if (existingLvi.Text.ToLower() == pathLower)
 						{
-							ShowError(Res.Error_DuplicateFolder);
+							this.ShowError(Res.Error_DuplicateFolder);
 							return;
 						}
 					}
 
-					AddImageItem(path);
+					AddLocationItem(new Location(LocationType.Directory, path));
 					Dirty = true;
 				}
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_AddFolder);
+				this.ShowError(ex, Res.Exception_AddFolder);
 			}
 		}
 
@@ -1153,19 +1172,39 @@ namespace WallSwitch
 		{
 			try
 			{
-				OpenFileDialog dlg = new OpenFileDialog();
+				var dlg = new OpenFileDialog();
 				dlg.Filter = Res.OpenImageDlgFilter;
 				dlg.FilterIndex = 1;
 				dlg.Multiselect = true;
 				if (dlg.ShowDialog() == DialogResult.OK)
 				{
-					foreach (string fileName in dlg.FileNames) AddImageItem(fileName);
+					foreach (var fileName in dlg.FileNames)
+					{
+						AddLocationItem(new Location(LocationType.File, fileName));
+					}
 					Dirty = true;
 				}
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_AddFile);
+				this.ShowError(ex, Res.Exception_AddFile);
+			}
+		}
+
+		private void btnAddFeed_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				var dlg = new FeedDialog(new Location(LocationType.Feed, ""));
+				if (dlg.ShowDialog(this) == DialogResult.OK)
+				{
+					AddLocationItem(dlg.Feed);
+					Dirty = true;
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
 			}
 		}
 
@@ -1173,22 +1212,32 @@ namespace WallSwitch
 		{
 			try
 			{
-				foreach (ListViewItem lvi in lstLocations.SelectedItems)
+				if (lstLocations.SelectedItems.Count != 1) return;
+
+				var selectedItem = lstLocations.SelectedItems[0];
+				var loc = selectedItem.Tag as Location;
+				switch (loc.Type)
 				{
-					string location = lvi.Text;
-					if (Directory.Exists(location) || File.Exists(location))
-					{
-						Process.Start(lvi.Text);
-					}
-					else
-					{
-						ShowError(Res.Error_LocationMissing);
-					}
+					case LocationType.File:
+					case LocationType.Directory:
+						Process.Start(loc.Path);
+						break;
+
+					case LocationType.Feed:
+						{
+							var dlg = new FeedDialog(loc);
+							if (dlg.ShowDialog(this) == DialogResult.OK)
+							{
+								selectedItem.Text = loc.Path;
+								Dirty = true;
+							}
+						}
+						break;
 				}
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -1213,7 +1262,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -1225,7 +1274,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -1237,7 +1286,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -1254,7 +1303,7 @@ namespace WallSwitch
 					foreach (string file in files)
 					{
 						if (Directory.Exists(file) ||
-							(File.Exists(file) && Theme.IsImageFile(file)))
+							(File.Exists(file) && ImageRec.FileNameToImageFormat(file) != null))
 						{
 							accept = true;
 							break;
@@ -1275,14 +1324,15 @@ namespace WallSwitch
 		{
 			try
 			{
-				string[] files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+				var files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
 
 				foreach (string file in files)
 				{
 					if (Directory.Exists(file) ||
-						(File.Exists(file) && Theme.IsImageFile(file)))
+						(File.Exists(file) && ImageRec.FileNameToImageFormat(file) != null))
 					{
-						AddImageItem(file);
+						if (File.Exists(file)) AddLocationItem(new Location(LocationType.File, file));
+						else AddLocationItem(new Location(LocationType.Directory, file));
 						Dirty = true;
 					}
 				}
@@ -1303,7 +1353,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_SwitchNowTray);
+				this.ShowError(ex, Res.Exception_SwitchNowTray);
 			}
 		}
 
@@ -1315,7 +1365,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_SwitchPrevTray);
+				this.ShowError(ex, Res.Exception_SwitchPrevTray);
 				throw;
 			}
 		}
@@ -1328,7 +1378,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_SwitchNow);
+				this.ShowError(ex, Res.Exception_SwitchNow);
 			}
 		}
 
@@ -1340,7 +1390,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_SwitchPrev);
+				this.ShowError(ex, Res.Exception_SwitchPrev);
 			}
 		}
 
@@ -1361,7 +1411,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -1379,10 +1429,11 @@ namespace WallSwitch
 				}
 
 				EnableControls();
+				ClearExpiredCache();
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -1401,11 +1452,30 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 			
 		}
-		
+
+		private void ClearExpiredCache()
+		{
+			// Create a list of all images currently in the history.
+			// These are the files that we don't want to delete.
+			var keepLocations = new List<string>();
+			foreach (var theme in _themes)
+			{
+				foreach (var historyItem in theme.History)
+				{
+					foreach (var loc in historyItem)
+					{
+						keepLocations.Add(loc.Location);
+					}
+				}
+			}
+
+			// Tell the image cache object to delete all others.
+			ImageCache.ClearExpiredCache(keepLocations);
+		}
 		#endregion
 
 		#region About Box
@@ -1418,7 +1488,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_AboutDialog);
+				this.ShowError(ex, Res.Exception_AboutDialog);
 			}
 		}
 		#endregion
@@ -1466,7 +1536,7 @@ namespace WallSwitch
 			}
 			catch (Exception ex)
 			{
-				ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
 
@@ -1500,6 +1570,103 @@ namespace WallSwitch
 		}
 		#endregion
 
+		#region History
+		void theme_HistoryAdded(object sender, Theme.HistoryAddedEventArgs e)
+		{
+			if (InvokeRequired)
+			{
+				Invoke(new Action(() => theme_HistoryAdded(sender, e)));
+				return;
+			}
+
+			try
+			{
+				foreach (var img in e.Images) lstHistory.AddHistory(img);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void lstHistory_SelectionChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				var item = lstHistory.SelectedItem;
+				ciOpenHistoryFile.Enabled = item != null;
+				ciExploreHistoryFile.Enabled = item != null;
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void ciOpenHistoryFile_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				var item = lstHistory.SelectedItem;
+				if (item != null)
+				{
+					var fileName = item.LocationOnDisk;
+					if (string.IsNullOrWhiteSpace(fileName))
+					{
+						this.ShowError(Res.ImageFileMissing);
+					}
+					else
+					{
+						Process.Start(fileName);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void ciExploreHistoryFile_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				var item = lstHistory.SelectedItem;
+				if (item != null)
+				{
+					var fileName = item.LocationOnDisk;
+					if (string.IsNullOrWhiteSpace(fileName))
+					{
+						this.ShowError(Res.ImageFileMissing);
+					}
+					else
+					{
+						FileUtils.ExploreFile(fileName);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void lstHistory_ItemActivated(object sender, HistoryList.ItemActivatedEventArgs e)
+		{
+			try
+			{
+				var fileName = e.ImageRec.LocationOnDisk;
+				if (!string.IsNullOrWhiteSpace(fileName)) Process.Start(fileName);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+		#endregion
+
 		
+
+
 	}
 }

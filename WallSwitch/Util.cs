@@ -131,7 +131,7 @@ namespace WallSwitch
 		{
 			get
 			{
-				string dir = String.Format(Res.SettingsDir, Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
+				string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Res.SettingsDir);
 				if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 				return dir;
 			}
@@ -139,11 +139,6 @@ namespace WallSwitch
 		#endregion
 
 		#region Rectangle Functions
-		/// <summary>
-		/// Scales a rectangle to a specific width while maintaining the aspect ratio.
-		/// </summary>
-		/// <param name="rect">The rectangle to be scaled</param>
-		/// <param name="width">The desired width</param>
 		public static RectangleF ScaleRectWidth(RectangleF rect, float width)
 		{
 			if (rect.Width > 0.0f && rect.Width != width)
@@ -154,11 +149,6 @@ namespace WallSwitch
 			return rect;
 		}
 
-		/// <summary>
-		/// Scales a rectangle to a specific height while maintaining the aspect ratio.
-		/// </summary>
-		/// <param name="rect">The rectangle to be scaled</param>
-		/// <param name="height">The desired height</param>
 		public static RectangleF ScaleRectHeight(RectangleF rect, float height)
 		{
 			if (rect.Height > 0.0f && rect.Height != height)
@@ -169,5 +159,46 @@ namespace WallSwitch
 			return rect;
 		}
 		#endregion
+	}
+
+	static class TimeSpanEx
+	{
+		public static TimeSpan CalcInterval(int freq, Period period)
+		{
+			switch (period)
+			{
+				case Period.Seconds:
+					return TimeSpan.FromSeconds(freq);
+				case Period.Minutes:
+					return TimeSpan.FromMinutes(freq);
+				case Period.Hours:
+					return TimeSpan.FromHours(freq);
+				case Period.Days:
+					return TimeSpan.FromDays(freq);
+				default:
+					return TimeSpan.FromMinutes(freq);
+			}
+		}
+	}
+
+	static class FormEx
+	{
+		public static void ShowError(this IWin32Window form, string message)
+		{
+			Log.Write(LogLevel.Error, "Error: {0}", message);
+			MessageBox.Show(String.Format(Res.Error_Content, message), Res.Error_Caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
+		}
+
+		public static void ShowError(this IWin32Window form, Exception ex, string message)
+		{
+			Log.Write(ex, "Error: {0}", message);
+			MessageBox.Show(String.Format(Res.Error_ContentEx, message, ex.ToString()), Res.Error_Caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
+		}
+
+		public static void ShowError(this IWin32Window form, Exception ex)
+		{
+			Log.Write(ex, "Error:");
+			MessageBox.Show(String.Format(Res.Error_ContentEx, ex.Message, ex.ToString()), Res.Error_Caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
+		}
 	}
 }

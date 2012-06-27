@@ -9,6 +9,7 @@ using System.Drawing.Imaging;
 using Microsoft.Win32;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
+using System.Linq;
 
 namespace WallSwitch
 {
@@ -1271,7 +1272,7 @@ namespace WallSwitch
 			get { return Screen.AllScreens.Length; }
 		}
 
-		public void Set(Theme theme, string[] files)
+		public void Set(Theme theme, IEnumerable<ImageRec> files)
 		{
 			if (theme == null) throw new ArgumentNullException("Theme is null.");
 			if (files == null) throw new ArgumentNullException("Files list is null.");
@@ -1340,114 +1341,118 @@ namespace WallSwitch
 			_g = Graphics.FromImage((Image)_bitmap);
 
 			// Draw an image for each monitor
+			var filesArray = files.ToArray();
 			int imageIndex = 0;
 			foreach (Screen screen in Screen.AllScreens)
 			{
-				RenderScreen(files.Length > imageIndex ? files[imageIndex] : null, screen);
+				RenderScreen(filesArray.Length > imageIndex ? filesArray[imageIndex] : null, screen);
 				imageIndex++;
-				if (imageIndex >= files.Length) imageIndex = 0;
+				if (imageIndex >= filesArray.Length) imageIndex = 0;
 			}
 			_firstRender = false;
 
 			// Apply to desktop background.
 			Log.Write(LogLevel.Debug, "Saving wallpaper to file '{0}'.", destFileName);
-			_bitmap.Save(destFileName, ImageFormat.Bmp);
+			_bitmap.Save(destFileName, System.Drawing.Imaging.ImageFormat.Bmp);
 			SetWin(destFileName);
 
 			_bitmap.Dispose();
 			_bitmap = null;
 		}
 
-		private void RenderScreen(string file, Screen screen)
+		private void RenderScreen(ImageRec file, Screen screen)
 		{
 			try
 			{
-				if (!string.IsNullOrEmpty(file))
+				if (file == null)
 				{
-					using (Image fileImg = Image.FromFile(file))
-					{
-						Image img = fileImg;
-						bool clearRequired = false;
-						int clearOpacity = 255;
-						float imgWidth = img.Width;
-						float imgHeight = img.Height;
-						if (imgWidth <= 0.0f || imgHeight <= 0.0f) return;
-
-						//Log.Write("Original image size: {0} x {1}", imgWidth, imgHeight);
-
-						RectangleF screenRect = screen.Bounds;
-						RectangleF imgRect = new RectangleF(0, 0, img.Width, img.Height);
-						RectangleF srcRect = imgRect;
-
-						if (_theme.Mode == ThemeMode.Collage)
-						{
-							// The maximum image size will be determined by the number of pixels (area), not by the max width/height.
-							// This will provide a more consistent image size when there are pictures with different aspect ratios.
-							float imgArea = imgWidth * imgHeight;
-							float imgSize = (float)_theme.ImageSize / 100.0f;
-							float screenArea = screenRect.Width * imgSize * screenRect.Height * imgSize;
-							float scale = 1.0f;
-
-							if (imgArea > screenArea * imgSize)
-							{
-								// Scale down the image
-								scale = (float)Math.Sqrt(screenArea / imgArea);
-								imgWidth = imgWidth * scale;
-								imgHeight = imgHeight * scale;
-
-								//Log.Write("Scaling down image area: scale [{0}] size [{1} x {2}]", scale, imgWidth, imgHeight);
-							}
-
-							// If one of the dimensions is still wider/taller than the screen, then scale it down more.
-							if (imgWidth > screenRect.Width)
-							{
-								float ratio = screenRect.Width / imgWidth;
-								imgWidth = screenRect.Width;
-								imgHeight *= ratio;
-								scale *= ratio;
-
-								//Log.Write("Scaling down width: ratio [{0}] size [{1} x {2}]", ratio, imgWidth, imgHeight);
-							}
-
-							if (imgHeight > screenRect.Height)
-							{
-								float ratio = screenRect.Height / imgHeight;
-								imgHeight = screenRect.Height;
-								imgWidth *= ratio;
-								scale *= ratio;
-
-								//Log.Write("Scaling down height: ratio [{0}] size [{1} x {2}]", ratio, imgWidth, imgHeight);
-							}
-
-							// Choose a random rect to display the image.
-							imgRect.X = (float)(_rand.NextDouble() * (screenRect.Width - imgWidth)) + screenRect.X;
-							imgRect.Y = (float)(_rand.NextDouble() * (screenRect.Height - imgHeight)) + screenRect.Y;
-							imgRect.Width = imgWidth;
-							imgRect.Height = imgHeight;
-
-							if (_firstRender) clearOpacity = 255;
-							else clearOpacity = _theme.BackOpacity255;
-							clearRequired = true;
-
-							// Feather edges
-							if (scale > 0.0f && _theme.Feather > 0)
-							{
-								int featherWidth = (int)((float)_theme.Feather / scale);
-								if (featherWidth > 0) img = FeatherImage(img, featherWidth);
-							}
-						}
-						else // Sequential or Random - one image per screen
-						{
-							imgRect = FitImage(imgRect, ref srcRect, screenRect, _theme.ImageFit, ref clearRequired);
-						}
-
-						if (clearRequired && clearOpacity > 0) ClearBackground(screen, clearOpacity);
-						if (img != null) _g.DrawImage(img, imgRect, srcRect, GraphicsUnit.Pixel);
-					}
+					Log.Write(LogLevel.Warning, "No image file passed.");
+					ClearBackground(screen, 255);
+				}
+				else if (!file.IsPresent)
+				{
+					Log.Write(LogLevel.Warning, "No image object is loaded.");
+					ClearBackground(screen, 255);
 				}
 				else
 				{
-					ClearBackground(screen, 255);
+					Image img = file.Image;
+					bool clearRequired = false;
+					int clearOpacity = 255;
+					float imgWidth = img.Width;
+					float imgHeight = img.Height;
+					if (imgWidth <= 0.0f || imgHeight <= 0.0f) return;
+
+					//Log.Write("Original image size: {0} x {1}", imgWidth, imgHeight);
+
+					RectangleF screenRect = screen.Bounds;
+					RectangleF imgRect = new RectangleF(0, 0, img.Width, img.Height);
+					RectangleF srcRect = imgRect;
+
+					if (_theme.Mode == ThemeMode.Collage)
+					{
+						// The maximum image size will be determined by the number of pixels (area), not by the max width/height.
+						// This will provide a more consistent image size when there are pictures with different aspect ratios.
+						float imgArea = imgWidth * imgHeight;
+						float imgSize = (float)_theme.ImageSize / 100.0f;
+						float screenArea = screenRect.Width * imgSize * screenRect.Height * imgSize;
+						float scale = 1.0f;
+
+						if (imgArea > screenArea * imgSize)
+						{
+							// Scale down the image
+							scale = (float)Math.Sqrt(screenArea / imgArea);
+							imgWidth = imgWidth * scale;
+							imgHeight = imgHeight * scale;
+
+							//Log.Write("Scaling down image area: scale [{0}] size [{1} x {2}]", scale, imgWidth, imgHeight);
+						}
+
+						// If one of the dimensions is still wider/taller than the screen, then scale it down more.
+						if (imgWidth > screenRect.Width)
+						{
+							float ratio = screenRect.Width / imgWidth;
+							imgWidth = screenRect.Width;
+							imgHeight *= ratio;
+							scale *= ratio;
+
+							//Log.Write("Scaling down width: ratio [{0}] size [{1} x {2}]", ratio, imgWidth, imgHeight);
+						}
+
+						if (imgHeight > screenRect.Height)
+						{
+							float ratio = screenRect.Height / imgHeight;
+							imgHeight = screenRect.Height;
+							imgWidth *= ratio;
+							scale *= ratio;
+
+							//Log.Write("Scaling down height: ratio [{0}] size [{1} x {2}]", ratio, imgWidth, imgHeight);
+						}
+
+						// Choose a random rect to display the image.
+						imgRect.X = (float)(_rand.NextDouble() * (screenRect.Width - imgWidth)) + screenRect.X;
+						imgRect.Y = (float)(_rand.NextDouble() * (screenRect.Height - imgHeight)) + screenRect.Y;
+						imgRect.Width = imgWidth;
+						imgRect.Height = imgHeight;
+
+						if (_firstRender) clearOpacity = 255;
+						else clearOpacity = _theme.BackOpacity255;
+						clearRequired = true;
+
+						// Feather edges
+						if (scale > 0.0f && _theme.Feather > 0)
+						{
+							int featherWidth = (int)((float)_theme.Feather / scale);
+							if (featherWidth > 0) img = FeatherImage(img, featherWidth);
+						}
+					}
+					else // Sequential or Random - one image per screen
+					{
+						imgRect = FitImage(imgRect, ref srcRect, screenRect, _theme.ImageFit, ref clearRequired);
+					}
+
+					if (clearRequired && clearOpacity > 0) ClearBackground(screen, clearOpacity);
+					if (img != null) _g.DrawImage(img, imgRect, srcRect, GraphicsUnit.Pixel);
 				}
 			}
 			catch (Exception ex)

@@ -90,14 +90,20 @@
 			this.btnPrevious = new System.Windows.Forms.Button();
 			this.tabThemeSettings = new System.Windows.Forms.TabControl();
 			this.tabLocations = new System.Windows.Forms.TabPage();
+			this.btnAddFeed = new System.Windows.Forms.Button();
 			this.tabDisplay = new System.Windows.Forms.TabPage();
 			this.grpCollageDisplay = new System.Windows.Forms.GroupBox();
 			this.lblFeatherDisplay = new System.Windows.Forms.Label();
 			this.lblFeather = new System.Windows.Forms.Label();
 			this.trkFeather = new System.Windows.Forms.TrackBar();
+			this.tabFrequency = new System.Windows.Forms.TabPage();
+			this.tabHistory = new System.Windows.Forms.TabPage();
+			this.cmHistory = new System.Windows.Forms.ContextMenuStrip(this.components);
+			this.ciOpenHistoryFile = new System.Windows.Forms.ToolStripMenuItem();
+			this.ciExploreHistoryFile = new System.Windows.Forms.ToolStripMenuItem();
 			this.clrBackTop = new WallSwitch.ColorSample();
 			this.clrBackBottom = new WallSwitch.ColorSample();
-			this.tabFrequency = new System.Windows.Forms.TabPage();
+			this.lstHistory = new WallSwitch.HistoryList();
 			this.locationsMenu.SuspendLayout();
 			this.grpTheme.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.trkOpacity)).BeginInit();
@@ -110,14 +116,16 @@
 			this.grpCollageDisplay.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.trkFeather)).BeginInit();
 			this.tabFrequency.SuspendLayout();
+			this.tabHistory.SuspendLayout();
+			this.cmHistory.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// lstLocations
 			// 
 			this.lstLocations.AllowDrop = true;
-			this.lstLocations.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this.lstLocations.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.lstLocations.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colLocation});
 			this.lstLocations.ContextMenuStrip = this.locationsMenu;
@@ -173,8 +181,8 @@
 			// 
 			// cmbTheme
 			// 
-			this.cmbTheme.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this.cmbTheme.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.cmbTheme.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmbTheme.FormattingEnabled = true;
 			this.cmbTheme.Location = new System.Drawing.Point(6, 19);
@@ -186,8 +194,8 @@
 			// 
 			// grpTheme
 			// 
-			this.grpTheme.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this.grpTheme.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.grpTheme.Controls.Add(this.btnRenameTheme);
 			this.grpTheme.Controls.Add(this.btnDeleteTheme);
 			this.grpTheme.Controls.Add(this.btnNewTheme);
@@ -679,12 +687,13 @@
 			// 
 			// tabThemeSettings
 			// 
-			this.tabThemeSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this.tabThemeSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.tabThemeSettings.Controls.Add(this.tabLocations);
 			this.tabThemeSettings.Controls.Add(this.tabDisplay);
 			this.tabThemeSettings.Controls.Add(this.tabFrequency);
+			this.tabThemeSettings.Controls.Add(this.tabHistory);
 			this.tabThemeSettings.Location = new System.Drawing.Point(12, 83);
 			this.tabThemeSettings.Name = "tabThemeSettings";
 			this.tabThemeSettings.SelectedIndex = 0;
@@ -693,6 +702,7 @@
 			// 
 			// tabLocations
 			// 
+			this.tabLocations.Controls.Add(this.btnAddFeed);
 			this.tabLocations.Controls.Add(this.lstLocations);
 			this.tabLocations.Controls.Add(this.btnAddFolder);
 			this.tabLocations.Controls.Add(this.btnAddImage);
@@ -704,6 +714,17 @@
 			this.tabLocations.Text = "Images";
 			this.tabLocations.UseVisualStyleBackColor = true;
 			// 
+			// btnAddFeed
+			// 
+			this.btnAddFeed.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.btnAddFeed.Location = new System.Drawing.Point(424, 64);
+			this.btnAddFeed.Name = "btnAddFeed";
+			this.btnAddFeed.Size = new System.Drawing.Size(120, 23);
+			this.btnAddFeed.TabIndex = 3;
+			this.btnAddFeed.Text = "Add &Feed";
+			this.btnAddFeed.UseVisualStyleBackColor = true;
+			this.btnAddFeed.Click += new System.EventHandler(this.btnAddFeed_Click);
+			// 
 			// tabDisplay
 			// 
 			this.tabDisplay.Controls.Add(this.grpCollageDisplay);
@@ -711,10 +732,10 @@
 			this.tabDisplay.Controls.Add(this.chkSeparateMonitors);
 			this.tabDisplay.Controls.Add(this.cmbThemeMode);
 			this.tabDisplay.Controls.Add(this.lblMode);
-			this.tabDisplay.Controls.Add(this.clrBackTop);
 			this.tabDisplay.Controls.Add(this.lblBackTop);
-			this.tabDisplay.Controls.Add(this.clrBackBottom);
 			this.tabDisplay.Controls.Add(this.lblBackBottom);
+			this.tabDisplay.Controls.Add(this.clrBackTop);
+			this.tabDisplay.Controls.Add(this.clrBackBottom);
 			this.tabDisplay.Location = new System.Drawing.Point(4, 22);
 			this.tabDisplay.Name = "tabDisplay";
 			this.tabDisplay.Padding = new System.Windows.Forms.Padding(3);
@@ -773,6 +794,54 @@
 			this.trkFeather.Value = 50;
 			this.trkFeather.Scroll += new System.EventHandler(this.trkFeather_Scroll);
 			// 
+			// tabFrequency
+			// 
+			this.tabFrequency.Controls.Add(this.cmbThemePeriod);
+			this.tabFrequency.Controls.Add(this.lblFrequency);
+			this.tabFrequency.Controls.Add(this.lblHotKey);
+			this.tabFrequency.Controls.Add(this.txtHotKey);
+			this.tabFrequency.Controls.Add(this.txtThemeFreq);
+			this.tabFrequency.Location = new System.Drawing.Point(4, 22);
+			this.tabFrequency.Name = "tabFrequency";
+			this.tabFrequency.Padding = new System.Windows.Forms.Padding(3);
+			this.tabFrequency.Size = new System.Drawing.Size(552, 232);
+			this.tabFrequency.TabIndex = 2;
+			this.tabFrequency.Text = "Frequency";
+			this.tabFrequency.UseVisualStyleBackColor = true;
+			// 
+			// tabHistory
+			// 
+			this.tabHistory.Controls.Add(this.lstHistory);
+			this.tabHistory.Location = new System.Drawing.Point(4, 22);
+			this.tabHistory.Name = "tabHistory";
+			this.tabHistory.Padding = new System.Windows.Forms.Padding(3);
+			this.tabHistory.Size = new System.Drawing.Size(552, 232);
+			this.tabHistory.TabIndex = 3;
+			this.tabHistory.Text = "History";
+			this.tabHistory.UseVisualStyleBackColor = true;
+			// 
+			// cmHistory
+			// 
+			this.cmHistory.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ciOpenHistoryFile,
+            this.ciExploreHistoryFile});
+			this.cmHistory.Name = "cmHistory";
+			this.cmHistory.Size = new System.Drawing.Size(134, 48);
+			// 
+			// ciOpenHistoryFile
+			// 
+			this.ciOpenHistoryFile.Name = "ciOpenHistoryFile";
+			this.ciOpenHistoryFile.Size = new System.Drawing.Size(133, 22);
+			this.ciOpenHistoryFile.Text = "&Open File";
+			this.ciOpenHistoryFile.Click += new System.EventHandler(this.ciOpenHistoryFile_Click);
+			// 
+			// ciExploreHistoryFile
+			// 
+			this.ciExploreHistoryFile.Name = "ciExploreHistoryFile";
+			this.ciExploreHistoryFile.Size = new System.Drawing.Size(133, 22);
+			this.ciExploreHistoryFile.Text = "&Explore File";
+			this.ciExploreHistoryFile.Click += new System.EventHandler(this.ciExploreHistoryFile_Click);
+			// 
 			// clrBackTop
 			// 
 			this.clrBackTop.BackColor = System.Drawing.Color.Black;
@@ -795,20 +864,16 @@
 			this.clrBackBottom.TabIndex = 6;
 			this.clrBackBottom.ColorChanged += new WallSwitch.ColorSample.ColorChangedEventHandler(this.clrBackBottom_ColorChanged);
 			// 
-			// tabFrequency
+			// lstHistory
 			// 
-			this.tabFrequency.Controls.Add(this.cmbThemePeriod);
-			this.tabFrequency.Controls.Add(this.lblFrequency);
-			this.tabFrequency.Controls.Add(this.lblHotKey);
-			this.tabFrequency.Controls.Add(this.txtHotKey);
-			this.tabFrequency.Controls.Add(this.txtThemeFreq);
-			this.tabFrequency.Location = new System.Drawing.Point(4, 22);
-			this.tabFrequency.Name = "tabFrequency";
-			this.tabFrequency.Padding = new System.Windows.Forms.Padding(3);
-			this.tabFrequency.Size = new System.Drawing.Size(552, 232);
-			this.tabFrequency.TabIndex = 2;
-			this.tabFrequency.Text = "Frequency";
-			this.tabFrequency.UseVisualStyleBackColor = true;
+			this.lstHistory.ContextMenuStrip = this.cmHistory;
+			this.lstHistory.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.lstHistory.Location = new System.Drawing.Point(3, 3);
+			this.lstHistory.Name = "lstHistory";
+			this.lstHistory.Size = new System.Drawing.Size(546, 226);
+			this.lstHistory.TabIndex = 0;
+			this.lstHistory.SelectionChanged += new System.EventHandler(this.lstHistory_SelectionChanged);
+			this.lstHistory.ItemActivated += new System.EventHandler<WallSwitch.HistoryList.ItemActivatedEventArgs>(this.lstHistory_ItemActivated);
 			// 
 			// MainWindow
 			// 
@@ -849,6 +914,8 @@
 			((System.ComponentModel.ISupportInitialize)(this.trkFeather)).EndInit();
 			this.tabFrequency.ResumeLayout(false);
 			this.tabFrequency.PerformLayout();
+			this.tabHistory.ResumeLayout(false);
+			this.cmHistory.ResumeLayout(false);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -924,6 +991,12 @@
 		private System.Windows.Forms.TabPage tabFrequency;
 		private System.Windows.Forms.Label lblFeatherDisplay;
 		private System.Windows.Forms.Label lblFeather;
+		private System.Windows.Forms.Button btnAddFeed;
+		private System.Windows.Forms.TabPage tabHistory;
+		private HistoryList lstHistory;
+		private System.Windows.Forms.ContextMenuStrip cmHistory;
+		private System.Windows.Forms.ToolStripMenuItem ciOpenHistoryFile;
+		private System.Windows.Forms.ToolStripMenuItem ciExploreHistoryFile;
 
 	}
 }

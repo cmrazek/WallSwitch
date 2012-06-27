@@ -5,6 +5,7 @@ using System.Xml;
 using System.IO;
 using System.Drawing;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace WallSwitch
 {
@@ -12,9 +13,10 @@ namespace WallSwitch
 	{
 		#region Constants
 		private const int k_maxHistory = 10;
+		private const int k_maxRetrievalRetries = 10;
 
 		private const int k_defaultFreq = 5;
-		private const ThemePeriod k_defaultPeriod = ThemePeriod.Minutes;
+		private const Period k_defaultPeriod = Period.Minutes;
 		private const ThemeMode k_defaultMode = ThemeMode.Random;
 		private static Color k_defaultBackColor = Color.Black;
 		private const bool k_defaultSeparateMonitors = true;
@@ -29,7 +31,7 @@ namespace WallSwitch
 		private List<Location> _locations = new List<Location>();
 		private string _name = "";
 		private int _freq = k_defaultFreq;
-		private ThemePeriod _period = k_defaultPeriod;
+		private Period _period = k_defaultPeriod;
 		private TimeSpan _interval;
 		private ThemeMode _mode = k_defaultMode;
 		private int _imageSize = k_defaultImageSize;	// Used only for collage mode
@@ -40,17 +42,13 @@ namespace WallSwitch
 		private Color _backColorBottom = k_defaultBackColor;
 		private int _backOpacity = k_defaultBackOpacity;
 		private ImageFit _imageFit = k_defaultImageFit;
-		private List<string[]> _history = new List<string[]>();
+		private List<IEnumerable<ImageRec>> _history = new List<IEnumerable<ImageRec>>();
 		private int _historyIndex = -1;
 		private Random _rand = new Random();
 		private int _feather = 15;
 		#endregion
 
 		#region Construction
-		/// <summary>
-		/// Constructs the Theme object.
-		/// </summary>
-		/// <param name="id"></param>
 		public Theme(Guid id)
 		{
 			_id = id;
@@ -59,36 +57,23 @@ namespace WallSwitch
 		#endregion
 
 		#region Attributes
-		/// <summary>
-		/// Gets the GUID for this theme.
-		/// </summary>
 		public Guid ID
 		{
 			get { return _id; }
 		}
 
-		/// <summary>
-		/// Gets or sets the name of this theme.
-		/// </summary>
 		public string Name
 		{
 			get { return _name; }
 			set { _name = value; }
 		}
 
-		/// <summary>
-		/// Gets or sets the mode (sequential, random, ...) for this theme.
-		/// </summary>
 		public ThemeMode Mode
 		{
 			get { return _mode; }
 			set { _mode = value; }
 		}
 
-		/// <summary>
-		/// Gets or sets the image size, in percent.
-		/// This is only used for collage mode.
-		/// </summary>
 		public int ImageSize
 		{
 			get { return _imageSize; }
@@ -99,35 +84,18 @@ namespace WallSwitch
 			}
 		}
 
-		/// <summary>
-		/// Gets or sets a flag indicating if this theme is the one currently switching.
-		/// </summary>
 		public bool IsActive
 		{
 			get { return _active; }
-			set
-			{
-				if (_active != value)
-				{
-					_active = value;
-					if (value) OnActivate();
-					else OnDeactivate();
-				}
-			}
+			set { _active = value; }
 		}
 
-		/// <summary>
-		/// Gets or sets the flag indicating if a different background image should be displayed on each monitor.
-		/// </summary>
 		public bool SeparateMonitors
 		{
 			get { return _separateMonitors; }
 			set { _separateMonitors = value; }
 		}
 
-		/// <summary>
-		/// Gets or sets the hotkey information.
-		/// </summary>
 		public HotKey HotKey
 		{
 			get { return _hotKey; }
@@ -138,9 +106,6 @@ namespace WallSwitch
 			}
 		}
 
-		/// <summary>
-		/// Gets or sets the image fit style.
-		/// </summary>
 		public ImageFit ImageFit
 		{
 			get { return _imageFit; }
@@ -159,7 +124,7 @@ namespace WallSwitch
 		#endregion
 
 		#region Save/Load
-		public void Save(XmlTextWriter xml)
+		public void Save(XmlWriter xml)
 		{
 			xml.WriteAttributeString("Name", _name);
 			if (_active) xml.WriteAttributeString("Active", Boolean.TrueString);
@@ -185,7 +150,7 @@ namespace WallSwitch
 			foreach (Location loc in _locations)
 			{
 				xml.WriteStartElement("Location");
-				xml.WriteString(loc.Path);
+				loc.Save(xml);
 				xml.WriteEndElement();	// Location
 			}
 
@@ -198,7 +163,7 @@ namespace WallSwitch
 
 			_active = Util.ParseBool(xmlTheme, "Active", false);
 			_freq = Util.ParseInt(xmlTheme, "Frequency", k_defaultFreq);
-			_period = Util.ParseEnum<ThemePeriod>(xmlTheme, "Period", k_defaultPeriod);
+			_period = Util.ParseEnum<Period>(xmlTheme, "Period", k_defaultPeriod);
 			CalcInterval();
 			_mode = Util.ParseEnum<ThemeMode>(xmlTheme, "Mode", k_defaultMode);
 			_backColorTop = Util.ParseColor(xmlTheme, "BackColorTop", k_defaultBackColor);
@@ -212,8 +177,16 @@ namespace WallSwitch
 
 			foreach (XmlElement xmlLoc in xmlTheme.SelectNodes("Location"))
 			{
-				string location = xmlLoc.InnerText;
-				if (!string.IsNullOrWhiteSpace(location)) _locations.Add(new Location(location));
+				try
+				{
+					var loc = new Location(xmlLoc);
+					loc.Load(xmlLoc);
+					_locations.Add(loc);
+				}
+				catch (Exception ex)
+				{
+					Log.Write(ex, "Error when loading location from settings file.");
+				}
 			}
 
 			LoadHistory(xmlTheme);
@@ -231,50 +204,10 @@ namespace WallSwitch
 			return false;
 		}
 
-		public string[] Locations
+		public IEnumerable<Location> Locations
 		{
-			get
-			{
-				// Create a string array of the paths.
-				string[] ret = new string[_locations.Count];
-				int i = 0;
-				foreach (Location loc in _locations) ret[i++] = loc.Path;
-
-				return ret;
-			}
-			set
-			{
-				// Create a new list retaining the existing location objects, where possible.
-				List<Location> newList = new List<Location>(value.Length);
-				foreach (string path in value)
-				{
-					bool found = false;
-					foreach (Location loc in _locations)
-					{
-						if (loc.SamePath(path))
-						{
-							newList.Add(loc);
-							found = true;
-							break;
-						}
-					}
-					if (!found)
-					{
-						Location newLoc = new Location(path);
-						newList.Add(newLoc);
-						//if (IsActive) newLoc.StartWatching();
-					}
-				}
-
-				// Find locations that have been deleted, and destroy them.
-				foreach (Location loc in _locations)
-				{
-					if (!newList.Contains(loc)) loc.Destroy();
-				}
-
-				// Start using the new list.
-				_locations = newList;
-			}
+			get { return _locations; }
+			set { _locations = value.ToList(); }
 		}
 		#endregion
 
@@ -290,7 +223,7 @@ namespace WallSwitch
 			}
 		}
 
-		public ThemePeriod Period
+		public Period Period
 		{
 			get { return _period; }
 			set
@@ -302,24 +235,7 @@ namespace WallSwitch
 
 		private void CalcInterval()
 		{
-			switch(_period)
-			{
-				case ThemePeriod.Seconds:
-					_interval = TimeSpan.FromSeconds(_freq);
-					break;
-				case ThemePeriod.Minutes:
-					_interval = TimeSpan.FromMinutes(_freq);
-					break;
-				case ThemePeriod.Hours:
-					_interval = TimeSpan.FromHours(_freq);
-					break;
-				case ThemePeriod.Days:
-					_interval = TimeSpan.FromDays(_freq);
-					break;
-				default:
-					_interval = TimeSpan.FromMinutes(_freq);
-					break;
-			}
+			_interval = TimeSpanEx.CalcInterval(_freq, _period);
 		}
 
 		public TimeSpan Interval
@@ -329,27 +245,18 @@ namespace WallSwitch
 		#endregion
 
 		#region Background Color
-		/// <summary>
-		/// Gets or sets the top background color.
-		/// </summary>
 		public Color BackColorTop
 		{
 			get { return _backColorTop; }
 			set { _backColorTop = value; }
 		}
 
-		/// <summary>
-		/// Gets or sets the bottom background color.
-		/// </summary>
 		public Color BackColorBottom
 		{
 			get { return _backColorBottom; }
 			set { _backColorBottom = value; }
 		}
 
-		/// <summary>
-		/// Gets or sets the opacity of the background (collage mode only).
-		/// </summary>
 		public int BackOpacity
 		{
 			get { return _backOpacity; }
@@ -360,9 +267,6 @@ namespace WallSwitch
 			}
 		}
 
-		/// <summary>
-		/// Gets the opacity for a 0 -> 255 scale.
-		/// </summary>
 		public int BackOpacity255
 		{
 			get
@@ -375,24 +279,24 @@ namespace WallSwitch
 		#endregion
 
 		#region History
-		public void AddHistory(string[] images)
-		{
-			_history.Add(images);
-		}
-
 		public bool CanGoPrev
 		{
 			get { return _historyIndex > 0; }
 		}
 
-		private void SaveHistory(XmlTextWriter xml)
+		private void SaveHistory(XmlWriter xml)
 		{
 			int index = 0;
-			foreach (string[] images in _history)
+			foreach (var images in _history)
 			{
 				xml.WriteStartElement("History");
 				if (index++ == _historyIndex) xml.WriteAttributeString("Current", Boolean.TrueString);
-				foreach (string image in images) xml.WriteElementString("Image", image);
+				foreach (var image in images)
+				{
+					xml.WriteStartElement("Image");
+					image.Save(xml);
+					xml.WriteEndElement();	// Image
+				}
 				xml.WriteEndElement();	// History
 			}
 		}
@@ -404,16 +308,17 @@ namespace WallSwitch
 				bool current = false;
 				if (xmlHistory.HasAttribute("Current")) Boolean.TryParse(xmlHistory.GetAttribute("Current"), out current);
 
-				List<String> images = new List<string>();
+				var images = new List<ImageRec>();
 				foreach (XmlElement xmlImage in xmlHistory.SelectNodes("Image"))
 				{
-					images.Add(xmlImage.InnerText.ToLower());
+					var image = ImageRec.FromXml(xmlImage);
+					if (image != null) images.Add(image);
 				}
 
 				if (images.Count > 0)
 				{
 					if (current) _historyIndex = _history.Count;
-					_history.Add(images.ToArray());
+					_history.Add(images);
 				}
 			}
 		}
@@ -426,20 +331,17 @@ namespace WallSwitch
 			string fileName = WallpaperFileName;
 			if (File.Exists(fileName)) File.Delete(fileName);
 		}
+
+		public IEnumerable<IEnumerable<ImageRec>> History
+		{
+			get { return _history; }
+		}
 		#endregion
 
 		#region ImageSelection
-		/// <summary>
-		/// This function selects the next images to be displayed as wallpaper.
-		/// If the user previously hit the back button, then this function will return
-		/// the next images in the cached list.
-		/// </summary>
-		/// <param name="numMonitors">The number of images to be selected (one image per monitor).</param>
-		/// <returns>If no images could be located, then null; otherwise, an array of selected images.
-		/// Note: The number of images returned may be less than the number of monitors, if not enough images were found.</returns>
-		public string[] GetNextImages(int numMonitors)
+		public IEnumerable<ImageRec> GetNextImages(int numMonitors)
 		{
-			string[] ret = null;
+			IEnumerable<ImageRec> ret = null;
 
 			Log.Write(LogLevel.Debug, "Finding next images...");
 
@@ -448,20 +350,23 @@ namespace WallSwitch
 			if (_historyIndex < _history.Count - 1)
 			{
 				Log.Write(LogLevel.Debug, "Previously selected images found.");
-				return _history[++_historyIndex];
+				var imageSet = _history[++_historyIndex];
+				var allFound = true;
+
+				foreach (var image in imageSet)
+				{
+					if (!image.Retrieve())
+					{
+						allFound = false;
+						break;
+					}
+				}
+				if (allFound) return imageSet;
 			}
 
 			// Go through each location and find files.
-			List<string> files = new List<string>();
-			foreach (Location loc in _locations)
-			{
-				try
-				{
-					foreach (string locFile in loc.Files) files.Add(locFile);
-				}
-				catch (Exception)
-				{ }
-			}
+			var files = new List<ImageRec>();
+			foreach (Location loc in _locations) files.AddRange(loc.Files);
 
 			Log.Write(LogLevel.Debug, files.Count.ToString() + " files found.");
 
@@ -472,16 +377,25 @@ namespace WallSwitch
 				if (_mode == ThemeMode.Random || _mode == ThemeMode.Collage)
 				{
 					// Pick N number of files to display.
-					List<String> pickedFiles = new List<string>(numMonitors);
-					for (int i = 0; i < numMonitors; i++)
+					var pickedFiles = new List<ImageRec>(numMonitors);
+					var retries = 0;
+					while (pickedFiles.Count < numMonitors && retries < k_maxRetrievalRetries)
 					{
-						int index = _rand.Next(files.Count);
-						string fileName = files[index];
-						Log.Write(LogLevel.Debug, "Choosing file # " + index.ToString() + ": " + fileName);
-						pickedFiles.Add(fileName);
+						var index = _rand.Next(files.Count);
+						var loc = files[index];
+						if (loc.Retrieve())
+						{
+							Log.Write(LogLevel.Debug, "Choosing file # {0}: {1}", index, loc);
+							pickedFiles.Add(loc);
+							retries = 0;
+						}
+						else
+						{
+							retries++;
+						}
 					}
 
-					ret = pickedFiles.ToArray();
+					ret = pickedFiles;
 				}
 				else // Sequential
 				{
@@ -490,31 +404,39 @@ namespace WallSwitch
 					int fileIndex = 0;
 					if (_history.Count > 0)
 					{
-						string[] currentImages = _history[_history.Count - 1];
+						var currentImages = _history[_history.Count - 1];
 
 						// Find the where the current images are in the list.
 						int index = -1;
-						foreach (string file in files)
+						foreach (var file in files)
 						{
-							foreach (string cur in currentImages)
+							foreach (var cur in currentImages)
 							{
-								if (file == cur) fileIndex = index + 1;
+								if (file.Equals(cur)) fileIndex = index + 1;
 							}
 							index++;
 						}
 					}
 
 					// Pick N number of files to display.
-					List<String> pickedFiles = new List<string>(numMonitors);
-					for (int i = 0; i < numMonitors; i++)
+					var pickedFiles = new List<ImageRec>(numMonitors);
+					var retries = 0;
+					while (pickedFiles.Count < numMonitors && fileIndex < files.Count && retries < k_maxRetrievalRetries)
 					{
-						if (fileIndex >= files.Count) fileIndex = 0;
-						string fileName = files[fileIndex++];
-						Log.Write(LogLevel.Debug, "Choosing file # " + fileIndex.ToString() + ": " + fileName);
-						pickedFiles.Add(fileName);
+						var loc = files[fileIndex++];
+						if (loc.Retrieve())
+						{
+							Log.Write(LogLevel.Debug, "Choosing file # {0}: {1}", fileIndex, loc);
+							pickedFiles.Add(loc);
+							retries = 0;
+						}
+						else
+						{
+							retries++;
+						}
 					}
 
-					ret = pickedFiles.ToArray();
+					ret = pickedFiles;
 				}
 			}
 
@@ -523,6 +445,8 @@ namespace WallSwitch
 				// Add history
 				_history.Add(ret);
 				_historyIndex = _history.Count - 1;
+
+				FireHistoryAdded(ret);
 
 				// Trim off the beginning of the history if we've exceeded the max length.
 				while (_history.Count > k_maxHistory)
@@ -535,31 +459,15 @@ namespace WallSwitch
 			return ret;
 		}
 
-		public static bool IsImageFile(string fileName)
-		{
-			string ext = Path.GetExtension(fileName).ToLower();
-			switch (ext)
-			{
-				case ".jpg":
-				case ".jpeg":
-				case ".gif":
-				case ".png":
-				case ".bmp":
-				case ".tiff":
-					return true;
-			}
-
-			return false;
-		}
-
-		/// <summary>
-		/// This function will return the previously displayed images.
-		/// </summary>
-		/// <returns>If there are previous images cached, an array of the image filenames; otherwise null.</returns>
-		public string[] GetPrevImages()
+		public IEnumerable<ImageRec> GetPrevImages()
 		{
 			Log.Write(LogLevel.Debug, "Going back to previous images.");
-			if (_historyIndex > 0) return _history[--_historyIndex];
+			if (_historyIndex > 0)
+			{
+				var imageSet = _history[--_historyIndex];
+				foreach (var image in imageSet) image.Retrieve();
+				return imageSet;
+			}
 			return null;
 		}
 		#endregion
@@ -571,31 +479,23 @@ namespace WallSwitch
 		}
 		#endregion
 
-		#region File System Watching
-		/// <summary>
-		/// Called when the theme is activating.
-		/// </summary>
-		private void OnActivate()
+		#region Events
+		public event EventHandler<HistoryAddedEventArgs> HistoryAdded;
+		public class HistoryAddedEventArgs : EventArgs
 		{
-			// Start watching directories.
-			//foreach (Location loc in _locations) loc.StartWatching();
+			public IEnumerable<ImageRec> Images { get; set; }
 		}
 
-		/// <summary>
-		/// Called when the theme is no longer active.
-		/// </summary>
-		private void OnDeactivate()
+		private void FireHistoryAdded(IEnumerable<ImageRec> images)
 		{
-			// Stop watching directories.
-			//foreach (Location loc in _locations) loc.StopWatching();
-		}
-
-		/// <summary>
-		/// Called when the application loads, and this theme is the active theme.
-		/// </summary>
-		public void OnAppLoadActivate()
-		{
-			OnActivate();
+			EventHandler<HistoryAddedEventArgs> ev = HistoryAdded;
+			if (ev != null)
+			{
+				ev(this, new HistoryAddedEventArgs
+				{
+					Images = images
+				});
+			}
 		}
 		#endregion
 	}
