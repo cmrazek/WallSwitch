@@ -3,3 +3,5 @@
 
 /WallSwitch/bin/*
 /WallSwitch/obj/*
+/Setup/Archive/*
+/Setup/bin/*

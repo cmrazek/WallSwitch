@@ -223,7 +223,7 @@ namespace WallSwitch {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid feed URL..
+        ///   Looks up a localized string similar to Invalid feed path or URL..
         /// </summary>
         internal static string Error_InvalidFeedUrl {
             get {
@@ -309,6 +309,15 @@ namespace WallSwitch {
         internal static string Error_SaveSettings {
             get {
                 return ResourceManager.GetString("Error_SaveSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update frequency cannot be less than 15 seconds..
+        /// </summary>
+        internal static string Error_ShortUpdateInterval {
+            get {
+                return ResourceManager.GetString("Error_ShortUpdateInterval", resourceCulture);
             }
         }
         
@@ -594,6 +603,15 @@ namespace WallSwitch {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Image Files ({0})|{0}|All Files (*.*)|*.*.
+        /// </summary>
+        internal static string ImageFileFilter {
+            get {
+                return ResourceManager.GetString("ImageFileFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The image file has been moved or deleted..
         /// </summary>
         internal static string ImageFileMissing {
@@ -639,11 +657,11 @@ namespace WallSwitch {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Image Files (jpg, png, gif, bmp)|*.jpg;*.png;*.gif;*.bmp|All Files|*.*.
+        ///   Looks up a localized string similar to (next refresh).
         /// </summary>
-        internal static string OpenImageDlgFilter {
+        internal static string NextUpdateNow {
             get {
-                return ResourceManager.GetString("OpenImageDlgFilter", resourceCulture);
+                return ResourceManager.GetString("NextUpdateNow", resourceCulture);
             }
         }
         

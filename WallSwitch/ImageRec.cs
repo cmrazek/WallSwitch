@@ -107,7 +107,7 @@ namespace WallSwitch
 				switch (_type)
 				{
 					case ImageLocationType.File:
-						return _location;
+						return File.Exists(_location) ? _location : string.Empty;
 					case ImageLocationType.Url:
 						{
 							string fileName;
@@ -121,6 +121,11 @@ namespace WallSwitch
 				return string.Empty;
 			}
 		}
+
+		public ImageFormat ImageFormat
+		{
+			get { return _imageFormat; }
+		}
 		#endregion
 
 		#region Loading
@@ -133,7 +138,7 @@ namespace WallSwitch
 				case ImageLocationType.File:
 					try
 					{
-						_imageFormat = FileNameToImageFormat(_location);
+						_imageFormat = ImageFormatDesc.FileNameToImageFormat(_location);
 						_image = Image.FromFile(_location);
 						return true;
 					}
@@ -168,7 +173,7 @@ namespace WallSwitch
 						var response = (HttpWebResponse)request.GetResponse();
 
 						Log.Write(LogLevel.Debug, "Content Type is '{0}'.", response.ContentType);
-						_imageFormat = ContentTypeToImageFormat(response.ContentType);
+						_imageFormat = ImageFormatDesc.ContentTypeToImageFormat(response.ContentType);
 
 						var stream = response.GetResponseStream();
 						_image = Image.FromStream(stream);
@@ -205,76 +210,6 @@ namespace WallSwitch
 		public Image Image
 		{
 			get { return _image; }
-		}
-		#endregion
-
-		#region Formats
-		public static ImageFormat FileNameToImageFormat(string fileName)
-		{
-			switch (Path.GetExtension(fileName).ToLower())
-			{
-				case ".bmp":
-					return ImageFormat.Bmp;
-				case ".emf":
-					return ImageFormat.Emf;
-				case ".exif":
-					return ImageFormat.Exif;
-				case ".gif":
-					return ImageFormat.Gif;
-				case ".ico":
-					return ImageFormat.Icon;
-				case ".jpg":
-				case ".jpeg":
-					return ImageFormat.Jpeg;
-				case ".png":
-					return ImageFormat.Png;
-				case ".tiff":
-					return ImageFormat.Tiff;
-				case ".wmf":
-					return ImageFormat.Wmf;
-				default:
-					return null;
-			}
-		}
-
-		public static string ImageFormatToExtension(ImageFormat fmt)
-		{
-			if (fmt.Guid == ImageFormat.Bmp.Guid) return ".bmp";
-			if (fmt.Guid == ImageFormat.Emf.Guid) return ".emf";
-			if (fmt.Guid == ImageFormat.Exif.Guid) return ".exif";
-			if (fmt.Guid == ImageFormat.Gif.Guid) return ".gif";
-			if (fmt.Guid == ImageFormat.Icon.Guid) return ".ico";
-			if (fmt.Guid == ImageFormat.Jpeg.Guid) return ".jpg";
-			if (fmt.Guid == ImageFormat.Png.Guid) return ".png";
-			if (fmt.Guid == ImageFormat.Tiff.Guid) return ".tiff";
-			if (fmt.Guid == ImageFormat.Wmf.Guid) return ".wmf";
-			return "";
-		}
-
-		private ImageFormat ContentTypeToImageFormat(string contentType)
-		{
-			switch (contentType.Trim().ToLower())
-			{
-				case "image/gif":
-					return ImageFormat.Gif;
-				case "image/jpeg":
-				case "image/pjpeg":
-					return ImageFormat.Jpeg;
-				case "image/png":
-					return ImageFormat.Png;
-				case "image/tiff":
-					return ImageFormat.Tiff;
-				case "image/vnd.microsoft.icon":
-					return ImageFormat.Icon;
-				default:
-					Log.Write(LogLevel.Warning, "Unable to determine image format from content type '{0}'.", contentType);
-					return null;
-			}
-		}
-
-		public ImageFormat ImageFormat
-		{
-			get { return _imageFormat; }
 		}
 		#endregion
 

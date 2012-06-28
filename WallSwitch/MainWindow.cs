@@ -57,6 +57,10 @@ namespace WallSwitch
 
 		// Hotkeys
 		private const int k_hotkeySwitchNext = 1;
+
+		private const string k_nextUpdateFormat = "t";	// Uses "h:mm tt" format
+
+		private const int k_minUpdateSeconds = 15;
 		#endregion
 
 		#region Window Management
@@ -418,7 +422,7 @@ namespace WallSwitch
 
 			Dirty = false;
 
-			RefreshImageList();
+			RefreshLocations();
 			EnableControls();
 
 			_refreshing = false;
@@ -461,6 +465,16 @@ namespace WallSwitch
 						this.ShowError(Res.Error_InvalidThemePeriod);
 					}
 					return false;
+			}
+
+			if (period == Period.Seconds && freq < k_minUpdateSeconds)
+			{
+				if (showErrors)
+				{
+					txtThemeFreq.Focus();
+					this.ShowError(Res.Error_ShortUpdateInterval);
+				}
+				return false;
 			}
 
 			ThemeMode mode = ThemeMode.Sequential;
@@ -517,7 +531,7 @@ namespace WallSwitch
 			return true;
 		}
 
-		private void RefreshImageList()
+		private void RefreshLocations()
 		{
 			lstLocations.Items.Clear();
 
@@ -551,7 +565,7 @@ namespace WallSwitch
 
 		private void EnableControls()
 		{
-			btnApply.Enabled = Dirty;
+			btnApply.Enabled = miFileSave.Enabled = Dirty;
 			btnActivate.Enabled = _switchThread == null || _switchThread.Theme == null || !_switchThread.Theme.Equals(_currentTheme);
 			btnDeleteTheme.Enabled = miFileDeleteTheme.Enabled = cmbTheme.Items.Count > 1;
 
@@ -561,27 +575,21 @@ namespace WallSwitch
 
 			grpCollageDisplay.Visible = cmbThemeMode.SelectedIndex == k_modeCollage;
 
-			//lblImageSize.Visible = cmbThemeMode.SelectedIndex == k_modeCollage;
-			//trkImageSize.Visible = cmbThemeMode.SelectedIndex == k_modeCollage;
-			//lblImageSizeDisplay.Visible = cmbThemeMode.SelectedIndex == k_modeCollage;
-
-			//lblOpacity.Visible = cmbThemeMode.SelectedIndex == k_modeCollage;
-			//trkOpacity.Visible = cmbThemeMode.SelectedIndex == k_modeCollage;
-			//lblOpacityDisplay.Visible = cmbThemeMode.SelectedIndex == k_modeCollage;
-
 			chkSeparateMonitors.Visible = Screen.AllScreens.Length > 1;
 			cmbImageFit.Visible = cmbThemeMode.SelectedIndex != k_modeCollage;
+
+			EnableLocationsContextMenu();
 		}
 
-		private void locationsMenu_Opening(object sender, CancelEventArgs e)
+		private void cmLocations_Opening(object sender, CancelEventArgs e)
 		{
 			try
 			{
-				cmDeleteLocation.Visible = lstLocations.SelectedItems.Count > 0;
+				EnableLocationsContextMenu();
 			}
 			catch (Exception ex)
 			{
-				this.ShowError(ex, Res.Exception_Generic);
+				this.ShowError(ex);
 			}
 		}
 
@@ -625,7 +633,7 @@ namespace WallSwitch
 		{
 			try
 			{
-				colLocation.Width = lstLocations.ClientSize.Width - 20;
+				lstLocations.DistributeColumns();
 			}
 			catch (Exception ex)
 			{
@@ -808,11 +816,13 @@ namespace WallSwitch
 		private void AttachTheme(Theme theme)
 		{
 			theme.HistoryAdded += theme_HistoryAdded;
+			theme.LocationUpdated += theme_LocationUpdated;
 		}
 
 		private void DetachTheme(Theme theme)
 		{
 			theme.HistoryAdded -= theme_HistoryAdded;
+			theme.LocationUpdated -= theme_LocationUpdated;
 		}
 
 		private void btnNewTheme_Click(object sender, EventArgs e)
@@ -1112,18 +1122,51 @@ namespace WallSwitch
 				this.ShowError(ex, Res.Exception_Generic);
 			}
 		}
+
+		void theme_LocationUpdated(object sender, Theme.LocationUpdatedEventArgs e)
+		{
+			if (InvokeRequired)
+			{
+				Invoke(new Action(() => theme_LocationUpdated(sender, e)));
+				return;
+			}
+
+			try
+			{
+				var lvi = (from l in lstLocations.Items.Cast<ListViewItem>() where object.Equals(l.Tag, e.Location) select l).FirstOrDefault();
+				if (lvi != null) UpdateLocationLvi(lvi);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
 		#endregion
 
-		#region Location Selection
+		#region Location List
+		private void EnableLocationsContextMenu()
+		{
+			var multiSelectedItems = lstLocations.SelectedItems.Count > 0;
+			var singleSelectedItem = lstLocations.SelectedItems.Count == 1;
+			var multiFileOrDirSelected = (from l in lstLocations.SelectedItems.Cast<ListViewItem>()
+										  where (l.Tag as Location).Type == LocationType.File || (l.Tag as Location).Type == LocationType.Directory
+										  select l).Any();
+
+			ciDeleteLocation.Enabled = multiSelectedItems;
+			ciUpdateLocationNow.Enabled = multiSelectedItems;
+			ciLocationExplore.Enabled = multiFileOrDirSelected;
+			ciLocationProperties.Enabled = singleSelectedItem;
+		}
+
 		private void AddLocationItem(Location location)
 		{
-			var lvi = new ListViewItem(location.ToString());
+			var lvi = new ListViewItem();
 			lvi.Tag = location;
+			UpdateLocationLvi(lvi);
 			lstLocations.Items.Add(lvi);
 
 			try
 			{
-				var ir = new IconReader();
 				var icon = location.GetIcon();
 				if (icon != null)
 				{
@@ -1137,6 +1180,28 @@ namespace WallSwitch
 				Log.Write(LogLevel.Error, String.Format(Res.Exception_GetIcon, location) + ex.ToString());
 				throw;
 			}
+		}
+
+		private void UpdateLocationLvi(ListViewItem lvi)
+		{
+			var location = lvi.Tag as Location;
+
+			// Path
+			lvi.Text = location.Path;
+
+			// Next update time
+			var nextUpdate = location.NextUpdate;
+			string nextUpdateString;
+			if (nextUpdate <= DateTime.Now)
+			{
+				nextUpdateString = Res.NextUpdateNow;
+			}
+			else
+			{
+				nextUpdateString = nextUpdate.ToString(k_nextUpdateFormat);
+			}
+			if (lvi.SubItems.Count < 2) lvi.SubItems.Add(nextUpdateString);
+			else lvi.SubItems[1].Text = nextUpdateString;
 		}
 
 		private void btnAddFolder_Click(object sender, EventArgs e)
@@ -1173,7 +1238,7 @@ namespace WallSwitch
 			try
 			{
 				var dlg = new OpenFileDialog();
-				dlg.Filter = Res.OpenImageDlgFilter;
+				dlg.Filter = ImageFormatDesc.ImageFileFilter;
 				dlg.FilterIndex = 1;
 				dlg.Multiselect = true;
 				if (dlg.ShowDialog() == DialogResult.OK)
@@ -1212,28 +1277,7 @@ namespace WallSwitch
 		{
 			try
 			{
-				if (lstLocations.SelectedItems.Count != 1) return;
-
-				var selectedItem = lstLocations.SelectedItems[0];
-				var loc = selectedItem.Tag as Location;
-				switch (loc.Type)
-				{
-					case LocationType.File:
-					case LocationType.Directory:
-						Process.Start(loc.Path);
-						break;
-
-					case LocationType.Feed:
-						{
-							var dlg = new FeedDialog(loc);
-							if (dlg.ShowDialog(this) == DialogResult.OK)
-							{
-								selectedItem.Text = loc.Path;
-								Dirty = true;
-							}
-						}
-						break;
-				}
+				EditSelectedLocation();
 			}
 			catch (Exception ex)
 			{
@@ -1241,7 +1285,22 @@ namespace WallSwitch
 			}
 		}
 
-		private void cmDeleteLocation_Click(object sender, EventArgs e)
+		private void EditSelectedLocation()
+		{
+			if (lstLocations.SelectedItems.Count != 1) return;
+
+			var selectedItem = lstLocations.SelectedItems[0];
+			var loc = selectedItem.Tag as Location;
+
+			var dlg = new FeedDialog(loc);
+			if (dlg.ShowDialog(this) == DialogResult.OK)
+			{
+				UpdateLocationLvi(selectedItem);
+				Dirty = true;
+			}
+		}
+
+		private void ciDeleteLocation_Click(object sender, EventArgs e)
 		{
 			try
 			{
@@ -1303,7 +1362,7 @@ namespace WallSwitch
 					foreach (string file in files)
 					{
 						if (Directory.Exists(file) ||
-							(File.Exists(file) && ImageRec.FileNameToImageFormat(file) != null))
+							(File.Exists(file) && ImageFormatDesc.FileNameToImageFormat(file) != null))
 						{
 							accept = true;
 							break;
@@ -1329,7 +1388,7 @@ namespace WallSwitch
 				foreach (string file in files)
 				{
 					if (Directory.Exists(file) ||
-						(File.Exists(file) && ImageRec.FileNameToImageFormat(file) != null))
+						(File.Exists(file) && ImageFormatDesc.FileNameToImageFormat(file) != null))
 					{
 						if (File.Exists(file)) AddLocationItem(new Location(LocationType.File, file));
 						else AddLocationItem(new Location(LocationType.Directory, file));
@@ -1340,6 +1399,58 @@ namespace WallSwitch
 			catch (Exception ex)
 			{
 				Log.Write(ex, "Exception on drag-drop.");
+			}
+		}
+
+		private void ciUpdateLocationNow_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				var dt = DateTime.Now;
+				foreach (var loc in (from l in lstLocations.SelectedItems.Cast<ListViewItem>() select l.Tag as Location))
+				{
+					loc.SetNextUpdateNow();
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void ciLocationProperties_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				EditSelectedLocation();
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex, Res.Exception_Generic);
+			}
+		}
+
+		private void ciLocationExplore_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				foreach (var loc in (from l in lstLocations.SelectedItems.Cast<ListViewItem>()
+									 select l.Tag as Location))
+				{
+					switch (loc.Type)
+					{
+						case LocationType.File:
+							FileUtil.ExploreFile(loc.Path);
+							break;
+						case LocationType.Directory:
+							FileUtil.ExploreDir(loc.Path);
+							break;
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
 			}
 		}
 		#endregion
@@ -1440,6 +1551,7 @@ namespace WallSwitch
 		private void ClearHistory()
 		{
 			if (_currentTheme != null) _currentTheme.ClearHistory();
+			lstHistory.Clear();
 		}
 
 		private void miClearHistory_Click(object sender, EventArgs e)
@@ -1472,6 +1584,8 @@ namespace WallSwitch
 					}
 				}
 			}
+
+			keepLocations.AddRange(from h in lstHistory.History select h.Location);
 
 			// Tell the image cache object to delete all others.
 			ImageCache.ClearExpiredCache(keepLocations);
@@ -1641,7 +1755,7 @@ namespace WallSwitch
 					}
 					else
 					{
-						FileUtils.ExploreFile(fileName);
+						FileUtil.ExploreFile(fileName);
 					}
 				}
 			}
@@ -1656,7 +1770,26 @@ namespace WallSwitch
 			try
 			{
 				var fileName = e.ImageRec.LocationOnDisk;
-				if (!string.IsNullOrWhiteSpace(fileName)) Process.Start(fileName);
+				if (string.IsNullOrWhiteSpace(fileName))
+				{
+					this.ShowError(Res.ImageFileMissing);
+				}
+				else
+				{
+					Process.Start(fileName);
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void ciClearHistoryList_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				lstHistory.Clear();
 			}
 			catch (Exception ex)
 			{
@@ -1666,7 +1799,6 @@ namespace WallSwitch
 		#endregion
 
 		
-
 
 	}
 }

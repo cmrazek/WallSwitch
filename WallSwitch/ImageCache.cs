@@ -40,7 +40,7 @@ namespace WallSwitch
 				if (image == null) return;
 
 				var fmt = loc.ImageFormat ?? ImageFormat.Png;
-				var fileName = string.Concat(Guid.NewGuid().ToString(), ImageRec.ImageFormatToExtension(fmt));
+				var fileName = string.Concat(Guid.NewGuid().ToString(), ImageFormatDesc.ImageFormatToExtension(fmt));
 
 				image.Save(Path.Combine(GetCacheDir(true), fileName), fmt);
 

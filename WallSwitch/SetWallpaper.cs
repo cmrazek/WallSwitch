@@ -1542,8 +1542,8 @@ namespace WallSwitch
 
 				case ImageFit.Fit:
 					// Scale to the right size.
-					imgRect = Util.ScaleRectWidth(imgRect, screenSize.Width);
-					if (imgRect.Height > screenSize.Height) imgRect = Util.ScaleRectHeight(imgRect, screenSize.Height);
+					imgRect = imgRect.ScaleRectWidth(screenSize.Width);
+					if (imgRect.Height > screenSize.Height) imgRect = imgRect.ScaleRectHeight(screenSize.Height);
 
 					// Center the image
 					imgRect.X = (screenSize.Width - imgRect.Width) * .5f;
@@ -1561,8 +1561,8 @@ namespace WallSwitch
 
 					// Source rect will be scaled to match the same aspect as the screen.
 					RectangleF rect = new RectangleF(0.0f, 0.0f, screenSize.Width, screenSize.Height);
-					rect = Util.ScaleRectWidth(rect, srcRect.Width);
-					if (rect.Height > srcRect.Height) rect = Util.ScaleRectHeight(rect, srcRect.Height);
+					rect = rect.ScaleRectWidth(srcRect.Width);
+					if (rect.Height > srcRect.Height) rect = rect.ScaleRectHeight(srcRect.Height);
 
 					// Center the source rect inside the image.
 					rect.X = (srcRect.Width - rect.Width) * .5f;

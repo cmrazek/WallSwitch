@@ -87,7 +87,14 @@ namespace WallSwitch
 		public bool IsActive
 		{
 			get { return _active; }
-			set { _active = value; }
+			set
+			{
+				if (_active != value)
+				{
+					_active = value;
+					OnActivate(_active);
+				}
+			}
 		}
 
 		public bool SeparateMonitors
@@ -131,8 +138,8 @@ namespace WallSwitch
 			xml.WriteAttributeString("Frequency", _freq.ToString());
 			xml.WriteAttributeString("Period", _period.ToString());
 			xml.WriteAttributeString("Mode", _mode.ToString());
-			xml.WriteAttributeString("BackColorTop", Util.ColorToString(_backColorTop));
-			xml.WriteAttributeString("BackColorBottom", Util.ColorToString(_backColorBottom));
+			xml.WriteAttributeString("BackColorTop", ColorUtil.ColorToString(_backColorTop));
+			xml.WriteAttributeString("BackColorBottom", ColorUtil.ColorToString(_backColorBottom));
 			if (!_separateMonitors) xml.WriteAttributeString("SeparateMonitors", _separateMonitors.ToString());
 
 			if (_mode == ThemeMode.Collage)
@@ -166,8 +173,8 @@ namespace WallSwitch
 			_period = Util.ParseEnum<Period>(xmlTheme, "Period", k_defaultPeriod);
 			CalcInterval();
 			_mode = Util.ParseEnum<ThemeMode>(xmlTheme, "Mode", k_defaultMode);
-			_backColorTop = Util.ParseColor(xmlTheme, "BackColorTop", k_defaultBackColor);
-			_backColorBottom = Util.ParseColor(xmlTheme, "BackColorBottom", k_defaultBackColor);
+			_backColorTop = ColorUtil.ParseColor(xmlTheme, "BackColorTop", k_defaultBackColor);
+			_backColorBottom = ColorUtil.ParseColor(xmlTheme, "BackColorBottom", k_defaultBackColor);
 			_separateMonitors = Util.ParseBool(xmlTheme, "SeparateMonitors", k_defaultSeparateMonitors);
 			_backOpacity = Util.ParseInt(xmlTheme, "BackOpacity", k_defaultBackOpacity);
 			_imageFit = Util.ParseEnum<ImageFit>(xmlTheme, "ImageFit", k_defaultImageFit);
@@ -182,6 +189,7 @@ namespace WallSwitch
 					var loc = new Location(xmlLoc);
 					loc.Load(xmlLoc);
 					_locations.Add(loc);
+					AttachLocations(new Location[] { loc });
 				}
 				catch (Exception ex)
 				{
@@ -194,7 +202,7 @@ namespace WallSwitch
 
 		#endregion
 
-		#region Items
+		#region Locations
 		public bool ContainsLocation(string location)
 		{
 			foreach (Location loc in _locations)
@@ -207,7 +215,37 @@ namespace WallSwitch
 		public IEnumerable<Location> Locations
 		{
 			get { return _locations; }
-			set { _locations = value.ToList(); }
+			set
+			{
+				var removedLocations = (from l in _locations where !value.Contains(l) select l).ToArray();
+				var addedLocations = (from v in value where !_locations.Contains(v) select v).ToArray();
+
+				_locations = value.ToList();
+
+				DetachLocations(removedLocations);
+				AttachLocations(addedLocations);
+			}
+		}
+
+		private void AttachLocations(IEnumerable<Location> locations)
+		{
+			foreach (var loc in locations)
+			{
+				loc.Updated += loc_Updated;
+			}
+		}
+
+		private void DetachLocations(IEnumerable<Location> locations)
+		{
+			foreach (var loc in locations)
+			{
+				loc.Updated -= loc_Updated;
+			}
+		}
+
+		void loc_Updated(object sender, Location.LocationEventArgs e)
+		{
+			FireLocationUpdated(e.Location);
 		}
 		#endregion
 
@@ -235,7 +273,7 @@ namespace WallSwitch
 
 		private void CalcInterval()
 		{
-			_interval = TimeSpanEx.CalcInterval(_freq, _period);
+			_interval = TimeSpanUtil.CalcInterval(_freq, _period);
 		}
 
 		public TimeSpan Interval
@@ -480,22 +518,58 @@ namespace WallSwitch
 		#endregion
 
 		#region Events
+		public class ThemeEventArgs : EventArgs
+		{
+			public Theme Theme { get; set; }
+
+			public ThemeEventArgs(Theme theme)
+			{
+				Theme = theme;
+			}
+		}
+
 		public event EventHandler<HistoryAddedEventArgs> HistoryAdded;
-		public class HistoryAddedEventArgs : EventArgs
+		public class HistoryAddedEventArgs : ThemeEventArgs
 		{
 			public IEnumerable<ImageRec> Images { get; set; }
+
+			public HistoryAddedEventArgs(Theme theme, IEnumerable<ImageRec> images)
+				: base(theme)
+			{
+				Images = images;
+			}
 		}
 
 		private void FireHistoryAdded(IEnumerable<ImageRec> images)
 		{
 			EventHandler<HistoryAddedEventArgs> ev = HistoryAdded;
-			if (ev != null)
+			if (ev != null) ev(this, new HistoryAddedEventArgs(this, images));
+		}
+
+		public event EventHandler<LocationUpdatedEventArgs> LocationUpdated;
+
+		public class LocationUpdatedEventArgs : ThemeEventArgs
+		{
+			public Location Location { get; set; }
+
+			public LocationUpdatedEventArgs(Theme theme, Location location)
+				: base(theme)
 			{
-				ev(this, new HistoryAddedEventArgs
-				{
-					Images = images
-				});
+				Location = location;
 			}
+		}
+
+		private void FireLocationUpdated(Location location)
+		{
+			EventHandler<LocationUpdatedEventArgs> ev = LocationUpdated;
+			if (ev != null) ev(this, new LocationUpdatedEventArgs(this, location));
+		}
+		#endregion
+
+		#region File System Watching
+		private void OnActivate(bool active)
+		{
+			// TODO
 		}
 		#endregion
 	}

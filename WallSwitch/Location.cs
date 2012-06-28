@@ -32,7 +32,7 @@ namespace WallSwitch
 		{
 			_type = type;
 			_path = path;
-			_updateInterval = TimeSpanEx.CalcInterval(_updateFreq, _updatePeriod);
+			_updateInterval = TimeSpanUtil.CalcInterval(_updateFreq, _updatePeriod);
 		}
 
 		public Location(XmlElement topElement)
@@ -62,18 +62,19 @@ namespace WallSwitch
 			{
 				try
 				{
+					
+
 					switch (_type)
 					{
 						case LocationType.File:
 							return new ImageRec[] { ImageRec.FromFile(_path) };
 
 						case LocationType.Directory:
-							_files.Clear();
-							SearchDir(_path);
+							UpdateIfRequired();
 							return _files;
 
 						case LocationType.Feed:
-							UpdateFeedIfRequired();
+							UpdateIfRequired();
 							return _files;
 
 						default:
@@ -96,7 +97,7 @@ namespace WallSwitch
 				string[] imageFiles = Directory.GetFiles(dir);
 				foreach (string file in imageFiles)
 				{
-					if (ImageRec.FileNameToImageFormat(file) != null) _files.Add(ImageRec.FromFile(file));
+					if (ImageFormatDesc.FileNameToImageFormat(file) != null) _files.Add(ImageRec.FromFile(file));
 				}
 
 				// Search sub-folders in this directory.
@@ -112,12 +113,8 @@ namespace WallSwitch
 		public void Save(XmlWriter xml)
 		{
 			xml.WriteAttributeString("Type", _type.ToString());
-
-			if (_type == LocationType.Feed)
-			{
-				xml.WriteAttributeString("UpdateFreq", _updateFreq.ToString());
-				xml.WriteAttributeString("UpdatePeriod", _updatePeriod.ToString());
-			}
+			xml.WriteAttributeString("UpdateFreq", _updateFreq.ToString());
+			xml.WriteAttributeString("UpdatePeriod", _updatePeriod.ToString());
 
 			xml.WriteString(_path);
 		}
@@ -136,26 +133,23 @@ namespace WallSwitch
 			_type = type;
 			_path = path;
 
-			if (_type == LocationType.Feed)
+			var str = topElement.GetAttribute("UpdateFreq");
+			if (!string.IsNullOrWhiteSpace(str))
 			{
-				var str = topElement.GetAttribute("UpdateFreq");
-				if (!string.IsNullOrWhiteSpace(str))
-				{
-					int freq;
-					if (Int32.TryParse(str, out freq)) _updateFreq = freq;
-					else _updateFreq = k_defaultUpdateInterval;
-				}
-
-				str = topElement.GetAttribute("UpdatePeriod");
-				if (!string.IsNullOrWhiteSpace(str))
-				{
-					Period period;
-					if (Enum.TryParse<Period>(str, out period)) _updatePeriod = period;
-					else _updatePeriod = k_defaultUpdatePeriod;
-				}
-
-				_updateInterval = TimeSpanEx.CalcInterval(_updateFreq, _updatePeriod);
+				int freq;
+				if (Int32.TryParse(str, out freq)) _updateFreq = freq;
+				else _updateFreq = k_defaultUpdateInterval;
 			}
+
+			str = topElement.GetAttribute("UpdatePeriod");
+			if (!string.IsNullOrWhiteSpace(str))
+			{
+				Period period;
+				if (Enum.TryParse<Period>(str, out period)) _updatePeriod = period;
+				else _updatePeriod = k_defaultUpdatePeriod;
+			}
+
+			_updateInterval = TimeSpanUtil.CalcInterval(_updateFreq, _updatePeriod);
 		}
 
 		public Icon GetIcon()
@@ -166,24 +160,42 @@ namespace WallSwitch
 			return ir.GetFileIcon(_path);
 		}
 
-		public void UpdateFeedIfRequired()
+		public void UpdateIfRequired()
 		{
 			try
 			{
-				if (_lastUpdate.Add(_updateInterval) > DateTime.Now) return;
-				
-				var loader = new FeedLoader();
-				if (loader.LoadUrl(_path))
+				if (NextUpdate > DateTime.Now) return;
+
+				switch (_type)
 				{
-					_files.Clear();
-					foreach (var image in loader.Images) _files.Add(image);
+					case LocationType.File:
+						// No updating required for files since it can't change.
+						return;
+
+					case LocationType.Directory:
+						Log.Write(LogLevel.Debug, "Scanning directory: {0}", _path);
+						_files.Clear();
+						SearchDir(_path);
+						break;
+
+					case LocationType.Feed:
+						{
+							var loader = new FeedLoader();
+							if (loader.LoadUrl(_path))
+							{
+								_files.Clear();
+								foreach (var image in loader.Images) _files.Add(image);
+							}
+						}
+						break;
 				}
 
 				_lastUpdate = DateTime.Now;
+				FireUpdated();
 			}
 			catch (Exception ex)
 			{
-				Log.Write(ex, "Error when updating feed '{0}'.", _path);
+				Log.Write(ex, "Error when updating location '{0}'.", _path);
 				_lastUpdate = DateTime.Now;
 			}
 		}
@@ -209,7 +221,39 @@ namespace WallSwitch
 		{
 			_updateFreq = freq;
 			_updatePeriod = period;
-			_updateInterval = TimeSpanEx.CalcInterval(freq, period);
+			_updateInterval = TimeSpanUtil.CalcInterval(freq, period);
+		}
+
+		public event EventHandler<LocationEventArgs> Updated;
+
+		public class LocationEventArgs : EventArgs
+		{
+			public Location Location { get; set; }
+
+			public LocationEventArgs(Location location)
+			{
+				Location = location;
+			}
+		}
+
+		private void FireUpdated()
+		{
+			EventHandler<LocationEventArgs> ev = Updated;
+			if (ev != null) ev(this, new LocationEventArgs(this));
+		}
+
+		public DateTime NextUpdate
+		{
+			get { return _lastUpdate.Add(_updateInterval); }
+		}
+
+		public void SetNextUpdateNow()
+		{
+			if (_lastUpdate != DateTime.MinValue)
+			{
+				_lastUpdate = DateTime.MinValue;
+				FireUpdated();
+			}
 		}
 
 	}

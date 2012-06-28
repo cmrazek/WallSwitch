@@ -37,8 +37,8 @@
 			// 
 			// txtPrompt
 			// 
-			this.txtPrompt.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this.txtPrompt.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.txtPrompt.BorderStyle = System.Windows.Forms.BorderStyle.None;
 			this.txtPrompt.Location = new System.Drawing.Point(12, 12);
 			this.txtPrompt.Name = "txtPrompt";
@@ -48,8 +48,8 @@
 			// 
 			// txtString
 			// 
-			this.txtString.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this.txtString.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.txtString.Location = new System.Drawing.Point(12, 38);
 			this.txtString.Name = "txtString";
 			this.txtString.Size = new System.Drawing.Size(310, 20);

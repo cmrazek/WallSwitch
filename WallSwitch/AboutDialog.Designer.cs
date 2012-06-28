@@ -36,7 +36,7 @@
 			// 
 			// pnlIcon
 			// 
-			this.pnlIcon.BackgroundImage = global::WallSwitch.Res.WallSwitch;
+			this.pnlIcon.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("pnlIcon.BackgroundImage")));
 			this.pnlIcon.Location = new System.Drawing.Point(12, 12);
 			this.pnlIcon.Name = "pnlIcon";
 			this.pnlIcon.Size = new System.Drawing.Size(64, 64);
@@ -58,7 +58,7 @@
 			this.lblCopyright.Name = "lblCopyright";
 			this.lblCopyright.Size = new System.Drawing.Size(158, 13);
 			this.lblCopyright.TabIndex = 2;
-			this.lblCopyright.Text = "Copyright (C) 2011 Chris Mrazek";
+			this.lblCopyright.Text = "Copyright (C) 2012 Chris Mrazek";
 			// 
 			// AboutDialog
 			// 

@@ -3,7 +3,7 @@
 ; -------------------------------------------------------------------------------------------------
 
 Name "WallSwitch"
-OutFile "WallSwitch_V1.0.2_Setup.exe"
+OutFile "Output\WallSwitch_V1.0.3_Setup.exe"
 InstallDir "$PROGRAMFILES\WallSwitch"
 RequestExecutionLevel admin
 
@@ -14,20 +14,20 @@ Var AppVersion
 Section "-Initialize"
 	StrCpy $AppName      "WallSwitch"
 	StrCpy $AppNameIdent "WallSwitch"
-	StrCpy $AppVersion   "1.0.2"
+	StrCpy $AppVersion   "1.0.3"
 SectionEnd
 
 ; -------------------------------------------------------------------------------------------------
 ; Installer
 ; -------------------------------------------------------------------------------------------------
 
-Page license
+;Page license
 Page components
 Page directory
 Page instfiles
 
-LicenseData "license.txt"
-LicenseForceSelection checkbox
+;LicenseData "license.txt"
+;LicenseForceSelection checkbox
 
 ; Check for .NET Framework 4.0
 Section "-CheckDotNet"
@@ -50,9 +50,11 @@ SectionEnd
 Section "Application (Required)"
 	SectionIn RO
 	SetOutPath "$INSTDIR"
-	File "WallSwitch.exe"
-	File "WallSwitch.ico"
-	File "ChangeLog.txt"
+	File "bin\WallSwitch.exe"
+	File "bin\WallSwitch.ico"
+	File "bin\HtmlAgilityPack.dll"
+	File "bin\HtmlAgilityPack.xml"
+	File "bin\ReadMe.txt"
 	WriteUninstaller "$INSTDIR\Uninstall.exe"
 SectionEnd
 
@@ -91,6 +93,8 @@ UninstPage instfiles
 Section "Uninstall"
 	; Remove installed files
 	Delete /REBOOTOK "$INSTDIR\WallSwitch.exe"
+	Delete /REBOOTOK "$INSTDIR\HtmlAgilityPack.dll"
+	Delete /REBOOTOK "$INSTDIR\HtmlAgilityPack.xml"
 	Delete "$INSTDIR\Uninstall.exe"
 	RMDir "$INSTDIR"
 	

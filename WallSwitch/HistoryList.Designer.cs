@@ -47,7 +47,9 @@
 			this.Controls.Add(this.vScroll);
 			this.DoubleBuffered = true;
 			this.Name = "HistoryList";
+			this.Load += new System.EventHandler(this.HistoryList_Load);
 			this.Paint += new System.Windows.Forms.PaintEventHandler(this.HistoryList_Paint);
+			this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HistoryList_KeyDown);
 			this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.HistoryList_MouseClick);
 			this.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.HistoryList_MouseDoubleClick);
 			this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.HistoryList_MouseDown);
