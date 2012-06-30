@@ -56,7 +56,7 @@ namespace WallSwitch
 		}
 		#endregion
 
-		#region Attributes
+		#region Properties
 		public Guid ID
 		{
 			get { return _id; }

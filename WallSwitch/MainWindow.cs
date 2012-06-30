@@ -130,21 +130,25 @@ namespace WallSwitch
 			UnregisterHotKeys();
 		}
 
-		private void Shutdown()
+		private void Shutdown(bool closeWindow)
 		{
 			SaveSettings();
 
 			_reallyClose = true;
-			Close();
+			if (closeWindow) Close();
 
-			if (_switchThread != null && _switchThread.IsAlive) _switchThread.Kill();
+			if (_switchThread != null && _switchThread.IsAlive)
+			{
+				_switchThread.Kill();
+				_switchThread = null;
+			}
 		}
 
 		private void cmExit_Click(object sender, EventArgs e)
 		{
 			try
 			{
-				Shutdown();
+				Shutdown(true);
 			}
 			catch (Exception ex)
 			{
@@ -156,7 +160,7 @@ namespace WallSwitch
 		{
 			try
 			{
-				Shutdown();
+				Shutdown(true);
 			}
 			catch (Exception ex)
 			{
@@ -204,11 +208,39 @@ namespace WallSwitch
 		{
 			try
 			{
+				Log.Write(LogLevel.Debug, "Received form closing event: {0} ", e.CloseReason);
+				Log.Flush();
+
 				if (!_reallyClose && e.CloseReason == CloseReason.UserClosing)
 				{
+					var hideWindow = true;
+					if (Dirty)
+					{
+						switch (MessageBox.Show(this, Res.Confirm_HideWindowDirtyTheme,
+							Res.Confirm_HideWindowDirtyThemeCaption, MessageBoxButtons.YesNoCancel,
+							MessageBoxIcon.Question, MessageBoxDefaultButton.Button1))
+						{
+							case DialogResult.Yes:
+								if (!SaveControls(true)) hideWindow = false;
+								break;
+							case DialogResult.No:
+								break;
+							case DialogResult.Cancel:
+								hideWindow = false;
+								break;
+						}
+					}
+
 					e.Cancel = true;
-					WindowState = FormWindowState.Minimized;
-					SaveSettings();
+					if (hideWindow)
+					{
+						WindowState = FormWindowState.Minimized;
+						SaveSettings();
+					}
+				}
+				else
+				{
+					Shutdown(false);
 				}
 			}
 			catch (Exception ex)
@@ -281,14 +313,29 @@ namespace WallSwitch
 		{
 			WindowState = FormWindowState.Minimized;
 			Visible = false;
-			ShowInTaskbar = false;
+
+			if (ShowInTaskbar != false)
+			{
+				ShowInTaskbar = false;
+
+				// Switching ShowInTaskbar causes hotkeys to be unregistered; reregister them.
+				ReregisterHotKeys();
+			}
 		}
 
 		private void ShowFromTray()
 		{
 			Visible = true;
 			WindowState = FormWindowState.Normal;
-			ShowInTaskbar = true;
+
+			if (ShowInTaskbar != true)
+			{
+				ShowInTaskbar = true;
+
+				// Switching ShowInTaskbar causes hotkeys to be unregistered; reregister them.
+				ReregisterHotKeys();
+			}
+
 			BringWindowToTop(this.Handle);
 
 			// Select the active theme.
@@ -796,6 +843,9 @@ namespace WallSwitch
 				memStream.Seek(0, SeekOrigin.Begin);
 				memStream.Read(data, 0, (int)memStream.Length);
 				File.WriteAllBytes(ConfigFileName, data);
+
+				// As good time as any to flush the log.
+				Log.Flush();
 			}
 			catch (Exception ex)
 			{
@@ -1440,10 +1490,24 @@ namespace WallSwitch
 					switch (loc.Type)
 					{
 						case LocationType.File:
-							FileUtil.ExploreFile(loc.Path);
+							if (!File.Exists(loc.Path))
+							{
+								this.ShowError(Res.Error_ImageFileMissing);
+							}
+							else
+							{
+								FileUtil.ExploreFile(loc.Path);
+							}
 							break;
 						case LocationType.Directory:
-							FileUtil.ExploreDir(loc.Path);
+							if (!Directory.Exists(loc.Path))
+							{
+								this.ShowError(Res.Error_DirectoryMissing);
+							}
+							else
+							{
+								FileUtil.ExploreDir(loc.Path);
+							}
 							break;
 					}
 				}
@@ -1550,8 +1614,9 @@ namespace WallSwitch
 
 		private void ClearHistory()
 		{
-			if (_currentTheme != null) _currentTheme.ClearHistory();
+			foreach (var theme in _themes) theme.ClearHistory();
 			lstHistory.Clear();
+			ClearExpiredCache();
 		}
 
 		private void miClearHistory_Click(object sender, EventArgs e)
@@ -1560,7 +1625,6 @@ namespace WallSwitch
 			{
 				ClearHistory();
 				_switchThread.SwitchNow(SwitchDir.Clear);
-				//MessageBox.Show(this, Res.HistoryCleared, Res.HistoryCleared_Caption, MessageBoxButtons.OK, MessageBoxIcon.Information);
 			}
 			catch (Exception ex)
 			{
@@ -1669,6 +1733,11 @@ namespace WallSwitch
 			foreach (Theme theme in _themes) theme.HotKey.Unregister();
 		}
 
+		private void ReregisterHotKeys()
+		{
+			foreach (Theme theme in _themes) theme.HotKey.Reregister();
+		}
+
 		private void OnHotKey(int id)
 		{
 			Log.Write(LogLevel.Debug, String.Format("Received hot key event ID [{0}].", id));
@@ -1727,7 +1796,7 @@ namespace WallSwitch
 					var fileName = item.LocationOnDisk;
 					if (string.IsNullOrWhiteSpace(fileName))
 					{
-						this.ShowError(Res.ImageFileMissing);
+						this.ShowError(Res.Error_ImageFileMissing);
 					}
 					else
 					{
@@ -1751,7 +1820,7 @@ namespace WallSwitch
 					var fileName = item.LocationOnDisk;
 					if (string.IsNullOrWhiteSpace(fileName))
 					{
-						this.ShowError(Res.ImageFileMissing);
+						this.ShowError(Res.Error_ImageFileMissing);
 					}
 					else
 					{
@@ -1772,7 +1841,7 @@ namespace WallSwitch
 				var fileName = e.ImageRec.LocationOnDisk;
 				if (string.IsNullOrWhiteSpace(fileName))
 				{
-					this.ShowError(Res.ImageFileMissing);
+					this.ShowError(Res.Error_ImageFileMissing);
 				}
 				else
 				{
@@ -1789,7 +1858,7 @@ namespace WallSwitch
 		{
 			try
 			{
-				lstHistory.Clear();
+				ClearHistory();
 			}
 			catch (Exception ex)
 			{

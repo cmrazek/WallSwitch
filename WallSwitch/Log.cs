@@ -30,24 +30,9 @@ namespace WallSwitch
 		/// Locked
 		/// </summary>
 		private static StringBuilder _sb = new StringBuilder();
-
-		/// <summary>
-		/// Locked using _killLock
-		/// </summary>
-		private static bool _kill = false;
-		private static object _killLock = new object();
-
-		/// <summary>
-		/// Locked
-		/// </summary>
-		private static Queue<string> _queue = new Queue<string>();
 		#endregion
 
-		#region Constants
-		private const int k_sleepTime = 250;
-		#endregion
-
-		#region Thread Management
+		#region Construction
 		/// <summary>
 		/// Opens the log file.
 		/// </summary>
@@ -55,9 +40,10 @@ namespace WallSwitch
 		{
 			try
 			{
-				_thread = new Thread(new ThreadStart(ThreadProc));
-				_thread.Name = "Logging Thread";
-				_thread.Start();
+				string logFileName = LogFileName;
+				_file = new StreamWriter(logFileName, false);
+				Write(LogLevel.Info, "Log file opened: {0}", logFileName);
+
 				_enabled = true;
 			}
 #if DEBUG
@@ -81,13 +67,11 @@ namespace WallSwitch
 		{
 			try
 			{
-				if (_thread != null && _thread.IsAlive)
+				if (_file != null)
 				{
-					lock (_killLock)
-					{
-						_kill = true;
-					}
-					_thread.Join();
+					_file.WriteLine("[" + TimeStamp + "] Closing log file.");
+					_file.Close();
+					_file = null;
 				}
 			}
 #if DEBUG
@@ -95,10 +79,13 @@ namespace WallSwitch
 			{
 				Debug.WriteLine("Error when closing log file:");
 				Debug.WriteLine(ex.ToString());
+				_file = null;
 			}
 #else
 			catch (Exception)
-			{ }
+			{
+				_file = null;
+			}
 #endif
 		}
 
@@ -107,66 +94,6 @@ namespace WallSwitch
 			get
 			{
 				return Path.Combine(Util.AppDataDir, Res.LogFile);
-			}
-		}
-
-		private static void ThreadProc()
-		{
-			try
-			{
-				string logFileName = LogFileName;
-				_file = new StreamWriter(logFileName, false);
-				Write(LogLevel.Info, "Log file opened: {0}", logFileName);
-
-				bool activity;
-
-				while (!CheckKill())
-				{
-					activity = false;
-
-					lock (_queue)
-					{
-						while (_queue.Count > 0)
-						{
-							_file.WriteLine(_queue.Dequeue());
-							activity = true;
-						}
-
-						if (activity) _file.Flush();
-					}
-
-					Thread.Sleep(k_sleepTime);
-				}
-			}
-#if DEBUG
-			catch (Exception ex)
-			{
-
-				Debug.WriteLine("Exception in logging thread:");
-				Debug.WriteLine(ex.ToString());
-
-			}
-#else
-			catch (Exception)
-			{ }
-#endif
-			finally
-			{
-				if (_file != null)
-				{
-					_file.WriteLine("[" + TimeStamp + "] Closing log file.");
-					_file.Close();
-					_file = null;
-				}
-			}
-
-		}
-
-		private static bool CheckKill()
-		{
-			lock (_killLock)
-			{
-				return _kill;
 			}
 		}
 
@@ -192,7 +119,6 @@ namespace WallSwitch
 			{
 				if (!_enabled || level < _level) return;
 
-				string logEntry;
 				lock (_sb)
 				{
 					_sb.Clear();
@@ -201,16 +127,11 @@ namespace WallSwitch
 					_sb.Append("] ");
 					_sb.Append(line);
 
-					logEntry = _sb.ToString();
-				}
-
+					var logEntry = _sb.ToString();
+					if (_file != null) _file.WriteLine(logEntry);
 #if DEBUG
-				Debug.WriteLine(logEntry);
+					Debug.WriteLine(logEntry);
 #endif
-
-				lock (_queue)
-				{
-					_queue.Enqueue(logEntry);
 				}
 			}
 			catch (Exception)
@@ -237,7 +158,6 @@ namespace WallSwitch
 			{
 				if (!_enabled) return;
 
-				string logEntry;
 				lock (_sb)
 				{
 					_sb.Clear();
@@ -246,18 +166,13 @@ namespace WallSwitch
 					_sb.Append("] ");
 					_sb.Append(comment);
 
-					logEntry = _sb.ToString();
-				}
+					var logEntry = _sb.ToString();
+					if (_file != null) _file.WriteLine(logEntry);
 
 #if DEBUG
-				Debug.WriteLine(logEntry);
-				Debug.WriteLine(ex.ToString());
+					Debug.WriteLine(logEntry);
+					Debug.WriteLine(ex.ToString());
 #endif
-
-				lock (_queue)
-				{
-					_queue.Enqueue(logEntry);
-					_queue.Enqueue(ex.ToString());
 				}
 			}
 			catch (Exception)
@@ -274,6 +189,14 @@ namespace WallSwitch
 		{
 			if (!_enabled) return;
 			Write(ex, String.Format(format, args));
+		}
+
+		public static void Flush()
+		{
+			if (_file != null)
+			{
+				_file.Flush();
+			}
 		}
 		#endregion
 	}

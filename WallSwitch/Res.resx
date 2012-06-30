@@ -313,12 +313,6 @@
     <value>Couldn't get icon for location '{0}'</value>
     <comment>{0} = Location</comment>
   </data>
-  <data name="HistoryCleared" xml:space="preserve">
-    <value>Image history has been cleared successfully.</value>
-  </data>
-  <data name="HistoryCleared_Caption" xml:space="preserve">
-    <value>Clear History</value>
-  </data>
   <data name="FeatherWidth" xml:space="preserve">
     <value>{0} pixels</value>
     <comment>{0} = Feather width</comment>
@@ -335,7 +329,7 @@
   <data name="ImageCacheDir" xml:space="preserve">
     <value>ImageCache</value>
   </data>
-  <data name="ImageFileMissing" xml:space="preserve">
+  <data name="Error_ImageFileMissing" xml:space="preserve">
     <value>The image file has been moved or deleted.</value>
   </data>
   <data name="ImageFileFilter" xml:space="preserve">
@@ -357,5 +351,14 @@
   </data>
   <data name="WallSwitch" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\AppIcon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Confirm_HideWindowDirtyTheme" xml:space="preserve">
+    <value>You have made changes to this theme. Do you want to save changes before hiding the window?</value>
+  </data>
+  <data name="Confirm_HideWindowDirtyThemeCaption" xml:space="preserve">
+    <value>Save Changes?</value>
+  </data>
+  <data name="Error_DirectoryMissing" xml:space="preserve">
+    <value>The directory has been moved or deleted.</value>
   </data>
 </root>

@@ -48,7 +48,18 @@ namespace WallSwitch
 		public string Path
 		{
 			get { return _path; }
-			set { _path = value; }
+			set
+			{
+				if (_path != value)
+				{
+					_path = value;
+
+					// Since the path has changed, the file list is now obsolete.
+					_files.Clear();
+					_lastUpdate = DateTime.MinValue;
+					FireUpdated();
+				}
+			}
 		}
 
 		public bool SamePath(string path)

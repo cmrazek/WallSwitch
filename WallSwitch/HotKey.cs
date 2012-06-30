@@ -24,11 +24,14 @@ namespace WallSwitch
 		#endregion
 
 		#region PInvoke
-		[DllImport("user32.dll")]
+		[DllImport("user32.dll", SetLastError = true)]
 		private static extern int RegisterHotKey(IntPtr hwnd, int id, int fsModifiers, int vk);
 
-		[DllImport("user32.dll")]
+		[DllImport("user32.dll", SetLastError = true)]
 		private static extern int UnregisterHotKey(IntPtr hwnd, int id);
+
+		[DllImport("Kernel32.dll", SetLastError = true)]
+		public static extern uint GetLastError();
 
 		private const int MOD_ALT = 0x0001;
 		private const int MOD_CONTROL = 0x0002;
@@ -197,7 +200,7 @@ namespace WallSwitch
 					Log.Write(LogLevel.Debug, "Reregistering hotkey: {0}", ToString());
 					if (0 == UnregisterHotKey(_form.Handle, _id))
 					{
-						Log.Write(LogLevel.Warning, "Failed to unregister hotkey [{0}] ID [{1}].", ToString(), _id);
+						Log.Write(LogLevel.Warning, "Failed to unregister hotkey [{0}] ID [{1}] (GetLastError = {2}).", ToString(), _id, GetLastError());
 					}
 				}
 				else
@@ -220,7 +223,7 @@ namespace WallSwitch
 				}
 				else
 				{
-					Log.Write(LogLevel.Debug, "Failed to register hotkey: " + ToString());
+					Log.Write(LogLevel.Debug, "Failed to register hotkey [{0}] (GetLastError = {1})", ToString(), GetLastError());
 				}
 			}
 			catch (Exception ex)
@@ -247,12 +250,44 @@ namespace WallSwitch
 				}
 				else
 				{
-					Log.Write(LogLevel.Warning, "Failed to unregister hotkey [{0}] ID [{1}].", ToString(), _id);
+					Log.Write(LogLevel.Warning, "Failed to unregister hotkey [{0}] ID [{1}] (GetLastError = {2}).", ToString(), _id, GetLastError());
 				}
 			}
 			catch (Exception ex)
 			{
 				Log.Write(ex, "Exception when unregistering hotkey [{0}] ID [{1}].", ToString(), _id);
+			}
+		}
+
+		/// <summary>
+		/// Reregisters the hotkey with windows using the same ID as before.
+		/// </summary>
+		public void Reregister()
+		{
+			try
+			{
+				if (_id != 0)
+				{
+					Log.Write(LogLevel.Debug, "Reregistering hotkey [{0}] ID [{1}].", ToString(), _id);
+
+					int mod = 0;
+					if (_control) mod |= MOD_CONTROL;
+					if (_alt) mod |= MOD_ALT;
+					if (_shift) mod |= MOD_SHIFT;
+
+					if (0 != RegisterHotKey(_form.Handle, _id, mod, (int)_key))
+					{
+						Log.Write(LogLevel.Debug, "Successfully reregistered hotkey [{0}] with ID [{1}].", ToString(), _id);
+					}
+					else
+					{
+						Log.Write(LogLevel.Warning, "Failed to reregister hotkey [{0}] with ID [{1}] (GetLastError = {2}).", ToString(), _id, GetLastError());
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Exception when reregistering hotkey [{0}] with ID [{1}].", ToString(), _id);
 			}
 		}
 

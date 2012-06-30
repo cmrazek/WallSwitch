@@ -1,9 +1,11 @@
 ; -------------------------------------------------------------------------------------------------
 ; WallSwitch Installer Script
+;
+; This script uses the LockedList plugin: http://nsis.sourceforge.net/LockedList_plug-in
 ; -------------------------------------------------------------------------------------------------
 
 Name "WallSwitch"
-OutFile "Output\WallSwitch_V1.0.3_Setup.exe"
+OutFile "Output\WallSwitch_V1.0.4_Setup.exe"
 InstallDir "$PROGRAMFILES\WallSwitch"
 RequestExecutionLevel admin
 
@@ -14,7 +16,7 @@ Var AppVersion
 Section "-Initialize"
 	StrCpy $AppName      "WallSwitch"
 	StrCpy $AppNameIdent "WallSwitch"
-	StrCpy $AppVersion   "1.0.3"
+	StrCpy $AppVersion   "1.0.4"
 SectionEnd
 
 ; -------------------------------------------------------------------------------------------------
@@ -24,6 +26,7 @@ SectionEnd
 ;Page license
 Page components
 Page directory
+Page Custom LockedCheck
 Page instfiles
 
 ;LicenseData "license.txt"
@@ -45,6 +48,19 @@ GoMicrosoft:
 	ExecShell "open" "http://www.microsoft.com/download/en/details.aspx?id=17718"
 ExitCheckDotNet:
 SectionEnd
+
+; Check for locked files
+Function LockedCheck
+	LockedList::AddModule "$INSTDIR\WallSwitch.exe"
+	LockedList::AddFile "$INSTDIR\WallSwitch.ico"
+	LockedList::AddModule "$INSTDIR\HtmlAgilityPack.dll"
+	LockedList::AddFile "$INSTDIR\HtmlAgilityPack.xml"
+	LockedList::AddFile "$INSTDIR\ReadMe.txt"
+	LockedList::AddModule "$INSTDIR\HtmlAgilityPack.dll"
+	LockedList::AddModule "$INSTDIR\Uninstall.exe"
+	LockedList::Dialog /autonext
+	Pop $R0
+FunctionEnd
 
 ; Install main application
 Section "Application (Required)"
@@ -88,19 +104,32 @@ SectionEnd
 
 UninstPage uninstConfirm
 UninstPage components
+UninstPage Custom un.LockedCheck
 UninstPage instfiles
+
+Function un.LockedCheck
+	LockedList::AddModule "$INSTDIR\WallSwitch.exe"
+	LockedList::AddFile "$INSTDIR\WallSwitch.ico"
+	LockedList::AddModule "$INSTDIR\HtmlAgilityPack.dll"
+	LockedList::AddFile "$INSTDIR\HtmlAgilityPack.xml"
+	LockedList::AddFile "$INSTDIR\ReadMe.txt"
+	LockedList::AddModule "$INSTDIR\HtmlAgilityPack.dll"
+	LockedList::AddModule "$INSTDIR\Uninstall.exe"
+	LockedList::Dialog /autonext
+	Pop $R0
+FunctionEnd
 
 Section "Uninstall"
 	; Remove installed files
-	Delete /REBOOTOK "$INSTDIR\WallSwitch.exe"
-	Delete /REBOOTOK "$INSTDIR\HtmlAgilityPack.dll"
-	Delete /REBOOTOK "$INSTDIR\HtmlAgilityPack.xml"
+	Delete "$INSTDIR\WallSwitch.exe"
+	Delete "$INSTDIR\HtmlAgilityPack.dll"
+	Delete "$INSTDIR\HtmlAgilityPack.xml"
 	Delete "$INSTDIR\Uninstall.exe"
 	RMDir "$INSTDIR"
 	
 	; Remove start menu shortcuts
 	Delete "$SMPROGRAMS\*.*"
-	RMDir /REBOOTOK "$SMPROGRAMS\WallSwitch"
+	RMDir "$SMPROGRAMS\WallSwitch"
 	
 	; Remove from add/remove programs control panel
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WallSwitch"
@@ -108,11 +137,4 @@ SectionEnd
 
 Section /o "un.Remove user settings"
 	RMDir /REBOOTOK "$APPDATA\WallSwitch"
-SectionEnd
-
-Section "-un.Final"
-	IfRebootFlag 0 NoReboot
-	MessageBox MB_YESNO "A reboot is required to finish uninstalling this application.$\n$\nDo you want to reboot now?" IDNO NoReboot
-	Reboot
-NoReboot:
 SectionEnd

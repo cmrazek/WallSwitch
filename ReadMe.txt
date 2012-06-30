@@ -1,16 +1,24 @@
 WallSwitch
 Switches desktop wallpapers from a variety of sources.
 http://wallswitch.codeplex.com/
-Current Version: 1.0.3
+Current Version: 1.0.4
 
 Requirements:
-	.NET Framework 4:      http://www.microsoft.com/download/en/details.aspx?id=17718
+	.NET Framework 4:  http://www.microsoft.com/download/en/details.aspx?id=17718
 
 Contact:
 	Chris Mrazek (cmrazek)
 	Email: chrismrazek@gmail.com
 
 ChangeLog:
+
+Version 1.0.4 - 2012-06-30:
+- Changes in previous version broke hotkey support; fixed this.
+- When minimizing the window to tray, if there are unsaved changes, then prompt to save first.
+- When changing the path on a folder location, reset the file list.
+- Fixed app not shutting down properly when closed externally.
+- Improved installer to shut down app instead of requiring reboot.
+- Clear History action now clears *all* history, rather than just the current theme.
 
 Version 1.0.3 - 2012-06-28:
 - Added support for RSS feeds.

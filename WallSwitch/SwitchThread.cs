@@ -31,7 +31,7 @@ namespace WallSwitch
 		#endregion
 
 		#region PInvoke
-		[DllImport("user32.dll", SetLastError = true)]
+		[DllImport("Kernel32.dll", SetLastError = true)]
 		public static extern uint GetLastError();
 
 		[DllImport("user32.dll", SetLastError = true)]

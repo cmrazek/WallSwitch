@@ -149,6 +149,24 @@ namespace WallSwitch {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You have made changes to this theme. Do you want to save changes before hiding the window?.
+        /// </summary>
+        internal static string Confirm_HideWindowDirtyTheme {
+            get {
+                return ResourceManager.GetString("Confirm_HideWindowDirtyTheme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save Changes?.
+        /// </summary>
+        internal static string Confirm_HideWindowDirtyThemeCaption {
+            get {
+                return ResourceManager.GetString("Confirm_HideWindowDirtyThemeCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Default.
         /// </summary>
         internal static string DefaultTheme {
@@ -196,11 +214,29 @@ namespace WallSwitch {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The directory has been moved or deleted..
+        /// </summary>
+        internal static string Error_DirectoryMissing {
+            get {
+                return ResourceManager.GetString("Error_DirectoryMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This folder is already present in the list..
         /// </summary>
         internal static string Error_DuplicateFolder {
             get {
                 return ResourceManager.GetString("Error_DuplicateFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The image file has been moved or deleted..
+        /// </summary>
+        internal static string Error_ImageFileMissing {
+            get {
+                return ResourceManager.GetString("Error_ImageFileMissing", resourceCulture);
             }
         }
         
@@ -540,24 +576,6 @@ namespace WallSwitch {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Image history has been cleared successfully..
-        /// </summary>
-        internal static string HistoryCleared {
-            get {
-                return ResourceManager.GetString("HistoryCleared", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Clear History.
-        /// </summary>
-        internal static string HistoryCleared_Caption {
-            get {
-                return ResourceManager.GetString("HistoryCleared_Caption", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Alt.
         /// </summary>
         internal static string HotKey_Alt {
@@ -608,15 +626,6 @@ namespace WallSwitch {
         internal static string ImageFileFilter {
             get {
                 return ResourceManager.GetString("ImageFileFilter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The image file has been moved or deleted..
-        /// </summary>
-        internal static string ImageFileMissing {
-            get {
-                return ResourceManager.GetString("ImageFileMissing", resourceCulture);
             }
         }
         
