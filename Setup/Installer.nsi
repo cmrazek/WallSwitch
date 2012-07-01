@@ -5,7 +5,7 @@
 ; -------------------------------------------------------------------------------------------------
 
 Name "WallSwitch"
-OutFile "Output\WallSwitch_V1.0.4_Setup.exe"
+OutFile "Output\WallSwitch_V1.0.5_Setup.exe"
 InstallDir "$PROGRAMFILES\WallSwitch"
 RequestExecutionLevel admin
 
@@ -16,7 +16,7 @@ Var AppVersion
 Section "-Initialize"
 	StrCpy $AppName      "WallSwitch"
 	StrCpy $AppNameIdent "WallSwitch"
-	StrCpy $AppVersion   "1.0.4"
+	StrCpy $AppVersion   "1.0.5"
 SectionEnd
 
 ; -------------------------------------------------------------------------------------------------
@@ -77,7 +77,7 @@ SectionEnd
 ; Install start menu shortcuts
 Section "Start Menu Shortcuts"
 	CreateDirectory "$SMPROGRAMS\WallSwitch"
-	CreateShortCut "$SMPROGRAMS\WallSwitch\WallSwitch.lnk" "$INSTDIR\WallSwitch.exe" "" "$INSTDIR\WallSwitch.exe" 0
+	CreateShortCut "$SMPROGRAMS\WallSwitch\WallSwitch.lnk" "$INSTDIR\WallSwitch.exe" "" "$INSTDIR\WallSwitch.exe"
 	CreateShortCut "$SMPROGRAMS\WallSwitch\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
 SectionEnd
 
@@ -125,16 +125,16 @@ Section "Uninstall"
 	Delete "$INSTDIR\HtmlAgilityPack.dll"
 	Delete "$INSTDIR\HtmlAgilityPack.xml"
 	Delete "$INSTDIR\Uninstall.exe"
-	RMDir "$INSTDIR"
+	RMDir /r "$INSTDIR"
 	
 	; Remove start menu shortcuts
-	Delete "$SMPROGRAMS\*.*"
-	RMDir "$SMPROGRAMS\WallSwitch"
+	RMDir /r "$SMPROGRAMS\WallSwitch"
 	
 	; Remove from add/remove programs control panel
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WallSwitch"
 SectionEnd
 
 Section /o "un.Remove user settings"
-	RMDir /REBOOTOK "$APPDATA\WallSwitch"
+	DetailPrint "Removing $LOCALAPPDATA\WallSwitch"
+	RMDir /r "$LOCALAPPDATA\WallSwitch"
 SectionEnd
