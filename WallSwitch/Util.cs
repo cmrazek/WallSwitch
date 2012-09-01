@@ -138,6 +138,26 @@ namespace WallSwitch
 		{
 			return new Point(rect.X + rect.Width / 2, rect.Y + rect.Height / 2);
 		}
+
+		public static RectangleF RestrictSize(this RectangleF rect, SizeF maxSize)
+		{
+			if (rect.Width > maxSize.Width) rect.Width = maxSize.Width;
+			if (rect.Height > maxSize.Height) rect.Height = maxSize.Height;
+			return rect;
+		}
+
+		public static RectangleF CenterInside(this RectangleF rect, RectangleF container)
+		{
+			return new RectangleF(container.Left + (container.Width - rect.Width) * .5f,
+				container.Top + (container.Height - rect.Height) * .5f,
+				rect.Width, rect.Height);
+		}
+
+		public static bool CompletelyInside(this RectangleF rect, RectangleF container)
+		{
+			return rect.Left >= container.Left && rect.Top >= container.Top &&
+				rect.Right <= container.Right && rect.Bottom <= container.Bottom;
+		}
 	}
 
 	static class TimeSpanUtil

@@ -467,6 +467,19 @@ namespace WallSwitch
 			trkFeather.Value = _currentTheme.Feather;
 			UpdateFeatherDisplay();
 
+			chkFadeTransition.Checked = _currentTheme.FadeTransition;
+
+			if (_currentTheme.MaxImageScale > 0)
+			{
+				chkLimitScale.Checked = true;
+				txtMaxScale.Text = _currentTheme.MaxImageScale.ToString();
+			}
+			else
+			{
+				chkLimitScale.Checked = false;
+				txtMaxScale.Text = string.Empty;
+			}
+
 			Dirty = false;
 
 			RefreshLocations();
@@ -484,6 +497,7 @@ namespace WallSwitch
 			{
 				if (showErrors)
 				{
+					tabThemeSettings.SelectedTab = tabFrequency;
 					txtThemeFreq.Focus();
 					this.ShowError(Res.Error_InvalidThemeFreq);
 				}
@@ -508,6 +522,7 @@ namespace WallSwitch
 				default:
 					if (showErrors)
 					{
+						tabThemeSettings.SelectedTab = tabFrequency;
 						cmbThemePeriod.Focus();
 						this.ShowError(Res.Error_InvalidThemePeriod);
 					}
@@ -518,6 +533,7 @@ namespace WallSwitch
 			{
 				if (showErrors)
 				{
+					tabThemeSettings.SelectedTab = tabFrequency;
 					txtThemeFreq.Focus();
 					this.ShowError(Res.Error_ShortUpdateInterval);
 				}
@@ -539,10 +555,35 @@ namespace WallSwitch
 				default:
 					if (showErrors)
 					{
+						tabThemeSettings.SelectedTab = tabDisplay;
 						cmbThemeMode.Focus();
 						this.ShowError(Res.Error_InvalidThemeOrder);
 					}
 					return false;
+			}
+
+			int maxImageScale = 0;
+			if (chkLimitScale.Checked)
+			{
+				if (!int.TryParse(txtMaxScale.Text, out maxImageScale))
+				{
+					if (showErrors)
+					{
+						tabThemeSettings.SelectedTab = tabDisplay;
+						txtMaxScale.Focus();
+						this.ShowError(Res.Error_InvalidMaxImageScale);
+					}
+					return false;
+				}
+				else if (maxImageScale <= 0)
+				{
+					if (showErrors)
+					{
+						tabThemeSettings.SelectedTab = tabDisplay;
+						txtMaxScale.Focus();
+						this.ShowError(Res.Error_NegativeMaxImageScale);
+					}
+				}
 			}
 
 			_currentTheme.Frequency = freq;
@@ -570,6 +611,8 @@ namespace WallSwitch
 			_currentTheme.ImageFit = (ImageFit)cmbImageFit.SelectedIndex;
 			_currentTheme.BackOpacity = trkOpacity.Value;
 			_currentTheme.Feather = trkFeather.Value;
+			_currentTheme.FadeTransition = chkFadeTransition.Checked;
+			_currentTheme.MaxImageScale = maxImageScale;
 
 			Dirty = false;
 			EnableControls();
@@ -624,6 +667,8 @@ namespace WallSwitch
 
 			chkSeparateMonitors.Visible = Screen.AllScreens.Length > 1;
 			cmbImageFit.Visible = cmbThemeMode.SelectedIndex != k_modeCollage;
+
+			txtMaxScale.Enabled = chkLimitScale.Checked;
 
 			EnableLocationsContextMenu();
 		}
@@ -1866,6 +1911,31 @@ namespace WallSwitch
 			}
 		}
 		#endregion
+
+		private void chkLimitScale_CheckedChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (chkLimitScale.Checked)
+				{
+					int scale = _currentTheme.MaxImageScale;
+					if (scale <= 0) scale = Theme.k_defaultMaxImageScale;
+					txtMaxScale.Text = scale.ToString();
+					txtMaxScale.Enabled = true;
+				}
+				else
+				{
+					txtMaxScale.Text = string.Empty;
+					txtMaxScale.Enabled = false;
+				}
+				EnableControls();
+				ControlChanged(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
 
 		
 

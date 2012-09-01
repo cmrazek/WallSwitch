@@ -268,6 +268,15 @@ namespace WallSwitch {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid maximum image scale..
+        /// </summary>
+        internal static string Error_InvalidMaxImageScale {
+            get {
+                return ResourceManager.GetString("Error_InvalidMaxImageScale", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid frequency.
         /// </summary>
         internal static string Error_InvalidThemeFreq {
@@ -318,6 +327,15 @@ namespace WallSwitch {
         internal static string Error_LocationMissing {
             get {
                 return ResourceManager.GetString("Error_LocationMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Maximum image scale must be greater than zero..
+        /// </summary>
+        internal static string Error_NegativeMaxImageScale {
+            get {
+                return ResourceManager.GetString("Error_NegativeMaxImageScale", resourceCulture);
             }
         }
         

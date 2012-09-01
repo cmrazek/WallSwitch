@@ -58,6 +58,12 @@
     <Reference Include="HtmlAgilityPack">
       <HintPath>..\HtmlAgilityPack.1.4.0\HtmlAgilityPack.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack">
+      <HintPath>..\Lib\Microsoft.WindowsAPICodePack.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.Shell">
+      <HintPath>..\Lib\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
@@ -119,6 +125,7 @@
     <Compile Include="Settings.cs" />
     <Compile Include="SettingsException.cs" />
     <Compile Include="SetWallpaper.cs" />
+    <Compile Include="shlobj.cs" />
     <Compile Include="SwitchDir.cs" />
     <Compile Include="SwitchThread.cs" />
     <Compile Include="TagString.cs" />

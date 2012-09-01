@@ -361,4 +361,10 @@
   <data name="Error_DirectoryMissing" xml:space="preserve">
     <value>The directory has been moved or deleted.</value>
   </data>
+  <data name="Error_InvalidMaxImageScale" xml:space="preserve">
+    <value>Invalid maximum image scale.</value>
+  </data>
+  <data name="Error_NegativeMaxImageScale" xml:space="preserve">
+    <value>Maximum image scale must be greater than zero.</value>
+  </data>
 </root>

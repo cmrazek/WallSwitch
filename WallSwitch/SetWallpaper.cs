@@ -10,6 +10,7 @@ using Microsoft.Win32;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Threading;
 
 namespace WallSwitch
 {
@@ -18,10 +19,21 @@ namespace WallSwitch
 		#region Variables
 		private Theme _theme = null;
 		private Graphics _g = null;
-		private Bitmap _bitmap = null;
 		private Random _rand = new Random();
 		private bool _firstRender = true;
 		#endregion
+
+		#region PInvoke
+		[DllImport("user32.dll", SetLastError = false)]
+		static extern IntPtr GetDesktopWindow();
+
+		[DllImport("User32.dll", SetLastError = true)]
+		private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+		[DllImport("user32.dll", CharSet = CharSet.Auto)]
+		private static extern int SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
+
+		private const int WM_USER = 0x0400;
 
 		#region SPI
 		/// <summary>
@@ -1245,9 +1257,13 @@ namespace WallSwitch
 		[return: MarshalAs(UnmanagedType.Bool)]
 		static extern bool SystemParametersInfo(SPI uiAction, uint uiParam, IntPtr pvParam, SPIF fWinIni);
 		#endregion // SPI
+		#endregion
 
-		private void SetWin(string fileName)
+		private void ChangeWallpaper(Bitmap bitmap)
 		{
+			var fileName = _theme.GetWallpaperFileName(ImageFormat.Bmp);
+			bitmap.Save(fileName, ImageFormat.Bmp);
+
 			RegistryKey key = Registry.CurrentUser.OpenSubKey("Control Panel\\Desktop", true);
 			try 
 			{
@@ -1265,6 +1281,47 @@ namespace WallSwitch
 			{
 				throw new InvalidOperationException("Failed to set wallpaper.");
 			}
+
+			_theme.LastWallpaperFile = fileName;
+		}
+
+		private void ChangeWallpaperFade(Bitmap bitmap)
+		{
+			try
+			{
+				int result;
+
+				var fileName = _theme.GetWallpaperFileName(ImageFormat.Png);
+				bitmap.Save(fileName, ImageFormat.Png);
+
+				var hwnd = FindWindow("Progman", null);
+				if (hwnd == null) throw new Exception(string.Format("Couldn't find Progman window (GetLastError = 0x{0:X8})", Marshal.GetLastWin32Error()));
+				SendMessage(hwnd, WM_USER + 300, IntPtr.Zero, IntPtr.Zero);
+
+				var ad = shlobj.GetActiveDesktop();
+				if (ad == null) throw new Exception("Couldn't get IActiveDesktop object.");
+
+				if ((result = ad.SetWallpaper(fileName, 0)) != 0)
+					throw new Exception(string.Format("IActiveDesktop.SetWallpaper failed with HRESULT 0x{0:X8}", result));
+
+				var opt = new WALLPAPEROPT
+				{
+					dwSize = (uint)Marshal.SizeOf(typeof(WALLPAPEROPT)),
+					dwStyle = WallPaperStyle.WPSTYLE_TILE
+				};
+				if ((result = ad.SetWallpaperOptions(ref opt, 0)) != 0)
+					throw new Exception(string.Format("IActiveDesktop.SetWallpaperOptions failed with HRESULT 0x{0:X8}", result));
+
+				if ((result = ad.ApplyChanges(AD_Apply.ALL | AD_Apply.BUFFERED_REFRESH)) != 0)
+					throw new Exception(string.Format("IActiveDesktop.ApplyChanges failed with HRESULT 0x{0:X8}", result));
+
+				_theme.LastWallpaperFile = fileName;
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Exception when fading desktop background.");
+				ChangeWallpaper(bitmap);
+			}
 		}
 
 		public int NumMonitors
@@ -1278,12 +1335,6 @@ namespace WallSwitch
 			if (files == null) throw new ArgumentNullException("Files list is null.");
 			_theme = theme;
 
-			if (_bitmap != null)
-			{
-				_bitmap.Dispose();
-				_bitmap = null;
-			}
-
 			// Get the desktop dimensions.
 			Size fullSize = new Size();
 			foreach (Screen screen in Screen.AllScreens)
@@ -1294,51 +1345,28 @@ namespace WallSwitch
 			}
 
 			// If there's a previous wallpaper saved, then load it.
-			string destFileName = _theme.WallpaperFileName;
-			try
+			Bitmap bitmap;
+			if (_theme.Mode == ThemeMode.Collage)
 			{
-				if (_theme.Mode == ThemeMode.Collage)
-				{
-					if (File.Exists(destFileName))
-					{
-						Log.Write(LogLevel.Debug, "Loading previous wallpaper bitmap: {0}.", destFileName);
-
-						// Need to load through a stream so we can force it to close.
-						// Image.FromFile leaves the file open for a while.
-						using (FileStream stream = new FileStream(destFileName, FileMode.Open))
-						{
-							long len = stream.Length;
-							if (len > 0)
-							{
-								_bitmap = new Bitmap(Bitmap.FromStream(stream));
-								_firstRender = false;
-							}
-							else
-							{
-								Log.Write(LogLevel.Debug, "The file has no content.");
-								_bitmap = null;
-							}
-							stream.Close();
-						}
-					}
-				}
+				bitmap = LoadLastWallpaper();
+				_firstRender = bitmap == null;
 			}
-			catch (Exception ex)
+			else
 			{
-				Log.Write(ex, "Exception when previous wallpaper bitmap.");
-				_bitmap = null;
-			}
-
-			// Create the offscreen surface if it doesn't exist or has changed.
-			if (_bitmap == null ||
-				_bitmap.Width != fullSize.Width || _bitmap.Height != fullSize.Height)
-			{
-				if (_bitmap != null) _bitmap.Dispose();
-				_bitmap = new Bitmap(fullSize.Width, fullSize.Height);
+				bitmap = null;
 				_firstRender = true;
 			}
 
-			_g = Graphics.FromImage((Image)_bitmap);
+			// Create the offscreen surface if it doesn't exist or has changed.
+			if (bitmap == null ||
+				bitmap.Width != fullSize.Width || bitmap.Height != fullSize.Height)
+			{
+				if (bitmap != null) bitmap.Dispose();
+				bitmap = new Bitmap(fullSize.Width, fullSize.Height);
+				_firstRender = true;
+			}
+
+			_g = Graphics.FromImage((Image)bitmap);
 
 			// Draw an image for each monitor
 			var filesArray = files.ToArray();
@@ -1352,12 +1380,52 @@ namespace WallSwitch
 			_firstRender = false;
 
 			// Apply to desktop background.
-			Log.Write(LogLevel.Debug, "Saving wallpaper to file '{0}'.", destFileName);
-			_bitmap.Save(destFileName, System.Drawing.Imaging.ImageFormat.Bmp);
-			SetWin(destFileName);
+			if (_theme.FadeTransition) ChangeWallpaperFade(bitmap);
+			else ChangeWallpaper(bitmap);
 
-			_bitmap.Dispose();
-			_bitmap = null;
+			bitmap.Dispose();
+			bitmap = null;
+		}
+
+		private Bitmap LoadLastWallpaper()
+		{
+			try
+			{
+				var fileName = _theme.LastWallpaperFile;
+				if (string.IsNullOrEmpty(fileName) || !File.Exists(fileName))
+				{
+					fileName = _theme.GetWallpaperFileName(ImageFormat.Png);
+					if (!File.Exists(fileName))
+					{
+						fileName = _theme.GetWallpaperFileName(ImageFormat.Jpeg);
+						if (!File.Exists(fileName))
+						{
+							fileName = _theme.GetWallpaperFileName(ImageFormat.Bmp);
+							if (!File.Exists(fileName)) return null;
+						}
+					}
+				}
+
+				Log.Write(LogLevel.Debug, "Loading previous wallpaper bitmap: {0}.", fileName);
+
+				// Need to load through a stream so we can force it to close.
+				// Image.FromFile leaves the file open for a while.
+				using (FileStream stream = new FileStream(fileName, FileMode.Open))
+				{
+					long len = stream.Length;
+					if (len > 0) return new Bitmap(Bitmap.FromStream(stream));
+					else
+					{
+						Log.Write(LogLevel.Debug, "The file has no content.");
+						return null;
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Exception when loading previous wallpaper.");
+				return null;
+			}
 		}
 
 		private void RenderScreen(ImageRec file, Screen screen)
@@ -1396,17 +1464,15 @@ namespace WallSwitch
 						float imgArea = imgWidth * imgHeight;
 						float imgSize = (float)_theme.ImageSize / 100.0f;
 						float screenArea = screenRect.Width * imgSize * screenRect.Height * imgSize;
-						float scale = 1.0f;
+						float scale = (float)Math.Sqrt(screenArea / imgArea);
 
-						if (imgArea > screenArea * imgSize)
+						if (_theme.MaxImageScale > 0)
 						{
-							// Scale down the image
-							scale = (float)Math.Sqrt(screenArea / imgArea);
-							imgWidth = imgWidth * scale;
-							imgHeight = imgHeight * scale;
-
-							//Log.Write("Scaling down image area: scale [{0}] size [{1} x {2}]", scale, imgWidth, imgHeight);
+							var maxScale = (float)_theme.MaxImageScale / 100.0f;
+							if (maxScale > 0.0f && scale > maxScale) scale = maxScale;
 						}
+						imgWidth *= scale;
+						imgHeight *= scale;
 
 						// If one of the dimensions is still wider/taller than the screen, then scale it down more.
 						if (imgWidth > screenRect.Width)
@@ -1415,8 +1481,6 @@ namespace WallSwitch
 							imgWidth = screenRect.Width;
 							imgHeight *= ratio;
 							scale *= ratio;
-
-							//Log.Write("Scaling down width: ratio [{0}] size [{1} x {2}]", ratio, imgWidth, imgHeight);
 						}
 
 						if (imgHeight > screenRect.Height)
@@ -1425,8 +1489,6 @@ namespace WallSwitch
 							imgHeight = screenRect.Height;
 							imgWidth *= ratio;
 							scale *= ratio;
-
-							//Log.Write("Scaling down height: ratio [{0}] size [{1} x {2}]", ratio, imgWidth, imgHeight);
 						}
 
 						// Choose a random rect to display the image.
@@ -1448,11 +1510,13 @@ namespace WallSwitch
 					}
 					else // Sequential or Random - one image per screen
 					{
-						imgRect = FitImage(imgRect, ref srcRect, screenRect, _theme.ImageFit, ref clearRequired);
+						imgRect = FitImage(imgRect, ref srcRect, screenRect, _theme.ImageFit, img.Size, ref clearRequired);
 					}
 
+					_g.SetClip(screen.Bounds);
 					if (clearRequired && clearOpacity > 0) ClearBackground(screen, clearOpacity);
 					if (img != null) _g.DrawImage(img, imgRect, srcRect, GraphicsUnit.Pixel);
+					//_g.ResetClip();
 				}
 			}
 			catch (Exception ex)
@@ -1482,101 +1546,52 @@ namespace WallSwitch
 			brush.Dispose();
 		}
 
-		private RectangleF FitImage(RectangleF imgRect, ref RectangleF srcRect, RectangleF screenRect, ImageFit fit, ref bool clearBackground)
+		private RectangleF FitImage(RectangleF imgRect, ref RectangleF srcRect, RectangleF screenRect, ImageFit fit, SizeF imgSize, ref bool clearBackground)
 		{
 			SizeF screenSize = screenRect.Size;
+			RectangleF origImgRect = imgRect;
 
 			switch (fit)
 			{
 				case ImageFit.Original:
-					if (imgRect.Width < screenSize.Width && imgRect.Height < screenSize.Height)
-					{
-						// Image is smaller than the screen. Center it.
-						imgRect.X += (screenSize.Width - imgRect.Width) / 2;
-						imgRect.Y += (screenSize.Height - imgRect.Height) / 2;
-						clearBackground = true;
-					}
-					else if (imgRect.Size.Equals(screenSize))
-					{
-						// Image is same size as screen.
-						imgRect = new RectangleF(new PointF(), screenSize);
-					}
-					else
-					{
-						// One or more dimensions is larger than the screen.
-						// Only display the portion that will fit.
-
-						float over = imgRect.Width - screenSize.Width;
-						if (over > 0.0f)
-						{
-							// Clip image
-							srcRect.X = over * .5f;
-							srcRect.Width = imgRect.Width = screenSize.Width;
-						}
-						else if (over < 0.0f)
-						{
-							// Center
-							imgRect.X = -over * .5f;
-							clearBackground = true;
-						}
-
-						over = imgRect.Height - screenSize.Height;
-						if (over > 0.0f)
-						{
-							// Clip image
-							srcRect.Y = over * .5f;
-							srcRect.Height = imgRect.Height = screenSize.Height;
-						}
-						else if (over < 0.0f)
-						{
-							// Center
-							imgRect.Y = -over * .5f;
-							clearBackground = true;
-						}
-					}
+					imgRect = imgRect.CenterInside(screenRect);
 					break;
 
 				case ImageFit.Stretch:
-					imgRect = new RectangleF(new PointF(), screenSize);
-					break;
-
-				case ImageFit.Fit:
-					// Scale to the right size.
-					imgRect = imgRect.ScaleRectWidth(screenSize.Width);
-					if (imgRect.Height > screenSize.Height) imgRect = imgRect.ScaleRectHeight(screenSize.Height);
-
-					// Center the image
-					imgRect.X = (screenSize.Width - imgRect.Width) * .5f;
-					imgRect.Y = (screenSize.Height - imgRect.Height) * .5f;
-
-					if (imgRect.Width < screenSize.Width || imgRect.Height < screenSize.Height)
+					if (_theme.MaxImageScale > 0)
 					{
-						clearBackground = true;
+						var maxScale = (float)_theme.MaxImageScale / 100.0f;
+						imgRect = new RectangleF(0.0f, 0.0f, imgSize.Width * maxScale, imgSize.Height * maxScale);
+						if (imgRect.Width > screenRect.Width) imgRect.Width = screenRect.Width;
+						if (imgRect.Height > screenRect.Height) imgRect.Height = screenRect.Height;
+
+						imgRect = imgRect.CenterInside(screenRect);
+					}
+					else
+					{
+						imgRect = screenRect;
 					}
 					break;
 
+				case ImageFit.Fit:
+					if (imgRect.Width != screenRect.Width) imgRect = imgRect.ScaleRectWidth(screenRect.Width);
+					if (imgRect.Height > screenRect.Height) imgRect = imgRect.ScaleRectHeight(screenRect.Height);
+					imgRect = imgRect.CenterInside(screenRect);
+					CheckImageRectSize(ref imgRect, imgSize);
+					break;
+
 				case ImageFit.Fill:
-					// Image will always fill whole screen.
-					imgRect = new RectangleF(new PointF(), screenSize);
-
-					// Source rect will be scaled to match the same aspect as the screen.
-					RectangleF rect = new RectangleF(0.0f, 0.0f, screenSize.Width, screenSize.Height);
-					rect = rect.ScaleRectWidth(srcRect.Width);
-					if (rect.Height > srcRect.Height) rect = rect.ScaleRectHeight(srcRect.Height);
-
-					// Center the source rect inside the image.
-					rect.X = (srcRect.Width - rect.Width) * .5f;
-					rect.Y = (srcRect.Height - rect.Height) * .5f;
-
-					srcRect = rect;
+					if (imgRect.Width < screenRect.Width) imgRect = imgRect.ScaleRectWidth(screenRect.Width);
+					if (imgRect.Height < screenRect.Height) imgRect = imgRect.ScaleRectHeight(screenRect.Height);
+					imgRect = imgRect.CenterInside(screenRect);
+					CheckImageRectSize(ref imgRect, imgSize);
 					break;
 
 				default:
 					throw new ArgumentException("Invalid image fit value.");
 			}
 
-			// The above code assumes the screen is at [0, 0]. Offset for the screen position.
-			imgRect.Offset(screenRect.Location);
+			clearBackground = !screenRect.CompletelyInside(imgRect);
 			return imgRect;
 		}
 
@@ -1702,6 +1717,19 @@ namespace WallSwitch
 				{
 					dstBitmap.UnlockBits(dstData);
 					srcBitmap.UnlockBits(srcData);
+				}
+			}
+		}
+
+		private void CheckImageRectSize(ref RectangleF rect, SizeF imgSize)
+		{
+			if (_theme.MaxImageScale > 0)
+			{
+				var maxScale = (float)_theme.MaxImageScale / 100.0f;
+				var maxSize = new SizeF(imgSize.Width * maxScale, imgSize.Height * maxScale);
+				if (rect.Width > maxSize.Width || rect.Height > maxSize.Height)
+				{
+					rect = rect.RestrictSize(maxSize).CenterInside(rect);
 				}
 			}
 		}

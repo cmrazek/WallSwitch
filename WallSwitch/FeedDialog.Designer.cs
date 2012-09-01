@@ -28,6 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FeedDialog));
 			this.label1 = new System.Windows.Forms.Label();
 			this.txtUrl = new System.Windows.Forms.TextBox();
@@ -39,6 +40,7 @@
 			this.label3 = new System.Windows.Forms.Label();
 			this.txtType = new System.Windows.Forms.TextBox();
 			this.btnBrowse = new System.Windows.Forms.Button();
+			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.SuspendLayout();
 			// 
 			// label1
@@ -58,6 +60,7 @@
 			this.txtUrl.Name = "txtUrl";
 			this.txtUrl.Size = new System.Drawing.Size(187, 20);
 			this.txtUrl.TabIndex = 0;
+			this.toolTip1.SetToolTip(this.txtUrl, "Path or address");
 			this.txtUrl.TextChanged += new System.EventHandler(this.txtUrl_TextChanged);
 			// 
 			// txtFreq
@@ -67,6 +70,7 @@
 			this.txtFreq.Name = "txtFreq";
 			this.txtFreq.Size = new System.Drawing.Size(60, 20);
 			this.txtFreq.TabIndex = 2;
+			this.toolTip1.SetToolTip(this.txtFreq, "Interval between directory/feed scans");
 			this.txtFreq.TextChanged += new System.EventHandler(this.txtFreq_TextChanged);
 			// 
 			// cmbPeriod
@@ -82,6 +86,7 @@
 			this.cmbPeriod.Name = "cmbPeriod";
 			this.cmbPeriod.Size = new System.Drawing.Size(75, 21);
 			this.cmbPeriod.TabIndex = 3;
+			this.toolTip1.SetToolTip(this.cmbPeriod, "Interval between directory/feed scans");
 			this.cmbPeriod.SelectedIndexChanged += new System.EventHandler(this.cmbPeriod_SelectedIndexChanged);
 			// 
 			// label2
@@ -101,6 +106,7 @@
 			this.btnOk.Size = new System.Drawing.Size(75, 23);
 			this.btnOk.TabIndex = 4;
 			this.btnOk.Text = "&OK";
+			this.toolTip1.SetToolTip(this.btnOk, "Save and exit");
 			this.btnOk.UseVisualStyleBackColor = true;
 			this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
 			// 
@@ -113,6 +119,7 @@
 			this.btnCancel.Size = new System.Drawing.Size(75, 23);
 			this.btnCancel.TabIndex = 5;
 			this.btnCancel.Text = "&Cancel";
+			this.toolTip1.SetToolTip(this.btnCancel, "Exit without saving");
 			this.btnCancel.UseVisualStyleBackColor = true;
 			this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
 			// 
@@ -132,6 +139,7 @@
 			this.txtType.ReadOnly = true;
 			this.txtType.Size = new System.Drawing.Size(100, 20);
 			this.txtType.TabIndex = 8;
+			this.toolTip1.SetToolTip(this.txtType, "Type of location");
 			// 
 			// btnBrowse
 			// 
@@ -141,6 +149,7 @@
 			this.btnBrowse.Size = new System.Drawing.Size(30, 23);
 			this.btnBrowse.TabIndex = 9;
 			this.btnBrowse.Text = "...";
+			this.toolTip1.SetToolTip(this.btnBrowse, "Browse for location");
 			this.btnBrowse.UseVisualStyleBackColor = true;
 			this.btnBrowse.Click += new System.EventHandler(this.btnBrowse_Click);
 			// 
@@ -186,5 +195,6 @@
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.TextBox txtType;
 		private System.Windows.Forms.Button btnBrowse;
+		private System.Windows.Forms.ToolTip toolTip1;
 	}
 }

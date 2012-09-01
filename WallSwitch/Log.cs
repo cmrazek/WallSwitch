@@ -167,7 +167,11 @@ namespace WallSwitch
 					_sb.Append(comment);
 
 					var logEntry = _sb.ToString();
-					if (_file != null) _file.WriteLine(logEntry);
+					if (_file != null)
+					{
+						_file.WriteLine(logEntry);
+						_file.WriteLine(ex.ToString());
+					}
 
 #if DEBUG
 					Debug.WriteLine(logEntry);

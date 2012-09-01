@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Xml;
-using System.IO;
-using System.Drawing;
-using System.Text.RegularExpressions;
 using System.Linq;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace WallSwitch
 {
@@ -24,12 +25,14 @@ namespace WallSwitch
 		private const int k_defaultBackOpacity = 15;
 		private const ImageFit k_defaultImageFit = ImageFit.Fit;
 		private const int k_defaultFeather = 15;
+		private const bool k_defaultFadeTransition = true;
+		public const int k_defaultMaxImageScale = 200;
 		#endregion
 
 		#region Variables
 		private Guid _id;
 		private List<Location> _locations = new List<Location>();
-		private string _name = "";
+		private string _name = string.Empty;
 		private int _freq = k_defaultFreq;
 		private Period _period = k_defaultPeriod;
 		private TimeSpan _interval;
@@ -46,6 +49,9 @@ namespace WallSwitch
 		private int _historyIndex = -1;
 		private Random _rand = new Random();
 		private int _feather = 15;
+		private bool _fadeTransition = k_defaultFadeTransition;
+		private string _lastWallpaperFile = string.Empty;
+		private int _maxImageScale = k_defaultMaxImageScale;
 		#endregion
 
 		#region Construction
@@ -128,6 +134,24 @@ namespace WallSwitch
 				_feather = value;
 			}
 		}
+
+		public bool FadeTransition
+		{
+			get { return _fadeTransition; }
+			set { _fadeTransition = value; }
+		}
+
+		public string LastWallpaperFile
+		{
+			get { return _lastWallpaperFile; }
+			set { _lastWallpaperFile = value; }
+		}
+
+		public int MaxImageScale
+		{
+			get { return _maxImageScale; }
+			set { _maxImageScale = value; }
+		}
 		#endregion
 
 		#region Save/Load
@@ -151,6 +175,10 @@ namespace WallSwitch
 			{
 				xml.WriteAttributeString("ImageFit", _imageFit.ToString());
 			}
+
+			if (_fadeTransition != k_defaultFadeTransition) xml.WriteAttributeString("FadeTransition", _fadeTransition.ToString());
+			if (!string.IsNullOrEmpty(_lastWallpaperFile)) xml.WriteAttributeString("LastWallpaperFile", _lastWallpaperFile);
+			if (_maxImageScale != k_defaultMaxImageScale) xml.WriteAttributeString("MaxImageScale", _maxImageScale.ToString());
 
 			_hotKey.SaveTheme(xml);
 
@@ -179,6 +207,9 @@ namespace WallSwitch
 			_backOpacity = Util.ParseInt(xmlTheme, "BackOpacity", k_defaultBackOpacity);
 			_imageFit = Util.ParseEnum<ImageFit>(xmlTheme, "ImageFit", k_defaultImageFit);
 			_feather = Util.ParseInt(xmlTheme, "FeatherEdges", k_defaultFeather);
+			_fadeTransition = Util.ParseBool(xmlTheme, "FadeTransition", k_defaultFadeTransition);
+			_lastWallpaperFile = Util.ParseString(xmlTheme, "LastWallpaperFile", string.Empty);
+			_maxImageScale = Util.ParseInt(xmlTheme, "MaxImageScale", k_defaultMaxImageScale);
 
 			_hotKey.LoadTheme(xmlTheme);
 
@@ -366,7 +397,13 @@ namespace WallSwitch
 			_history.Clear();
 			_historyIndex = -1;
 
-			string fileName = WallpaperFileName;
+			var fileName = GetWallpaperFileName(ImageFormat.Bmp);
+			if (File.Exists(fileName)) File.Delete(fileName);
+
+			fileName = GetWallpaperFileName(ImageFormat.Jpeg);
+			if (File.Exists(fileName)) File.Delete(fileName);
+
+			fileName = GetWallpaperFileName(ImageFormat.Png);
 			if (File.Exists(fileName)) File.Delete(fileName);
 		}
 
@@ -511,9 +548,13 @@ namespace WallSwitch
 		#endregion
 
 		#region Wallpaper
-		public string WallpaperFileName
+		private void OnActivate(bool active)
 		{
-			get { return String.Format("{0}\\{1}.bmp", Util.AppDataDir, _id); }
+		}
+
+		public string GetWallpaperFileName(ImageFormat format)
+		{
+			return String.Format("{0}\\{1}{2}", Util.AppDataDir, _id, ImageFormatDesc.ImageFormatToExtension(format));
 		}
 		#endregion
 
@@ -563,13 +604,6 @@ namespace WallSwitch
 		{
 			EventHandler<LocationUpdatedEventArgs> ev = LocationUpdated;
 			if (ev != null) ev(this, new LocationUpdatedEventArgs(this, location));
-		}
-		#endregion
-
-		#region File System Watching
-		private void OnActivate(bool active)
-		{
-			// TODO
 		}
 		#endregion
 	}

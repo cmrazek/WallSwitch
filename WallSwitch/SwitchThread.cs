@@ -15,7 +15,6 @@ namespace WallSwitch
 		private List<string> _files = new List<string>();
 		private Random _rand = new Random();
 
-		//private object _controlLock = new object();		TODO: remove
 		private volatile bool _kill = false;
 		private volatile SwitchDir _switchNow = SwitchDir.None;
 		private volatile bool _locked = false;
@@ -51,6 +50,7 @@ namespace WallSwitch
 
 			_thread = new Thread(new ThreadStart(ThreadProc));
 			_thread.Name = "Switch Thread";
+			_thread.SetApartmentState(ApartmentState.STA);
 			_thread.Start();
 		}
 
@@ -67,17 +67,6 @@ namespace WallSwitch
 				_thread = null;
 			}
 		}
-
-		// TODO: remove
-		//private bool CheckKill()
-		//{
-		//    bool kill;
-		//    lock (_controlLock)
-		//    {
-		//        kill = _kill;
-		//    }
-		//    return kill;
-		//}
 
 		public bool IsAlive
 		{
