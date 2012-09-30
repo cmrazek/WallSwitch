@@ -51,8 +51,6 @@
 			this.lblOpacityDisplay = new System.Windows.Forms.Label();
 			this.trkOpacity = new System.Windows.Forms.TrackBar();
 			this.lblOpacity = new System.Windows.Forms.Label();
-			this.txtHotKey = new System.Windows.Forms.TextBox();
-			this.lblHotKey = new System.Windows.Forms.Label();
 			this.chkSeparateMonitors = new System.Windows.Forms.CheckBox();
 			this.lblImageSizeDisplay = new System.Windows.Forms.Label();
 			this.lblImageSize = new System.Windows.Forms.Label();
@@ -91,6 +89,7 @@
 			this.menuTools = new System.Windows.Forms.ToolStripMenuItem();
 			this.miToolsStartWithWindows = new System.Windows.Forms.ToolStripMenuItem();
 			this.miClearHistory = new System.Windows.Forms.ToolStripMenuItem();
+			this.miHotKeys = new System.Windows.Forms.ToolStripMenuItem();
 			this.menuHelp = new System.Windows.Forms.ToolStripMenuItem();
 			this.miHelpAbout = new System.Windows.Forms.ToolStripMenuItem();
 			this.btnPrevious = new System.Windows.Forms.Button();
@@ -98,6 +97,11 @@
 			this.tabLocations = new System.Windows.Forms.TabPage();
 			this.btnAddFeed = new System.Windows.Forms.Button();
 			this.tabDisplay = new System.Windows.Forms.TabPage();
+			this.c_colorEffectsGroupBox = new System.Windows.Forms.GroupBox();
+			this.c_colorEffectCollageFadeRatioValue = new System.Windows.Forms.Label();
+			this.c_colorEffectCollageFadeRatioTrackBar = new System.Windows.Forms.TrackBar();
+			this.c_colorEffectCollageFade = new System.Windows.Forms.CheckBox();
+			this.c_colorEffectCombo = new System.Windows.Forms.ComboBox();
 			this.lblScalePct = new System.Windows.Forms.Label();
 			this.txtMaxScale = new System.Windows.Forms.TextBox();
 			this.chkLimitScale = new System.Windows.Forms.CheckBox();
@@ -109,6 +113,8 @@
 			this.clrBackTop = new WallSwitch.ColorSample();
 			this.clrBackBottom = new WallSwitch.ColorSample();
 			this.tabFrequency = new System.Windows.Forms.TabPage();
+			this.c_activateThemeHotKey = new WallSwitch.HotKeyTextBox();
+			this.c_activateThemeLabel = new System.Windows.Forms.Label();
 			this.tabHistory = new System.Windows.Forms.TabPage();
 			this.lstHistory = new WallSwitch.HistoryList();
 			this.cmHistory = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -117,6 +123,7 @@
 			this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripSeparator();
 			this.ciClearHistoryList = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+			this.btnPause = new System.Windows.Forms.Button();
 			this.cmLocations.SuspendLayout();
 			this.grpTheme.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.trkOpacity)).BeginInit();
@@ -126,6 +133,8 @@
 			this.tabThemeSettings.SuspendLayout();
 			this.tabLocations.SuspendLayout();
 			this.tabDisplay.SuspendLayout();
+			this.c_colorEffectsGroupBox.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.c_colorEffectCollageFadeRatioTrackBar)).BeginInit();
 			this.grpCollageDisplay.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.trkFeather)).BeginInit();
 			this.tabFrequency.SuspendLayout();
@@ -317,7 +326,7 @@
 			// lblOpacityDisplay
 			// 
 			this.lblOpacityDisplay.AutoSize = true;
-			this.lblOpacityDisplay.Location = new System.Drawing.Point(245, 56);
+			this.lblOpacityDisplay.Location = new System.Drawing.Point(245, 58);
 			this.lblOpacityDisplay.Name = "lblOpacityDisplay";
 			this.lblOpacityDisplay.Size = new System.Drawing.Size(15, 13);
 			this.lblOpacityDisplay.TabIndex = 5;
@@ -347,27 +356,6 @@
 			this.lblOpacity.TabIndex = 3;
 			this.lblOpacity.Text = "Background Opacity:";
 			// 
-			// txtHotKey
-			// 
-			this.txtHotKey.BackColor = System.Drawing.SystemColors.Window;
-			this.txtHotKey.Location = new System.Drawing.Point(145, 32);
-			this.txtHotKey.MaxLength = 5;
-			this.txtHotKey.Name = "txtHotKey";
-			this.txtHotKey.ReadOnly = true;
-			this.txtHotKey.Size = new System.Drawing.Size(141, 20);
-			this.txtHotKey.TabIndex = 4;
-			this.toolTip1.SetToolTip(this.txtHotKey, "Hot key used to activate this theme or display the next image");
-			this.txtHotKey.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtHotKey_KeyDown);
-			// 
-			// lblHotKey
-			// 
-			this.lblHotKey.AutoSize = true;
-			this.lblHotKey.Location = new System.Drawing.Point(6, 32);
-			this.lblHotKey.Name = "lblHotKey";
-			this.lblHotKey.Size = new System.Drawing.Size(48, 13);
-			this.lblHotKey.TabIndex = 3;
-			this.lblHotKey.Text = "Hot Key:";
-			// 
 			// chkSeparateMonitors
 			// 
 			this.chkSeparateMonitors.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -377,7 +365,7 @@
 			this.chkSeparateMonitors.Location = new System.Drawing.Point(9, 209);
 			this.chkSeparateMonitors.Name = "chkSeparateMonitors";
 			this.chkSeparateMonitors.Size = new System.Drawing.Size(179, 17);
-			this.chkSeparateMonitors.TabIndex = 8;
+			this.chkSeparateMonitors.TabIndex = 10;
 			this.chkSeparateMonitors.Text = "Separate image for each monitor";
 			this.toolTip1.SetToolTip(this.chkSeparateMonitors, "Display a separate image on each monitor");
 			this.chkSeparateMonitors.UseVisualStyleBackColor = true;
@@ -386,7 +374,7 @@
 			// lblImageSizeDisplay
 			// 
 			this.lblImageSizeDisplay.AutoSize = true;
-			this.lblImageSizeDisplay.Location = new System.Drawing.Point(245, 19);
+			this.lblImageSizeDisplay.Location = new System.Drawing.Point(245, 21);
 			this.lblImageSizeDisplay.Name = "lblImageSizeDisplay";
 			this.lblImageSizeDisplay.Size = new System.Drawing.Size(15, 13);
 			this.lblImageSizeDisplay.TabIndex = 2;
@@ -624,7 +612,7 @@
 			// btnSwitchNow
 			// 
 			this.btnSwitchNow.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.btnSwitchNow.Location = new System.Drawing.Point(129, 347);
+			this.btnSwitchNow.Location = new System.Drawing.Point(210, 347);
 			this.btnSwitchNow.Name = "btnSwitchNow";
 			this.btnSwitchNow.Size = new System.Drawing.Size(30, 23);
 			this.btnSwitchNow.TabIndex = 7;
@@ -712,7 +700,8 @@
 			// 
 			this.menuTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.miToolsStartWithWindows,
-            this.miClearHistory});
+            this.miClearHistory,
+            this.miHotKeys});
 			this.menuTools.Name = "menuTools";
 			this.menuTools.Size = new System.Drawing.Size(48, 20);
 			this.menuTools.Text = "&Tools";
@@ -731,6 +720,13 @@
 			this.miClearHistory.Size = new System.Drawing.Size(178, 22);
 			this.miClearHistory.Text = "&Clear History";
 			this.miClearHistory.Click += new System.EventHandler(this.miClearHistory_Click);
+			// 
+			// miHotKeys
+			// 
+			this.miHotKeys.Name = "miHotKeys";
+			this.miHotKeys.Size = new System.Drawing.Size(178, 22);
+			this.miHotKeys.Text = "&Hot Keys";
+			this.miHotKeys.Click += new System.EventHandler(this.miHotKeys_Click);
 			// 
 			// menuHelp
 			// 
@@ -802,6 +798,7 @@
 			// 
 			// tabDisplay
 			// 
+			this.tabDisplay.Controls.Add(this.c_colorEffectsGroupBox);
 			this.tabDisplay.Controls.Add(this.lblScalePct);
 			this.tabDisplay.Controls.Add(this.txtMaxScale);
 			this.tabDisplay.Controls.Add(this.chkLimitScale);
@@ -823,6 +820,69 @@
 			this.tabDisplay.Text = "Display";
 			this.tabDisplay.UseVisualStyleBackColor = true;
 			// 
+			// c_colorEffectsGroupBox
+			// 
+			this.c_colorEffectsGroupBox.Controls.Add(this.c_colorEffectCollageFadeRatioValue);
+			this.c_colorEffectsGroupBox.Controls.Add(this.c_colorEffectCollageFadeRatioTrackBar);
+			this.c_colorEffectsGroupBox.Controls.Add(this.c_colorEffectCollageFade);
+			this.c_colorEffectsGroupBox.Controls.Add(this.c_colorEffectCombo);
+			this.c_colorEffectsGroupBox.Location = new System.Drawing.Point(9, 57);
+			this.c_colorEffectsGroupBox.Name = "c_colorEffectsGroupBox";
+			this.c_colorEffectsGroupBox.Size = new System.Drawing.Size(165, 144);
+			this.c_colorEffectsGroupBox.TabIndex = 8;
+			this.c_colorEffectsGroupBox.TabStop = false;
+			this.c_colorEffectsGroupBox.Text = "Color Effects:";
+			// 
+			// c_colorEffectCollageFadeRatioValue
+			// 
+			this.c_colorEffectCollageFadeRatioValue.AutoSize = true;
+			this.c_colorEffectCollageFadeRatioValue.Location = new System.Drawing.Point(131, 72);
+			this.c_colorEffectCollageFadeRatioValue.Name = "c_colorEffectCollageFadeRatioValue";
+			this.c_colorEffectCollageFadeRatioValue.Size = new System.Drawing.Size(15, 13);
+			this.c_colorEffectCollageFadeRatioValue.TabIndex = 3;
+			this.c_colorEffectCollageFadeRatioValue.Text = "%";
+			// 
+			// c_colorEffectCollageFadeRatioTrackBar
+			// 
+			this.c_colorEffectCollageFadeRatioTrackBar.BackColor = System.Drawing.SystemColors.Window;
+			this.c_colorEffectCollageFadeRatioTrackBar.LargeChange = 20;
+			this.c_colorEffectCollageFadeRatioTrackBar.Location = new System.Drawing.Point(6, 70);
+			this.c_colorEffectCollageFadeRatioTrackBar.Maximum = 100;
+			this.c_colorEffectCollageFadeRatioTrackBar.Name = "c_colorEffectCollageFadeRatioTrackBar";
+			this.c_colorEffectCollageFadeRatioTrackBar.Size = new System.Drawing.Size(124, 45);
+			this.c_colorEffectCollageFadeRatioTrackBar.SmallChange = 10;
+			this.c_colorEffectCollageFadeRatioTrackBar.TabIndex = 2;
+			this.c_colorEffectCollageFadeRatioTrackBar.TickFrequency = 10;
+			this.toolTip1.SetToolTip(this.c_colorEffectCollageFadeRatioTrackBar, "Amount of color effect to apply to background images");
+			this.c_colorEffectCollageFadeRatioTrackBar.Value = 25;
+			this.c_colorEffectCollageFadeRatioTrackBar.Scroll += new System.EventHandler(this.c_colorEffectCollageFadeRatioTrackBar_Scroll);
+			// 
+			// c_colorEffectCollageFade
+			// 
+			this.c_colorEffectCollageFade.AutoSize = true;
+			this.c_colorEffectCollageFade.Location = new System.Drawing.Point(6, 47);
+			this.c_colorEffectCollageFade.Name = "c_colorEffectCollageFade";
+			this.c_colorEffectCollageFade.Size = new System.Drawing.Size(146, 17);
+			this.c_colorEffectCollageFade.TabIndex = 1;
+			this.c_colorEffectCollageFade.Text = "Fade background images";
+			this.toolTip1.SetToolTip(this.c_colorEffectCollageFade, "If checked, older images will be faded out using this color effect, and the foreg" +
+        "round image will be drawn normally.");
+			this.c_colorEffectCollageFade.UseVisualStyleBackColor = true;
+			this.c_colorEffectCollageFade.CheckedChanged += new System.EventHandler(this.ControlChanged);
+			// 
+			// c_colorEffectCombo
+			// 
+			this.c_colorEffectCombo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.c_colorEffectCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.c_colorEffectCombo.FormattingEnabled = true;
+			this.c_colorEffectCombo.Location = new System.Drawing.Point(6, 19);
+			this.c_colorEffectCombo.Name = "c_colorEffectCombo";
+			this.c_colorEffectCombo.Size = new System.Drawing.Size(153, 21);
+			this.c_colorEffectCombo.TabIndex = 0;
+			this.toolTip1.SetToolTip(this.c_colorEffectCombo, "Color effect to be applied to wallpaper.");
+			this.c_colorEffectCombo.SelectedIndexChanged += new System.EventHandler(this.ControlChanged);
+			// 
 			// lblScalePct
 			// 
 			this.lblScalePct.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -830,7 +890,7 @@
 			this.lblScalePct.Location = new System.Drawing.Point(531, 210);
 			this.lblScalePct.Name = "lblScalePct";
 			this.lblScalePct.Size = new System.Drawing.Size(15, 13);
-			this.lblScalePct.TabIndex = 12;
+			this.lblScalePct.TabIndex = 13;
 			this.lblScalePct.Text = "%";
 			// 
 			// txtMaxScale
@@ -839,7 +899,7 @@
 			this.txtMaxScale.Location = new System.Drawing.Point(475, 207);
 			this.txtMaxScale.Name = "txtMaxScale";
 			this.txtMaxScale.Size = new System.Drawing.Size(50, 20);
-			this.txtMaxScale.TabIndex = 11;
+			this.txtMaxScale.TabIndex = 12;
 			this.txtMaxScale.TextChanged += new System.EventHandler(this.ControlChanged);
 			// 
 			// chkLimitScale
@@ -849,7 +909,7 @@
 			this.chkLimitScale.Location = new System.Drawing.Point(343, 209);
 			this.chkLimitScale.Name = "chkLimitScale";
 			this.chkLimitScale.Size = new System.Drawing.Size(126, 17);
-			this.chkLimitScale.TabIndex = 10;
+			this.chkLimitScale.TabIndex = 11;
 			this.chkLimitScale.Text = "Limit image scaling to";
 			this.chkLimitScale.UseVisualStyleBackColor = true;
 			this.chkLimitScale.CheckedChanged += new System.EventHandler(this.chkLimitScale_CheckedChanged);
@@ -860,7 +920,7 @@
 			this.chkFadeTransition.Location = new System.Drawing.Point(290, 35);
 			this.chkFadeTransition.Name = "chkFadeTransition";
 			this.chkFadeTransition.Size = new System.Drawing.Size(133, 17);
-			this.chkFadeTransition.TabIndex = 9;
+			this.chkFadeTransition.TabIndex = 7;
 			this.chkFadeTransition.Text = "Cross-Fade Transitions";
 			this.toolTip1.SetToolTip(this.chkFadeTransition, "Use smooth cross-fading between wallpapers (Windows 7 or higher)");
 			this.chkFadeTransition.UseVisualStyleBackColor = true;
@@ -877,10 +937,10 @@
 			this.grpCollageDisplay.Controls.Add(this.lblImageSizeDisplay);
 			this.grpCollageDisplay.Controls.Add(this.lblOpacityDisplay);
 			this.grpCollageDisplay.Controls.Add(this.lblOpacity);
-			this.grpCollageDisplay.Location = new System.Drawing.Point(9, 57);
+			this.grpCollageDisplay.Location = new System.Drawing.Point(183, 57);
 			this.grpCollageDisplay.Name = "grpCollageDisplay";
-			this.grpCollageDisplay.Size = new System.Drawing.Size(320, 146);
-			this.grpCollageDisplay.TabIndex = 7;
+			this.grpCollageDisplay.Size = new System.Drawing.Size(363, 144);
+			this.grpCollageDisplay.TabIndex = 9;
 			this.grpCollageDisplay.TabStop = false;
 			this.grpCollageDisplay.Text = "Collage Display";
 			// 
@@ -943,10 +1003,10 @@
 			// 
 			// tabFrequency
 			// 
+			this.tabFrequency.Controls.Add(this.c_activateThemeHotKey);
+			this.tabFrequency.Controls.Add(this.c_activateThemeLabel);
 			this.tabFrequency.Controls.Add(this.cmbThemePeriod);
 			this.tabFrequency.Controls.Add(this.lblFrequency);
-			this.tabFrequency.Controls.Add(this.lblHotKey);
-			this.tabFrequency.Controls.Add(this.txtHotKey);
 			this.tabFrequency.Controls.Add(this.txtThemeFreq);
 			this.tabFrequency.Location = new System.Drawing.Point(4, 22);
 			this.tabFrequency.Name = "tabFrequency";
@@ -955,6 +1015,26 @@
 			this.tabFrequency.TabIndex = 2;
 			this.tabFrequency.Text = "Frequency";
 			this.tabFrequency.UseVisualStyleBackColor = true;
+			// 
+			// c_activateThemeHotKey
+			// 
+			this.c_activateThemeHotKey.BackColor = System.Drawing.SystemColors.Window;
+			this.c_activateThemeHotKey.HotKey = null;
+			this.c_activateThemeHotKey.Location = new System.Drawing.Point(145, 32);
+			this.c_activateThemeHotKey.Name = "c_activateThemeHotKey";
+			this.c_activateThemeHotKey.ReadOnly = true;
+			this.c_activateThemeHotKey.Size = new System.Drawing.Size(141, 20);
+			this.c_activateThemeHotKey.TabIndex = 4;
+			this.c_activateThemeHotKey.HotKeyChanged += new System.EventHandler(this.ControlChanged);
+			// 
+			// c_activateThemeLabel
+			// 
+			this.c_activateThemeLabel.AutoSize = true;
+			this.c_activateThemeLabel.Location = new System.Drawing.Point(6, 35);
+			this.c_activateThemeLabel.Name = "c_activateThemeLabel";
+			this.c_activateThemeLabel.Size = new System.Drawing.Size(48, 13);
+			this.c_activateThemeLabel.TabIndex = 3;
+			this.c_activateThemeLabel.Text = "Hot Key:";
 			// 
 			// tabHistory
 			// 
@@ -971,11 +1051,11 @@
 			// 
 			this.lstHistory.ContextMenuStrip = this.cmHistory;
 			this.lstHistory.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.lstHistory.ImageToolTip = this.toolTip1;
 			this.lstHistory.Location = new System.Drawing.Point(3, 3);
 			this.lstHistory.Name = "lstHistory";
 			this.lstHistory.Size = new System.Drawing.Size(546, 226);
 			this.lstHistory.TabIndex = 0;
-			this.toolTip1.SetToolTip(this.lstHistory, "Previously displayed images");
 			this.lstHistory.SelectionChanged += new System.EventHandler(this.lstHistory_SelectionChanged);
 			this.lstHistory.ItemActivated += new System.EventHandler<WallSwitch.HistoryList.ItemActivatedEventArgs>(this.lstHistory_ItemActivated);
 			// 
@@ -1015,19 +1095,30 @@
 			this.ciClearHistoryList.Text = "&Clear History";
 			this.ciClearHistoryList.Click += new System.EventHandler(this.ciClearHistoryList_Click);
 			// 
+			// btnPause
+			// 
+			this.btnPause.Location = new System.Drawing.Point(129, 347);
+			this.btnPause.Name = "btnPause";
+			this.btnPause.Size = new System.Drawing.Size(75, 23);
+			this.btnPause.TabIndex = 17;
+			this.btnPause.Text = "&Pause";
+			this.btnPause.UseVisualStyleBackColor = true;
+			this.btnPause.Click += new System.EventHandler(this.btnPause_Click);
+			// 
 			// MainWindow
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(584, 382);
+			this.Controls.Add(this.btnPause);
 			this.Controls.Add(this.tabThemeSettings);
 			this.Controls.Add(this.mainMenu);
 			this.Controls.Add(this.btnActivate);
 			this.Controls.Add(this.grpTheme);
 			this.Controls.Add(this.btnPrevious);
 			this.Controls.Add(this.btnClose);
-			this.Controls.Add(this.btnSwitchNow);
 			this.Controls.Add(this.btnApply);
+			this.Controls.Add(this.btnSwitchNow);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MainMenuStrip = this.mainMenu;
 			this.MinimumSize = new System.Drawing.Size(600, 420);
@@ -1049,6 +1140,9 @@
 			this.tabLocations.ResumeLayout(false);
 			this.tabDisplay.ResumeLayout(false);
 			this.tabDisplay.PerformLayout();
+			this.c_colorEffectsGroupBox.ResumeLayout(false);
+			this.c_colorEffectsGroupBox.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.c_colorEffectCollageFadeRatioTrackBar)).EndInit();
 			this.grpCollageDisplay.ResumeLayout(false);
 			this.grpCollageDisplay.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.trkFeather)).EndInit();
@@ -1113,8 +1207,6 @@
 		private System.Windows.Forms.TrackBar trkImageSize;
 		private System.Windows.Forms.Label lblImageSizeDisplay;
 		private System.Windows.Forms.CheckBox chkSeparateMonitors;
-		private System.Windows.Forms.Label lblHotKey;
-		private System.Windows.Forms.TextBox txtHotKey;
 		private System.Windows.Forms.TrackBar trkOpacity;
 		private System.Windows.Forms.Label lblOpacity;
 		private System.Windows.Forms.Label lblOpacityDisplay;
@@ -1150,6 +1242,15 @@
 		private System.Windows.Forms.Label lblScalePct;
 		private System.Windows.Forms.TextBox txtMaxScale;
 		private System.Windows.Forms.CheckBox chkLimitScale;
+		private System.Windows.Forms.Button btnPause;
+		private HotKeyTextBox c_activateThemeHotKey;
+		private System.Windows.Forms.Label c_activateThemeLabel;
+		private System.Windows.Forms.ToolStripMenuItem miHotKeys;
+		private System.Windows.Forms.GroupBox c_colorEffectsGroupBox;
+		private System.Windows.Forms.CheckBox c_colorEffectCollageFade;
+		private System.Windows.Forms.ComboBox c_colorEffectCombo;
+		private System.Windows.Forms.Label c_colorEffectCollageFadeRatioValue;
+		private System.Windows.Forms.TrackBar c_colorEffectCollageFadeRatioTrackBar;
 
 	}
 }

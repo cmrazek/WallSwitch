@@ -78,6 +78,7 @@
     <Compile Include="AboutDialog.Designer.cs">
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="ColorEffect.cs" />
     <Compile Include="ColorSample.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -98,6 +99,15 @@
       <DependentUpon>HistoryList.cs</DependentUpon>
     </Compile>
     <Compile Include="HotKey.cs" />
+    <Compile Include="HotKeySettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="HotKeySettings.Designer.cs">
+      <DependentUpon>HotKeySettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="HotKeyTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="IconReader.cs" />
     <Compile Include="ImageCache.cs" />
     <Compile Include="ImageFit.cs" />
@@ -149,6 +159,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="HistoryList.resx">
       <DependentUpon>HistoryList.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HotKeySettings.resx">
+      <DependentUpon>HotKeySettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
@@ -219,7 +232,7 @@
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

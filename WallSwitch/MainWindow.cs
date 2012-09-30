@@ -26,7 +26,7 @@ namespace WallSwitch
 		private SwitchThread _switchThread = null;
 		private ImageList _locationImages = new ImageList();
 		private bool _winStart = false;
-		private HotKey _hotKey = new HotKey();
+		private HotKey _changeThemeHotKey = new HotKey();
 		private static MainWindow _mainWindow = null;
 
 		private delegate void VoidDelegate();
@@ -102,11 +102,15 @@ namespace WallSwitch
 					_currentTheme = activeTheme;
 				}
 
+				c_activateThemeHotKey.HotKey = _changeThemeHotKey;
+
 				// Start the switch thread
 				_switchThread = new SwitchThread();
 				_switchThread.Start(activeTheme);
 				_switchThread.Switching += new SwitchThread.SwitchEventHandler(_switchThread_Switching);
 				_switchThread.Switched += new SwitchThread.SwitchEventHandler(_switchThread_Switched);
+
+				c_colorEffectCombo.InitForEnum<ColorEffect>(ColorEffect.None);
 
 				// Update all the controls
 				RefreshControls();
@@ -278,10 +282,7 @@ namespace WallSwitch
 
 			try
 			{
-				if (m.Msg == WM_HOTKEY)
-				{
-					OnHotKey(m.WParam.ToInt32());
-				}
+				if (m.Msg == WM_HOTKEY) HotKey.OnWmHotKey(m.WParam.ToInt32());
 			}
 			catch (Exception ex)
 			{
@@ -325,6 +326,8 @@ namespace WallSwitch
 
 		private void ShowFromTray()
 		{
+			if (IsDisposed) return;
+
 			Visible = true;
 			WindowState = FormWindowState.Normal;
 
@@ -347,6 +350,8 @@ namespace WallSwitch
 
 		public void AppActivate()
 		{
+			if (IsDisposed) return;
+
 			if (InvokeRequired)
 			{
 				if (_appActivateFunc == null) _appActivateFunc = new VoidDelegate(AppActivate);
@@ -356,6 +361,17 @@ namespace WallSwitch
 
 			ShowFromTray();
 			SetForegroundWindow(this.Handle);
+		}
+
+		public void ShowNotification(string message)
+		{
+			if (!string.IsNullOrWhiteSpace(message))
+			{
+				trayIcon.BalloonTipText = message;
+				trayIcon.BalloonTipTitle = Res.Notify_Title;
+				trayIcon.BalloonTipIcon = ToolTipIcon.None;
+				trayIcon.ShowBalloonTip(1);
+			}
 		}
 		#endregion
 
@@ -456,8 +472,7 @@ namespace WallSwitch
 			UpdateImageSizeDisplay();
 
 			chkSeparateMonitors.Checked = _currentTheme.SeparateMonitors;
-			_hotKey.Copy(_currentTheme.HotKey);
-			SetHotKeyText();
+			_changeThemeHotKey.Copy(_currentTheme.HotKey);
 
 			cmbImageFit.SelectedIndex = (int)_currentTheme.ImageFit;
 
@@ -479,6 +494,10 @@ namespace WallSwitch
 				chkLimitScale.Checked = false;
 				txtMaxScale.Text = string.Empty;
 			}
+
+			c_colorEffectCombo.SetEnumValue<ColorEffect>(_currentTheme.ColorEffect);
+			c_colorEffectCollageFade.Checked = _currentTheme.ColorEffectCollageFade;
+			c_colorEffectCollageFadeRatioTrackBar.Value = _currentTheme.ColorEffectCollageFadeRatio;
 
 			Dirty = false;
 
@@ -597,15 +616,14 @@ namespace WallSwitch
 									   select l.Tag as Location).ToArray();
 
 			_currentTheme.SeparateMonitors = chkSeparateMonitors.Checked;
-			if (!_currentTheme.HotKey.Equals(_hotKey))
+			if (!_currentTheme.HotKey.Equals(_changeThemeHotKey))
 			{
 				// Hot key is changing. Need to reregister.
-				_currentTheme.HotKey = _hotKey;
-				_currentTheme.HotKey.Register(this);
+				_currentTheme.HotKey = _changeThemeHotKey;
 			}
 			else
 			{
-				_currentTheme.HotKey = _hotKey;
+				_currentTheme.HotKey = _changeThemeHotKey;
 			}
 
 			_currentTheme.ImageFit = (ImageFit)cmbImageFit.SelectedIndex;
@@ -613,6 +631,10 @@ namespace WallSwitch
 			_currentTheme.Feather = trkFeather.Value;
 			_currentTheme.FadeTransition = chkFadeTransition.Checked;
 			_currentTheme.MaxImageScale = maxImageScale;
+
+			_currentTheme.ColorEffect = c_colorEffectCombo.GetEnumValue<ColorEffect>();
+			_currentTheme.ColorEffectCollageFade = c_colorEffectCollageFade.Checked;
+			_currentTheme.ColorEffectCollageFadeRatio = c_colorEffectCollageFadeRatioTrackBar.Value;
 
 			Dirty = false;
 			EnableControls();
@@ -659,9 +681,11 @@ namespace WallSwitch
 			btnActivate.Enabled = _switchThread == null || _switchThread.Theme == null || !_switchThread.Theme.Equals(_currentTheme);
 			btnDeleteTheme.Enabled = miFileDeleteTheme.Enabled = cmbTheme.Items.Count > 1;
 
+			var isSwitching = _switchThread != null && _switchThread.IsSwitching;
+
 			Theme activeTheme = GetActiveTheme();
-			btnPrevious.Enabled = activeTheme != null && activeTheme.CanGoPrev && !_switchThread.IsSwitching;
-			btnSwitchNow.Enabled = activeTheme != null && !_switchThread.IsSwitching;
+			btnPrevious.Enabled = activeTheme != null && activeTheme.CanGoPrev && !isSwitching;
+			btnSwitchNow.Enabled = activeTheme != null && !isSwitching;
 
 			grpCollageDisplay.Visible = cmbThemeMode.SelectedIndex == k_modeCollage;
 
@@ -669,6 +693,12 @@ namespace WallSwitch
 			cmbImageFit.Visible = cmbThemeMode.SelectedIndex != k_modeCollage;
 
 			txtMaxScale.Enabled = chkLimitScale.Checked;
+
+			btnPause.Text = _switchThread != null && _switchThread.Paused ? Res.Button_Unpause : Res.Button_Pause;
+
+			var collageFade = cmbThemeMode.SelectedIndex == k_modeCollage;
+			c_colorEffectCollageFade.Visible = collageFade;
+			c_colorEffectCollageFadeRatioTrackBar.Visible = c_colorEffectCollageFadeRatioValue.Visible = collageFade && c_colorEffectCollageFade.Checked;
 
 			EnableLocationsContextMenu();
 		}
@@ -785,7 +815,6 @@ namespace WallSwitch
 		{
 			try
 			{
-
 				UpdateFeatherDisplay();
 				Dirty = true;
 			}
@@ -798,6 +827,24 @@ namespace WallSwitch
 		private void UpdateFeatherDisplay()
 		{
 			lblFeatherDisplay.Text = String.Format(Res.FeatherWidth, trkFeather.Value);
+		}
+
+		private void c_colorEffectCollageFadeRatioTrackBar_Scroll(object sender, EventArgs e)
+		{
+			try
+			{
+				UpdateCollageFadeRatioDisplay();
+				Dirty = true;
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void UpdateCollageFadeRatioDisplay()
+		{
+			c_colorEffectCollageFadeRatioValue.Text = string.Format(Res.CollageFadeRatioPercent, c_colorEffectCollageFadeRatioTrackBar.Value);
 		}
 		#endregion
 
@@ -817,6 +864,11 @@ namespace WallSwitch
 					{
 						Settings.Load(xmlSettings);
 						ImageCache.LoadSettings(xmlSettings);
+
+						foreach (XmlElement xmlHotKeys in xmlSettings.SelectNodes("HotKeys"))
+						{
+							LoadHotKeys(xmlHotKeys);
+						}
 
 						foreach (XmlElement xmlTheme in xmlSettings.SelectNodes("Theme"))
 						{
@@ -868,6 +920,10 @@ namespace WallSwitch
 					xml.WriteStartDocument();
 					xml.WriteStartElement("Settings");
 					Settings.Save(xml);
+
+					xml.WriteStartElement("HotKeys");
+					SaveHotKeys(xml);
+					xml.WriteEndElement();	// HotKeys
 
 					foreach (Theme theme in _themes)
 					{
@@ -1092,6 +1148,19 @@ namespace WallSwitch
 			}
 		}
 
+		public void OnActivateTheme(Theme setTheme)
+		{
+			try
+			{
+				if (!setTheme.IsActive) ActivateTheme(setTheme);
+				else _switchThread.SwitchNow(SwitchDir.Next);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
 		private void ActivateTheme(Theme setTheme)
 		{
 			_refreshing = true;
@@ -1230,6 +1299,19 @@ namespace WallSwitch
 			{
 				var lvi = (from l in lstLocations.Items.Cast<ListViewItem>() where object.Equals(l.Tag, e.Location) select l).FirstOrDefault();
 				if (lvi != null) UpdateLocationLvi(lvi);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void btnPause_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				_switchThread.Paused = !_switchThread.Paused;
+				EnableControls();
 			}
 			catch (Exception ex)
 			{
@@ -1699,6 +1781,31 @@ namespace WallSwitch
 			// Tell the image cache object to delete all others.
 			ImageCache.ClearExpiredCache(keepLocations);
 		}
+
+		private void chkLimitScale_CheckedChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (chkLimitScale.Checked)
+				{
+					int scale = _currentTheme.MaxImageScale;
+					if (scale <= 0) scale = Theme.k_defaultMaxImageScale;
+					txtMaxScale.Text = scale.ToString();
+					txtMaxScale.Enabled = true;
+				}
+				else
+				{
+					txtMaxScale.Text = string.Empty;
+					txtMaxScale.Enabled = false;
+				}
+				EnableControls();
+				ControlChanged(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
 		#endregion
 
 		#region About Box
@@ -1717,83 +1824,180 @@ namespace WallSwitch
 		#endregion
 
 		#region HotKeys
-		private void txtHotKey_KeyDown(object sender, KeyEventArgs e)
-		{
-			try
-			{
-				switch (e.KeyCode)
-				{
-					case Keys.Back:
-					case Keys.Delete:
-						if (_hotKey.IsEnabled)
-						{
-							_hotKey.Clear();
-							SetHotKeyText();
-							e.Handled = true;
-							Dirty = true;
-						}
-						break;
+		private HotKey _nextImageHotKey = new HotKey();
+		private HotKey _prevImageHotKey = new HotKey();
+		private HotKey _pauseHotKey = new HotKey();
+		private HotKey _clearHistoryHotKey = new HotKey();
+		private HotKey _showWindowHotKey = new HotKey();
 
-					case Keys.Menu:
-					case Keys.LMenu:
-					case Keys.RMenu:
-					case Keys.Shift:
-					case Keys.ShiftKey:
-					case Keys.LShiftKey:
-					case Keys.RShiftKey:
-					case Keys.Control:
-					case Keys.ControlKey:
-					case Keys.LControlKey:
-					case Keys.RControlKey:
-						break;
-
-					default:
-						if (_hotKey.Detect(e))
-						{
-							SetHotKeyText();
-							e.Handled = true;
-							Dirty = true;
-						}
-						break;
-				}
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex, Res.Exception_Generic);
-			}
-		}
-
-		private void SetHotKeyText()
-		{
-			txtHotKey.Text = _hotKey.ToString();
-		}
+		private const string k_nextImageHotKey = "NextImage";
+		private const string k_prevImageHotKey = "PrevImage";
+		private const string k_pauseHotKey = "Pause";
+		private const string k_clearHistoryHotKey = "ClearHistory";
+		private const string k_showWindowHotKey = "ShowWindow";
 
 		private void RegisterHotKeys()
 		{
 			foreach (Theme theme in _themes) theme.HotKey.Register(this);
+
+			_nextImageHotKey.Register(this);
+			_nextImageHotKey.HotKeyPressed += new EventHandler(_nextImageHotKey_HotKeyPressed);
+
+			_prevImageHotKey.Register(this);
+			_prevImageHotKey.HotKeyPressed += new EventHandler(_prevImageHotKey_HotKeyPressed);
+
+			_pauseHotKey.Register(this);
+			_pauseHotKey.HotKeyPressed += new EventHandler(_pauseHotKey_HotKeyPressed);
+
+			_clearHistoryHotKey.Register(this);
+			_clearHistoryHotKey.HotKeyPressed += new EventHandler(_clearHistoryHotKey_HotKeyPressed);
+
+			_showWindowHotKey.Register(this);
+			_showWindowHotKey.HotKeyPressed += new EventHandler(_showWindowHotKey_HotKeyPressed);
 		}
 
 		private void UnregisterHotKeys()
 		{
 			foreach (Theme theme in _themes) theme.HotKey.Unregister();
+
+			_nextImageHotKey.Unregister();
+			_prevImageHotKey.Unregister();
+			_pauseHotKey.Unregister();
+			_clearHistoryHotKey.Unregister();
+			_showWindowHotKey.Unregister();
 		}
 
 		private void ReregisterHotKeys()
 		{
 			foreach (Theme theme in _themes) theme.HotKey.Reregister();
+
+			_nextImageHotKey.Reregister();
+			_prevImageHotKey.Reregister();
+			_pauseHotKey.Reregister();
+			_clearHistoryHotKey.Reregister();
+			_showWindowHotKey.Reregister();
 		}
 
-		private void OnHotKey(int id)
+		private void SaveHotKeys(XmlWriter xml)
 		{
-			Log.Write(LogLevel.Debug, String.Format("Received hot key event ID [{0}].", id));
+			_nextImageHotKey.SaveXml(xml, k_nextImageHotKey);
+			_prevImageHotKey.SaveXml(xml, k_prevImageHotKey);
+			_pauseHotKey.SaveXml(xml, k_pauseHotKey);
+			_clearHistoryHotKey.SaveXml(xml, k_clearHistoryHotKey);
+			_showWindowHotKey.SaveXml(xml, k_showWindowHotKey);
+		}
 
-			foreach (Theme theme in _themes)
+		private void LoadHotKeys(XmlElement xmlRoot)
+		{
+			foreach (XmlElement element in xmlRoot.SelectNodes(HotKey.XmlElementName))
 			{
-				if (id == theme.HotKey.ID)
+				switch (element.GetAttribute(HotKey.XmlNameAttribute))
 				{
-					if (!theme.IsActive) ActivateTheme(theme);
-					else _switchThread.SwitchNow(SwitchDir.Next);
+					case k_nextImageHotKey:
+						_nextImageHotKey.LoadXml(element);
+						break;
+					case k_prevImageHotKey:
+						_prevImageHotKey.LoadXml(element);
+						break;
+					case k_pauseHotKey:
+						_pauseHotKey.LoadXml(element);
+						break;
+					case k_clearHistoryHotKey:
+						_clearHistoryHotKey.LoadXml(element);
+						break;
+					case k_showWindowHotKey:
+						_showWindowHotKey.LoadXml(element);
+						break;
 				}
+			}
+		}
+
+		private void miHotKeys_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				var form = new HotKeySettings();
+				form.NextImageHotKey = _nextImageHotKey;
+				form.PrevImageHotKey = _prevImageHotKey;
+				form.PauseHotKey = _pauseHotKey;
+				form.ClearHistoryHotKey = _clearHistoryHotKey;
+				form.ShowWindowHotKey = _showWindowHotKey;
+
+				if (form.ShowDialog(this) == DialogResult.OK)
+				{
+					_nextImageHotKey.Copy(form.NextImageHotKey);
+					_prevImageHotKey.Copy(form.PrevImageHotKey);
+					_pauseHotKey.Copy(form.PauseHotKey);
+					_clearHistoryHotKey.Copy(form.ClearHistoryHotKey);
+					_showWindowHotKey.Copy(form.ShowWindowHotKey);
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		void _nextImageHotKey_HotKeyPressed(object sender, EventArgs e)
+		{
+			try
+			{
+				_switchThread.SwitchNow(SwitchDir.Next);
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Exception during next image hotkey.");
+			}
+		}
+
+		void _prevImageHotKey_HotKeyPressed(object sender, EventArgs e)
+		{
+			try
+			{
+				_switchThread.SwitchNow(SwitchDir.Prev);
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Exception during previous image hotkey.");
+			}
+		}
+
+		void _pauseHotKey_HotKeyPressed(object sender, EventArgs e)
+		{
+			try
+			{
+				_switchThread.Paused = !_switchThread.Paused;
+				EnableControls();
+				ShowNotification(_switchThread.Paused ? Res.Notify_Paused : Res.Notify_Unpaused);
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Exception during pause hotkey.");
+			}
+		}
+
+		void _clearHistoryHotKey_HotKeyPressed(object sender, EventArgs e)
+		{
+			try
+			{
+				ClearHistory();
+				ShowNotification(Res.Notify_HistoryCleared);
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Exception during clear history hotkey.");
+			}
+		}
+
+		void _showWindowHotKey_HotKeyPressed(object sender, EventArgs e)
+		{
+			try
+			{
+				AppActivate();
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Exception during show window hotkey.");
 			}
 		}
 		#endregion
@@ -1911,31 +2115,6 @@ namespace WallSwitch
 			}
 		}
 		#endregion
-
-		private void chkLimitScale_CheckedChanged(object sender, EventArgs e)
-		{
-			try
-			{
-				if (chkLimitScale.Checked)
-				{
-					int scale = _currentTheme.MaxImageScale;
-					if (scale <= 0) scale = Theme.k_defaultMaxImageScale;
-					txtMaxScale.Text = scale.ToString();
-					txtMaxScale.Enabled = true;
-				}
-				else
-				{
-					txtMaxScale.Text = string.Empty;
-					txtMaxScale.Enabled = false;
-				}
-				EnableControls();
-				ControlChanged(sender, e);
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex);
-			}
-		}
 
 		
 

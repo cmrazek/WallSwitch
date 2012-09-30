@@ -10,13 +10,13 @@ using System.Drawing.Imaging;
 
 namespace WallSwitch
 {
-	enum ImageLocationType
+	public enum ImageLocationType
 	{
 		File,
 		Url
 	}
 
-	class ImageRec
+	public class ImageRec
 	{
 		#region Member Variables
 		private string _location;

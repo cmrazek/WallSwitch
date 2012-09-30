@@ -10,7 +10,7 @@ using System.Xml;
 
 namespace WallSwitch
 {
-	class Theme
+	public class Theme
 	{
 		#region Constants
 		private const int k_maxHistory = 10;
@@ -27,6 +27,7 @@ namespace WallSwitch
 		private const int k_defaultFeather = 15;
 		private const bool k_defaultFadeTransition = true;
 		public const int k_defaultMaxImageScale = 200;
+		public const int k_defaultColorEffectCollageFadeRatio = 25;
 		#endregion
 
 		#region Variables
@@ -52,6 +53,9 @@ namespace WallSwitch
 		private bool _fadeTransition = k_defaultFadeTransition;
 		private string _lastWallpaperFile = string.Empty;
 		private int _maxImageScale = k_defaultMaxImageScale;
+		private ColorEffect _colorEffect = ColorEffect.None;
+		private bool _colorEffectCollageFade = false;
+		private int _colorEffectCollageFadeRatio = k_defaultColorEffectCollageFadeRatio;
 		#endregion
 
 		#region Construction
@@ -59,6 +63,20 @@ namespace WallSwitch
 		{
 			_id = id;
 			CalcInterval();
+
+			_hotKey.HotKeyPressed += new EventHandler(_hotKey_HotKeyPressed);
+		}
+
+		void _hotKey_HotKeyPressed(object sender, EventArgs e)
+		{
+			try
+			{
+				if (MainWindow.Window != null) MainWindow.Window.OnActivateTheme(this);
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Exception when activating theme in response to hotkey.");
+			}
 		}
 		#endregion
 
@@ -155,6 +173,10 @@ namespace WallSwitch
 		#endregion
 
 		#region Save/Load
+		private const string k_colorEffectXml = "ColorEffect";
+		private const string k_colorEffectCollageFadeXml = "ColorEffectCollageFade";
+		private const string k_colorEffectCollageFadeRatio = "ColorEffectCollageFadeRatio";
+
 		public void Save(XmlWriter xml)
 		{
 			xml.WriteAttributeString("Name", _name);
@@ -180,7 +202,11 @@ namespace WallSwitch
 			if (!string.IsNullOrEmpty(_lastWallpaperFile)) xml.WriteAttributeString("LastWallpaperFile", _lastWallpaperFile);
 			if (_maxImageScale != k_defaultMaxImageScale) xml.WriteAttributeString("MaxImageScale", _maxImageScale.ToString());
 
-			_hotKey.SaveTheme(xml);
+			if (_colorEffect != ColorEffect.None) xml.WriteAttributeString(k_colorEffectXml, _colorEffect.ToString());
+			if (_colorEffectCollageFade != false) xml.WriteAttributeString(k_colorEffectCollageFadeXml, _colorEffectCollageFade.ToString());
+			if (_colorEffectCollageFade != false) xml.WriteAttributeString(k_colorEffectCollageFadeRatio, _colorEffectCollageFadeRatio.ToString());
+
+			_hotKey.SaveXml(xml);
 
 			foreach (Location loc in _locations)
 			{
@@ -210,8 +236,14 @@ namespace WallSwitch
 			_fadeTransition = Util.ParseBool(xmlTheme, "FadeTransition", k_defaultFadeTransition);
 			_lastWallpaperFile = Util.ParseString(xmlTheme, "LastWallpaperFile", string.Empty);
 			_maxImageScale = Util.ParseInt(xmlTheme, "MaxImageScale", k_defaultMaxImageScale);
+			_colorEffect = Util.ParseEnum<ColorEffect>(xmlTheme, k_colorEffectXml, ColorEffect.None);
+			_colorEffectCollageFade = Util.ParseBool(xmlTheme, k_colorEffectCollageFadeXml, false);
+			_colorEffectCollageFadeRatio = Util.ParseInt(xmlTheme, k_colorEffectCollageFadeRatio, k_defaultColorEffectCollageFadeRatio);
 
-			_hotKey.LoadTheme(xmlTheme);
+			foreach (XmlElement xmlHotKey in xmlTheme.SelectNodes(HotKey.XmlElementName))
+			{
+				_hotKey.LoadXml(xmlHotKey);
+			}
 
 			foreach (XmlElement xmlLoc in xmlTheme.SelectNodes("Location"))
 			{
@@ -604,6 +636,31 @@ namespace WallSwitch
 		{
 			EventHandler<LocationUpdatedEventArgs> ev = LocationUpdated;
 			if (ev != null) ev(this, new LocationUpdatedEventArgs(this, location));
+		}
+		#endregion
+
+		#region Color Effects
+		public ColorEffect ColorEffect
+		{
+			get { return _colorEffect; }
+			set { _colorEffect = value; }
+		}
+
+		public bool ColorEffectCollageFade
+		{
+			get { return _colorEffectCollageFade; }
+			set { _colorEffectCollageFade = value; }
+		}
+
+		public int ColorEffectCollageFadeRatio
+		{
+			get { return _colorEffectCollageFadeRatio; }
+			set
+			{
+				if (value < 0) _colorEffectCollageFadeRatio = 0;
+				else if (value > 100) _colorEffectCollageFadeRatio = 100;
+				else _colorEffectCollageFadeRatio = value;
+			}
 		}
 		#endregion
 	}

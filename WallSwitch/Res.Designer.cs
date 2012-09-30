@@ -113,6 +113,69 @@ namespace WallSwitch {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &amp;Pause.
+        /// </summary>
+        internal static string Button_Pause {
+            get {
+                return ResourceManager.GetString("Button_Pause", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Un&amp;pause.
+        /// </summary>
+        internal static string Button_Unpause {
+            get {
+                return ResourceManager.GetString("Button_Unpause", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Return.
+        /// </summary>
+        internal static string Char_Cr {
+            get {
+                return ResourceManager.GetString("Char_Cr", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Return.
+        /// </summary>
+        internal static string Char_Lf {
+            get {
+                return ResourceManager.GetString("Char_Lf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Space.
+        /// </summary>
+        internal static string Char_Space {
+            get {
+                return ResourceManager.GetString("Char_Space", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tab.
+        /// </summary>
+        internal static string Char_Tab {
+            get {
+                return ResourceManager.GetString("Char_Tab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}%.
+        /// </summary>
+        internal static string CollageFadeRatioPercent {
+            get {
+                return ResourceManager.GetString("CollageFadeRatioPercent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You have made changes to this theme. Do you want to save changes before changing?.
         /// </summary>
         internal static string Confirm_ChangeDirtyTheme {
@@ -689,6 +752,42 @@ namespace WallSwitch {
         internal static string NextUpdateNow {
             get {
                 return ResourceManager.GetString("NextUpdateNow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wallpaper history has been cleared..
+        /// </summary>
+        internal static string Notify_HistoryCleared {
+            get {
+                return ResourceManager.GetString("Notify_HistoryCleared", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Paused.
+        /// </summary>
+        internal static string Notify_Paused {
+            get {
+                return ResourceManager.GetString("Notify_Paused", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WallSwitch.
+        /// </summary>
+        internal static string Notify_Title {
+            get {
+                return ResourceManager.GetString("Notify_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unpaused.
+        /// </summary>
+        internal static string Notify_Unpaused {
+            get {
+                return ResourceManager.GetString("Notify_Unpaused", resourceCulture);
             }
         }
         

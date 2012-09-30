@@ -10,7 +10,7 @@ namespace WallSwitch
 	/// <summary>
 	/// Holds information for a hot key.
 	/// </summary>
-	class HotKey
+	public class HotKey
 	{
 		#region Variables
 		private Keys _key = Keys.None;
@@ -21,6 +21,9 @@ namespace WallSwitch
 		private Form _form = null;
 		private int _id = 0;
 		private static int _lastId = 0;
+		private bool _active = false;
+
+		private static Dictionary<int, HotKey> _reg = new Dictionary<int, HotKey>();
 		#endregion
 
 		#region PInvoke
@@ -33,6 +36,9 @@ namespace WallSwitch
 		[DllImport("Kernel32.dll", SetLastError = true)]
 		public static extern uint GetLastError();
 
+		[DllImport("user32.dll")]
+		private static extern int MapVirtualKey(uint uCode, uint uMapType);
+
 		private const int MOD_ALT = 0x0001;
 		private const int MOD_CONTROL = 0x0002;
 		private const int MOD_NOREPEAT = 0x4000;
@@ -40,13 +46,49 @@ namespace WallSwitch
 		private const int MOD_WIN = 0x0008;
 		#endregion
 
+		#region Events
+		public event EventHandler KeyComboChanged;
+		public event EventHandler HotKeyPressed;
+
+		private void FireKeyComboChanged()
+		{
+			try
+			{
+				var ev = KeyComboChanged;
+				if (ev != null) ev(this, new EventArgs());
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Exception when firing KeyComboChanged event.");
+			}
+		}
+
+		private void FireHotKeyPressed()
+		{
+			try
+			{
+				var ev = HotKeyPressed;
+				if (ev != null) ev(this, new EventArgs());
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Exception when firing HotKeyPressed event.");
+			}
+		}
+		#endregion
+
 		/// <summary>
 		/// Clears out the hot key.
 		/// </summary>
 		public void Clear()
 		{
-			_key = Keys.None;
-			_control = _alt = _shift = false;
+			if (_key != Keys.None || _control || _alt || _shift)
+			{
+				_key = Keys.None;
+				_control = _alt = _shift = false;
+
+				OnKeyComboChanged();
+			}
 		}
 
 		/// <summary>
@@ -55,10 +97,15 @@ namespace WallSwitch
 		/// <param name="k">The object to be copied.</param>
 		public void Copy(HotKey k)
 		{
-			_key = k._key;
-			_control = k._control;
-			_alt = k._alt;
-			_shift = k._shift;
+			if (_key != k._key || _control != k._control || _alt != k._alt || _shift != k._shift)
+			{
+				_key = k._key;
+				_control = k._control;
+				_alt = k._alt;
+				_shift = k._shift;
+
+				OnKeyComboChanged();
+			}
 		}
 
 		/// <summary>
@@ -75,17 +122,18 @@ namespace WallSwitch
 			return _key == h._key && _control == h._control && _alt == h._alt && _shift == h._shift;
 		}
 
+		/// <summary>
+		/// Gets a hash code for this HotKey object.
+		/// </summary>
+		/// <returns></returns>
 		public override int GetHashCode()
 		{
 			return base.GetHashCode();
 		}
 
-		/// <summary>
-		/// Returns a string containing the text representation of the hot key.
-		/// </summary>
-		public override string ToString()
+		public string GetText(bool friendly)
 		{
-			if (_key == Keys.None) return "";
+			if (_key == Keys.None) return string.Empty;
 
 			StringBuilder sb = new StringBuilder();
 
@@ -108,9 +156,48 @@ namespace WallSwitch
 			}
 
 			if (sb.Length > 0) sb.Append(Res.HotKey_Delim);
-			sb.Append(_key.ToString());
+			sb.Append(GetFriendlyKeysDesc(_key));
 
 			return sb.ToString();
+		}
+
+		/// <summary>
+		/// Returns a string containing the text representation of the hot key.
+		/// </summary>
+		public override string ToString()
+		{
+			return GetText(false);
+		}
+
+		/// <summary>
+		/// Gets a friendly representation of a virtual key code.
+		/// </summary>
+		/// <param name="key">The virtual key code.</param>
+		/// <returns>A string that contains the friendly text.</returns>
+		private string GetFriendlyKeysDesc(Keys key)
+		{
+			try
+			{
+				var charCode = MapVirtualKey((uint)_key, 2);
+				var ch = Convert.ToChar(charCode);
+				switch (ch)
+				{
+					case ' ':
+						return Res.Char_Space;
+					case '\t':
+						return Res.Char_Tab;
+					case '\r':
+						return Res.Char_Cr;
+					case '\n':
+						return Res.Char_Lf;
+					default:
+						return ch.ToString();
+				}
+			}
+			catch (Exception)
+			{
+				return key.ToString();
+			}
 		}
 
 		/// <summary>
@@ -123,10 +210,15 @@ namespace WallSwitch
 			// Only accept hot key if one or more modifier keys are pressed as well.
 			if (!e.Control && !e.Alt && !e.Shift) return false;
 
-			_key = e.KeyCode;
-			_control = e.Control;
-			_alt = e.Alt;
-			_shift = e.Shift;
+			if (_key != e.KeyCode || _control != e.Control || _alt != e.Alt || _shift != e.Shift)
+			{
+				_key = e.KeyCode;
+				_control = e.Control;
+				_alt = e.Alt;
+				_shift = e.Shift;
+
+				OnKeyComboChanged();
+			}
 
 			return true;
 		}
@@ -134,7 +226,7 @@ namespace WallSwitch
 		/// <summary>
 		/// Gets a flag indicating if a valid hot key combination was entered.
 		/// </summary>
-		public bool IsEnabled
+		public bool IsValidKeyCombo
 		{
 			get { return _key != Keys.None; }
 		}
@@ -143,11 +235,12 @@ namespace WallSwitch
 		/// Saves the hot key information to the theme element.
 		/// </summary>
 		/// <param name="xml"></param>
-		public void SaveTheme(XmlWriter xml)
+		public void SaveXml(XmlWriter xml, string name = "")
 		{
-			if (IsEnabled)
+			if (IsValidKeyCombo)
 			{
 				xml.WriteStartElement("HotKey");
+				if (!string.IsNullOrEmpty(name)) xml.WriteAttributeString("Name", name);
 				if (_control) xml.WriteAttributeString("Control", Boolean.TrueString);
 				if (_alt) xml.WriteAttributeString("Alt", Boolean.TrueString);
 				if (_shift) xml.WriteAttributeString("Shift", Boolean.TrueString);
@@ -160,29 +253,41 @@ namespace WallSwitch
 		/// Loads the hot key information from the theme element.
 		/// </summary>
 		/// <param name="xmlTheme"></param>
-		public void LoadTheme(XmlElement xmlTheme)
+		public void LoadXml(XmlElement xmlHotKey)
 		{
-			XmlElement xml = (XmlElement)xmlTheme.SelectSingleNode("HotKey");
-			if (xml != null)
+			if (xmlHotKey.HasAttribute("Control") && !Boolean.TryParse(xmlHotKey.GetAttribute("Control"), out _control))
+				throw new XmlException("Invalid hotkey Control value.");
+
+			if (xmlHotKey.HasAttribute("Alt") && !Boolean.TryParse(xmlHotKey.GetAttribute("Alt"), out _alt))
+				throw new XmlException("Invalid hotkey Alt value.");
+
+			if (xmlHotKey.HasAttribute("Shift") && !Boolean.TryParse(xmlHotKey.GetAttribute("Shift"), out _shift))
+				throw new XmlException("Invalid hotkey Shift value.");
+
+			if (xmlHotKey.HasAttribute("Key"))
 			{
-				if (xml.HasAttribute("Control") && !Boolean.TryParse(xml.GetAttribute("Control"), out _control))
-					throw new XmlException("Invalid hotkey Control value.");
-
-				if (xml.HasAttribute("Alt") && !Boolean.TryParse(xml.GetAttribute("Alt"), out _alt))
-					throw new XmlException("Invalid hotkey Alt value.");
-
-				if (xml.HasAttribute("Shift") && !Boolean.TryParse(xml.GetAttribute("Shift"), out _shift))
-					throw new XmlException("Invalid hotkey Shift value.");
-
-				if (xml.HasAttribute("Key"))
-				{
-					if (!Enum.TryParse<Keys>(xml.GetAttribute("Key"), out _key)) throw new XmlException("Invalid hotkey Key value.");
-				}
-				else
-				{
-					throw new XmlException("Hotkey does not have a 'Key' attribute.");
-				}
+				if (!Enum.TryParse<Keys>(xmlHotKey.GetAttribute("Key"), out _key)) throw new XmlException("Invalid hotkey Key value.");
 			}
+			else
+			{
+				throw new XmlException("Hotkey does not have a 'Key' attribute.");
+			}
+		}
+
+		/// <summary>
+		/// Gets the name of the XML element created by SaveXml().
+		/// </summary>
+		public static string XmlElementName
+		{
+			get { return "HotKey"; }
+		}
+
+		/// <summary>
+		/// Gets the name of the Name attribute created by SaveXml().
+		/// </summary>
+		public static string XmlNameAttribute
+		{
+			get { return "Name"; }
 		}
 
 		/// <summary>
@@ -193,7 +298,9 @@ namespace WallSwitch
 		{
 			try
 			{
-				if (!IsEnabled) return;
+				_active = true;
+				_form = form;
+				if (!IsValidKeyCombo) return;
 
 				if (_id != 0)
 				{
@@ -218,8 +325,8 @@ namespace WallSwitch
 				if (0 != RegisterHotKey(form.Handle, id, mod, (int)_key))
 				{
 					Log.Write(LogLevel.Debug, "Registered hotkey [{0}] with ID [{1}].", ToString(), id);
-					_form = form;
 					_id = id;
+					_reg[id] = this;
 				}
 				else
 				{
@@ -239,13 +346,15 @@ namespace WallSwitch
 		{
 			try
 			{
-				if (_id == 0) return;
+				_active = false;
+				if (_id == 0 || _form == null) return;
 
 				Log.Write(LogLevel.Debug, "Unregistering hotkey [{0}] ID [{1}].", ToString(), _id);
 
 				if (0 != UnregisterHotKey(_form.Handle, _id))
 				{
 					_form = null;
+					_reg.Remove(_id);
 					_id = 0;
 				}
 				else
@@ -266,7 +375,8 @@ namespace WallSwitch
 		{
 			try
 			{
-				if (_id != 0)
+				_active = true;
+				if (_id != 0 && _form != null)
 				{
 					Log.Write(LogLevel.Debug, "Reregistering hotkey [{0}] ID [{1}].", ToString(), _id);
 
@@ -278,6 +388,7 @@ namespace WallSwitch
 					if (0 != RegisterHotKey(_form.Handle, _id, mod, (int)_key))
 					{
 						Log.Write(LogLevel.Debug, "Successfully reregistered hotkey [{0}] with ID [{1}].", ToString(), _id);
+						_reg[_id] = this;
 					}
 					else
 					{
@@ -297,6 +408,26 @@ namespace WallSwitch
 		public int ID
 		{
 			get { return _id; }
+		}
+
+		/// <summary>
+		/// Called internally when the key combination has changed.
+		/// </summary>
+		private void OnKeyComboChanged()
+		{
+			if (_active && _form != null) Register(_form);
+			FireKeyComboChanged();
+		}
+
+		/// <summary>
+		/// Handles WM_HOTKEY events.
+		/// </summary>
+		/// <param name="id">The hotkey ID retrieved from WM_HOTKEY.</param>
+		/// <remarks>This function should be called by form class that detects WM_HOTKEY event messages.</remarks>
+		public static void OnWmHotKey(int id)
+		{
+			HotKey hk;
+			if (_reg.TryGetValue(id, out hk)) hk.FireHotKeyPressed();
 		}
 	}
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WallSwitch
 {
-	enum ImageFit : int
+	public enum ImageFit : int
 	{
 		Original = 0,
 		Stretch = 1,

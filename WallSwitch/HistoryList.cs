@@ -27,6 +27,7 @@ namespace WallSwitch
 		private int _maxScroll = 0;
 		private HistoryItem _selectedItem = null;
 		private int _maxHistory = k_maxHistory;
+		private ToolTip _imageToolTip = null;
 		#endregion
 
 		#region Internal Classes
@@ -406,6 +407,43 @@ namespace WallSwitch
 				this.ShowError(ex);
 			}
 		}
+
+		public ToolTip ImageToolTip
+		{
+			get { return _imageToolTip; }
+			set { _imageToolTip = value; }
+		}
+
+		private void HistoryList_MouseHover(object sender, EventArgs e)
+		{
+			try
+			{
+				var cursorPos = this.PointToClient(new Point(Cursor.Position.X, Cursor.Position.Y));
+
+				if (_imageToolTip != null)
+				{
+					HistoryItem hi = HitTest(cursorPos);
+					if (hi != null) _imageToolTip.SetToolTip(this, hi.imageRec.Location);
+					else _imageToolTip.SetToolTip(this, string.Empty);
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void HistoryList_MouseMove(object sender, MouseEventArgs e)
+		{
+			try
+			{
+				this.ResetMouseEventArgs();
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
 		#endregion
 
 		#region Keyboard Input
@@ -541,5 +579,6 @@ namespace WallSwitch
 			}
 		}
 		#endregion
+
 	}
 }

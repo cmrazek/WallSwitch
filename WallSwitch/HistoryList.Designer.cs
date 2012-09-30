@@ -53,6 +53,8 @@
 			this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.HistoryList_MouseClick);
 			this.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.HistoryList_MouseDoubleClick);
 			this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.HistoryList_MouseDown);
+			this.MouseHover += new System.EventHandler(this.HistoryList_MouseHover);
+			this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.HistoryList_MouseMove);
 			this.Resize += new System.EventHandler(this.HistoryList_Resize);
 			this.ResumeLayout(false);
 

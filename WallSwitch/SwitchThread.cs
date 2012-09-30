@@ -168,6 +168,8 @@ namespace WallSwitch
 				return switchNow;
 			}
 
+			if (_paused) return SwitchDir.None;
+
 			// If the screensaver was last found to be running, then check now if the user has woken up.
 			if (_screensaverRunning)
 			{
@@ -230,6 +232,7 @@ namespace WallSwitch
 		public event SwitchEventHandler Switching;
 		public event SwitchEventHandler Switched;
 		private bool _switching = false;
+		private volatile bool _paused = false;
 
 		private void DoSwitch(SwitchDir dir)
 		{
@@ -298,6 +301,12 @@ namespace WallSwitch
 		public bool IsSwitching
 		{
 			get { return _switching; }
+		}
+
+		public bool Paused
+		{
+			get { return _paused; }
+			set { _paused = value; }
 		}
 		#endregion
 	}

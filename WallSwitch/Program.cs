@@ -52,7 +52,7 @@ namespace WallSwitch
 			{
 				if (s != null)
 				{
-					while (s.WaitOne())
+					while (s.SafeWaitHandle != null && !s.SafeWaitHandle.IsClosed && s.WaitOne())
 					{
 						MainWindow window = MainWindow.Window;
 						if (window != null) window.AppActivate();

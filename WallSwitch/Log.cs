@@ -21,7 +21,6 @@ namespace WallSwitch
 	public class Log
 	{
 		#region Variables
-		private static Thread _thread = null;
 		private static StreamWriter _file = null;
 		private static bool _enabled = false;
 		private static LogLevel _level = LogLevel.Debug;
@@ -49,10 +48,8 @@ namespace WallSwitch
 #if DEBUG
 			catch (Exception ex)
 			{
-
 				Debug.WriteLine("Error when opening log file:");
 				Debug.WriteLine(ex.ToString());
-
 			}
 #else
 			catch (Exception)

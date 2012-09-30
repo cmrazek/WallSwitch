@@ -17,7 +17,7 @@ namespace WallSwitch
 	class SetWallpaper
 	{
 		#region Variables
-		private Theme _theme = null;
+		//private Theme _theme = null;
 		private Graphics _g = null;
 		private Random _rand = new Random();
 		private bool _firstRender = true;
@@ -1259,9 +1259,9 @@ namespace WallSwitch
 		#endregion // SPI
 		#endregion
 
-		private void ChangeWallpaper(Bitmap bitmap)
+		private void ChangeWallpaper(Theme theme, Bitmap bitmap)
 		{
-			var fileName = _theme.GetWallpaperFileName(ImageFormat.Bmp);
+			var fileName = theme.GetWallpaperFileName(ImageFormat.Bmp);
 			bitmap.Save(fileName, ImageFormat.Bmp);
 
 			RegistryKey key = Registry.CurrentUser.OpenSubKey("Control Panel\\Desktop", true);
@@ -1282,16 +1282,16 @@ namespace WallSwitch
 				throw new InvalidOperationException("Failed to set wallpaper.");
 			}
 
-			_theme.LastWallpaperFile = fileName;
+			theme.LastWallpaperFile = fileName;
 		}
 
-		private void ChangeWallpaperFade(Bitmap bitmap)
+		private void ChangeWallpaperFade(Theme theme, Bitmap bitmap)
 		{
 			try
 			{
 				int result;
 
-				var fileName = _theme.GetWallpaperFileName(ImageFormat.Png);
+				var fileName = theme.GetWallpaperFileName(ImageFormat.Png);
 				bitmap.Save(fileName, ImageFormat.Png);
 
 				var hwnd = FindWindow("Progman", null);
@@ -1315,12 +1315,12 @@ namespace WallSwitch
 				if ((result = ad.ApplyChanges(AD_Apply.ALL | AD_Apply.BUFFERED_REFRESH)) != 0)
 					throw new Exception(string.Format("IActiveDesktop.ApplyChanges failed with HRESULT 0x{0:X8}", result));
 
-				_theme.LastWallpaperFile = fileName;
+				theme.LastWallpaperFile = fileName;
 			}
 			catch (Exception ex)
 			{
 				Log.Write(ex, "Exception when fading desktop background.");
-				ChangeWallpaper(bitmap);
+				ChangeWallpaper(theme, bitmap);
 			}
 		}
 
@@ -1333,7 +1333,6 @@ namespace WallSwitch
 		{
 			if (theme == null) throw new ArgumentNullException("Theme is null.");
 			if (files == null) throw new ArgumentNullException("Files list is null.");
-			_theme = theme;
 
 			// Get the desktop dimensions.
 			Size fullSize = new Size();
@@ -1346,9 +1345,9 @@ namespace WallSwitch
 
 			// If there's a previous wallpaper saved, then load it.
 			Bitmap bitmap;
-			if (_theme.Mode == ThemeMode.Collage)
+			if (theme.Mode == ThemeMode.Collage)
 			{
-				bitmap = LoadLastWallpaper();
+				bitmap = LoadLastWallpaper(theme);
 				_firstRender = bitmap == null;
 			}
 			else
@@ -1365,6 +1364,10 @@ namespace WallSwitch
 				bitmap = new Bitmap(fullSize.Width, fullSize.Height);
 				_firstRender = true;
 			}
+			else
+			{
+				bitmap = ApplyBackgroundFadeColorEffect(theme, bitmap);
+			}
 
 			_g = Graphics.FromImage((Image)bitmap);
 
@@ -1373,34 +1376,34 @@ namespace WallSwitch
 			int imageIndex = 0;
 			foreach (Screen screen in Screen.AllScreens)
 			{
-				RenderScreen(filesArray.Length > imageIndex ? filesArray[imageIndex] : null, screen);
+				RenderScreen(theme, filesArray.Length > imageIndex ? filesArray[imageIndex] : null, screen);
 				imageIndex++;
 				if (imageIndex >= filesArray.Length) imageIndex = 0;
 			}
 			_firstRender = false;
 
 			// Apply to desktop background.
-			if (_theme.FadeTransition) ChangeWallpaperFade(bitmap);
-			else ChangeWallpaper(bitmap);
+			if (theme.FadeTransition) ChangeWallpaperFade(theme, bitmap);
+			else ChangeWallpaper(theme, bitmap);
 
 			bitmap.Dispose();
 			bitmap = null;
 		}
 
-		private Bitmap LoadLastWallpaper()
+		private Bitmap LoadLastWallpaper(Theme theme)
 		{
 			try
 			{
-				var fileName = _theme.LastWallpaperFile;
+				var fileName = theme.LastWallpaperFile;
 				if (string.IsNullOrEmpty(fileName) || !File.Exists(fileName))
 				{
-					fileName = _theme.GetWallpaperFileName(ImageFormat.Png);
+					fileName = theme.GetWallpaperFileName(ImageFormat.Png);
 					if (!File.Exists(fileName))
 					{
-						fileName = _theme.GetWallpaperFileName(ImageFormat.Jpeg);
+						fileName = theme.GetWallpaperFileName(ImageFormat.Jpeg);
 						if (!File.Exists(fileName))
 						{
-							fileName = _theme.GetWallpaperFileName(ImageFormat.Bmp);
+							fileName = theme.GetWallpaperFileName(ImageFormat.Bmp);
 							if (!File.Exists(fileName)) return null;
 						}
 					}
@@ -1428,19 +1431,19 @@ namespace WallSwitch
 			}
 		}
 
-		private void RenderScreen(ImageRec file, Screen screen)
+		private void RenderScreen(Theme theme, ImageRec file, Screen screen)
 		{
 			try
 			{
 				if (file == null)
 				{
 					Log.Write(LogLevel.Warning, "No image file passed.");
-					ClearBackground(screen, 255);
+					ClearBackground(theme, screen, 255);
 				}
 				else if (!file.IsPresent)
 				{
 					Log.Write(LogLevel.Warning, "No image object is loaded.");
-					ClearBackground(screen, 255);
+					ClearBackground(theme, screen, 255);
 				}
 				else
 				{
@@ -1457,18 +1460,18 @@ namespace WallSwitch
 					RectangleF imgRect = new RectangleF(0, 0, img.Width, img.Height);
 					RectangleF srcRect = imgRect;
 
-					if (_theme.Mode == ThemeMode.Collage)
+					if (theme.Mode == ThemeMode.Collage)
 					{
 						// The maximum image size will be determined by the number of pixels (area), not by the max width/height.
 						// This will provide a more consistent image size when there are pictures with different aspect ratios.
 						float imgArea = imgWidth * imgHeight;
-						float imgSize = (float)_theme.ImageSize / 100.0f;
+						float imgSize = (float)theme.ImageSize / 100.0f;
 						float screenArea = screenRect.Width * imgSize * screenRect.Height * imgSize;
 						float scale = (float)Math.Sqrt(screenArea / imgArea);
 
-						if (_theme.MaxImageScale > 0)
+						if (theme.MaxImageScale > 0)
 						{
-							var maxScale = (float)_theme.MaxImageScale / 100.0f;
+							var maxScale = (float)theme.MaxImageScale / 100.0f;
 							if (maxScale > 0.0f && scale > maxScale) scale = maxScale;
 						}
 						imgWidth *= scale;
@@ -1498,25 +1501,40 @@ namespace WallSwitch
 						imgRect.Height = imgHeight;
 
 						if (_firstRender) clearOpacity = 255;
-						else clearOpacity = _theme.BackOpacity255;
+						else clearOpacity = theme.BackOpacity255;
 						clearRequired = true;
 
 						// Feather edges
-						if (scale > 0.0f && _theme.Feather > 0)
+						if (scale > 0.0f && theme.Feather > 0)
 						{
-							int featherWidth = (int)((float)_theme.Feather / scale);
+							int featherWidth = (int)((float)theme.Feather / scale);
 							if (featherWidth > 0) img = FeatherImage(img, featherWidth);
 						}
 					}
 					else // Sequential or Random - one image per screen
 					{
-						imgRect = FitImage(imgRect, ref srcRect, screenRect, _theme.ImageFit, img.Size, ref clearRequired);
+						imgRect = FitImage(theme, imgRect, ref srcRect, screenRect, theme.ImageFit, img.Size, ref clearRequired);
 					}
 
 					_g.SetClip(screen.Bounds);
-					if (clearRequired && clearOpacity > 0) ClearBackground(screen, clearOpacity);
-					if (img != null) _g.DrawImage(img, imgRect, srcRect, GraphicsUnit.Pixel);
-					//_g.ResetClip();
+					if (clearRequired && clearOpacity > 0) ClearBackground(theme, screen, clearOpacity);
+
+					if (theme.ColorEffect == ColorEffect.None ||
+					    (theme.Mode == ThemeMode.Collage && theme.ColorEffectCollageFade))
+					{
+					    _g.DrawImage(img, imgRect, srcRect, GraphicsUnit.Pixel);
+					}
+					else
+					{
+						var colorMatrix = theme.ColorEffect.GetColorMatrix();
+						ImageAttributes imgAttribs = new ImageAttributes();
+						imgAttribs.SetColorMatrix(colorMatrix);
+
+						if (img != null) _g.DrawImage(img,
+							new Rectangle((int)Math.Round(imgRect.X), (int)Math.Round(imgRect.Y), (int)Math.Round(imgRect.Width), (int)Math.Round(imgRect.Height)),
+							srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height,
+							GraphicsUnit.Pixel, imgAttribs);
+					}
 				}
 			}
 			catch (Exception ex)
@@ -1525,10 +1543,10 @@ namespace WallSwitch
 			}
 		}
 
-		private void ClearBackground(Screen screen, int opacity)
+		private void ClearBackground(Theme theme, Screen screen, int opacity)
 		{
-			Color topColor = Color.FromArgb(opacity, _theme.BackColorTop.R, _theme.BackColorTop.G, _theme.BackColorTop.B);
-			Color bottomColor = Color.FromArgb(opacity, _theme.BackColorBottom.R, _theme.BackColorBottom.G, _theme.BackColorBottom.B);
+			Color topColor = Color.FromArgb(opacity, theme.BackColorTop.R, theme.BackColorTop.G, theme.BackColorTop.B);
+			Color bottomColor = Color.FromArgb(opacity, theme.BackColorBottom.R, theme.BackColorBottom.G, theme.BackColorBottom.B);
 
 			Brush brush;
 			if (topColor.ToArgb() == bottomColor.ToArgb())
@@ -1546,7 +1564,7 @@ namespace WallSwitch
 			brush.Dispose();
 		}
 
-		private RectangleF FitImage(RectangleF imgRect, ref RectangleF srcRect, RectangleF screenRect, ImageFit fit, SizeF imgSize, ref bool clearBackground)
+		private RectangleF FitImage(Theme theme, RectangleF imgRect, ref RectangleF srcRect, RectangleF screenRect, ImageFit fit, SizeF imgSize, ref bool clearBackground)
 		{
 			SizeF screenSize = screenRect.Size;
 			RectangleF origImgRect = imgRect;
@@ -1558,9 +1576,9 @@ namespace WallSwitch
 					break;
 
 				case ImageFit.Stretch:
-					if (_theme.MaxImageScale > 0)
+					if (theme.MaxImageScale > 0)
 					{
-						var maxScale = (float)_theme.MaxImageScale / 100.0f;
+						var maxScale = (float)theme.MaxImageScale / 100.0f;
 						imgRect = new RectangleF(0.0f, 0.0f, imgSize.Width * maxScale, imgSize.Height * maxScale);
 						if (imgRect.Width > screenRect.Width) imgRect.Width = screenRect.Width;
 						if (imgRect.Height > screenRect.Height) imgRect.Height = screenRect.Height;
@@ -1577,14 +1595,14 @@ namespace WallSwitch
 					if (imgRect.Width != screenRect.Width) imgRect = imgRect.ScaleRectWidth(screenRect.Width);
 					if (imgRect.Height > screenRect.Height) imgRect = imgRect.ScaleRectHeight(screenRect.Height);
 					imgRect = imgRect.CenterInside(screenRect);
-					CheckImageRectSize(ref imgRect, imgSize);
+					CheckImageRectSize(theme, ref imgRect, imgSize);
 					break;
 
 				case ImageFit.Fill:
 					if (imgRect.Width < screenRect.Width) imgRect = imgRect.ScaleRectWidth(screenRect.Width);
 					if (imgRect.Height < screenRect.Height) imgRect = imgRect.ScaleRectHeight(screenRect.Height);
 					imgRect = imgRect.CenterInside(screenRect);
-					CheckImageRectSize(ref imgRect, imgSize);
+					CheckImageRectSize(theme, ref imgRect, imgSize);
 					break;
 
 				default:
@@ -1721,17 +1739,34 @@ namespace WallSwitch
 			}
 		}
 
-		private void CheckImageRectSize(ref RectangleF rect, SizeF imgSize)
+		private void CheckImageRectSize(Theme theme, ref RectangleF rect, SizeF imgSize)
 		{
-			if (_theme.MaxImageScale > 0)
+			if (theme.MaxImageScale > 0)
 			{
-				var maxScale = (float)_theme.MaxImageScale / 100.0f;
+				var maxScale = (float)theme.MaxImageScale / 100.0f;
 				var maxSize = new SizeF(imgSize.Width * maxScale, imgSize.Height * maxScale);
 				if (rect.Width > maxSize.Width || rect.Height > maxSize.Height)
 				{
 					rect = rect.RestrictSize(maxSize).CenterInside(rect);
 				}
 			}
+		}
+
+		private Bitmap ApplyBackgroundFadeColorEffect(Theme theme, Bitmap oldBitmap)
+		{
+			if (theme.Mode != ThemeMode.Collage || !theme.ColorEffectCollageFade || theme.ColorEffect == ColorEffect.None) return oldBitmap;
+
+			var newBitmap = new Bitmap(oldBitmap.Width, oldBitmap.Height);
+			var g = Graphics.FromImage(newBitmap);
+
+			var ratio = theme.ColorEffectCollageFadeRatio / 100.0f;
+
+			var imgAttrib = new ImageAttributes();
+			imgAttrib.SetColorMatrix(ColorEffect.None.GetColorMatrixBlend(theme.ColorEffect, ratio));
+			g.DrawImage(oldBitmap, new Rectangle(0, 0, oldBitmap.Width, oldBitmap.Height), 0.0f, 0.0f, oldBitmap.Width, oldBitmap.Height,
+				GraphicsUnit.Pixel, imgAttrib);
+
+			return newBitmap;
 		}
 	}
 }

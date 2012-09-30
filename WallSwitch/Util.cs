@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using System.Xml;
 using System.Drawing;
@@ -261,6 +262,63 @@ namespace WallSwitch
 				var ratio = (float)width / (float)totalWidth;
 				col.Width = (int)(clientWidth * ratio);
 			}
+		}
+	}
+
+	public static class ComboBoxUtil
+	{
+		public static void InitForEnum<T>(this ComboBox comboBox, T initialValue) where T : struct, IConvertible
+		{
+			comboBox.Items.Clear();
+			TagString selectItem = null;
+
+			foreach (T val in Enum.GetValues(typeof(T)))
+			{
+				var item = new TagString(EnumUtil.GetEnumDesc<T>(val), val);
+				if (val.Equals(initialValue)) selectItem = item;
+				comboBox.Items.Add(item);
+			}
+
+			if (selectItem != null) comboBox.SelectedItem = selectItem;
+		}
+
+		public static T GetEnumValue<T>(this ComboBox comboBox) where T : struct, IConvertible
+		{
+			var item = comboBox.SelectedItem;
+			if (item == null || item.GetType() != typeof(TagString)) return default(T);
+
+			TagString ts = item as TagString;
+			if (ts.Tag == null || ts.Tag.GetType() != typeof(T)) return default(T);
+
+			return (T)ts.Tag;
+		}
+
+		public static void SetEnumValue<T>(this ComboBox comboBox, T value) where T : struct, IConvertible
+		{
+			foreach (var item in comboBox.Items)
+			{
+				if (item != null && item.GetType() == typeof(TagString))
+				{
+					TagString ts = item as TagString;
+					if (ts.Tag != null && ts.Tag.GetType() == typeof(T) && value.Equals(ts.Tag))
+					{
+						comboBox.SelectedItem = item;
+						return;
+					}
+				}
+			}
+		}
+	}
+
+	public static class EnumUtil
+	{
+		public static string GetEnumDesc<T>(T value) where T : struct, IConvertible
+		{
+			DescriptionAttribute descAttrib = (from d in typeof(T).GetField(value.ToString()).GetCustomAttributes(typeof(DescriptionAttribute), false).Cast<DescriptionAttribute>()
+											   select d as DescriptionAttribute).FirstOrDefault();
+
+			if (descAttrib != null) return descAttrib.Description;
+			return value.ToString();
 		}
 	}
 }

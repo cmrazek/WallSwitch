@@ -367,4 +367,37 @@
   <data name="Error_NegativeMaxImageScale" xml:space="preserve">
     <value>Maximum image scale must be greater than zero.</value>
   </data>
+  <data name="Button_Pause" xml:space="preserve">
+    <value>&amp;Pause</value>
+  </data>
+  <data name="Button_Unpause" xml:space="preserve">
+    <value>Un&amp;pause</value>
+  </data>
+  <data name="Char_Cr" xml:space="preserve">
+    <value>Return</value>
+  </data>
+  <data name="Char_Lf" xml:space="preserve">
+    <value>Return</value>
+  </data>
+  <data name="Char_Space" xml:space="preserve">
+    <value>Space</value>
+  </data>
+  <data name="Char_Tab" xml:space="preserve">
+    <value>Tab</value>
+  </data>
+  <data name="CollageFadeRatioPercent" xml:space="preserve">
+    <value>{0}%</value>
+  </data>
+  <data name="Notify_HistoryCleared" xml:space="preserve">
+    <value>Wallpaper history has been cleared.</value>
+  </data>
+  <data name="Notify_Paused" xml:space="preserve">
+    <value>Paused</value>
+  </data>
+  <data name="Notify_Title" xml:space="preserve">
+    <value>WallSwitch</value>
+  </data>
+  <data name="Notify_Unpaused" xml:space="preserve">
+    <value>Unpaused</value>
+  </data>
 </root>

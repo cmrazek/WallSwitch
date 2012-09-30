@@ -8,14 +8,14 @@ using System.Drawing;
 
 namespace WallSwitch
 {
-	enum LocationType
+	public enum LocationType
 	{
 		File,
 		Directory,
 		Feed
 	}
 
-	class Location
+	public class Location
 	{
 		private const int k_defaultUpdateInterval = 1;
 		private const Period k_defaultUpdatePeriod = Period.Hours;
