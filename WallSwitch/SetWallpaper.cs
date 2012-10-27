@@ -1448,92 +1448,95 @@ namespace WallSwitch
 				else
 				{
 					Image img = file.Image;
-					bool clearRequired = false;
-					int clearOpacity = 255;
-					float imgWidth = img.Width;
-					float imgHeight = img.Height;
-					if (imgWidth <= 0.0f || imgHeight <= 0.0f) return;
-
-					//Log.Write("Original image size: {0} x {1}", imgWidth, imgHeight);
-
-					RectangleF screenRect = screen.Bounds;
-					RectangleF imgRect = new RectangleF(0, 0, img.Width, img.Height);
-					RectangleF srcRect = imgRect;
-
-					if (theme.Mode == ThemeMode.Collage)
+					lock (img)
 					{
-						// The maximum image size will be determined by the number of pixels (area), not by the max width/height.
-						// This will provide a more consistent image size when there are pictures with different aspect ratios.
-						float imgArea = imgWidth * imgHeight;
-						float imgSize = (float)theme.ImageSize / 100.0f;
-						float screenArea = screenRect.Width * imgSize * screenRect.Height * imgSize;
-						float scale = (float)Math.Sqrt(screenArea / imgArea);
+						bool clearRequired = false;
+						int clearOpacity = 255;
+						float imgWidth = img.Width;
+						float imgHeight = img.Height;
+						if (imgWidth <= 0.0f || imgHeight <= 0.0f) return;
 
-						if (theme.MaxImageScale > 0)
+						//Log.Write("Original image size: {0} x {1}", imgWidth, imgHeight);
+
+						RectangleF screenRect = screen.Bounds;
+						RectangleF imgRect = new RectangleF(0, 0, img.Width, img.Height);
+						RectangleF srcRect = imgRect;
+
+						if (theme.Mode == ThemeMode.Collage)
 						{
-							var maxScale = (float)theme.MaxImageScale / 100.0f;
-							if (maxScale > 0.0f && scale > maxScale) scale = maxScale;
-						}
-						imgWidth *= scale;
-						imgHeight *= scale;
+							// The maximum image size will be determined by the number of pixels (area), not by the max width/height.
+							// This will provide a more consistent image size when there are pictures with different aspect ratios.
+							float imgArea = imgWidth * imgHeight;
+							float imgSize = (float)theme.ImageSize / 100.0f;
+							float screenArea = screenRect.Width * imgSize * screenRect.Height * imgSize;
+							float scale = (float)Math.Sqrt(screenArea / imgArea);
 
-						// If one of the dimensions is still wider/taller than the screen, then scale it down more.
-						if (imgWidth > screenRect.Width)
+							if (theme.MaxImageScale > 0)
+							{
+								var maxScale = (float)theme.MaxImageScale / 100.0f;
+								if (maxScale > 0.0f && scale > maxScale) scale = maxScale;
+							}
+							imgWidth *= scale;
+							imgHeight *= scale;
+
+							// If one of the dimensions is still wider/taller than the screen, then scale it down more.
+							if (imgWidth > screenRect.Width)
+							{
+								float ratio = screenRect.Width / imgWidth;
+								imgWidth = screenRect.Width;
+								imgHeight *= ratio;
+								scale *= ratio;
+							}
+
+							if (imgHeight > screenRect.Height)
+							{
+								float ratio = screenRect.Height / imgHeight;
+								imgHeight = screenRect.Height;
+								imgWidth *= ratio;
+								scale *= ratio;
+							}
+
+							// Choose a random rect to display the image.
+							imgRect.X = (float)(_rand.NextDouble() * (screenRect.Width - imgWidth)) + screenRect.X;
+							imgRect.Y = (float)(_rand.NextDouble() * (screenRect.Height - imgHeight)) + screenRect.Y;
+							imgRect.Width = imgWidth;
+							imgRect.Height = imgHeight;
+
+							if (_firstRender) clearOpacity = 255;
+							else clearOpacity = theme.BackOpacity255;
+							clearRequired = true;
+
+							// Feather edges
+							if (scale > 0.0f && theme.Feather > 0)
+							{
+								int featherWidth = (int)((float)theme.Feather / scale);
+								if (featherWidth > 0) img = FeatherImage(img, featherWidth);
+							}
+						}
+						else // Sequential or Random - one image per screen
 						{
-							float ratio = screenRect.Width / imgWidth;
-							imgWidth = screenRect.Width;
-							imgHeight *= ratio;
-							scale *= ratio;
+							imgRect = FitImage(theme, imgRect, ref srcRect, screenRect, theme.ImageFit, img.Size, ref clearRequired);
 						}
 
-						if (imgHeight > screenRect.Height)
+						_g.SetClip(screen.Bounds);
+						if (clearRequired && clearOpacity > 0) ClearBackground(theme, screen, clearOpacity);
+
+						if (theme.ColorEffect == ColorEffect.None ||
+							(theme.Mode == ThemeMode.Collage && theme.ColorEffectCollageFade))
 						{
-							float ratio = screenRect.Height / imgHeight;
-							imgHeight = screenRect.Height;
-							imgWidth *= ratio;
-							scale *= ratio;
+							_g.DrawImage(img, imgRect, srcRect, GraphicsUnit.Pixel);
 						}
-
-						// Choose a random rect to display the image.
-						imgRect.X = (float)(_rand.NextDouble() * (screenRect.Width - imgWidth)) + screenRect.X;
-						imgRect.Y = (float)(_rand.NextDouble() * (screenRect.Height - imgHeight)) + screenRect.Y;
-						imgRect.Width = imgWidth;
-						imgRect.Height = imgHeight;
-
-						if (_firstRender) clearOpacity = 255;
-						else clearOpacity = theme.BackOpacity255;
-						clearRequired = true;
-
-						// Feather edges
-						if (scale > 0.0f && theme.Feather > 0)
+						else
 						{
-							int featherWidth = (int)((float)theme.Feather / scale);
-							if (featherWidth > 0) img = FeatherImage(img, featherWidth);
+							var colorMatrix = theme.ColorEffect.GetColorMatrix();
+							ImageAttributes imgAttribs = new ImageAttributes();
+							imgAttribs.SetColorMatrix(colorMatrix);
+
+							if (img != null) _g.DrawImage(img,
+								new Rectangle((int)Math.Round(imgRect.X), (int)Math.Round(imgRect.Y), (int)Math.Round(imgRect.Width), (int)Math.Round(imgRect.Height)),
+								srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height,
+								GraphicsUnit.Pixel, imgAttribs);
 						}
-					}
-					else // Sequential or Random - one image per screen
-					{
-						imgRect = FitImage(theme, imgRect, ref srcRect, screenRect, theme.ImageFit, img.Size, ref clearRequired);
-					}
-
-					_g.SetClip(screen.Bounds);
-					if (clearRequired && clearOpacity > 0) ClearBackground(theme, screen, clearOpacity);
-
-					if (theme.ColorEffect == ColorEffect.None ||
-					    (theme.Mode == ThemeMode.Collage && theme.ColorEffectCollageFade))
-					{
-					    _g.DrawImage(img, imgRect, srcRect, GraphicsUnit.Pixel);
-					}
-					else
-					{
-						var colorMatrix = theme.ColorEffect.GetColorMatrix();
-						ImageAttributes imgAttribs = new ImageAttributes();
-						imgAttribs.SetColorMatrix(colorMatrix);
-
-						if (img != null) _g.DrawImage(img,
-							new Rectangle((int)Math.Round(imgRect.X), (int)Math.Round(imgRect.Y), (int)Math.Round(imgRect.Width), (int)Math.Round(imgRect.Height)),
-							srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height,
-							GraphicsUnit.Pixel, imgAttribs);
 					}
 				}
 			}

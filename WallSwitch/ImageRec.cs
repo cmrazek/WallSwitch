@@ -23,6 +23,7 @@ namespace WallSwitch
 		private ImageLocationType _type;
 		private Image _image = null;
 		private ImageFormat _imageFormat = null;
+		private Bitmap _thumbnail = null;
 		#endregion
 
 		#region Construction
@@ -140,6 +141,7 @@ namespace WallSwitch
 					{
 						_imageFormat = ImageFormatDesc.FileNameToImageFormat(_location);
 						_image = Image.FromFile(_location);
+						MakeThumbnail();
 						return true;
 					}
 					catch (Exception ex)
@@ -178,7 +180,7 @@ namespace WallSwitch
 						var stream = response.GetResponseStream();
 						_image = Image.FromStream(stream);
 						ImageCache.SaveImage(this);
-
+						MakeThumbnail();
 						return true;
 					}
 					catch (Exception ex)
@@ -210,6 +212,32 @@ namespace WallSwitch
 		public Image Image
 		{
 			get { return _image; }
+		}
+
+		private void MakeThumbnail()
+		{
+			try
+			{
+				if (_thumbnail != null || _image == null) return;
+				lock (_image)
+				{
+					var imageRect = new RectangleF(new PointF(0.0f, 0.0f), _image.Size);
+					if (imageRect.Width > HistoryList.ThumbnailWidth) imageRect = imageRect.ScaleRectWidth(HistoryList.ThumbnailWidth);
+					if (imageRect.Height > HistoryList.ThumbnailHeight) imageRect = imageRect.ScaleRectHeight(HistoryList.ThumbnailHeight);
+
+					_thumbnail = new Bitmap(_image, (int)imageRect.Width, (int)imageRect.Height);
+				}
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Error when creating image thumbnail.");
+				_thumbnail = null;
+			}
+		}
+
+		public Bitmap Thumbnail
+		{
+			get { return _thumbnail; }
 		}
 		#endregion
 

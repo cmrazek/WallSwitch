@@ -1,7 +1,7 @@
 WallSwitch
 Switches desktop wallpapers from a variety of sources.
 http://wallswitch.codeplex.com/
-Current Version: 1.0.4
+Current Version: 1.1
 
 Requirements:
 	.NET Framework 4:  http://www.microsoft.com/download/en/details.aspx?id=17718
@@ -11,6 +11,21 @@ Contact:
 	Email: chrismrazek@gmail.com
 
 ChangeLog:
+
+Version 1.1 - 2012-10-27:
+- Now automatically checks for updates (can be disabled if desired)
+- Misc bug fixes.
+
+Version 1.0.6 - 2012-09-30:
+- Added hotkeys to perform a variety of operations (next/previous image, pause, clear history, etc.)
+- Added color effects for grayscale, sepia and intense color.
+- Various fixes.
+
+Version 1.0.5 - 2012-09-01:
+- Added cross-fade transitions (thanks to Freshie for assistance).
+- Added tooltip text to controls.
+- Added option to prevent small images from being scaled too large.
+- Fixed incorrectly scaled images in collage mode.
 
 Version 1.0.4 - 2012-06-30:
 - Changes in previous version broke hotkey support; fixed this.

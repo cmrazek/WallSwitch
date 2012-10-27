@@ -12,8 +12,8 @@ namespace WallSwitch
 	partial class HistoryList : UserControl
 	{
 		#region Constants
-		private const int k_imageWidth = 100;
-		private const int k_imageHeight = 100;
+		public const int k_imageWidth = 100;
+		public const int k_imageHeight = 100;
 		private const int k_itemSpacer = 4;
 		private const int k_itemMargin = 1;
 		private const float k_mouseWheelScale = .4f;
@@ -67,21 +67,17 @@ namespace WallSwitch
 		#region Item Manipulation
 		public void AddHistory(ImageRec rec)
 		{
-			if (rec.Image == null) return;
+			if (rec == null || rec.Thumbnail == null) return;
 
-			var imageRect = new RectangleF(new PointF(0.0f, 0.0f), rec.Image.Size);
-			if (imageRect.Width > k_imageWidth) imageRect = imageRect.ScaleRectWidth(k_imageWidth);
-			if (imageRect.Height > k_imageHeight) imageRect = imageRect.ScaleRectHeight(k_imageHeight);
-
-			Bitmap bmp = null;
-			if (rec != null) bmp = new Bitmap(rec.Image, (int)imageRect.Width, (int)imageRect.Height);
-
-			_items.Insert(0, new HistoryItem
+			lock (rec.Thumbnail)
 			{
-				image = bmp,
-				imageRec = rec,
-				imageRect = imageRect
-			});
+				_items.Insert(0, new HistoryItem
+				{
+					image = rec.Thumbnail,
+					imageRec = rec,
+					imageRect = new RectangleF(new PointF(0.0f, 0.0f), rec.Thumbnail.Size)
+				});
+			}
 
 			while (_items.Count > _maxHistory)
 			{
@@ -233,7 +229,10 @@ namespace WallSwitch
 					imageRect.Offset((k_imageWidth - imageRect.Width) / 2, (k_imageHeight - imageRect.Height) / 2);
 					imageRect.Offset(0, -_scroll);
 
-					g.DrawImage(image, imageRect);
+					lock (image)
+					{
+						g.DrawImage(image, imageRect);
+					}
 				}
 
 				var shadeRect = item.bounds;
@@ -581,6 +580,16 @@ namespace WallSwitch
 			}
 		}
 		#endregion
+
+		public static int ThumbnailWidth
+		{
+			get { return k_imageWidth; }
+		}
+
+		public static int ThumbnailHeight
+		{
+			get { return k_imageHeight; }
+		}
 
 	}
 }
