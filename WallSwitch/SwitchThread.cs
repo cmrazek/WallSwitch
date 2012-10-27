@@ -277,10 +277,9 @@ namespace WallSwitch
 				{
 					foreach (var img in images) Log.Write(LogLevel.Debug, "  Image: {0}", img);
 					if (images != null) wallpaperSetter.Set(_theme, images);
-				}
 
-				// Now that everything's drawn, it's safe to release that memory.
-				foreach (var img in images) img.Release();
+					foreach (var img in images) img.Release();
+				}
 
 				Log.Write(LogLevel.Debug, "Finished switching wallpaper.");
 			}

@@ -67,6 +67,8 @@ namespace WallSwitch
 		#region Item Manipulation
 		public void AddHistory(ImageRec rec)
 		{
+			if (rec.Image == null) return;
+
 			var imageRect = new RectangleF(new PointF(0.0f, 0.0f), rec.Image.Size);
 			if (imageRect.Width > k_imageWidth) imageRect = imageRect.ScaleRectWidth(k_imageWidth);
 			if (imageRect.Height > k_imageHeight) imageRect = imageRect.ScaleRectHeight(k_imageHeight);

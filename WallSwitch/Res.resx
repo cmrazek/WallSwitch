@@ -400,4 +400,21 @@
   <data name="Notify_Unpaused" xml:space="preserve">
     <value>Unpaused</value>
   </data>
+  <data name="ProcessName" xml:space="preserve">
+    <value>WallSwitch</value>
+  </data>
+  <data name="UpdateAvailableBalloonText" xml:space="preserve">
+    <value>A new version of WallSwitch is now available to download.
+
+Click here to be taken to the download page.</value>
+  </data>
+  <data name="UpdateCheckFailedBalloonText" xml:space="preserve">
+    <value>An error occurred when checking for updates.</value>
+  </data>
+  <data name="UpdateNotAvailableBalloonText" xml:space="preserve">
+    <value>WallSwitch is up to date.</value>
+  </data>
+  <data name="UpdateRssUrl" xml:space="preserve">
+    <value>https://wallswitch.codeplex.com/project/feeds/rss?ProjectRSSFeed=codeplex%3a%2f%2frelease%2fwallswitch</value>
+  </data>
 </root>

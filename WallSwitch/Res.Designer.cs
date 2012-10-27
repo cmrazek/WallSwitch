@@ -792,6 +792,15 @@ namespace WallSwitch {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to WallSwitch.
+        /// </summary>
+        internal static string ProcessName {
+            get {
+                return ResourceManager.GetString("ProcessName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enter the new name for the theme:.
         /// </summary>
         internal static string RenameThemePrompt {
@@ -831,6 +840,44 @@ namespace WallSwitch {
         internal static string SettingsFileName {
             get {
                 return ResourceManager.GetString("SettingsFileName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A new version of WallSwitch is now available to download.
+        ///
+        ///Click here to be taken to the download page..
+        /// </summary>
+        internal static string UpdateAvailableBalloonText {
+            get {
+                return ResourceManager.GetString("UpdateAvailableBalloonText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An error occurred when checking for updates..
+        /// </summary>
+        internal static string UpdateCheckFailedBalloonText {
+            get {
+                return ResourceManager.GetString("UpdateCheckFailedBalloonText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WallSwitch is up to date..
+        /// </summary>
+        internal static string UpdateNotAvailableBalloonText {
+            get {
+                return ResourceManager.GetString("UpdateNotAvailableBalloonText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to https://wallswitch.codeplex.com/project/feeds/rss?ProjectRSSFeed=codeplex%3a%2f%2frelease%2fwallswitch.
+        /// </summary>
+        internal static string UpdateRssUrl {
+            get {
+                return ResourceManager.GetString("UpdateRssUrl", resourceCulture);
             }
         }
         

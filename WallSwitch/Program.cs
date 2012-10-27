@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows.Forms;
 using System.Threading;
 
@@ -7,7 +8,7 @@ namespace WallSwitch
 {
 	static class Program
 	{
-		private const string k_guid = "{57FF779B-63F3-430A-B420-AD436F2D2AEB}";
+		private const string k_guid = "57FF779B-63F3-430A-B420-AD436F2D2AEB";
 
 		/// <summary>
 		/// The main entry point for the application.
@@ -15,52 +16,50 @@ namespace WallSwitch
 		[STAThread]
 		static void Main(string[] args)
 		{
-			Log.Initialize();
 			try
 			{
+				var winStart = false;
+				foreach (var arg in args)
+				{
+					if (arg.Equals("-winstart", StringComparison.InvariantCultureIgnoreCase))
+					{
+						winStart = true;
+					}
+				}
+
+				bool createdNew;
+				var mutex = new Mutex(true, k_guid, out createdNew);
+				if (createdNew)
+				{
+					Log.Initialize();
+					try
+					{
 #if DEBUG
-				Log.Level = LogLevel.Debug;
+						Log.Level = LogLevel.Debug;
 #else
-				Log.Level = LogLevel.Info;
+						Log.Level = LogLevel.Info;
 #endif
 
-				Settings.Initialize();
+						Settings.Initialize();
 
-				Application.EnableVisualStyles();
-				Application.SetCompatibleTextRenderingDefault(false);
-
-				bool createdNew = false;
-				using (Semaphore sem = new Semaphore(0, 1, "Global\\" + k_guid, out createdNew))
-				{
-					if (createdNew)
-					{
-						ThreadPool.QueueUserWorkItem((WaitCallback)(state => SemProc(sem)));
-						Application.Run(new MainWindow(args));
+						Application.EnableVisualStyles();
+						Application.SetCompatibleTextRenderingDefault(false);
+						Application.Run(new MainWindow(winStart));
 					}
-					sem.Release();
-				}
-			}
-			finally
-			{
-				Log.Close();
-			}
-		}
-
-		static void SemProc(Semaphore s)
-		{
-			try
-			{
-				if (s != null)
-				{
-					while (s.SafeWaitHandle != null && !s.SafeWaitHandle.IsClosed && s.WaitOne())
+					finally
 					{
-						MainWindow window = MainWindow.Window;
-						if (window != null) window.AppActivate();
+						Log.Close();
 					}
 				}
+				else if (!winStart)
+				{
+					MainWindow.AppActivateExternal();
+				}
 			}
-			catch (Exception)
-			{ }
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.ToString(), "Error when starting WallSwitch", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
 		}
 	}
 }

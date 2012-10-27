@@ -173,34 +173,51 @@ namespace WallSwitch
 		#endregion
 
 		#region Save/Load
+		private const string k_name = "Name";
+		private const string k_active = "Active";
+		private const string k_freq = "Frequency";
+		private const string k_period = "Period";
+		private const string k_mode = "Mode";
+		private const string k_imageSize = "ImageSize";
+		private const string k_backColorTop = "BackColorTop";
+		private const string k_backColorBottom = "BackColorBottom";
+		private const string k_separateMonitors = "SeparateMonitors";
+		private const string k_backOpacity = "BackOpacity";
+		private const string k_featherEdges = "FeatherEdges";
+		private const string k_imageFit = "ImageFit";
+		private const string k_fadeTransition = "FadeTransition";
+		private const string k_lastWallpaperFile = "LastWallpaperFile";
+		private const string k_maxImageScale = "MaxImageScale";
 		private const string k_colorEffectXml = "ColorEffect";
 		private const string k_colorEffectCollageFadeXml = "ColorEffectCollageFade";
 		private const string k_colorEffectCollageFadeRatio = "ColorEffectCollageFadeRatio";
+		private const string k_location = "Location";
 
 		public void Save(XmlWriter xml)
 		{
-			xml.WriteAttributeString("Name", _name);
-			if (_active) xml.WriteAttributeString("Active", Boolean.TrueString);
-			xml.WriteAttributeString("Frequency", _freq.ToString());
-			xml.WriteAttributeString("Period", _period.ToString());
-			xml.WriteAttributeString("Mode", _mode.ToString());
-			xml.WriteAttributeString("BackColorTop", ColorUtil.ColorToString(_backColorTop));
-			xml.WriteAttributeString("BackColorBottom", ColorUtil.ColorToString(_backColorBottom));
-			if (!_separateMonitors) xml.WriteAttributeString("SeparateMonitors", _separateMonitors.ToString());
+			xml.WriteAttributeString(k_name, _name);
+			if (_active) xml.WriteAttributeString(k_active, Boolean.TrueString);
+			xml.WriteAttributeString(k_freq, _freq.ToString());
+			xml.WriteAttributeString(k_period, _period.ToString());
+			xml.WriteAttributeString(k_mode, _mode.ToString());
+			xml.WriteAttributeString(k_imageSize, _imageSize.ToString());
+			xml.WriteAttributeString(k_backColorTop, ColorUtil.ColorToString(_backColorTop));
+			xml.WriteAttributeString(k_backColorBottom, ColorUtil.ColorToString(_backColorBottom));
+			if (!_separateMonitors) xml.WriteAttributeString(k_separateMonitors, _separateMonitors.ToString());
 
 			if (_mode == ThemeMode.Collage)
 			{
-				xml.WriteAttributeString("BackOpacity", _backOpacity.ToString());
-				if (_feather != k_defaultFeather) xml.WriteAttributeString("FeatherEdges", _feather.ToString());
+				xml.WriteAttributeString(k_backOpacity, _backOpacity.ToString());
+				if (_feather != k_defaultFeather) xml.WriteAttributeString(k_featherEdges, _feather.ToString());
 			}
 			else
 			{
-				xml.WriteAttributeString("ImageFit", _imageFit.ToString());
+				xml.WriteAttributeString(k_imageFit, _imageFit.ToString());
 			}
 
-			if (_fadeTransition != k_defaultFadeTransition) xml.WriteAttributeString("FadeTransition", _fadeTransition.ToString());
-			if (!string.IsNullOrEmpty(_lastWallpaperFile)) xml.WriteAttributeString("LastWallpaperFile", _lastWallpaperFile);
-			if (_maxImageScale != k_defaultMaxImageScale) xml.WriteAttributeString("MaxImageScale", _maxImageScale.ToString());
+			if (_fadeTransition != k_defaultFadeTransition) xml.WriteAttributeString(k_fadeTransition, _fadeTransition.ToString());
+			if (!string.IsNullOrEmpty(_lastWallpaperFile)) xml.WriteAttributeString(k_lastWallpaperFile, _lastWallpaperFile);
+			if (_maxImageScale != k_defaultMaxImageScale) xml.WriteAttributeString(k_maxImageScale, _maxImageScale.ToString());
 
 			if (_colorEffect != ColorEffect.None) xml.WriteAttributeString(k_colorEffectXml, _colorEffect.ToString());
 			if (_colorEffectCollageFade != false) xml.WriteAttributeString(k_colorEffectCollageFadeXml, _colorEffectCollageFade.ToString());
@@ -210,7 +227,7 @@ namespace WallSwitch
 
 			foreach (Location loc in _locations)
 			{
-				xml.WriteStartElement("Location");
+				xml.WriteStartElement(k_location);
 				loc.Save(xml);
 				xml.WriteEndElement();	// Location
 			}
@@ -220,22 +237,23 @@ namespace WallSwitch
 
 		public void Load(XmlElement xmlTheme)
 		{
-			_name = Util.ParseString(xmlTheme, "Name", _id.ToString());
+			_name = Util.ParseString(xmlTheme, k_name, _id.ToString());
 
-			_active = Util.ParseBool(xmlTheme, "Active", false);
-			_freq = Util.ParseInt(xmlTheme, "Frequency", k_defaultFreq);
-			_period = Util.ParseEnum<Period>(xmlTheme, "Period", k_defaultPeriod);
+			_active = Util.ParseBool(xmlTheme, k_active, false);
+			_freq = Util.ParseInt(xmlTheme, k_freq, k_defaultFreq);
+			_period = Util.ParseEnum<Period>(xmlTheme, k_period, k_defaultPeriod);
 			CalcInterval();
-			_mode = Util.ParseEnum<ThemeMode>(xmlTheme, "Mode", k_defaultMode);
-			_backColorTop = ColorUtil.ParseColor(xmlTheme, "BackColorTop", k_defaultBackColor);
-			_backColorBottom = ColorUtil.ParseColor(xmlTheme, "BackColorBottom", k_defaultBackColor);
-			_separateMonitors = Util.ParseBool(xmlTheme, "SeparateMonitors", k_defaultSeparateMonitors);
-			_backOpacity = Util.ParseInt(xmlTheme, "BackOpacity", k_defaultBackOpacity);
-			_imageFit = Util.ParseEnum<ImageFit>(xmlTheme, "ImageFit", k_defaultImageFit);
-			_feather = Util.ParseInt(xmlTheme, "FeatherEdges", k_defaultFeather);
-			_fadeTransition = Util.ParseBool(xmlTheme, "FadeTransition", k_defaultFadeTransition);
-			_lastWallpaperFile = Util.ParseString(xmlTheme, "LastWallpaperFile", string.Empty);
-			_maxImageScale = Util.ParseInt(xmlTheme, "MaxImageScale", k_defaultMaxImageScale);
+			_mode = Util.ParseEnum<ThemeMode>(xmlTheme, k_mode, k_defaultMode);
+			_imageSize = Util.ParseInt(xmlTheme, k_imageSize, k_defaultImageSize);
+			_backColorTop = ColorUtil.ParseColor(xmlTheme, k_backColorTop, k_defaultBackColor);
+			_backColorBottom = ColorUtil.ParseColor(xmlTheme, k_backColorBottom, k_defaultBackColor);
+			_separateMonitors = Util.ParseBool(xmlTheme, k_separateMonitors, k_defaultSeparateMonitors);
+			_backOpacity = Util.ParseInt(xmlTheme, k_backOpacity, k_defaultBackOpacity);
+			_imageFit = Util.ParseEnum<ImageFit>(xmlTheme, k_imageFit, k_defaultImageFit);
+			_feather = Util.ParseInt(xmlTheme, k_featherEdges, k_defaultFeather);
+			_fadeTransition = Util.ParseBool(xmlTheme, k_fadeTransition, k_defaultFadeTransition);
+			_lastWallpaperFile = Util.ParseString(xmlTheme, k_lastWallpaperFile, string.Empty);
+			_maxImageScale = Util.ParseInt(xmlTheme, k_maxImageScale, k_defaultMaxImageScale);
 			_colorEffect = Util.ParseEnum<ColorEffect>(xmlTheme, k_colorEffectXml, ColorEffect.None);
 			_colorEffectCollageFade = Util.ParseBool(xmlTheme, k_colorEffectCollageFadeXml, false);
 			_colorEffectCollageFadeRatio = Util.ParseInt(xmlTheme, k_colorEffectCollageFadeRatio, k_defaultColorEffectCollageFadeRatio);
@@ -245,7 +263,7 @@ namespace WallSwitch
 				_hotKey.LoadXml(xmlHotKey);
 			}
 
-			foreach (XmlElement xmlLoc in xmlTheme.SelectNodes("Location"))
+			foreach (XmlElement xmlLoc in xmlTheme.SelectNodes(k_location))
 			{
 				try
 				{

@@ -5,7 +5,7 @@
 ; -------------------------------------------------------------------------------------------------
 
 Name "WallSwitch"
-OutFile "Output\WallSwitch_V1.0.6_Setup.exe"
+OutFile "Output\WallSwitch_V1.1_Setup.exe"
 InstallDir "$PROGRAMFILES\WallSwitch"
 RequestExecutionLevel admin
 
@@ -16,7 +16,7 @@ Var AppVersion
 Section "-Initialize"
 	StrCpy $AppName      "WallSwitch"
 	StrCpy $AppNameIdent "WallSwitch"
-	StrCpy $AppVersion   "1.0.6"
+	StrCpy $AppVersion   "1.1"
 SectionEnd
 
 ; -------------------------------------------------------------------------------------------------

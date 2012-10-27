@@ -124,6 +124,10 @@
 			this.ciClearHistoryList = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.btnPause = new System.Windows.Forms.Button();
+			this.miCheckForUpdatesOnStartup = new System.Windows.Forms.ToolStripMenuItem();
+			this.miCheckForUpdatesNow = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripSeparator();
+			this.toolStripMenuItem8 = new System.Windows.Forms.ToolStripSeparator();
 			this.cmLocations.SuspendLayout();
 			this.grpTheme.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.trkOpacity)).BeginInit();
@@ -700,8 +704,12 @@
 			// 
 			this.menuTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.miToolsStartWithWindows,
-            this.miClearHistory,
-            this.miHotKeys});
+            this.miHotKeys,
+            this.toolStripMenuItem7,
+            this.miCheckForUpdatesOnStartup,
+            this.miCheckForUpdatesNow,
+            this.toolStripMenuItem8,
+            this.miClearHistory});
 			this.menuTools.Name = "menuTools";
 			this.menuTools.Size = new System.Drawing.Size(48, 20);
 			this.menuTools.Text = "&Tools";
@@ -710,21 +718,21 @@
 			// miToolsStartWithWindows
 			// 
 			this.miToolsStartWithWindows.Name = "miToolsStartWithWindows";
-			this.miToolsStartWithWindows.Size = new System.Drawing.Size(178, 22);
+			this.miToolsStartWithWindows.Size = new System.Drawing.Size(234, 22);
 			this.miToolsStartWithWindows.Text = "&Start With Windows";
 			this.miToolsStartWithWindows.Click += new System.EventHandler(this.miToolsStartWithWindows_Click);
 			// 
 			// miClearHistory
 			// 
 			this.miClearHistory.Name = "miClearHistory";
-			this.miClearHistory.Size = new System.Drawing.Size(178, 22);
+			this.miClearHistory.Size = new System.Drawing.Size(234, 22);
 			this.miClearHistory.Text = "&Clear History";
 			this.miClearHistory.Click += new System.EventHandler(this.miClearHistory_Click);
 			// 
 			// miHotKeys
 			// 
 			this.miHotKeys.Name = "miHotKeys";
-			this.miHotKeys.Size = new System.Drawing.Size(178, 22);
+			this.miHotKeys.Size = new System.Drawing.Size(234, 22);
 			this.miHotKeys.Text = "&Hot Keys";
 			this.miHotKeys.Click += new System.EventHandler(this.miHotKeys_Click);
 			// 
@@ -739,7 +747,7 @@
 			// miHelpAbout
 			// 
 			this.miHelpAbout.Name = "miHelpAbout";
-			this.miHelpAbout.Size = new System.Drawing.Size(107, 22);
+			this.miHelpAbout.Size = new System.Drawing.Size(152, 22);
 			this.miHelpAbout.Text = "&About";
 			this.miHelpAbout.Click += new System.EventHandler(this.miHelpAbout_Click);
 			// 
@@ -1105,6 +1113,30 @@
 			this.btnPause.UseVisualStyleBackColor = true;
 			this.btnPause.Click += new System.EventHandler(this.btnPause_Click);
 			// 
+			// miCheckForUpdatesOnStartup
+			// 
+			this.miCheckForUpdatesOnStartup.Name = "miCheckForUpdatesOnStartup";
+			this.miCheckForUpdatesOnStartup.Size = new System.Drawing.Size(234, 22);
+			this.miCheckForUpdatesOnStartup.Text = "Check for Updates on Start-up";
+			this.miCheckForUpdatesOnStartup.Click += new System.EventHandler(this.miCheckForUpdatesOnStartup_Click);
+			// 
+			// miCheckForUpdatesNow
+			// 
+			this.miCheckForUpdatesNow.Name = "miCheckForUpdatesNow";
+			this.miCheckForUpdatesNow.Size = new System.Drawing.Size(234, 22);
+			this.miCheckForUpdatesNow.Text = "Check for Updates Now";
+			this.miCheckForUpdatesNow.Click += new System.EventHandler(this.miCheckForUpdatesNow_Click);
+			// 
+			// toolStripMenuItem7
+			// 
+			this.toolStripMenuItem7.Name = "toolStripMenuItem7";
+			this.toolStripMenuItem7.Size = new System.Drawing.Size(231, 6);
+			// 
+			// toolStripMenuItem8
+			// 
+			this.toolStripMenuItem8.Name = "toolStripMenuItem8";
+			this.toolStripMenuItem8.Size = new System.Drawing.Size(231, 6);
+			// 
 			// MainWindow
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1251,6 +1283,10 @@
 		private System.Windows.Forms.ComboBox c_colorEffectCombo;
 		private System.Windows.Forms.Label c_colorEffectCollageFadeRatioValue;
 		private System.Windows.Forms.TrackBar c_colorEffectCollageFadeRatioTrackBar;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem7;
+		private System.Windows.Forms.ToolStripMenuItem miCheckForUpdatesOnStartup;
+		private System.Windows.Forms.ToolStripMenuItem miCheckForUpdatesNow;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem8;
 
 	}
 }

@@ -68,6 +68,8 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -116,6 +118,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="ImageRec.cs" />
+    <Compile Include="IWallSwitchService.cs" />
     <Compile Include="Location.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="MainWindow.cs">
@@ -147,7 +150,10 @@
     </Compile>
     <Compile Include="ThemeMode.cs" />
     <Compile Include="Period.cs" />
+    <Compile Include="UpdateCheck.cs" />
     <Compile Include="Util.cs" />
+    <Compile Include="WallSwitchService.cs" />
+    <Compile Include="WallSwitchServiceManager.cs" />
     <EmbeddedResource Include="AboutDialog.resx">
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -224,6 +230,9 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

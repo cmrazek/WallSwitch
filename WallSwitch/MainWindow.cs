@@ -31,13 +31,15 @@ namespace WallSwitch
 
 		private delegate void VoidDelegate();
 		private VoidDelegate _appActivateFunc = null;
+		private WallSwitchServiceManager _serviceMgr = null;
+		private EventHandler _balloonClickedHandler = null;
 		#endregion
 
 		#region PInvoke
 		[DllImport("user32.dll", SetLastError = true)]
 		static extern bool BringWindowToTop(IntPtr hWnd);
 
-		private static int WM_HOTKEY = 0x0312;
+		private const int WM_HOTKEY = 0x0312;
 
 		[DllImport("User32.dll")]
 		public static extern Int32 SetForegroundWindow(IntPtr hWnd);
@@ -64,17 +66,9 @@ namespace WallSwitch
 		#endregion
 
 		#region Window Management
-		public MainWindow(string[] args)
+		public MainWindow(bool winStart)
 		{
-			foreach (string arg in args)
-			{
-				if (arg.ToLower() == "-winstart")
-				{
-					_winStart = true;
-					HideToTray();
-				}
-			}
-
+			if (_winStart = winStart) HideToTray();
 			InitializeComponent();
 		}
 
@@ -122,6 +116,11 @@ namespace WallSwitch
 				if (_winStart) HideToTray();
 
 				RegisterHotKeys();
+
+				_serviceMgr = new WallSwitchServiceManager();
+				_serviceMgr.CreateService();
+
+				if (Settings.CheckForUpdatesOnStartup) CheckForUpdates(false);
 			}
 			catch (Exception ex)
 			{
@@ -131,7 +130,20 @@ namespace WallSwitch
 
 		private void MainWindow_FormClosed(object sender, FormClosedEventArgs e)
 		{
-			UnregisterHotKeys();
+			try
+			{
+				UnregisterHotKeys();
+
+				if (_serviceMgr != null)
+				{
+					_serviceMgr.Dispose();
+					_serviceMgr = null;
+				}
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Error when form closed.");
+			}
 		}
 
 		private void Shutdown(bool closeWindow)
@@ -282,7 +294,12 @@ namespace WallSwitch
 
 			try
 			{
-				if (m.Msg == WM_HOTKEY) HotKey.OnWmHotKey(m.WParam.ToInt32());
+				switch (m.Msg)
+				{
+					case WM_HOTKEY:
+						HotKey.OnWmHotKey(m.WParam.ToInt32());
+						break;
+				}
 			}
 			catch (Exception ex)
 			{
@@ -355,7 +372,7 @@ namespace WallSwitch
 			if (InvokeRequired)
 			{
 				if (_appActivateFunc == null) _appActivateFunc = new VoidDelegate(AppActivate);
-				Invoke(_appActivateFunc);
+				BeginInvoke(_appActivateFunc);
 				return;
 			}
 
@@ -363,14 +380,46 @@ namespace WallSwitch
 			SetForegroundWindow(this.Handle);
 		}
 
-		public void ShowNotification(string message)
+		public static void AppActivateExternal()
 		{
+			try
+			{
+				var client = WallSwitchServiceManager.GetClient();
+				if (client != null)
+				{
+					client.Activate();
+				}
+			}
+			catch (Exception)
+			{ }
+		}
+
+		public void ShowNotification(string message, EventHandler clickCallback = null)
+		{
+			if (InvokeRequired)
+			{
+				BeginInvoke(new Action(() => { ShowNotification(message, clickCallback); }));
+				return;
+			}
+
 			if (!string.IsNullOrWhiteSpace(message))
 			{
 				trayIcon.BalloonTipText = message;
 				trayIcon.BalloonTipTitle = Res.Notify_Title;
 				trayIcon.BalloonTipIcon = ToolTipIcon.None;
 				trayIcon.ShowBalloonTip(1);
+
+				if (_balloonClickedHandler != null)
+				{
+					trayIcon.BalloonTipClicked -= _balloonClickedHandler;
+					_balloonClickedHandler = null;
+				}
+
+				if (clickCallback != null)
+				{
+					_balloonClickedHandler = clickCallback;
+					trayIcon.BalloonTipClicked += _balloonClickedHandler;
+				}
 			}
 		}
 		#endregion
@@ -804,6 +853,7 @@ namespace WallSwitch
 			try
 			{
 				miToolsStartWithWindows.Checked = Settings.StartWithWindows;
+				miCheckForUpdatesOnStartup.Checked = Settings.CheckForUpdatesOnStartup;
 			}
 			catch (Exception ex)
 			{
@@ -1291,7 +1341,7 @@ namespace WallSwitch
 		{
 			if (InvokeRequired)
 			{
-				Invoke(new Action(() => theme_LocationUpdated(sender, e)));
+				BeginInvoke(new Action(() => theme_LocationUpdated(sender, e)));
 				return;
 			}
 
@@ -1705,7 +1755,7 @@ namespace WallSwitch
 				{
 					// If not in the main thread, then invoke it.
 					if (_switchThread_Switching_func == null) _switchThread_Switching_func = new SwitchThread.SwitchEventHandler(_switchThread_Switching);
-					Invoke(_switchThread_Switching_func, new object[] { sender, e });
+					BeginInvoke(_switchThread_Switching_func, new object[] { sender, e });
 					return;
 				}
 
@@ -1726,7 +1776,7 @@ namespace WallSwitch
 				{
 					// If not in the main thread, then invoke it.
 					if (_switchThread_Switched_func == null) _switchThread_Switched_func = new SwitchThread.SwitchEventHandler(_switchThread_Switched);
-					Invoke(_switchThread_Switched_func, new object[] { sender, e });
+					BeginInvoke(_switchThread_Switched_func, new object[] { sender, e });
 					return;
 				}
 
@@ -1968,7 +2018,7 @@ namespace WallSwitch
 			{
 				_switchThread.Paused = !_switchThread.Paused;
 				EnableControls();
-				ShowNotification(_switchThread.Paused ? Res.Notify_Paused : Res.Notify_Unpaused);
+				ShowNotification(_switchThread.Paused ? Res.Notify_Paused : Res.Notify_Unpaused, null);
 			}
 			catch (Exception ex)
 			{
@@ -1981,7 +2031,7 @@ namespace WallSwitch
 			try
 			{
 				ClearHistory();
-				ShowNotification(Res.Notify_HistoryCleared);
+				ShowNotification(Res.Notify_HistoryCleared, null);
 			}
 			catch (Exception ex)
 			{
@@ -2007,7 +2057,7 @@ namespace WallSwitch
 		{
 			if (InvokeRequired)
 			{
-				Invoke(new Action(() => theme_HistoryAdded(sender, e)));
+				BeginInvoke(new Action(() => theme_HistoryAdded(sender, e)));
 				return;
 			}
 
@@ -2116,7 +2166,104 @@ namespace WallSwitch
 		}
 		#endregion
 
+		#region Auto-Update Check
+		private void CheckForUpdates(bool manualCheck)
+		{
+			try
+			{
+				var checker = new UpdateChecker();
+				checker.UpdateAvailable += new EventHandler<UpdateCheckEventArgs>(checker_UpdateAvailable);
+				if (manualCheck)
+				{
+					checker.NoUpdateAvailable += new EventHandler<UpdateCheckEventArgs>(checker_NoUpdateAvailable);
+					checker.UpdateCheckFailed += new EventHandler<UpdateCheckEventArgs>(checker_UpdateCheckFailed);
+				}
+				checker.Check();
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Exception when checking for updates.");
+			}
+		}
+
+		void checker_UpdateAvailable(object sender, UpdateCheckEventArgs e)
+		{
+			try
+			{
+				ShowNotification(Res.UpdateAvailableBalloonText, (x, y) => { OpenUpdateUrl(e.UpdateUrl); });
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Error when notifying that update available.");
+			}
+		}
+
+		void checker_NoUpdateAvailable(object sender, UpdateCheckEventArgs e)
+		{
+			try
+			{
+				ShowNotification(Res.UpdateNotAvailableBalloonText);
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Error when notifying that no updated available.");
+			}
+		}
+
+		void checker_UpdateCheckFailed(object sender, UpdateCheckEventArgs e)
+		{
+			try
+			{
+				ShowNotification(Res.UpdateCheckFailedBalloonText);
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Error when notifying that the update check failed.");
+			}
+		}
+
+		private void OpenUpdateUrl(string url)
+		{
+			try
+			{
+				var uri = new Uri(url);
+				if (uri.IsFile) throw new InvalidOperationException("Invalid update URL.");
+				Process.Start(uri.ToString());
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex, "Error when attempting to open the update page.");
+			}
+		}
+
+		private void miCheckForUpdatesOnStartup_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				Settings.CheckForUpdatesOnStartup = !Settings.CheckForUpdatesOnStartup;
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void miCheckForUpdatesNow_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				CheckForUpdates(true);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+		#endregion
+
 		
+
+
 
 	}
 }

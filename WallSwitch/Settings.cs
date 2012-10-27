@@ -11,12 +11,16 @@ namespace WallSwitch
 	{
 		#region Constants
 		private const bool k_defaultStartWithWindows = false;
-		//private const bool k_defaultLogging = false;
+		private const bool k_defaultCheckForUpdatesOnStartup = true;
 		#endregion
 
 		#region Variables
 		private static bool _startWithWindows = k_defaultStartWithWindows;
-		//private static bool _logging = false;
+		private static bool _checkForUpdatesOnStartup = k_defaultCheckForUpdatesOnStartup;
+		#endregion
+
+		#region XML Tag Names
+		private const string k_checkForUpdates = "CheckForUpdates";
 		#endregion
 
 		/// <summary>
@@ -38,13 +42,13 @@ namespace WallSwitch
 		#region Save / Load
 		public static void Save(XmlWriter xml)
 		{
-			//xml.WriteElementString("Logging", _logging.ToString());
+			xml.WriteElementString(k_checkForUpdates, _checkForUpdatesOnStartup.ToString());
 		}
 
 		public static void Load(XmlElement xmlSettings)
 		{
-			//XmlElement xmlLogging = (XmlElement)xmlSettings.SelectSingleNode("Logging");
-			//if (xmlLogging != null) _logging = Util.ToBoolean(xmlLogging.InnerText, k_defaultLogging);
+			var xml = (XmlElement)xmlSettings.SelectSingleNode(k_checkForUpdates);
+			if (xml != null) _checkForUpdatesOnStartup = Util.ParseBool(xml.InnerText, k_defaultCheckForUpdatesOnStartup);
 		}
 		#endregion
 
@@ -128,6 +132,12 @@ namespace WallSwitch
 			}
 		}
 		#endregion
+
+		public static bool CheckForUpdatesOnStartup
+		{
+			get { return _checkForUpdatesOnStartup; }
+			set { _checkForUpdatesOnStartup = value; }
+		}
 
 	}
 }
