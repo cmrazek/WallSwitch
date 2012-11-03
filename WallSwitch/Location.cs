@@ -40,6 +40,14 @@ namespace WallSwitch
 			Load(topElement);
 		}
 
+		public Location Clone()
+		{
+			return new Location(_type, _path)
+			{
+				_updateInterval = _updateInterval
+			};
+		}
+
 		public override string ToString()
 		{
 			return _path;

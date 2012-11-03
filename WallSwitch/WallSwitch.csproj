@@ -152,6 +152,7 @@
     <Compile Include="Period.cs" />
     <Compile Include="UpdateCheck.cs" />
     <Compile Include="Util.cs" />
+    <Compile Include="WallpaperRenderer.cs" />
     <Compile Include="WallSwitchService.cs" />
     <Compile Include="WallSwitchServiceManager.cs" />
     <EmbeddedResource Include="AboutDialog.resx">
@@ -203,6 +204,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AppIcon.ico" />
+    <None Include="Resources\Expand1.png" />
+    <None Include="Resources\Expand0.png" />
+    <None Include="Resources\Play.png" />
+    <None Include="Resources\Pause.png" />
+    <None Include="Resources\Prev.png" />
+    <None Include="Resources\Next.png" />
     <None Include="Resources\AppIcon.png" />
     <None Include="Resources\AppIcon.ico" />
     <None Include="Resources\AppIcon2.ico" />
@@ -241,7 +248,7 @@
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

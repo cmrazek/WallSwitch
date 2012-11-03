@@ -10,6 +10,10 @@ namespace WallSwitch
 {
 	public partial class PromptDialog : Form
 	{
+		public delegate bool ValidateCallBack(string text);
+
+		public ValidateCallBack ValidateString { get; set; }
+
 		public PromptDialog()
 		{
 			InitializeComponent();
@@ -17,7 +21,7 @@ namespace WallSwitch
 
 		private void PromptDialog_Load(object sender, EventArgs e)
 		{
-			btnOK.Enabled = !string.IsNullOrWhiteSpace(txtString.Text);
+			btnOK.Enabled = ValidateString != null ? ValidateString(txtString.Text) : !string.IsNullOrWhiteSpace(txtString.Text);
 			txtString.SelectAll();
 		}
 
@@ -35,7 +39,7 @@ namespace WallSwitch
 
 		private void txtString_TextChanged(object sender, EventArgs e)
 		{
-			btnOK.Enabled = !string.IsNullOrWhiteSpace(txtString.Text);
+			btnOK.Enabled = ValidateString != null ? ValidateString(txtString.Text) : !string.IsNullOrWhiteSpace(txtString.Text);
 		}
 
 		private void btnOK_Click(object sender, EventArgs e)

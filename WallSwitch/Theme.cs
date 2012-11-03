@@ -24,10 +24,16 @@ namespace WallSwitch
 		private const int k_defaultImageSize = 50;
 		private const int k_defaultBackOpacity = 15;
 		private const ImageFit k_defaultImageFit = ImageFit.Fit;
-		private const int k_defaultFeather = 15;
+		private const bool k_defaultFeatherEnable = true;
+		private const int k_defaultFeatherDist = 15;
 		private const bool k_defaultFadeTransition = true;
 		public const int k_defaultMaxImageScale = 200;
-		public const int k_defaultColorEffectCollageFadeRatio = 25;
+		public const int k_defaultColorEffectBackRatio = 25;
+		private const bool k_defaultDropShadow = false;
+		private const int k_defaultDropShadowDist = 15;
+		private const bool k_defaultDropShadowFeather = true;
+		private const int k_defaultDropShadowFeatherDist = 20;
+		private const int k_defaultDropShadowOpacity = 50;
 		#endregion
 
 		#region Variables
@@ -48,20 +54,30 @@ namespace WallSwitch
 		private ImageFit _imageFit = k_defaultImageFit;
 		private List<IEnumerable<ImageRec>> _history = new List<IEnumerable<ImageRec>>();
 		private int _historyIndex = -1;
-		private Random _rand = new Random();
-		private int _feather = 15;
+		private Random _rand = null;
 		private bool _fadeTransition = k_defaultFadeTransition;
 		private string _lastWallpaperFile = string.Empty;
 		private int _maxImageScale = k_defaultMaxImageScale;
-		private ColorEffect _colorEffect = ColorEffect.None;
-		private bool _colorEffectCollageFade = false;
-		private int _colorEffectCollageFadeRatio = k_defaultColorEffectCollageFadeRatio;
+
+		private ColorEffect _colorEffectFore = ColorEffect.None;
+		private ColorEffect _colorEffectBack = ColorEffect.None;
+		private int _colorEffectBackRatio = k_defaultColorEffectBackRatio;
+
+		private bool _featherEnable = k_defaultFeatherEnable;
+		private int _featherDist = k_defaultFeatherDist;
+
+		private bool _dropShadow = k_defaultDropShadow;
+		private int _dropShadowDist = k_defaultDropShadowDist;
+		private bool _dropShadowFeather = k_defaultDropShadowFeather;
+		private int _dropShadowFeatherDist = k_defaultDropShadowFeatherDist;
+		private int _dropShadowOpacity = k_defaultDropShadowOpacity;
 		#endregion
 
 		#region Construction
 		public Theme(Guid id)
 		{
 			_id = id;
+			_rand = RandomUtil.FromGuidAndTime(_id);
 			CalcInterval();
 
 			_hotKey.HotKeyPressed += new EventHandler(_hotKey_HotKeyPressed);
@@ -77,6 +93,38 @@ namespace WallSwitch
 			{
 				Log.Write(ex, "Exception when activating theme in response to hotkey.");
 			}
+		}
+
+		public Theme Clone()
+		{
+			// Don't clone active, hotkey, history, historyIndex, rand, lastWallpaperFile
+
+			return new Theme(Guid.NewGuid())
+			{
+				_locations = (from l in _locations select l.Clone()).ToList(),
+				_name = _name,
+				_freq = _freq,
+				_period = _period,
+				_interval = _interval,
+				_mode = _mode,
+				_imageSize = _imageSize,
+				_separateMonitors = _separateMonitors,
+				_backColorTop = _backColorTop,
+				_backColorBottom = _backColorBottom,
+				_backOpacity = _backOpacity,
+				_imageFit = _imageFit,
+				_featherDist = _featherDist,
+				_fadeTransition = _fadeTransition,
+				_maxImageScale = _maxImageScale,
+				_colorEffectFore = _colorEffectFore,
+				_colorEffectBack = _colorEffectBack,
+				_colorEffectBackRatio = _colorEffectBackRatio,
+				_dropShadow = _dropShadow,
+				_dropShadowDist = _dropShadowDist,
+				_dropShadowFeather = _dropShadowFeather,
+				_dropShadowFeatherDist = _dropShadowFeatherDist,
+				_dropShadowOpacity = _dropShadowOpacity
+			};
 		}
 		#endregion
 
@@ -143,16 +191,6 @@ namespace WallSwitch
 			set { _imageFit = value; }
 		}
 
-		public int Feather
-		{
-			get { return _feather; }
-			set
-			{
-				if (value < 0) throw new ArgumentOutOfRangeException("Feather cannot be less than zero.");
-				_feather = value;
-			}
-		}
-
 		public bool FadeTransition
 		{
 			get { return _fadeTransition; }
@@ -173,55 +211,73 @@ namespace WallSwitch
 		#endregion
 
 		#region Save/Load
-		private const string k_name = "Name";
-		private const string k_active = "Active";
-		private const string k_freq = "Frequency";
-		private const string k_period = "Period";
-		private const string k_mode = "Mode";
-		private const string k_imageSize = "ImageSize";
-		private const string k_backColorTop = "BackColorTop";
-		private const string k_backColorBottom = "BackColorBottom";
-		private const string k_separateMonitors = "SeparateMonitors";
-		private const string k_backOpacity = "BackOpacity";
-		private const string k_featherEdges = "FeatherEdges";
-		private const string k_imageFit = "ImageFit";
-		private const string k_fadeTransition = "FadeTransition";
-		private const string k_lastWallpaperFile = "LastWallpaperFile";
-		private const string k_maxImageScale = "MaxImageScale";
-		private const string k_colorEffectXml = "ColorEffect";
-		private const string k_colorEffectCollageFadeXml = "ColorEffectCollageFade";
-		private const string k_colorEffectCollageFadeRatio = "ColorEffectCollageFadeRatio";
+		private const string k_nameXml = "Name";
+		private const string k_activeXml = "Active";
+		private const string k_freqXml = "Frequency";
+		private const string k_periodXml = "Period";
+		private const string k_modeXml = "Mode";
+		private const string k_imageSizeXml = "ImageSize";
+		private const string k_backColorTopXml = "BackColorTop";
+		private const string k_backColorBottomXml = "BackColorBottom";
+		private const string k_separateMonitorsXml = "SeparateMonitors";
+		private const string k_backOpacityXml = "BackOpacity";
+		private const string k_imageFitXml = "ImageFit";
+		private const string k_fadeTransitionXml = "FadeTransition";
+		private const string k_lastWallpaperFileXml = "LastWallpaperFile";
+		private const string k_maxImageScaleXml = "MaxImageScale";
+		private const string k_colorEffectXml = "ColorEffect";	// Deprecated
+		private const string k_colorEffectForeXml = "ColorEffectFore";
+		private const string k_colorEffectBackXml = "ColorEffectBack";
+		private const string k_colorEffectCollageFadeXml = "ColorEffectCollageFade";	// Deprecated
+		private const string k_colorEffectCollageFadeRatioXml = "ColorEffectCollageFadeRatio";
 		private const string k_location = "Location";
+
+		private const string k_featherEnableXml = "Feather";
+		private const string k_featherDistXml = "FeatherEdges";
+
+		private const string k_dropShadowXml = "DropShadow";
+		private const string k_dropShadowDistXml = "DropShadowDist";
+		private const string k_dropShadowFeatherXml = "DropShadowFeather";
+		private const string k_dropShadowFeatherDistXml = "DropShadowFeatherDist";
+		private const string k_dropShadowOpacityXml = "DropShadowOpacity";
 
 		public void Save(XmlWriter xml)
 		{
-			xml.WriteAttributeString(k_name, _name);
-			if (_active) xml.WriteAttributeString(k_active, Boolean.TrueString);
-			xml.WriteAttributeString(k_freq, _freq.ToString());
-			xml.WriteAttributeString(k_period, _period.ToString());
-			xml.WriteAttributeString(k_mode, _mode.ToString());
-			xml.WriteAttributeString(k_imageSize, _imageSize.ToString());
-			xml.WriteAttributeString(k_backColorTop, ColorUtil.ColorToString(_backColorTop));
-			xml.WriteAttributeString(k_backColorBottom, ColorUtil.ColorToString(_backColorBottom));
-			if (!_separateMonitors) xml.WriteAttributeString(k_separateMonitors, _separateMonitors.ToString());
+			xml.WriteAttributeString(k_nameXml, _name);
+			if (_active) xml.WriteAttributeString(k_activeXml, Boolean.TrueString);
+			xml.WriteAttributeString(k_freqXml, _freq.ToString());
+			xml.WriteAttributeString(k_periodXml, _period.ToString());
+			xml.WriteAttributeString(k_modeXml, _mode.ToString());
+			xml.WriteAttributeString(k_imageSizeXml, _imageSize.ToString());
+			xml.WriteAttributeString(k_backColorTopXml, ColorUtil.ColorToString(_backColorTop));
+			xml.WriteAttributeString(k_backColorBottomXml, ColorUtil.ColorToString(_backColorBottom));
+			if (!_separateMonitors) xml.WriteAttributeString(k_separateMonitorsXml, _separateMonitors.ToString());
 
 			if (_mode == ThemeMode.Collage)
 			{
-				xml.WriteAttributeString(k_backOpacity, _backOpacity.ToString());
-				if (_feather != k_defaultFeather) xml.WriteAttributeString(k_featherEdges, _feather.ToString());
+				xml.WriteAttributeString(k_backOpacityXml, _backOpacity.ToString());
 			}
 			else
 			{
-				xml.WriteAttributeString(k_imageFit, _imageFit.ToString());
+				xml.WriteAttributeString(k_imageFitXml, _imageFit.ToString());
 			}
 
-			if (_fadeTransition != k_defaultFadeTransition) xml.WriteAttributeString(k_fadeTransition, _fadeTransition.ToString());
-			if (!string.IsNullOrEmpty(_lastWallpaperFile)) xml.WriteAttributeString(k_lastWallpaperFile, _lastWallpaperFile);
-			if (_maxImageScale != k_defaultMaxImageScale) xml.WriteAttributeString(k_maxImageScale, _maxImageScale.ToString());
+			if (_fadeTransition != k_defaultFadeTransition) xml.WriteAttributeString(k_fadeTransitionXml, _fadeTransition.ToString());
+			if (!string.IsNullOrEmpty(_lastWallpaperFile)) xml.WriteAttributeString(k_lastWallpaperFileXml, _lastWallpaperFile);
+			if (_maxImageScale != k_defaultMaxImageScale) xml.WriteAttributeString(k_maxImageScaleXml, _maxImageScale.ToString());
 
-			if (_colorEffect != ColorEffect.None) xml.WriteAttributeString(k_colorEffectXml, _colorEffect.ToString());
-			if (_colorEffectCollageFade != false) xml.WriteAttributeString(k_colorEffectCollageFadeXml, _colorEffectCollageFade.ToString());
-			if (_colorEffectCollageFade != false) xml.WriteAttributeString(k_colorEffectCollageFadeRatio, _colorEffectCollageFadeRatio.ToString());
+			if (_colorEffectFore != ColorEffect.None) xml.WriteAttributeString(k_colorEffectForeXml, _colorEffectFore.ToString());
+			if (_colorEffectBack != ColorEffect.None) xml.WriteAttributeString(k_colorEffectBackXml, _colorEffectBack.ToString());
+			if (_colorEffectBack != ColorEffect.None) xml.WriteAttributeString(k_colorEffectCollageFadeRatioXml, _colorEffectBackRatio.ToString());
+
+			if (_featherEnable != k_defaultFeatherEnable) xml.WriteAttributeString(k_featherEnableXml, _featherDist.ToString());
+			if (_featherDist != k_defaultFeatherDist) xml.WriteAttributeString(k_featherDistXml, _featherDist.ToString());
+
+			if (_dropShadow != k_defaultDropShadow) xml.WriteAttributeString(k_dropShadowXml, _dropShadow.ToString());
+			if (_dropShadowDist != k_defaultDropShadowDist) xml.WriteAttributeString(k_dropShadowDistXml, _dropShadowDist.ToString());
+			if (_dropShadowFeather != k_defaultDropShadowFeather) xml.WriteAttributeString(k_dropShadowFeatherXml, _dropShadowFeather.ToString());
+			if (_dropShadowFeatherDist != k_defaultDropShadowFeatherDist) xml.WriteAttributeString(k_dropShadowFeatherDistXml, _dropShadowFeatherDist.ToString());
+			if (_dropShadowOpacity != k_defaultDropShadowOpacity) xml.WriteAttributeString(k_dropShadowOpacityXml, _dropShadowOpacity.ToString());
 
 			_hotKey.SaveXml(xml);
 
@@ -237,26 +293,49 @@ namespace WallSwitch
 
 		public void Load(XmlElement xmlTheme)
 		{
-			_name = Util.ParseString(xmlTheme, k_name, _id.ToString());
+			_name = Util.ParseString(xmlTheme, k_nameXml, _id.ToString());
 
-			_active = Util.ParseBool(xmlTheme, k_active, false);
-			_freq = Util.ParseInt(xmlTheme, k_freq, k_defaultFreq);
-			_period = Util.ParseEnum<Period>(xmlTheme, k_period, k_defaultPeriod);
+			_active = Util.ParseBool(xmlTheme, k_activeXml, false);
+			_freq = Util.ParseInt(xmlTheme, k_freqXml, k_defaultFreq);
+			_period = Util.ParseEnum<Period>(xmlTheme, k_periodXml, k_defaultPeriod);
 			CalcInterval();
-			_mode = Util.ParseEnum<ThemeMode>(xmlTheme, k_mode, k_defaultMode);
-			_imageSize = Util.ParseInt(xmlTheme, k_imageSize, k_defaultImageSize);
-			_backColorTop = ColorUtil.ParseColor(xmlTheme, k_backColorTop, k_defaultBackColor);
-			_backColorBottom = ColorUtil.ParseColor(xmlTheme, k_backColorBottom, k_defaultBackColor);
-			_separateMonitors = Util.ParseBool(xmlTheme, k_separateMonitors, k_defaultSeparateMonitors);
-			_backOpacity = Util.ParseInt(xmlTheme, k_backOpacity, k_defaultBackOpacity);
-			_imageFit = Util.ParseEnum<ImageFit>(xmlTheme, k_imageFit, k_defaultImageFit);
-			_feather = Util.ParseInt(xmlTheme, k_featherEdges, k_defaultFeather);
-			_fadeTransition = Util.ParseBool(xmlTheme, k_fadeTransition, k_defaultFadeTransition);
-			_lastWallpaperFile = Util.ParseString(xmlTheme, k_lastWallpaperFile, string.Empty);
-			_maxImageScale = Util.ParseInt(xmlTheme, k_maxImageScale, k_defaultMaxImageScale);
-			_colorEffect = Util.ParseEnum<ColorEffect>(xmlTheme, k_colorEffectXml, ColorEffect.None);
-			_colorEffectCollageFade = Util.ParseBool(xmlTheme, k_colorEffectCollageFadeXml, false);
-			_colorEffectCollageFadeRatio = Util.ParseInt(xmlTheme, k_colorEffectCollageFadeRatio, k_defaultColorEffectCollageFadeRatio);
+			_mode = Util.ParseEnum<ThemeMode>(xmlTheme, k_modeXml, k_defaultMode);
+			_imageSize = Util.ParseInt(xmlTheme, k_imageSizeXml, k_defaultImageSize);
+			_backColorTop = ColorUtil.ParseColor(xmlTheme, k_backColorTopXml, k_defaultBackColor);
+			_backColorBottom = ColorUtil.ParseColor(xmlTheme, k_backColorBottomXml, k_defaultBackColor);
+			_separateMonitors = Util.ParseBool(xmlTheme, k_separateMonitorsXml, k_defaultSeparateMonitors);
+			_backOpacity = Util.ParseInt(xmlTheme, k_backOpacityXml, k_defaultBackOpacity);
+			_imageFit = Util.ParseEnum<ImageFit>(xmlTheme, k_imageFitXml, k_defaultImageFit);
+			_featherEnable = Util.ParseBool(xmlTheme, k_featherEnableXml, k_defaultFeatherEnable);
+			_featherDist = Util.ParseInt(xmlTheme, k_featherDistXml, k_defaultFeatherDist);
+			_fadeTransition = Util.ParseBool(xmlTheme, k_fadeTransitionXml, k_defaultFadeTransition);
+			_lastWallpaperFile = Util.ParseString(xmlTheme, k_lastWallpaperFileXml, string.Empty);
+			_maxImageScale = Util.ParseInt(xmlTheme, k_maxImageScaleXml, k_defaultMaxImageScale);
+
+			// Old XML settings use a single attribute to store a fore/back color effect.
+			// New XML uses a separate attribute for each.
+			if (xmlTheme.HasAttribute(k_colorEffectXml))
+			{
+				if (Util.ParseBool(xmlTheme, k_colorEffectCollageFadeXml, false))
+				{
+					_colorEffectBack = Util.ParseEnum<ColorEffect>(xmlTheme, k_colorEffectXml, ColorEffect.None);
+					_colorEffectFore = ColorEffect.None;
+				}
+				else
+				{
+					_colorEffectFore = Util.ParseEnum<ColorEffect>(xmlTheme, k_colorEffectXml, ColorEffect.None);
+					_colorEffectBack = ColorEffect.None;
+				}
+			}
+			_colorEffectFore = Util.ParseEnum<ColorEffect>(xmlTheme, k_colorEffectForeXml, _colorEffectFore);
+			_colorEffectBack = Util.ParseEnum<ColorEffect>(xmlTheme, k_colorEffectBackXml, _colorEffectBack);
+			_colorEffectBackRatio = Util.ParseInt(xmlTheme, k_colorEffectCollageFadeRatioXml, k_defaultColorEffectBackRatio);
+
+			_dropShadow = Util.ParseBool(xmlTheme, k_dropShadowXml, k_defaultDropShadow);
+			_dropShadowDist = Util.ParseInt(xmlTheme, k_dropShadowDistXml, k_defaultDropShadowDist);
+			_dropShadowFeather = Util.ParseBool(xmlTheme, k_dropShadowFeatherXml, k_defaultDropShadowFeather);
+			_dropShadowFeatherDist = Util.ParseInt(xmlTheme, k_dropShadowFeatherDistXml, k_defaultDropShadowFeatherDist);
+			_dropShadowOpacity = Util.ParseInt(xmlTheme, k_dropShadowOpacityXml, k_defaultDropShadowOpacity);
 
 			foreach (XmlElement xmlHotKey in xmlTheme.SelectNodes(HotKey.XmlElementName))
 			{
@@ -658,26 +737,81 @@ namespace WallSwitch
 		#endregion
 
 		#region Color Effects
-		public ColorEffect ColorEffect
+		public ColorEffect ColorEffectFore
 		{
-			get { return _colorEffect; }
-			set { _colorEffect = value; }
+			get { return _colorEffectFore; }
+			set { _colorEffectFore = value; }
 		}
 
-		public bool ColorEffectCollageFade
+		public ColorEffect ColorEffectBack
 		{
-			get { return _colorEffectCollageFade; }
-			set { _colorEffectCollageFade = value; }
+			get { return _colorEffectBack; }
+			set { _colorEffectBack = value; }
 		}
 
-		public int ColorEffectCollageFadeRatio
+		public int ColorEffectBackRatio
 		{
-			get { return _colorEffectCollageFadeRatio; }
+			get { return _colorEffectBackRatio; }
 			set
 			{
-				if (value < 0) _colorEffectCollageFadeRatio = 0;
-				else if (value > 100) _colorEffectCollageFadeRatio = 100;
-				else _colorEffectCollageFadeRatio = value;
+				if (value < 0) _colorEffectBackRatio = 0;
+				else if (value > 100) _colorEffectBackRatio = 100;
+				else _colorEffectBackRatio = value;
+			}
+		}
+		#endregion
+
+		#region Feather
+		public bool Feather
+		{
+			get { return _featherEnable; }
+			set { _featherEnable = value; }
+		}
+
+		public int FeatherDist
+		{
+			get { return _featherDist; }
+			set
+			{
+				if (value < 0) throw new ArgumentOutOfRangeException("Feather cannot be less than zero.");
+				_featherDist = value;
+			}
+		}
+		#endregion
+
+		#region Drop Shadow
+		public bool DropShadow
+		{
+			get { return _dropShadow; }
+			set { _dropShadow = value; }
+		}
+
+		public int DropShadowDist
+		{
+			get { return _dropShadowDist; }
+			set { _dropShadowDist = value; }
+		}
+
+		public bool DropShadowFeather
+		{
+			get { return _dropShadowFeather; }
+			set { _dropShadowFeather = value; }
+		}
+
+		public int DropShadowFeatherDist
+		{
+			get { return _dropShadowFeatherDist; }
+			set { _dropShadowFeatherDist = value; }
+		}
+
+		public int DropShadowOpacity
+		{
+			get { return _dropShadowOpacity; }
+			set
+			{
+				_dropShadowOpacity = value;
+				if (_dropShadowOpacity < 0) _dropShadowOpacity = 0;
+				else if (_dropShadowOpacity > 100) _dropShadowOpacity = 100;
 			}
 		}
 		#endregion

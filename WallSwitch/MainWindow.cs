@@ -63,6 +63,8 @@ namespace WallSwitch
 		private const string k_nextUpdateFormat = "t";	// Uses "h:mm tt" format
 
 		private const int k_minUpdateSeconds = 15;
+
+		private const int k_groupBoxMargin = 8;
 		#endregion
 
 		#region Window Management
@@ -104,7 +106,8 @@ namespace WallSwitch
 				_switchThread.Switching += new SwitchThread.SwitchEventHandler(_switchThread_Switching);
 				_switchThread.Switched += new SwitchThread.SwitchEventHandler(_switchThread_Switched);
 
-				c_colorEffectCombo.InitForEnum<ColorEffect>(ColorEffect.None);
+				cmbColorEffectFore.InitForEnum<ColorEffect>(ColorEffect.None);
+				cmbColorEffectBack.InitForEnum<ColorEffect>(ColorEffect.None);
 
 				// Update all the controls
 				RefreshControls();
@@ -177,18 +180,6 @@ namespace WallSwitch
 			try
 			{
 				Shutdown(true);
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex, Res.Exception_Generic);
-			}
-		}
-
-		private void btnClose_Click(object sender, EventArgs e)
-		{
-			try
-			{
-				Close();
 			}
 			catch (Exception ex)
 			{
@@ -517,7 +508,7 @@ namespace WallSwitch
 			clrBackBottom.Color = _currentTheme.BackColorBottom;
 
 			// Image Size
-			trkImageSize.Value = _currentTheme.ImageSize;
+			trkImageSize.Value = _currentTheme.ImageSize.Clamp(trkImageSize.Minimum, trkImageSize.Maximum);
 			UpdateImageSizeDisplay();
 
 			chkSeparateMonitors.Checked = _currentTheme.SeparateMonitors;
@@ -525,10 +516,11 @@ namespace WallSwitch
 
 			cmbImageFit.SelectedIndex = (int)_currentTheme.ImageFit;
 
-			trkOpacity.Value = _currentTheme.BackOpacity;
+			trkOpacity.Value = _currentTheme.BackOpacity.Clamp(trkOpacity.Minimum, trkOpacity.Maximum);
 			UpdateBackOpacityDisplay();
 
-			trkFeather.Value = _currentTheme.Feather;
+			chkFeather.Checked = _currentTheme.Feather;
+			trkFeather.Value = _currentTheme.FeatherDist.Clamp(trkFeather.Minimum, trkFeather.Maximum);
 			UpdateFeatherDisplay();
 
 			chkFadeTransition.Checked = _currentTheme.FadeTransition;
@@ -544,9 +536,18 @@ namespace WallSwitch
 				txtMaxScale.Text = string.Empty;
 			}
 
-			c_colorEffectCombo.SetEnumValue<ColorEffect>(_currentTheme.ColorEffect);
-			c_colorEffectCollageFade.Checked = _currentTheme.ColorEffectCollageFade;
-			c_colorEffectCollageFadeRatioTrackBar.Value = _currentTheme.ColorEffectCollageFadeRatio;
+			cmbColorEffectFore.SetEnumValue<ColorEffect>(_currentTheme.ColorEffectFore);
+			cmbColorEffectBack.SetEnumValue<ColorEffect>(_currentTheme.ColorEffectBack);
+			trkColorEffectCollageFadeRatio.Value = _currentTheme.ColorEffectBackRatio.Clamp(trkColorEffectCollageFadeRatio.Minimum, trkColorEffectCollageFadeRatio.Maximum);
+
+			chkDropShadow.Checked = _currentTheme.DropShadow;
+			trkDropShadow.Value = _currentTheme.DropShadowDist.Clamp(trkDropShadow.Minimum, trkDropShadow.Maximum);
+			chkDropShadowFeather.Checked = _currentTheme.DropShadowFeather;
+			lblDropShadowUnit.Text = string.Format(Res.DropShadowDist, trkDropShadow.Value);
+			trkDropShadowFeatherDist.Value = _currentTheme.DropShadowFeatherDist.Clamp(trkDropShadowFeatherDist.Minimum, trkDropShadowFeatherDist.Maximum);
+			lblDropShadowFeatherDist.Text = string.Format(Res.DropShadowFeatherDistValue, trkDropShadowFeatherDist.Value);
+			trkDropShadowOpacity.Value = _currentTheme.DropShadowOpacity.Clamp(trkDropShadowOpacity.Minimum, trkDropShadowOpacity.Maximum);
+			lblDropShadowOpacityValue.Text = string.Format(Res.DropShadowOpacityValue, trkDropShadowOpacity.Value);
 
 			Dirty = false;
 
@@ -565,7 +566,7 @@ namespace WallSwitch
 			{
 				if (showErrors)
 				{
-					tabThemeSettings.SelectedTab = tabFrequency;
+					tabThemeSettings.SelectedTab = tabSettings;
 					txtThemeFreq.Focus();
 					this.ShowError(Res.Error_InvalidThemeFreq);
 				}
@@ -590,7 +591,7 @@ namespace WallSwitch
 				default:
 					if (showErrors)
 					{
-						tabThemeSettings.SelectedTab = tabFrequency;
+						tabThemeSettings.SelectedTab = tabSettings;
 						cmbThemePeriod.Focus();
 						this.ShowError(Res.Error_InvalidThemePeriod);
 					}
@@ -601,7 +602,7 @@ namespace WallSwitch
 			{
 				if (showErrors)
 				{
-					tabThemeSettings.SelectedTab = tabFrequency;
+					tabThemeSettings.SelectedTab = tabSettings;
 					txtThemeFreq.Focus();
 					this.ShowError(Res.Error_ShortUpdateInterval);
 				}
@@ -623,7 +624,7 @@ namespace WallSwitch
 				default:
 					if (showErrors)
 					{
-						tabThemeSettings.SelectedTab = tabDisplay;
+						tabThemeSettings.SelectedTab = tabSettings;
 						cmbThemeMode.Focus();
 						this.ShowError(Res.Error_InvalidThemeOrder);
 					}
@@ -637,7 +638,7 @@ namespace WallSwitch
 				{
 					if (showErrors)
 					{
-						tabThemeSettings.SelectedTab = tabDisplay;
+						tabThemeSettings.SelectedTab = tabSettings;
 						txtMaxScale.Focus();
 						this.ShowError(Res.Error_InvalidMaxImageScale);
 					}
@@ -647,7 +648,7 @@ namespace WallSwitch
 				{
 					if (showErrors)
 					{
-						tabThemeSettings.SelectedTab = tabDisplay;
+						tabThemeSettings.SelectedTab = tabSettings;
 						txtMaxScale.Focus();
 						this.ShowError(Res.Error_NegativeMaxImageScale);
 					}
@@ -677,13 +678,21 @@ namespace WallSwitch
 
 			_currentTheme.ImageFit = (ImageFit)cmbImageFit.SelectedIndex;
 			_currentTheme.BackOpacity = trkOpacity.Value;
-			_currentTheme.Feather = trkFeather.Value;
 			_currentTheme.FadeTransition = chkFadeTransition.Checked;
 			_currentTheme.MaxImageScale = maxImageScale;
 
-			_currentTheme.ColorEffect = c_colorEffectCombo.GetEnumValue<ColorEffect>();
-			_currentTheme.ColorEffectCollageFade = c_colorEffectCollageFade.Checked;
-			_currentTheme.ColorEffectCollageFadeRatio = c_colorEffectCollageFadeRatioTrackBar.Value;
+			_currentTheme.ColorEffectFore = cmbColorEffectFore.GetEnumValue<ColorEffect>();
+			_currentTheme.ColorEffectBack = cmbColorEffectBack.GetEnumValue<ColorEffect>();
+			_currentTheme.ColorEffectBackRatio = trkColorEffectCollageFadeRatio.Value;
+
+			_currentTheme.Feather = chkFeather.Checked;
+			_currentTheme.FeatherDist = trkFeather.Value;
+
+			_currentTheme.DropShadow = chkDropShadow.Checked;
+			_currentTheme.DropShadowDist = trkDropShadow.Value;
+			_currentTheme.DropShadowFeather = chkDropShadowFeather.Checked;
+			_currentTheme.DropShadowFeatherDist = trkDropShadowFeatherDist.Value;
+			_currentTheme.DropShadowOpacity = trkDropShadowOpacity.Value;
 
 			Dirty = false;
 			EnableControls();
@@ -722,33 +731,58 @@ namespace WallSwitch
 		private void ControlChanged(object sender, EventArgs e)
 		{
 			if (!_refreshing) Dirty = true;
+			EnableControls();
 		}
 
 		private void EnableControls()
 		{
-			btnApply.Enabled = miFileSave.Enabled = Dirty;
+			// Theme Group
+			btnSave.Enabled = ciSaveTheme.Enabled = miFileSave.Enabled = Dirty;
 			btnActivate.Enabled = _switchThread == null || _switchThread.Theme == null || !_switchThread.Theme.Equals(_currentTheme);
-			btnDeleteTheme.Enabled = miFileDeleteTheme.Enabled = cmbTheme.Items.Count > 1;
+			ciDeleteTheme.Enabled = miFileDeleteTheme.Enabled = cmbTheme.Items.Count > 1;
 
+			// Prev/Pause/Next Group
 			var isSwitching = _switchThread != null && _switchThread.IsSwitching;
-
 			Theme activeTheme = GetActiveTheme();
 			btnPrevious.Enabled = activeTheme != null && activeTheme.CanGoPrev && !isSwitching;
 			btnSwitchNow.Enabled = activeTheme != null && !isSwitching;
+			btnPause.Image = _switchThread != null && _switchThread.Paused ? Res.PlayIcon : Res.PauseIcon;
 
-			grpCollageDisplay.Visible = cmbThemeMode.SelectedIndex == k_modeCollage;
-
+			// Display Mode Group
 			chkSeparateMonitors.Visible = Screen.AllScreens.Length > 1;
 			cmbImageFit.Visible = cmbThemeMode.SelectedIndex != k_modeCollage;
-
 			txtMaxScale.Enabled = chkLimitScale.Checked;
 
-			btnPause.Text = _switchThread != null && _switchThread.Paused ? Res.Button_Unpause : Res.Button_Pause;
+			// Background Color Group
 
-			var collageFade = cmbThemeMode.SelectedIndex == k_modeCollage;
-			c_colorEffectCollageFade.Visible = collageFade;
-			c_colorEffectCollageFadeRatioTrackBar.Visible = c_colorEffectCollageFadeRatioValue.Visible = collageFade && c_colorEffectCollageFade.Checked;
+			// Collage Display Group
+			grpCollageDisplay.Visible = cmbThemeMode.SelectedIndex == k_modeCollage;
 
+			trkFeather.Visible = chkFeather.Checked;
+			lblFeatherUnit.Visible = chkFeather.Checked;
+
+			var dropShadow = chkDropShadow.Checked;
+			trkDropShadow.Visible = dropShadow;
+			lblDropShadowUnit.Visible = dropShadow;
+			chkDropShadowFeather.Visible = dropShadow;
+			trkDropShadowFeatherDist.Visible = dropShadow && chkDropShadowFeather.Checked;
+			lblDropShadowFeatherDist.Visible = dropShadow && chkDropShadowFeather.Checked;
+			lblDropShadowOpacity.Visible = dropShadow;
+			trkDropShadowOpacity.Visible = dropShadow;
+			lblDropShadowOpacityValue.Visible = dropShadow;
+
+			// Foreground Effects Group
+
+			// Background Effects Group
+			if (cmbThemeMode.SelectedIndex == k_modeCollage)
+			{
+				grpBackgroundColorEffects.Visible = true;
+				trkColorEffectCollageFadeRatio.Visible = lblColorEffectCollageFadeRatioUnit.Visible = cmbColorEffectBack.GetEnumValue<ColorEffect>() != ColorEffect.None;
+			}
+			else
+			{
+				grpBackgroundColorEffects.Visible = false;
+			}
 			EnableLocationsContextMenu();
 		}
 
@@ -876,7 +910,7 @@ namespace WallSwitch
 
 		private void UpdateFeatherDisplay()
 		{
-			lblFeatherDisplay.Text = String.Format(Res.FeatherWidth, trkFeather.Value);
+			lblFeatherUnit.Text = String.Format(Res.FeatherWidth, trkFeather.Value);
 		}
 
 		private void c_colorEffectCollageFadeRatioTrackBar_Scroll(object sender, EventArgs e)
@@ -894,7 +928,7 @@ namespace WallSwitch
 
 		private void UpdateCollageFadeRatioDisplay()
 		{
-			c_colorEffectCollageFadeRatioValue.Text = string.Format(Res.CollageFadeRatioPercent, c_colorEffectCollageFadeRatioTrackBar.Value);
+			lblColorEffectCollageFadeRatioUnit.Text = string.Format(Res.CollageFadeRatioPercent, trkColorEffectCollageFadeRatio.Value);
 		}
 		#endregion
 
@@ -1115,6 +1149,18 @@ namespace WallSwitch
 			}
 		}
 
+		private void c_themeMenuButton_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				cmTheme.Show(btnTheme, new Point(0, btnTheme.Height));
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
 		private void btnRenameTheme_Click(object sender, EventArgs e)
 		{
 			try
@@ -1174,6 +1220,53 @@ namespace WallSwitch
 			catch (Exception ex)
 			{
 				this.ShowError(ex, Res.Exception_Generic);
+			}
+		}
+
+		private void miDuplicateTheme_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (_currentTheme == null) return;
+
+				var cancel = false;
+				if (Dirty)
+				{
+					switch (MessageBox.Show(this, Res.DuplicateThemeDirtyPrompt, Res.DuplicateThemeDirtyTitle,
+						MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question))
+					{
+						case DialogResult.Yes:
+							if (!SaveControls(true)) cancel = true;
+							break;
+						case DialogResult.No:
+							break;
+						case DialogResult.Cancel:
+							cancel = true;
+							break;
+					}
+				}
+
+				if (!cancel)
+				{
+					PromptDialog dlg = new PromptDialog();
+					dlg.Text = Res.DuplicateThemeTitle;
+					dlg.Prompt = Res.DuplicateThemePrompt;
+					dlg.String = _currentTheme.Name;
+					dlg.ValidateString = str => !string.IsNullOrWhiteSpace(str) && !(from t in _themes where t.Name == str select t).Any();
+					if (dlg.ShowDialog() == DialogResult.OK)
+					{
+						var newTheme = _currentTheme.Clone();
+						newTheme.Name = dlg.String;
+						_themes.Add(newTheme);
+						_currentTheme = newTheme;
+						Dirty = true;
+						RefreshControls();
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
 			}
 		}
 
@@ -2261,9 +2354,44 @@ namespace WallSwitch
 		}
 		#endregion
 
-		
+		private void trkDropShadow_Scroll(object sender, EventArgs e)
+		{
+			try
+			{
+				lblDropShadowUnit.Text = string.Format(Res.DropShadowDist, trkDropShadow.Value);
+				ControlChanged(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
 
+		private void trkDropShadowFeatherDist_Scroll(object sender, EventArgs e)
+		{
+			try
+			{
+				lblDropShadowFeatherDist.Text = string.Format(Res.DropShadowFeatherDistValue, trkDropShadowFeatherDist.Value);
+				ControlChanged(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
 
+		private void trkDropShadowOpacity_Scroll(object sender, EventArgs e)
+		{
+			try
+			{
+				lblDropShadowOpacityValue.Text = string.Format(Res.DropShadowOpacityValue, trkDropShadowOpacity.Value);
+				ControlChanged(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
 
 	}
 }

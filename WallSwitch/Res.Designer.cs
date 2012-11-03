@@ -113,24 +113,6 @@ namespace WallSwitch {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &amp;Pause.
-        /// </summary>
-        internal static string Button_Pause {
-            get {
-                return ResourceManager.GetString("Button_Pause", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Un&amp;pause.
-        /// </summary>
-        internal static string Button_Unpause {
-            get {
-                return ResourceManager.GetString("Button_Unpause", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Return.
         /// </summary>
         internal static string Char_Cr {
@@ -235,6 +217,69 @@ namespace WallSwitch {
         internal static string DefaultTheme {
             get {
                 return ResourceManager.GetString("DefaultTheme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} pixels.
+        /// </summary>
+        internal static string DropShadowDist {
+            get {
+                return ResourceManager.GetString("DropShadowDist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} pixels.
+        /// </summary>
+        internal static string DropShadowFeatherDistValue {
+            get {
+                return ResourceManager.GetString("DropShadowFeatherDistValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} %.
+        /// </summary>
+        internal static string DropShadowOpacityValue {
+            get {
+                return ResourceManager.GetString("DropShadowOpacityValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have made changes to this theme.  Do you want to save changes before creating a duplicate?.
+        /// </summary>
+        internal static string DuplicateThemeDirtyPrompt {
+            get {
+                return ResourceManager.GetString("DuplicateThemeDirtyPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save Changes?.
+        /// </summary>
+        internal static string DuplicateThemeDirtyTitle {
+            get {
+                return ResourceManager.GetString("DuplicateThemeDirtyTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter the new name for the duplicate theme:.
+        /// </summary>
+        internal static string DuplicateThemePrompt {
+            get {
+                return ResourceManager.GetString("DuplicateThemePrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Duplicate Theme.
+        /// </summary>
+        internal static string DuplicateThemeTitle {
+            get {
+                return ResourceManager.GetString("DuplicateThemeTitle", resourceCulture);
             }
         }
         
@@ -647,6 +692,20 @@ namespace WallSwitch {
             }
         }
         
+        internal static System.Drawing.Bitmap Expand0 {
+            get {
+                object obj = ResourceManager.GetObject("Expand0", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap Expand1 {
+            get {
+                object obj = ResourceManager.GetObject("Expand1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to {0} pixels.
         /// </summary>
@@ -746,6 +805,13 @@ namespace WallSwitch {
             }
         }
         
+        internal static System.Drawing.Bitmap NextIcon {
+            get {
+                object obj = ResourceManager.GetObject("NextIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to (next refresh).
         /// </summary>
@@ -788,6 +854,27 @@ namespace WallSwitch {
         internal static string Notify_Unpaused {
             get {
                 return ResourceManager.GetString("Notify_Unpaused", resourceCulture);
+            }
+        }
+        
+        internal static System.Drawing.Bitmap PauseIcon {
+            get {
+                object obj = ResourceManager.GetObject("PauseIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap PlayIcon {
+            get {
+                object obj = ResourceManager.GetObject("PlayIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap PrevIcon {
+            get {
+                object obj = ResourceManager.GetObject("PrevIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         

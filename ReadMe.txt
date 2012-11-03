@@ -12,6 +12,11 @@ Contact:
 
 ChangeLog:
 
+Version 1.2 - (pending)
+- Added ability to duplicate a theme.
+- Added drop shadows to collage mode.
+- In collage mode, can use separate color effects for foreground and background.
+
 Version 1.1 - 2012-10-27:
 - Now automatically checks for updates (can be disabled if desired)
 - Misc bug fixes.

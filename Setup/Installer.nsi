@@ -5,7 +5,7 @@
 ; -------------------------------------------------------------------------------------------------
 
 Name "WallSwitch"
-OutFile "Output\WallSwitch_V1.1_Setup.exe"
+OutFile "Output\WallSwitch_V1.2_Setup.exe"
 InstallDir "$PROGRAMFILES\WallSwitch"
 RequestExecutionLevel admin
 

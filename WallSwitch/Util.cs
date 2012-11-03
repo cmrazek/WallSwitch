@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.Text;
 using System.Xml;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Windows.Forms;
@@ -319,6 +321,69 @@ namespace WallSwitch
 
 			if (descAttrib != null) return descAttrib.Description;
 			return value.ToString();
+		}
+	}
+
+	public static class RandomUtil
+	{
+		public static Random FromGuid(Guid guid)
+		{
+			var bytes = guid.ToByteArray();
+			uint seed = BytesToUint(bytes[0], bytes[1], bytes[2], bytes[3]) ^
+				BytesToUint(bytes[4], bytes[5], bytes[6], bytes[7]) ^
+				BytesToUint(bytes[8], bytes[9], bytes[10], bytes[11]) ^
+				BytesToUint(bytes[12], bytes[13], bytes[14], bytes[15]);
+			seed &= 0x7fffffff;
+			return new Random((int)seed);
+		}
+
+		public static Random FromGuidAndTime(Guid guid)
+		{
+			var bytes = guid.ToByteArray();
+			uint seed = BytesToUint(bytes[0], bytes[1], bytes[2], bytes[3]) ^
+				BytesToUint(bytes[4], bytes[5], bytes[6], bytes[7]) ^
+				BytesToUint(bytes[8], bytes[9], bytes[10], bytes[11]) ^
+				BytesToUint(bytes[12], bytes[13], bytes[14], bytes[15]);
+			seed ^= (uint)(DateTime.Now.Ticks & 0xffffffff);
+			seed &= 0x7fffffff;
+			return new Random((int)seed);
+		}
+
+		private static uint BytesToUint(byte b0, byte b1, byte b2, byte b3)
+		{
+			return (uint)b0 | ((uint)b1 << 8) | ((uint)b2 << 16) | ((uint)b3 << 24);
+		}
+	}
+
+	public static class IntUtil
+	{
+		public static int Clamp(this int value, int minValue, int maxValue)
+		{
+			if (value < minValue) return minValue;
+			if (value > maxValue) return maxValue;
+			return value;
+		}
+	}
+
+	public static class GraphicsUtil
+	{
+		public static void DrawImageWithColorMatrix(this Graphics g, Image img, RectangleF imgRect, RectangleF srcRect, ColorMatrix colorMatrix)
+		{
+			if (img == null || colorMatrix == null) return;
+
+			ImageAttributes imgAttribs = new ImageAttributes();
+			imgAttribs.SetColorMatrix(colorMatrix);
+
+			g.DrawImage(img,
+				new Rectangle((int)Math.Round(imgRect.X), (int)Math.Round(imgRect.Y), (int)Math.Round(imgRect.Width), (int)Math.Round(imgRect.Height)),
+				srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height,
+				GraphicsUnit.Pixel, imgAttribs);
+		}
+
+		public static void DrawImageWithColorMatrix(this Graphics g, Image img, RectangleF imgRect, ColorMatrix colorMatrix)
+		{
+			if (img == null || colorMatrix == null) return;
+			DrawImageWithColorMatrix(g, img, imgRect, new RectangleF(0, 0, img.Width, img.Height), colorMatrix);
 		}
 	}
 }
