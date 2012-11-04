@@ -15,6 +15,7 @@ namespace WallSwitch
 		#region Constants
 		private const int k_maxHistory = 10;
 		private const int k_maxRetrievalRetries = 10;
+		private const int k_maxImageRectHistory = 3;
 
 		private const int k_defaultFreq = 5;
 		private const Period k_defaultPeriod = Period.Minutes;
@@ -34,6 +35,8 @@ namespace WallSwitch
 		private const bool k_defaultDropShadowFeather = true;
 		private const int k_defaultDropShadowFeatherDist = 20;
 		private const int k_defaultDropShadowOpacity = 50;
+		private const bool k_defaultBackgroundBlur = false;
+		private const int k_defaultBackgroundBlurDist = 8;
 		#endregion
 
 		#region Variables
@@ -53,6 +56,7 @@ namespace WallSwitch
 		private int _backOpacity = k_defaultBackOpacity;
 		private ImageFit _imageFit = k_defaultImageFit;
 		private List<IEnumerable<ImageRec>> _history = new List<IEnumerable<ImageRec>>();
+		private List<RectangleF> _imageRectHistory = new List<RectangleF>();
 		private int _historyIndex = -1;
 		private Random _rand = null;
 		private bool _fadeTransition = k_defaultFadeTransition;
@@ -71,6 +75,9 @@ namespace WallSwitch
 		private bool _dropShadowFeather = k_defaultDropShadowFeather;
 		private int _dropShadowFeatherDist = k_defaultDropShadowFeatherDist;
 		private int _dropShadowOpacity = k_defaultDropShadowOpacity;
+
+		private bool _backgroundBlur = k_defaultBackgroundBlur;
+		private int _backgroundBlurDist = k_defaultBackgroundBlurDist;
 		#endregion
 
 		#region Construction
@@ -123,7 +130,9 @@ namespace WallSwitch
 				_dropShadowDist = _dropShadowDist,
 				_dropShadowFeather = _dropShadowFeather,
 				_dropShadowFeatherDist = _dropShadowFeatherDist,
-				_dropShadowOpacity = _dropShadowOpacity
+				_dropShadowOpacity = _dropShadowOpacity,
+				_backgroundBlur = _backgroundBlur,
+				_backgroundBlurDist = _backgroundBlurDist
 			};
 		}
 		#endregion
@@ -241,6 +250,9 @@ namespace WallSwitch
 		private const string k_dropShadowFeatherDistXml = "DropShadowFeatherDist";
 		private const string k_dropShadowOpacityXml = "DropShadowOpacity";
 
+		private const string k_backgroundBlurXml = "BackgroundBlur";
+		private const string k_backgroundBlurDistXml = "BackgroundBlurDist";
+
 		public void Save(XmlWriter xml)
 		{
 			xml.WriteAttributeString(k_nameXml, _name);
@@ -278,6 +290,9 @@ namespace WallSwitch
 			if (_dropShadowFeather != k_defaultDropShadowFeather) xml.WriteAttributeString(k_dropShadowFeatherXml, _dropShadowFeather.ToString());
 			if (_dropShadowFeatherDist != k_defaultDropShadowFeatherDist) xml.WriteAttributeString(k_dropShadowFeatherDistXml, _dropShadowFeatherDist.ToString());
 			if (_dropShadowOpacity != k_defaultDropShadowOpacity) xml.WriteAttributeString(k_dropShadowOpacityXml, _dropShadowOpacity.ToString());
+
+			if (_backgroundBlur != k_defaultBackgroundBlur) xml.WriteAttributeString(k_backgroundBlurXml, _backgroundBlur.ToString());
+			if (_backgroundBlurDist != k_defaultBackgroundBlurDist) xml.WriteAttributeString(k_backgroundBlurDistXml, _backgroundBlurDist.ToString());
 
 			_hotKey.SaveXml(xml);
 
@@ -336,6 +351,9 @@ namespace WallSwitch
 			_dropShadowFeather = Util.ParseBool(xmlTheme, k_dropShadowFeatherXml, k_defaultDropShadowFeather);
 			_dropShadowFeatherDist = Util.ParseInt(xmlTheme, k_dropShadowFeatherDistXml, k_defaultDropShadowFeatherDist);
 			_dropShadowOpacity = Util.ParseInt(xmlTheme, k_dropShadowOpacityXml, k_defaultDropShadowOpacity);
+
+			_backgroundBlur = Util.ParseBool(xmlTheme, k_backgroundBlurXml, k_defaultBackgroundBlur);
+			_backgroundBlurDist = Util.ParseInt(xmlTheme, k_backgroundBlurDistXml, k_defaultBackgroundBlurDist);
 
 			foreach (XmlElement xmlHotKey in xmlTheme.SelectNodes(HotKey.XmlElementName))
 			{
@@ -497,6 +515,16 @@ namespace WallSwitch
 				}
 				xml.WriteEndElement();	// History
 			}
+
+			foreach (var rect in _imageRectHistory)
+			{
+				xml.WriteStartElement("ImageRectHistory");
+				xml.WriteAttributeString("X", rect.X.ToString());
+				xml.WriteAttributeString("Y", rect.Y.ToString());
+				xml.WriteAttributeString("Width", rect.Width.ToString());
+				xml.WriteAttributeString("Height", rect.Height.ToString());
+				xml.WriteEndElement();	// ImageRectHistory
+			}
 		}
 
 		private void LoadHistory(XmlElement xmlTheme)
@@ -519,6 +547,21 @@ namespace WallSwitch
 					_history.Add(images);
 				}
 			}
+
+			_imageRectHistory.Clear();
+			foreach (XmlElement xmlRect in xmlTheme.SelectNodes("ImageRectHistory"))
+			{
+				float x, y, width, height;
+				if (xmlRect.HasAttribute("X") && xmlRect.HasAttribute("Y") &&
+					xmlRect.HasAttribute("Width") && xmlRect.HasAttribute("Height") &&
+					float.TryParse(xmlRect.GetAttribute("X"), out x) &&
+					float.TryParse(xmlRect.GetAttribute("Y"), out y) &&
+					float.TryParse(xmlRect.GetAttribute("Width"), out width) &&
+					float.TryParse(xmlRect.GetAttribute("Height"), out height))
+				{
+					_imageRectHistory.Add(new RectangleF(x, y, width, height));
+				}
+			}
 		}
 
 		public void ClearHistory()
@@ -534,11 +577,32 @@ namespace WallSwitch
 
 			fileName = GetWallpaperFileName(ImageFormat.Png);
 			if (File.Exists(fileName)) File.Delete(fileName);
+
+			_imageRectHistory.Clear();
 		}
 
 		public IEnumerable<IEnumerable<ImageRec>> History
 		{
 			get { return _history; }
+		}
+
+		public IEnumerable<RectangleF> ImageRectHistory
+		{
+			get { return _imageRectHistory; }
+		}
+
+		public void AddImageRectHistory(RectangleF rect, int numMonitors)
+		{
+			_imageRectHistory.Add(rect);
+			while (_imageRectHistory.Count > k_maxImageRectHistory * numMonitors)
+			{
+				_imageRectHistory.RemoveAt(0);
+			}
+		}
+
+		public void ClearImageRectHistory()
+		{
+			_imageRectHistory.Clear();
 		}
 		#endregion
 
@@ -812,6 +876,24 @@ namespace WallSwitch
 				_dropShadowOpacity = value;
 				if (_dropShadowOpacity < 0) _dropShadowOpacity = 0;
 				else if (_dropShadowOpacity > 100) _dropShadowOpacity = 100;
+			}
+		}
+		#endregion
+
+		#region Background Blur
+		public bool BackgroundBlur
+		{
+			get { return _backgroundBlur; }
+			set { _backgroundBlur = value; }
+		}
+
+		public int BackgroundBlurDist
+		{
+			get { return _backgroundBlurDist; }
+			set
+			{
+				_backgroundBlurDist = value;
+				if (_backgroundBlurDist < 0) _backgroundBlurDist = 0;
 			}
 		}
 		#endregion

@@ -1,8 +1,13 @@
+*.ipch
 *.suo
 *.user
 
-/WallSwitch/bin/*
-/WallSwitch/obj/*
+/Debug/*
+/Release/*
 /Setup/Archive/*
 /Setup/bin/*
 /Setup/Output/*
+/WallSwitch/bin/*
+/WallSwitch/obj/*
+/WallSwitchImgProc/Debug/*
+/WallSwitchImgProc/Release/*

@@ -549,6 +549,10 @@ namespace WallSwitch
 			trkDropShadowOpacity.Value = _currentTheme.DropShadowOpacity.Clamp(trkDropShadowOpacity.Minimum, trkDropShadowOpacity.Maximum);
 			lblDropShadowOpacityValue.Text = string.Format(Res.DropShadowOpacityValue, trkDropShadowOpacity.Value);
 
+			chkBackgroundBlur.Checked = _currentTheme.BackgroundBlur;
+			trkBackgroundBlurDist.Value = _currentTheme.BackgroundBlurDist.Clamp(trkBackgroundBlurDist.Minimum, trkBackgroundBlurDist.Maximum);
+			lblBackgroundBlurDistValue.Text = string.Format(Res.BackgroundBlurDist, trkBackgroundBlurDist.Value);
+
 			Dirty = false;
 
 			RefreshLocations();
@@ -694,6 +698,9 @@ namespace WallSwitch
 			_currentTheme.DropShadowFeatherDist = trkDropShadowFeatherDist.Value;
 			_currentTheme.DropShadowOpacity = trkDropShadowOpacity.Value;
 
+			_currentTheme.BackgroundBlur = chkBackgroundBlur.Checked;
+			_currentTheme.BackgroundBlurDist = trkBackgroundBlurDist.Value;
+
 			Dirty = false;
 			EnableControls();
 			SaveSettings();
@@ -778,11 +785,16 @@ namespace WallSwitch
 			{
 				grpBackgroundColorEffects.Visible = true;
 				trkColorEffectCollageFadeRatio.Visible = lblColorEffectCollageFadeRatioUnit.Visible = cmbColorEffectBack.GetEnumValue<ColorEffect>() != ColorEffect.None;
+				trkBackgroundBlurDist.Visible = chkBackgroundBlur.Checked;
+				lblBackgroundBlurDistValue.Visible = chkBackgroundBlur.Checked;
 			}
 			else
 			{
 				grpBackgroundColorEffects.Visible = false;
 			}
+
+
+
 			EnableLocationsContextMenu();
 		}
 
@@ -2385,6 +2397,19 @@ namespace WallSwitch
 			try
 			{
 				lblDropShadowOpacityValue.Text = string.Format(Res.DropShadowOpacityValue, trkDropShadowOpacity.Value);
+				ControlChanged(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void trkBackgroundBlurDist_Scroll(object sender, EventArgs e)
+		{
+			try
+			{
+				lblBackgroundBlurDistValue.Text = string.Format(Res.BackgroundBlurDist, trkBackgroundBlurDist.Value);
 				ControlChanged(sender, e);
 			}
 			catch (Exception ex)

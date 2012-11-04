@@ -161,6 +161,13 @@ namespace WallSwitch
 			return rect.Left >= container.Left && rect.Top >= container.Top &&
 				rect.Right <= container.Right && rect.Bottom <= container.Bottom;
 		}
+
+		public static float IntersectArea(this RectangleF self, RectangleF rect)
+		{
+			if (!self.IntersectsWith(rect)) return 0.0f;
+			var inter = RectangleF.Intersect(self, rect);
+			return inter.Width * inter.Height;
+		}
 	}
 
 	static class TimeSpanUtil

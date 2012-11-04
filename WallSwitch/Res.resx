@@ -451,4 +451,7 @@ Click here to be taken to the download page.</value>
   <data name="DropShadowOpacityValue" xml:space="preserve">
     <value>{0} %</value>
   </data>
+  <data name="BackgroundBlurDist" xml:space="preserve">
+    <value>{0} pixels</value>
+  </data>
 </root>

@@ -4,12 +4,19 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace WallSwitch
 {
 	class WallpaperRenderer : IDisposable
 	{
+		[DllImport("WallSwitchImgProc.dll", CallingConvention = CallingConvention.Cdecl)]
+		private static extern int BlurImage(IntPtr pImageBits, int width, int height, int iImageFormat, int stride, int blurDist);
+
+		[DllImport("WallSwitchImgProc.dll", CallingConvention = CallingConvention.Cdecl)]
+		private static extern int TransferChannel32(IntPtr pSrcImageBits, int srcChannel, int srcStride, IntPtr pDstImageBits, int dstChannel, int dstStride, int width, int height);
+
 		private Size _fullSize = new Size(0, 0);
 		private List<Rectangle> _screenRects = new List<Rectangle>();
 		private Bitmap _bitmap = null;
@@ -17,6 +24,8 @@ namespace WallSwitch
 		private Theme _theme = null;
 		private Random _rand = new Random();
 		private bool _firstRender = true;
+
+		private const int k_randomRectRetries = 10;
 
 		public WallpaperRenderer()
 		{ }
@@ -51,8 +60,10 @@ namespace WallSwitch
 			_theme = theme;
 
 			_fullSize = new Size(0, 0);
+			_screenRects.Clear();
 			foreach (var rect in screenRects)
 			{
+				_screenRects.Add(rect);
 				if (rect.Left + rect.Width > _fullSize.Width) _fullSize.Width = rect.Left + rect.Width;
 				if (rect.Top + rect.Height > _fullSize.Height) _fullSize.Height = rect.Top + rect.Height;
 			}
@@ -76,6 +87,7 @@ namespace WallSwitch
 				_g = Graphics.FromImage(_bitmap);
 				_g.Clear(Color.Black);
 				_firstRender = true;
+				_theme.ClearImageRectHistory();
 			}
 
 			if (_theme.Mode == ThemeMode.Collage &&
@@ -91,8 +103,10 @@ namespace WallSwitch
 		{
 			var image = lastImage;
 
-			//BlurImage(image, 10);
-			//BlurImageTest(image, 5);
+			if (_theme.BackgroundBlur && _theme.BackgroundBlurDist > 0)
+			{
+				BlurImage(image, _theme.BackgroundBlurDist);
+			}
 
 			if (_theme.ColorEffectBack == ColorEffect.None || _theme.ColorEffectBackRatio <= 0)
 			{
@@ -135,8 +149,6 @@ namespace WallSwitch
 						float imgHeight = img.Height;
 						if (imgWidth <= 0.0f || imgHeight <= 0.0f) return;
 
-						//Log.Write("Original image size: {0} x {1}", imgWidth, imgHeight);
-
 						RectangleF screenRect = thisScreenRect;
 						RectangleF imgRect = new RectangleF(0, 0, img.Width, img.Height);
 						RectangleF srcRect = imgRect;
@@ -177,11 +189,7 @@ namespace WallSwitch
 								scale *= ratio;
 							}
 
-							// Choose a random rect to display the image.
-							imgRect.X = (float)(_rand.NextDouble() * (screenRect.Width - imgWidth)) + screenRect.X;
-							imgRect.Y = (float)(_rand.NextDouble() * (screenRect.Height - imgHeight)) + screenRect.Y;
-							imgRect.Width = imgWidth;
-							imgRect.Height = imgHeight;
+							imgRect = GetRandomImageRect(thisScreenRect, imgWidth, imgHeight);
 
 							if (_firstRender) clearOpacity = 255;
 							else clearOpacity = _theme.BackOpacity255;
@@ -390,43 +398,36 @@ namespace WallSwitch
 
 		private enum ChannelARGB : int
 		{
-			Blue = 0,
-			Green = 1,
-			Red = 2,
-			Alpha = 3
+		    Blue = 0,
+		    Green = 1,
+		    Red = 2,
+		    Alpha = 3
 		}
 
 		private void TransferChannel(Bitmap srcBitmap, ChannelARGB srcChannel, Bitmap dstBitmap, ChannelARGB dstChannel)
 		{
-			if (srcBitmap.Size != dstBitmap.Size) throw new InvalidOperationException("Source and destination bitmaps must be the same size.");
-
-			unsafe
+			var srcData = srcBitmap.LockBits(new Rectangle(0, 0, srcBitmap.Width, srcBitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+			try
 			{
-				Rectangle rect = new Rectangle(0, 0, srcBitmap.Width, srcBitmap.Height);
-
-				BitmapData srcData = srcBitmap.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-				BitmapData dstData = dstBitmap.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+				var dstData = dstBitmap.LockBits(new Rectangle(0, 0, dstBitmap.Width, dstBitmap.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
 				try
 				{
-					byte* srcPtr = (byte*)srcData.Scan0.ToPointer();
-					byte* dstPtr = (byte*)dstData.Scan0.ToPointer();
-
-					dstPtr += (int)dstChannel;
-					srcPtr += (int)srcChannel;
-
-					int numPixels = srcBitmap.Width * srcBitmap.Height;
-					for (int i = 0; i < numPixels; i++)
+					var ret = TransferChannel32(srcData.Scan0, (int)srcChannel, srcData.Stride,
+						dstData.Scan0, (int)dstChannel, dstData.Stride,
+						srcBitmap.Width, srcBitmap.Height);
+					if (ret != 0)
 					{
-						*dstPtr = *srcPtr;
-						srcPtr += 4;
-						dstPtr += 4;
+						Log.Write(LogLevel.Error, "Error when transferring bitmap channel: {0}", ret);
 					}
 				}
 				finally
 				{
 					dstBitmap.UnlockBits(dstData);
-					srcBitmap.UnlockBits(srcData);
 				}
+			}
+			finally
+			{
+				srcBitmap.UnlockBits(srcData);
 			}
 		}
 
@@ -470,144 +471,46 @@ namespace WallSwitch
 			}
 		}
 
-		// Not enabled yet because it's a huge CPU hog.  Seeking alternatives.
-		private unsafe void BlurImage(Bitmap img, int dist)
+		private void BlurImage(Bitmap img, int blurDist)
 		{
-			var startTime = DateTime.Now;
-
-			var filterLen = dist * 2 + 1;
-			var filter = new int[filterLen];
-			for (var f = 0; f < filterLen; f++)
-			{
-				filter[f] = (int)(GaussElement(f, filterLen) * 256.0);
-			}
-
 			var imgData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
 			try
 			{
-				byte* imgBits = (byte*)imgData.Scan0;
-				int stride = imgData.Stride;
-
-				int width = img.Width;
-				int height = img.Height;
-				int x, y, off, i, lineOff;
-				int r, g, b, a, min, max, filterVal;
-				int start, end;
-
-				// Horizontal blur
-				int[] buf = new int[width * 4];
-
-				for (y = 0; y < height; y++)
-				{
-					lineOff = stride * y;
-
-					// Copy data into buffer
-					for (off = 0, end = width * 4; off < end; off++)
-					{
-						buf[off] = *(byte*)(imgBits + lineOff + off);
-					}
-
-					for (x = 0; x < width; x++)
-					{
-						min = x - dist;
-						max = x + dist;
-						start = min < 0 ? 0 : min;
-						end = max >= width ? width - 1 : max;
-
-						r = g = b = a = 0;
-
-						for (i = start; i <= end; i++)
-						{
-							filterVal = filter[i - min];
-							off = i * 4;
-							a += (buf[off + 3] * filterVal) >> 8;
-							r += (buf[off + 2] * filterVal) >> 8;
-							g += (buf[off + 1] * filterVal) >> 8;
-							b += (buf[off + 0] * filterVal) >> 8;
-						}
-
-						*(int*)(imgBits + lineOff + x * 4) = (int)b | ((int)g << 8) | ((int)r << 16) | ((int)a << 24);
-					}
-				}
-
-				// Vertical blur
-				int xOff;
-
-				buf = new int[height * 4];
-				for (x = 0; x < width; x++)
-				{
-					xOff = x * 4;
-
-					for (y = 0; y < height; y++)
-					{
-						off = stride * y + xOff;
-						i = y * 4;
-						buf[i + 0] = *(byte*)(imgBits + off + 0);
-						buf[i + 1] = *(byte*)(imgBits + off + 1);
-						buf[i + 2] = *(byte*)(imgBits + off + 2);
-						buf[i + 3] = *(byte*)(imgBits + off + 3);
-					}
-
-					for (y = 0; y < height; y++)
-					{
-						min = y - dist;
-						max = y + dist;
-						start = min < 0 ? 0 : min;
-						end = max >= height ? height - 1 : max;
-
-						r = g = b = a = 0;
-
-						for (i = start; i <= end; i++)
-						{
-							filterVal = filter[i - min];
-
-							off = i * 4;
-							a += (buf[off + 3] * filterVal) >> 8;
-							r += (buf[off + 2] * filterVal) >> 8;
-							g += (buf[off + 1] * filterVal) >> 8;
-							b += (buf[off + 0] * filterVal) >> 8;
-						}
-
-						*(int*)(imgBits + stride * y + xOff) = (int)b | ((int)g << 8) | ((int)r << 16) | ((int)a << 24);
-					}
-				}
+				BlurImage(imgData.Scan0, img.Width, img.Height, 0, imgData.Stride, blurDist);
 			}
 			finally
 			{
 				img.UnlockBits(imgData);
 			}
-
-			Log.Write(LogLevel.Info, "Blur completed in {0} msec", DateTime.Now.Subtract(startTime).TotalMilliseconds);
 		}
 
-		double Gauss(double x, double m, double d)
+		private RectangleF GetRandomImageRect(Rectangle screenRect, float imgWidth, float imgHeight)
 		{
-			return 1.0 / (d * Math.Sqrt(2 * Math.PI)) * Math.Pow(Math.E, ((x - m) * (x - m)) * -1 / 2 * d * d);
-		}
+			var retries = k_randomRectRetries;
+			RectangleF bestRect = new RectangleF(0.0f, 0.0f, 0.0f, 0.0f);
+			RectangleF rect;
+			var bestOverlap = -1.0f;
+			var oldRects = new List<RectangleF>();
 
-		double GaussElement(int index, int arrayLength)
-		{
-			int center = arrayLength / 2;
-			double extent = arrayLength - center;
-			double x = (double)(center - index) / extent * 3.0;
-			return Gauss(x, 0, 1) / (extent / 3.0);
-		}
+			while (retries-- > 0)
+			{
+				rect = new RectangleF(
+					(float)(_rand.NextDouble() * (screenRect.Width - imgWidth)) + screenRect.X,
+					(float)(_rand.NextDouble() * (screenRect.Height - imgHeight)) + screenRect.Y,
+					imgWidth, imgHeight);
 
-		private void BlurImageTest(Bitmap img, int dist)
-		{
-			var width = img.Width / dist;
-			var height = img.Height / dist;
-			if (width < 1) width = 1;
-			if (height < 1) height = 1;
+				var overlap = 0.0f;
+				foreach (var oldRect in _theme.ImageRectHistory) overlap += oldRect.IntersectArea(rect);
 
-			var bm = new Bitmap(width, height);
-			var g = Graphics.FromImage(bm);
-			g.InterpolationMode = InterpolationMode.High;
-			g.DrawImage(img, new Rectangle(0, 0, width, height));
+				if (overlap < bestOverlap || bestOverlap < 0)
+				{
+					bestRect = rect;
+					bestOverlap = overlap;
+				}
+			}
 
-			var g2 = Graphics.FromImage(img);
-			g2.InterpolationMode = InterpolationMode.High;
-			g2.DrawImage(bm, new Rectangle(0, 0, img.Width, img.Height));
+			_theme.AddImageRectHistory(bestRect, _screenRects.Count);
+			return bestRect;
 		}
 	}
 }

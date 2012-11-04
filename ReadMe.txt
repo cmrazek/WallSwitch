@@ -1,7 +1,7 @@
 WallSwitch
 Switches desktop wallpapers from a variety of sources.
 http://wallswitch.codeplex.com/
-Current Version: 1.1
+Current Version: 1.2
 
 Requirements:
 	.NET Framework 4:  http://www.microsoft.com/download/en/details.aspx?id=17718
@@ -12,10 +12,12 @@ Contact:
 
 ChangeLog:
 
-Version 1.2 - (pending)
+Version 1.2 - 2012-11-04:
 - Added ability to duplicate a theme.
 - Added drop shadows to collage mode.
 - In collage mode, can use separate color effects for foreground and background.
+- Added a blur option to collage background.
+- Image positions in collage mode are now more evenly distributed.
 
 Version 1.1 - 2012-10-27:
 - Now automatically checks for updates (can be disabled if desired)

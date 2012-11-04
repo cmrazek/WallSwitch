@@ -58,6 +58,7 @@ Function LockedCheck
 	LockedList::AddFile "$INSTDIR\ReadMe.txt"
 	LockedList::AddModule "$INSTDIR\HtmlAgilityPack.dll"
 	LockedList::AddModule "$INSTDIR\Uninstall.exe"
+	LockedList::AddModule "$INSTDIR\WallSwitchImgProc.dll"
 	LockedList::Dialog /autonext
 	Pop $R0
 FunctionEnd
@@ -71,6 +72,7 @@ Section "Application (Required)"
 	File "bin\HtmlAgilityPack.dll"
 	File "bin\HtmlAgilityPack.xml"
 	File "bin\ReadMe.txt"
+	File "bin\WallSwitchImgProc.dll"
 	WriteUninstaller "$INSTDIR\Uninstall.exe"
 SectionEnd
 
@@ -115,6 +117,7 @@ Function un.LockedCheck
 	LockedList::AddFile "$INSTDIR\ReadMe.txt"
 	LockedList::AddModule "$INSTDIR\HtmlAgilityPack.dll"
 	LockedList::AddModule "$INSTDIR\Uninstall.exe"
+	LockedList::AddModule "$INSTDIR\WallSwitchImgProc.dll"
 	LockedList::Dialog /autonext
 	Pop $R0
 FunctionEnd
@@ -125,6 +128,8 @@ Section "Uninstall"
 	Delete "$INSTDIR\HtmlAgilityPack.dll"
 	Delete "$INSTDIR\HtmlAgilityPack.xml"
 	Delete "$INSTDIR\Uninstall.exe"
+	Delete "$INSTDIR\ReadMe.txt"
+	Delete "$INSTDIR\WallSwitchImgProc.dll"
 	RMDir /r "$INSTDIR"
 	
 	; Remove start menu shortcuts

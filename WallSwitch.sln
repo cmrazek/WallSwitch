@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WallSwitch", "WallSwitch\WallSwitch.csproj", "{258A45C4-2116-4522-BE10-1CAC045ED338}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WallSwitchImgProc", "WallSwitchImgProc\WallSwitchImgProc.vcxproj", "{FA6A314B-EC69-4651-8041-D966486FED98}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,18 @@ Global
 		{258A45C4-2116-4522-BE10-1CAC045ED338}.Release|Win32.ActiveCfg = Release|x86
 		{258A45C4-2116-4522-BE10-1CAC045ED338}.Release|x86.ActiveCfg = Release|x86
 		{258A45C4-2116-4522-BE10-1CAC045ED338}.Release|x86.Build.0 = Release|x86
+		{FA6A314B-EC69-4651-8041-D966486FED98}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{FA6A314B-EC69-4651-8041-D966486FED98}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{FA6A314B-EC69-4651-8041-D966486FED98}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{FA6A314B-EC69-4651-8041-D966486FED98}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FA6A314B-EC69-4651-8041-D966486FED98}.Debug|Win32.Build.0 = Debug|Win32
+		{FA6A314B-EC69-4651-8041-D966486FED98}.Debug|x86.ActiveCfg = Debug|Win32
+		{FA6A314B-EC69-4651-8041-D966486FED98}.Release|Any CPU.ActiveCfg = Release|Win32
+		{FA6A314B-EC69-4651-8041-D966486FED98}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{FA6A314B-EC69-4651-8041-D966486FED98}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{FA6A314B-EC69-4651-8041-D966486FED98}.Release|Win32.ActiveCfg = Release|Win32
+		{FA6A314B-EC69-4651-8041-D966486FED98}.Release|Win32.Build.0 = Release|Win32
+		{FA6A314B-EC69-4651-8041-D966486FED98}.Release|x86.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

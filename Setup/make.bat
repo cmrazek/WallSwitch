@@ -43,6 +43,12 @@ if errorlevel 1 (
 	goto :eof
 )
 
+copy ..\Release\WallSwitchImgProc.dll bin\
+if errorlevel 1 (
+	echo Failed to copy WallSwitchImgProc.dll
+	goto :eof
+)
+
 %makensis% Installer.nsi
 if errorlevel 1 (
 	echo MakeNSIS Failed.

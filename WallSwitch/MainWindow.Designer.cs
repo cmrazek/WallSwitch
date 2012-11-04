@@ -130,8 +130,13 @@
 			this.lblFeatherUnit = new System.Windows.Forms.Label();
 			this.trkFeather = new System.Windows.Forms.TrackBar();
 			this.grpImageEffects = new System.Windows.Forms.GroupBox();
+			this.label1 = new System.Windows.Forms.Label();
 			this.cmbColorEffectFore = new System.Windows.Forms.ComboBox();
 			this.grpBackgroundColorEffects = new System.Windows.Forms.GroupBox();
+			this.lblBackgroundBlurDistValue = new System.Windows.Forms.Label();
+			this.trkBackgroundBlurDist = new System.Windows.Forms.TrackBar();
+			this.chkBackgroundBlur = new System.Windows.Forms.CheckBox();
+			this.label2 = new System.Windows.Forms.Label();
 			this.cmbColorEffectBack = new System.Windows.Forms.ComboBox();
 			this.lblColorEffectCollageFadeRatioUnit = new System.Windows.Forms.Label();
 			this.trkColorEffectCollageFadeRatio = new System.Windows.Forms.TrackBar();
@@ -168,6 +173,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.trkFeather)).BeginInit();
 			this.grpImageEffects.SuspendLayout();
 			this.grpBackgroundColorEffects.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.trkBackgroundBlurDist)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.trkColorEffectCollageFadeRatio)).BeginInit();
 			this.tabHistory.SuspendLayout();
 			this.cmHistory.SuspendLayout();
@@ -1184,6 +1190,7 @@
 			// 
 			// grpImageEffects
 			// 
+			this.grpImageEffects.Controls.Add(this.label1);
 			this.grpImageEffects.Controls.Add(this.cmbColorEffectFore);
 			this.grpImageEffects.Location = new System.Drawing.Point(3, 469);
 			this.grpImageEffects.Name = "grpImageEffects";
@@ -1192,13 +1199,22 @@
 			this.grpImageEffects.TabStop = false;
 			this.grpImageEffects.Text = "Image Effects";
 			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(6, 22);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(65, 13);
+			this.label1.TabIndex = 1;
+			this.label1.Text = "Color Effect:";
+			// 
 			// cmbColorEffectFore
 			// 
 			this.cmbColorEffectFore.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.cmbColorEffectFore.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmbColorEffectFore.FormattingEnabled = true;
-			this.cmbColorEffectFore.Location = new System.Drawing.Point(6, 19);
+			this.cmbColorEffectFore.Location = new System.Drawing.Point(119, 19);
 			this.cmbColorEffectFore.Name = "cmbColorEffectFore";
 			this.cmbColorEffectFore.Size = new System.Drawing.Size(139, 21);
 			this.cmbColorEffectFore.TabIndex = 0;
@@ -1207,23 +1223,73 @@
 			// 
 			// grpBackgroundColorEffects
 			// 
+			this.grpBackgroundColorEffects.Controls.Add(this.lblBackgroundBlurDistValue);
+			this.grpBackgroundColorEffects.Controls.Add(this.trkBackgroundBlurDist);
+			this.grpBackgroundColorEffects.Controls.Add(this.chkBackgroundBlur);
+			this.grpBackgroundColorEffects.Controls.Add(this.label2);
 			this.grpBackgroundColorEffects.Controls.Add(this.cmbColorEffectBack);
 			this.grpBackgroundColorEffects.Controls.Add(this.lblColorEffectCollageFadeRatioUnit);
 			this.grpBackgroundColorEffects.Controls.Add(this.trkColorEffectCollageFadeRatio);
 			this.grpBackgroundColorEffects.Location = new System.Drawing.Point(3, 525);
 			this.grpBackgroundColorEffects.Name = "grpBackgroundColorEffects";
-			this.grpBackgroundColorEffects.Size = new System.Drawing.Size(520, 71);
+			this.grpBackgroundColorEffects.Size = new System.Drawing.Size(520, 120);
 			this.grpBackgroundColorEffects.TabIndex = 5;
 			this.grpBackgroundColorEffects.TabStop = false;
 			this.grpBackgroundColorEffects.Text = "Background Image Effects";
+			// 
+			// lblBackgroundBlurDistValue
+			// 
+			this.lblBackgroundBlurDistValue.AutoSize = true;
+			this.lblBackgroundBlurDistValue.Location = new System.Drawing.Point(249, 53);
+			this.lblBackgroundBlurDistValue.Name = "lblBackgroundBlurDistValue";
+			this.lblBackgroundBlurDistValue.Size = new System.Drawing.Size(33, 13);
+			this.lblBackgroundBlurDistValue.TabIndex = 6;
+			this.lblBackgroundBlurDistValue.Text = "pixels";
+			this.toolTip1.SetToolTip(this.lblBackgroundBlurDistValue, "Amount of blur to apply to background");
+			// 
+			// trkBackgroundBlurDist
+			// 
+			this.trkBackgroundBlurDist.BackColor = System.Drawing.SystemColors.Window;
+			this.trkBackgroundBlurDist.LargeChange = 20;
+			this.trkBackgroundBlurDist.Location = new System.Drawing.Point(119, 52);
+			this.trkBackgroundBlurDist.Maximum = 20;
+			this.trkBackgroundBlurDist.Name = "trkBackgroundBlurDist";
+			this.trkBackgroundBlurDist.Size = new System.Drawing.Size(124, 45);
+			this.trkBackgroundBlurDist.SmallChange = 10;
+			this.trkBackgroundBlurDist.TabIndex = 5;
+			this.trkBackgroundBlurDist.TickFrequency = 2;
+			this.toolTip1.SetToolTip(this.trkBackgroundBlurDist, "Amount of blur to apply to background");
+			this.trkBackgroundBlurDist.Value = 20;
+			this.trkBackgroundBlurDist.Scroll += new System.EventHandler(this.trkBackgroundBlurDist_Scroll);
+			// 
+			// chkBackgroundBlur
+			// 
+			this.chkBackgroundBlur.AutoSize = true;
+			this.chkBackgroundBlur.Location = new System.Drawing.Point(6, 52);
+			this.chkBackgroundBlur.Name = "chkBackgroundBlur";
+			this.chkBackgroundBlur.Size = new System.Drawing.Size(44, 17);
+			this.chkBackgroundBlur.TabIndex = 4;
+			this.chkBackgroundBlur.Text = "Blur";
+			this.toolTip1.SetToolTip(this.chkBackgroundBlur, "Blur the background?");
+			this.chkBackgroundBlur.UseVisualStyleBackColor = true;
+			this.chkBackgroundBlur.CheckedChanged += new System.EventHandler(this.ControlChanged);
+			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(6, 22);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(65, 13);
+			this.label2.TabIndex = 3;
+			this.label2.Text = "Color Effect:";
 			// 
 			// cmbColorEffectBack
 			// 
 			this.cmbColorEffectBack.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmbColorEffectBack.FormattingEnabled = true;
-			this.cmbColorEffectBack.Location = new System.Drawing.Point(6, 19);
+			this.cmbColorEffectBack.Location = new System.Drawing.Point(119, 19);
 			this.cmbColorEffectBack.Name = "cmbColorEffectBack";
-			this.cmbColorEffectBack.Size = new System.Drawing.Size(141, 21);
+			this.cmbColorEffectBack.Size = new System.Drawing.Size(139, 21);
 			this.cmbColorEffectBack.TabIndex = 0;
 			this.toolTip1.SetToolTip(this.cmbColorEffectBack, "Color effect to be applied to background images.");
 			this.cmbColorEffectBack.SelectedIndexChanged += new System.EventHandler(this.ControlChanged);
@@ -1231,7 +1297,7 @@
 			// lblColorEffectCollageFadeRatioUnit
 			// 
 			this.lblColorEffectCollageFadeRatioUnit.AutoSize = true;
-			this.lblColorEffectCollageFadeRatioUnit.Location = new System.Drawing.Point(284, 22);
+			this.lblColorEffectCollageFadeRatioUnit.Location = new System.Drawing.Point(394, 22);
 			this.lblColorEffectCollageFadeRatioUnit.Name = "lblColorEffectCollageFadeRatioUnit";
 			this.lblColorEffectCollageFadeRatioUnit.Size = new System.Drawing.Size(15, 13);
 			this.lblColorEffectCollageFadeRatioUnit.TabIndex = 2;
@@ -1242,7 +1308,7 @@
 			// 
 			this.trkColorEffectCollageFadeRatio.BackColor = System.Drawing.SystemColors.Window;
 			this.trkColorEffectCollageFadeRatio.LargeChange = 20;
-			this.trkColorEffectCollageFadeRatio.Location = new System.Drawing.Point(154, 19);
+			this.trkColorEffectCollageFadeRatio.Location = new System.Drawing.Point(264, 19);
 			this.trkColorEffectCollageFadeRatio.Maximum = 100;
 			this.trkColorEffectCollageFadeRatio.Name = "trkColorEffectCollageFadeRatio";
 			this.trkColorEffectCollageFadeRatio.Size = new System.Drawing.Size(124, 45);
@@ -1403,8 +1469,10 @@
 			((System.ComponentModel.ISupportInitialize)(this.trkDropShadow)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.trkFeather)).EndInit();
 			this.grpImageEffects.ResumeLayout(false);
+			this.grpImageEffects.PerformLayout();
 			this.grpBackgroundColorEffects.ResumeLayout(false);
 			this.grpBackgroundColorEffects.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.trkBackgroundBlurDist)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.trkColorEffectCollageFadeRatio)).EndInit();
 			this.tabHistory.ResumeLayout(false);
 			this.cmHistory.ResumeLayout(false);
@@ -1533,6 +1601,11 @@
 		private System.Windows.Forms.Label lblDropShadowOpacityValue;
 		private System.Windows.Forms.TrackBar trkDropShadowOpacity;
 		private System.Windows.Forms.Button btnSave;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Label lblBackgroundBlurDistValue;
+		private System.Windows.Forms.TrackBar trkBackgroundBlurDist;
+		private System.Windows.Forms.CheckBox chkBackgroundBlur;
 
 	}
 }

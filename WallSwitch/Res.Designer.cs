@@ -104,6 +104,15 @@ namespace WallSwitch {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} pixels.
+        /// </summary>
+        internal static string BackgroundBlurDist {
+            get {
+                return ResourceManager.GetString("BackgroundBlurDist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0}%.
         /// </summary>
         internal static string BackOpacityPercent {
