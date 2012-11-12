@@ -9,7 +9,7 @@ using System.Text;
 
 namespace WallSwitch
 {
-	class WallpaperRenderer : IDisposable
+	class WallpaperRenderer : IWallpaperRenderer
 	{
 		[DllImport("WallSwitchImgProc.dll", CallingConvention = CallingConvention.Cdecl)]
 		private static extern int BlurImage(IntPtr pImageBits, int width, int height, int iImageFormat, int stride, int blurDist);
@@ -48,7 +48,7 @@ namespace WallSwitch
 			}
 		}
 
-		public Bitmap Bitmap
+		public Image WallpaperImage
 		{
 			get { return _bitmap; }
 		}
@@ -123,7 +123,7 @@ namespace WallSwitch
 			}
 		}
 
-		public void DrawScreen(ImageRec file, Rectangle thisScreenRect)
+		public void RenderScreen(ImageRec file, Rectangle thisScreenRect)
 		{
 			try
 			{
@@ -234,7 +234,7 @@ namespace WallSwitch
 			}
 		}
 
-		public void DrawBlank(Rectangle screenRect)
+		public void RenderBlankScreen(Rectangle screenRect)
 		{
 			if (_theme.Mode != ThemeMode.Collage)
 			{
@@ -491,6 +491,7 @@ namespace WallSwitch
 			RectangleF rect;
 			var bestOverlap = -1.0f;
 			var oldRects = new List<RectangleF>();
+			RectangleF screenRectF = screenRect;
 
 			while (retries-- > 0)
 			{
@@ -500,7 +501,15 @@ namespace WallSwitch
 					imgWidth, imgHeight);
 
 				var overlap = 0.0f;
-				foreach (var oldRect in _theme.ImageRectHistory) overlap += oldRect.IntersectArea(rect);
+				var scale = 1.0f;
+				foreach (var oldRect in _theme.ImageRectHistory)
+				{
+					if (screenRectF.Contains(oldRect))
+					{
+						overlap += oldRect.IntersectArea(rect) * scale;
+						scale += 1.0f;
+					}
+				}
 
 				if (overlap < bestOverlap || bestOverlap < 0)
 				{

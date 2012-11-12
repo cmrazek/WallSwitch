@@ -12,6 +12,12 @@ Contact:
 
 ChangeLog:
 
+Version 1.2.1 - (pending)
+- Improved collage image distribution to overlap older images first.
+- Set default collage background blur distance to 4 (provides a more gradual effect).
+- Fixed issue where wallpaper not displayed on Windows Vista when Cross-Fade transitions enabled.
+- Fixed issue with duplicated themes not updating history view correctly.
+
 Version 1.2 - 2012-11-04:
 - Added ability to duplicate a theme.
 - Added drop shadows to collage mode.

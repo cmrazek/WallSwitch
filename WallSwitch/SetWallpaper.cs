@@ -1256,10 +1256,10 @@ namespace WallSwitch
 		#endregion // SPI
 		#endregion
 
-		private void ChangeWallpaper(Theme theme, Bitmap bitmap)
+		private void ChangeWallpaper(Theme theme, Image wallpaperImage)
 		{
 			var fileName = theme.GetWallpaperFileName(ImageFormat.Bmp);
-			bitmap.Save(fileName, ImageFormat.Bmp);
+			wallpaperImage.Save(fileName, ImageFormat.Bmp);
 
 			RegistryKey key = Registry.CurrentUser.OpenSubKey("Control Panel\\Desktop", true);
 			try 
@@ -1282,14 +1282,14 @@ namespace WallSwitch
 			theme.LastWallpaperFile = fileName;
 		}
 
-		private void ChangeWallpaperFade(Theme theme, Bitmap bitmap)
+		private void ChangeWallpaperFade(Theme theme, Image wallpaperImage)
 		{
 			try
 			{
 				int result;
 
 				var fileName = theme.GetWallpaperFileName(ImageFormat.Png);
-				bitmap.Save(fileName, ImageFormat.Png);
+				wallpaperImage.Save(fileName, ImageFormat.Png);
 
 				var hwnd = FindWindow("Progman", null);
 				if (hwnd == null) throw new Exception(string.Format("Couldn't find Progman window (GetLastError = 0x{0:X8})", Marshal.GetLastWin32Error()));
@@ -1317,7 +1317,7 @@ namespace WallSwitch
 			catch (Exception ex)
 			{
 				Log.Write(ex, "Exception when fading desktop background.");
-				ChangeWallpaper(theme, bitmap);
+				ChangeWallpaper(theme, wallpaperImage);
 			}
 		}
 
@@ -1331,26 +1331,38 @@ namespace WallSwitch
 			if (theme == null) throw new ArgumentNullException("Theme is null.");
 			if (files == null) throw new ArgumentNullException("Files list is null.");
 
-			var screenRects = (from s in Screen.AllScreens select s.Bounds).ToArray();
-			using (_renderer = new WallpaperRenderer())
+			try
 			{
-				Bitmap lastImage = null;
-				if (theme.Mode == ThemeMode.Collage) lastImage = LoadLastWallpaper(theme);
-				_renderer.InitFrame(screenRects, theme, lastImage);
-
-				var imageIndex = 0;
-				var fileArray = files.ToArray();
-				foreach (var screenRect in screenRects)
+				var screenRects = (from s in Screen.AllScreens select s.Bounds).ToArray();
+				using (_renderer = new WallpaperRenderer())
 				{
-					if (imageIndex >= fileArray.Length) imageIndex = 0;
-					if (imageIndex < fileArray.Length) _renderer.DrawScreen(fileArray[imageIndex], screenRect);
-					else _renderer.DrawBlank(screenRect);
-					imageIndex++;
-				}
+					Bitmap lastImage = null;
+					if (theme.Mode == ThemeMode.Collage) lastImage = LoadLastWallpaper(theme);
+					if (_renderer.InitFrame(screenRects, theme, lastImage))
+					{
+						var imageIndex = 0;
+						var fileArray = files.ToArray();
+						foreach (var screenRect in screenRects)
+						{
+							if (imageIndex >= fileArray.Length) imageIndex = 0;
+							if (imageIndex < fileArray.Length) _renderer.RenderScreen(fileArray[imageIndex], screenRect);
+							else _renderer.RenderBlankScreen(screenRect);
+							imageIndex++;
+						}
 
-				// Apply to desktop background.
-				if (theme.FadeTransition) ChangeWallpaperFade(theme, _renderer.Bitmap);
-				else ChangeWallpaper(theme, _renderer.Bitmap);
+						// Apply to desktop background.
+						if (theme.FadeTransition && OsUtil.Win7Available) ChangeWallpaperFade(theme, _renderer.WallpaperImage);
+						else ChangeWallpaper(theme, _renderer.WallpaperImage);
+					}
+					else
+					{
+						Log.Write(LogLevel.Error, "Couldn't initialize the wallpaper frame.");
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "An exception occurred when setting the wallpaper.");
 			}
 		}
 

@@ -36,7 +36,7 @@ namespace WallSwitch
 		private const int k_defaultDropShadowFeatherDist = 20;
 		private const int k_defaultDropShadowOpacity = 50;
 		private const bool k_defaultBackgroundBlur = false;
-		private const int k_defaultBackgroundBlurDist = 8;
+		private const int k_defaultBackgroundBlurDist = 4;
 		#endregion
 
 		#region Variables

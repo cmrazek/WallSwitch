@@ -760,6 +760,9 @@ namespace WallSwitch
 			cmbImageFit.Visible = cmbThemeMode.SelectedIndex != k_modeCollage;
 			txtMaxScale.Enabled = chkLimitScale.Checked;
 
+			// Change Frequency Group
+			chkFadeTransition.Visible = OsUtil.Win7Available;
+
 			// Background Color Group
 
 			// Collage Display Group
@@ -941,6 +944,58 @@ namespace WallSwitch
 		private void UpdateCollageFadeRatioDisplay()
 		{
 			lblColorEffectCollageFadeRatioUnit.Text = string.Format(Res.CollageFadeRatioPercent, trkColorEffectCollageFadeRatio.Value);
+		}
+
+		private void trkDropShadow_Scroll(object sender, EventArgs e)
+		{
+			try
+			{
+				lblDropShadowUnit.Text = string.Format(Res.DropShadowDist, trkDropShadow.Value);
+				ControlChanged(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void trkDropShadowFeatherDist_Scroll(object sender, EventArgs e)
+		{
+			try
+			{
+				lblDropShadowFeatherDist.Text = string.Format(Res.DropShadowFeatherDistValue, trkDropShadowFeatherDist.Value);
+				ControlChanged(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void trkDropShadowOpacity_Scroll(object sender, EventArgs e)
+		{
+			try
+			{
+				lblDropShadowOpacityValue.Text = string.Format(Res.DropShadowOpacityValue, trkDropShadowOpacity.Value);
+				ControlChanged(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void trkBackgroundBlurDist_Scroll(object sender, EventArgs e)
+		{
+			try
+			{
+				lblBackgroundBlurDistValue.Text = string.Format(Res.BackgroundBlurDist, trkBackgroundBlurDist.Value);
+				ControlChanged(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
 		}
 		#endregion
 
@@ -1269,6 +1324,8 @@ namespace WallSwitch
 					{
 						var newTheme = _currentTheme.Clone();
 						newTheme.Name = dlg.String;
+						AttachTheme(newTheme);
+
 						_themes.Add(newTheme);
 						_currentTheme = newTheme;
 						Dirty = true;
@@ -2365,58 +2422,5 @@ namespace WallSwitch
 			}
 		}
 		#endregion
-
-		private void trkDropShadow_Scroll(object sender, EventArgs e)
-		{
-			try
-			{
-				lblDropShadowUnit.Text = string.Format(Res.DropShadowDist, trkDropShadow.Value);
-				ControlChanged(sender, e);
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex);
-			}
-		}
-
-		private void trkDropShadowFeatherDist_Scroll(object sender, EventArgs e)
-		{
-			try
-			{
-				lblDropShadowFeatherDist.Text = string.Format(Res.DropShadowFeatherDistValue, trkDropShadowFeatherDist.Value);
-				ControlChanged(sender, e);
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex);
-			}
-		}
-
-		private void trkDropShadowOpacity_Scroll(object sender, EventArgs e)
-		{
-			try
-			{
-				lblDropShadowOpacityValue.Text = string.Format(Res.DropShadowOpacityValue, trkDropShadowOpacity.Value);
-				ControlChanged(sender, e);
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex);
-			}
-		}
-
-		private void trkBackgroundBlurDist_Scroll(object sender, EventArgs e)
-		{
-			try
-			{
-				lblBackgroundBlurDistValue.Text = string.Format(Res.BackgroundBlurDist, trkBackgroundBlurDist.Value);
-				ControlChanged(sender, e);
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex);
-			}
-		}
-
 	}
 }
