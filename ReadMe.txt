@@ -1,7 +1,7 @@
 WallSwitch
 Switches desktop wallpapers from a variety of sources.
 http://wallswitch.codeplex.com/
-Current Version: 1.2
+Current Version: 1.2.1
 
 Requirements:
 	.NET Framework 4:  http://www.microsoft.com/download/en/details.aspx?id=17718
@@ -12,7 +12,7 @@ Contact:
 
 ChangeLog:
 
-Version 1.2.1 - (pending)
+Version 1.2.1 - 2012-11-12:
 - Improved collage image distribution to overlap older images first.
 - Set default collage background blur distance to 4 (provides a more gradual effect).
 - Fixed issue where wallpaper not displayed on Windows Vista when Cross-Fade transitions enabled.
