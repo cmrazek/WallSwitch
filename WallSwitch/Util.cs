@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
-using System.Xml;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Text.RegularExpressions;
 using System.IO;
-using System.Windows.Forms;
-using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
+using System.Xml;
 
 namespace WallSwitch
 {
@@ -221,6 +222,38 @@ namespace WallSwitch
 		public static void ExploreDir(string dirPath)
 		{
 			Process.Start(dirPath);
+		}
+
+		private const int FO_DELETE = 3;
+		private const int FOF_ALLOWUNDO = 0x40;
+		private const int FOF_NOCONFIRMATION = 0x0010;
+
+		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto, Pack = 1)]
+		public struct SHFILEOPSTRUCT
+		{
+			public IntPtr hwnd;
+			[MarshalAs(UnmanagedType.U4)]
+			public int wFunc;
+			public string pFrom;
+			public string pTo;
+			public short fFlags;
+			[MarshalAs(UnmanagedType.Bool)]
+			public bool fAnyOperationsAborted;
+			public IntPtr hNameMappings;
+			public string lpszProgressTitle;
+		}
+
+		[DllImport("shell32.dll", CharSet = CharSet.Auto)]
+		static extern int SHFileOperation(ref SHFILEOPSTRUCT FileOp);
+
+		public static void RecycleFile(string fileName)
+		{
+			SHFILEOPSTRUCT fileop = new SHFILEOPSTRUCT();
+			fileop.wFunc = FO_DELETE;
+			fileop.pFrom = fileName + '\0' + '\0';
+			fileop.fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION;
+
+			SHFileOperation(ref fileop);
 		}
 	}
 

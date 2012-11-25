@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Net;
-using HtmlAgilityPack;
+using System.Text;
 using System.Xml;
+using HtmlAgilityPack;
+
+#if DEBUG
+using System.IO;
+#endif
 
 namespace WallSwitch
 {
@@ -20,12 +24,31 @@ namespace WallSwitch
 
 				_images.Clear();
 
-				var req = (HttpWebRequest)HttpWebRequest.Create(url);
+				var uri = new Uri(url);
+				var req = (HttpWebRequest)HttpWebRequest.Create(uri);
 				var rsp = (HttpWebResponse)req.GetResponse();
 				var stream = rsp.GetResponseStream();
 
 				var xmlDoc = new XmlDocument();
 				xmlDoc.Load(rsp.GetResponseStream());
+
+#if DEBUG
+				var outDir = Path.Combine(Util.AppDataDir, "FeedLog");
+				if (!Directory.Exists(outDir)) Directory.CreateDirectory(outDir);
+
+				string fileName;
+				var fileNameIndex = 0;
+				do
+				{
+					fileName = Path.Combine(outDir, string.Format("{0} {1}", uri.Host, DateTime.Now.ToString("yyyy-MM-dd HH.mm.ss")));
+					if (fileNameIndex > 0) fileName += string.Format(" ({0})", fileNameIndex);
+					fileNameIndex++;
+					fileName += ".xml";
+				}
+				while (File.Exists(fileName));
+
+				xmlDoc.Save(fileName);
+#endif
 
 				var rootElement = xmlDoc.DocumentElement;
 				if (rootElement.Name == "rss")
@@ -56,6 +79,8 @@ namespace WallSwitch
 		{
 			foreach (XmlElement item in xmlDoc.GetElementsByTagName("item"))
 			{
+				var pubDate = GetPubDateForItem(item);
+
 				// Check for an image element.
 				var node = item.SelectSingleNode("image");
 				if (node != null && node.NodeType == XmlNodeType.Element)
@@ -67,7 +92,7 @@ namespace WallSwitch
 						if (!string.IsNullOrWhiteSpace(url))
 						{
 							Log.Write(LogLevel.Debug, "Found image in item image element '{0}'.", url);
-							_images.Add(ImageRec.FromUrl(url));
+							_images.Add(ImageRec.FromUrl(url, pubDate));
 						}
 					}
 				}
@@ -76,7 +101,7 @@ namespace WallSwitch
 				node = item.SelectSingleNode("description");
 				if (node != null && node.NodeType == XmlNodeType.Element)
 				{
-					SearchHtmlForImages(node.InnerText);
+					SearchHtmlForImages(node.InnerText, pubDate);
 				}
 			}
 		}
@@ -85,6 +110,8 @@ namespace WallSwitch
 		{
 			foreach (XmlElement entry in xmlDoc.GetElementsByTagName("entry"))
 			{
+				var pubDate = GetPubDateForItem(entry);
+
 				foreach (XmlNode node in entry.ChildNodes)
 				{
 					if (node.NodeType != XmlNodeType.Element) continue;
@@ -94,14 +121,14 @@ namespace WallSwitch
 						var type = content.GetAttribute("type");
 						if (string.IsNullOrEmpty(type) || type == "html" || type == "xhtml")
 						{
-							SearchHtmlForImages(content.InnerText);
+							SearchHtmlForImages(content.InnerText, pubDate);
 						}
 						else if (type.StartsWith("image/"))
 						{
 							var src = content.GetAttribute("src");
 							if (!string.IsNullOrWhiteSpace(src))
 							{
-								_images.Add(ImageRec.FromUrl(src));
+								_images.Add(ImageRec.FromUrl(src, pubDate));
 							}
 						}
 					}
@@ -109,7 +136,51 @@ namespace WallSwitch
 			}
 		}
 
-		private void SearchHtmlForImages(string html)
+		private DateTime GetPubDateForItem(XmlElement item)
+		{
+			DateTime pubDate;
+
+			var node = item.SelectSingleNode("pubDate");
+			if (node != null && node.NodeType == XmlNodeType.Element)
+			{
+				if (DateTime.TryParse(node.InnerText, out pubDate))
+				{
+					Log.Write(LogLevel.Debug, "Item has pubDate element: {0}", pubDate.ToString());
+					return pubDate;
+				}
+				else
+				{
+					Log.Write(LogLevel.Debug, "Couldn't parse pubDate element text: {0}", node.InnerText);
+				}
+			}
+			else
+			{
+				Log.Write(LogLevel.Debug, "Item has no pubDate element.");
+			}
+
+			node = item.SelectSingleNode("updated");
+			if (node != null && node.NodeType == XmlNodeType.Element)
+			{
+				if (DateTime.TryParse(node.InnerText, out pubDate))
+				{
+					Log.Write(LogLevel.Debug, "Item has updated element: {0}", pubDate.ToString());
+					return pubDate;
+				}
+				else
+				{
+					Log.Write(LogLevel.Debug, "Couldn't parse updated element text: {0}", node.InnerText);
+				}
+			}
+			else
+			{
+				Log.Write(LogLevel.Debug, "Item has no updated element.");
+			}
+
+			Log.Write(LogLevel.Debug, "Resorting to current date as the pub date.");
+			return DateTime.Now;
+		}
+
+		private void SearchHtmlForImages(string html, DateTime pubDate)
 		{
 			try
 			{
@@ -117,7 +188,7 @@ namespace WallSwitch
 
 				var htmlDoc = new HtmlDocument();
 				htmlDoc.LoadHtml(html);
-				SearchHtmlNodeForImages(htmlDoc.DocumentNode);
+				SearchHtmlNodeForImages(htmlDoc.DocumentNode, pubDate);
 			}
 			catch (Exception ex)
 			{
@@ -125,7 +196,7 @@ namespace WallSwitch
 			}
 		}
 
-		private void SearchHtmlNodeForImages(HtmlNode parentNode)
+		private void SearchHtmlNodeForImages(HtmlNode parentNode, DateTime pubDate)
 		{
 			foreach (var node in (from n in parentNode.ChildNodes
 								  where n.NodeType == HtmlNodeType.Element
@@ -137,12 +208,12 @@ namespace WallSwitch
 					if (!string.IsNullOrWhiteSpace(src))
 					{
 						Log.Write(LogLevel.Debug, "Found image in item HTML '{0}'.", src);
-						_images.Add(ImageRec.FromUrl(src));
+						_images.Add(ImageRec.FromUrl(src, pubDate));
 					}
 				}
 				else if (node.HasChildNodes)
 				{
-					SearchHtmlNodeForImages(node);
+					SearchHtmlNodeForImages(node, pubDate);
 				}
 			}
 		}

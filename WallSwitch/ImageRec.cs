@@ -24,6 +24,7 @@ namespace WallSwitch
 		private Image _image = null;
 		private ImageFormat _imageFormat = null;
 		private Bitmap _thumbnail = null;
+		private DateTime? _pubDate = null;
 		#endregion
 
 		#region Construction
@@ -47,11 +48,12 @@ namespace WallSwitch
 			return loc;
 		}
 
-		public static ImageRec FromUrl(string url)
+		public static ImageRec FromUrl(string url, DateTime pubDate)
 		{
 			var loc = new ImageRec();
 			loc._location = url;
 			loc._type = ImageLocationType.Url;
+			loc._pubDate = pubDate;
 			return loc;
 		}
 
@@ -72,6 +74,7 @@ namespace WallSwitch
 		public void Save(XmlWriter xml)
 		{
 			xml.WriteAttributeString("Type", _type.ToString());
+			if (_pubDate.HasValue) xml.WriteAttributeString("PubDate", _pubDate.Value.ToString("s"));
 			xml.WriteString(_location);
 		}
 
@@ -126,6 +129,12 @@ namespace WallSwitch
 		public ImageFormat ImageFormat
 		{
 			get { return _imageFormat; }
+		}
+
+		public DateTime? PubDate
+		{
+			get { return _pubDate; }
+			set { _pubDate = value; }
 		}
 		#endregion
 

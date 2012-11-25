@@ -27,6 +27,7 @@ namespace WallSwitch
 		private Period _updatePeriod = k_defaultUpdatePeriod;
 		private int _updateFreq = k_defaultUpdateInterval;
 		private TimeSpan _updateInterval;
+		private bool _disabled = false;
 
 		public Location(LocationType type, string path)
 		{
@@ -44,7 +45,8 @@ namespace WallSwitch
 		{
 			return new Location(_type, _path)
 			{
-				_updateInterval = _updateInterval
+				_updateInterval = _updateInterval,
+				_disabled = _disabled
 			};
 		}
 
@@ -134,6 +136,7 @@ namespace WallSwitch
 			xml.WriteAttributeString("Type", _type.ToString());
 			xml.WriteAttributeString("UpdateFreq", _updateFreq.ToString());
 			xml.WriteAttributeString("UpdatePeriod", _updatePeriod.ToString());
+			if (_disabled) xml.WriteAttributeString("Disabled", _disabled.ToString());
 
 			xml.WriteString(_path);
 		}
@@ -166,6 +169,14 @@ namespace WallSwitch
 				Period period;
 				if (Enum.TryParse<Period>(str, out period)) _updatePeriod = period;
 				else _updatePeriod = k_defaultUpdatePeriod;
+			}
+
+			str = topElement.GetAttribute("Disabled");
+			if (!string.IsNullOrWhiteSpace(str))
+			{
+				bool disabled;
+				if (bool.TryParse(str, out disabled)) _disabled = disabled;
+				else _disabled = false;
 			}
 
 			_updateInterval = TimeSpanUtil.CalcInterval(_updateFreq, _updatePeriod);
@@ -272,6 +283,23 @@ namespace WallSwitch
 			{
 				_lastUpdate = DateTime.MinValue;
 				FireUpdated();
+			}
+		}
+
+		public event EventHandler<LocationEventArgs> DisabledChanged;
+
+		public bool Disabled
+		{
+			get { return _disabled; }
+			set
+			{
+				if (_disabled != value)
+				{
+					_disabled = value;
+
+					var ev = DisabledChanged;
+					if (ev != null) ev(this, new LocationEventArgs(this));
+				}
 			}
 		}
 

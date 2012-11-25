@@ -35,6 +35,7 @@
 			this.colNextUpdate = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.cmLocations = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.ciAddFolder = new System.Windows.Forms.ToolStripMenuItem();
+			this.miAddRssFeed = new System.Windows.Forms.ToolStripMenuItem();
 			this.ciAddImage = new System.Windows.Forms.ToolStripMenuItem();
 			this.ciLocationExplore = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripSeparator();
@@ -115,7 +116,10 @@
 			this.cmbThemePeriod = new System.Windows.Forms.ComboBox();
 			this.lblFrequency = new System.Windows.Forms.Label();
 			this.txtThemeFreq = new System.Windows.Forms.TextBox();
+			this.c_activateThemeHotKey = new WallSwitch.HotKeyTextBox();
 			this.grpBackgroundColor = new System.Windows.Forms.GroupBox();
+			this.clrBackTop = new WallSwitch.ColorSample();
+			this.clrBackBottom = new WallSwitch.ColorSample();
 			this.grpCollageDisplay = new System.Windows.Forms.GroupBox();
 			this.trkDropShadowFeatherDist = new System.Windows.Forms.TrackBar();
 			this.trkDropShadowOpacity = new System.Windows.Forms.TrackBar();
@@ -141,6 +145,7 @@
 			this.lblColorEffectCollageFadeRatioUnit = new System.Windows.Forms.Label();
 			this.trkColorEffectCollageFadeRatio = new System.Windows.Forms.TrackBar();
 			this.tabHistory = new System.Windows.Forms.TabPage();
+			this.lstHistory = new WallSwitch.HistoryList();
 			this.cmHistory = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.ciOpenHistoryFile = new System.Windows.Forms.ToolStripMenuItem();
 			this.ciExploreHistoryFile = new System.Windows.Forms.ToolStripMenuItem();
@@ -148,10 +153,7 @@
 			this.ciClearHistoryList = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.grpNavButtons = new System.Windows.Forms.GroupBox();
-			this.c_activateThemeHotKey = new WallSwitch.HotKeyTextBox();
-			this.clrBackTop = new WallSwitch.ColorSample();
-			this.clrBackBottom = new WallSwitch.ColorSample();
-			this.lstHistory = new WallSwitch.HistoryList();
+			this.ciDeleteHistoryFile = new System.Windows.Forms.ToolStripMenuItem();
 			this.cmLocations.SuspendLayout();
 			this.grpTheme.SuspendLayout();
 			this.cmTheme.SuspendLayout();
@@ -183,21 +185,21 @@
 			// lstLocations
 			// 
 			this.lstLocations.AllowDrop = true;
-			this.lstLocations.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+			this.lstLocations.CheckBoxes = true;
 			this.lstLocations.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colLocation,
             this.colNextUpdate});
 			this.lstLocations.ContextMenuStrip = this.cmLocations;
-			this.lstLocations.Location = new System.Drawing.Point(0, 0);
+			this.lstLocations.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.lstLocations.Location = new System.Drawing.Point(3, 3);
 			this.lstLocations.Name = "lstLocations";
-			this.lstLocations.Size = new System.Drawing.Size(823, 536);
+			this.lstLocations.Size = new System.Drawing.Size(546, 305);
 			this.lstLocations.TabIndex = 0;
 			this.toolTip1.SetToolTip(this.lstLocations, "Locations where images are retrieved");
 			this.lstLocations.UseCompatibleStateImageBehavior = false;
 			this.lstLocations.View = System.Windows.Forms.View.Details;
 			this.lstLocations.ItemActivate += new System.EventHandler(this.lstLocations_ItemActivate);
+			this.lstLocations.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.lstLocations_ItemChecked);
 			this.lstLocations.DragDrop += new System.Windows.Forms.DragEventHandler(this.lstLocations_DragDrop);
 			this.lstLocations.DragEnter += new System.Windows.Forms.DragEventHandler(this.lstLocations_DragEnter);
 			this.lstLocations.Resize += new System.EventHandler(this.lstLocations_Resize);
@@ -217,6 +219,7 @@
 			// 
 			this.cmLocations.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ciAddFolder,
+            this.miAddRssFeed,
             this.ciAddImage,
             this.ciLocationExplore,
             this.toolStripMenuItem6,
@@ -225,7 +228,7 @@
             this.ciDeleteLocation,
             this.ciLocationProperties});
 			this.cmLocations.Name = "locationsMenu";
-			this.cmLocations.Size = new System.Drawing.Size(141, 148);
+			this.cmLocations.Size = new System.Drawing.Size(141, 170);
 			this.cmLocations.Opening += new System.ComponentModel.CancelEventHandler(this.cmLocations_Opening);
 			// 
 			// ciAddFolder
@@ -234,6 +237,13 @@
 			this.ciAddFolder.Size = new System.Drawing.Size(140, 22);
 			this.ciAddFolder.Text = "Add &Folder";
 			this.ciAddFolder.Click += new System.EventHandler(this.ciAddFolder_Click);
+			// 
+			// miAddRssFeed
+			// 
+			this.miAddRssFeed.Name = "miAddRssFeed";
+			this.miAddRssFeed.Size = new System.Drawing.Size(140, 22);
+			this.miAddRssFeed.Text = "&Add Feed";
+			this.miAddRssFeed.Click += new System.EventHandler(this.btnAddFeed_Click);
 			// 
 			// ciAddImage
 			// 
@@ -1002,6 +1012,17 @@
 			this.toolTip1.SetToolTip(this.txtThemeFreq, "Wallpaper change interval");
 			this.txtThemeFreq.TextChanged += new System.EventHandler(this.ControlChanged);
 			// 
+			// c_activateThemeHotKey
+			// 
+			this.c_activateThemeHotKey.BackColor = System.Drawing.SystemColors.Window;
+			this.c_activateThemeHotKey.HotKey = null;
+			this.c_activateThemeHotKey.Location = new System.Drawing.Point(153, 45);
+			this.c_activateThemeHotKey.Name = "c_activateThemeHotKey";
+			this.c_activateThemeHotKey.ReadOnly = true;
+			this.c_activateThemeHotKey.Size = new System.Drawing.Size(141, 20);
+			this.c_activateThemeHotKey.TabIndex = 5;
+			this.c_activateThemeHotKey.HotKeyChanged += new System.EventHandler(this.ControlChanged);
+			// 
 			// grpBackgroundColor
 			// 
 			this.grpBackgroundColor.Controls.Add(this.clrBackTop);
@@ -1017,6 +1038,30 @@
 			this.grpBackgroundColor.TabIndex = 2;
 			this.grpBackgroundColor.TabStop = false;
 			this.grpBackgroundColor.Text = "Background Color";
+			// 
+			// clrBackTop
+			// 
+			this.clrBackTop.BackColor = System.Drawing.Color.Black;
+			this.clrBackTop.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.clrBackTop.Color = System.Drawing.Color.Black;
+			this.clrBackTop.Location = new System.Drawing.Point(153, 19);
+			this.clrBackTop.Name = "clrBackTop";
+			this.clrBackTop.Size = new System.Drawing.Size(30, 18);
+			this.clrBackTop.TabIndex = 1;
+			this.toolTip1.SetToolTip(this.clrBackTop, "Top color of background gradient");
+			this.clrBackTop.ColorChanged += new WallSwitch.ColorSample.ColorChangedEventHandler(this.clrBackTop_ColorChanged);
+			// 
+			// clrBackBottom
+			// 
+			this.clrBackBottom.BackColor = System.Drawing.Color.Black;
+			this.clrBackBottom.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.clrBackBottom.Color = System.Drawing.Color.Black;
+			this.clrBackBottom.Location = new System.Drawing.Point(153, 43);
+			this.clrBackBottom.Name = "clrBackBottom";
+			this.clrBackBottom.Size = new System.Drawing.Size(30, 18);
+			this.clrBackBottom.TabIndex = 3;
+			this.toolTip1.SetToolTip(this.clrBackBottom, "Bottom color of background gradient");
+			this.clrBackBottom.ColorChanged += new WallSwitch.ColorSample.ColorChangedEventHandler(this.clrBackBottom_ColorChanged);
 			// 
 			// grpCollageDisplay
 			// 
@@ -1330,39 +1375,52 @@
 			this.tabHistory.Text = "History";
 			this.tabHistory.UseVisualStyleBackColor = true;
 			// 
+			// lstHistory
+			// 
+			this.lstHistory.ContextMenuStrip = this.cmHistory;
+			this.lstHistory.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.lstHistory.ImageToolTip = this.toolTip1;
+			this.lstHistory.Location = new System.Drawing.Point(3, 3);
+			this.lstHistory.Name = "lstHistory";
+			this.lstHistory.Size = new System.Drawing.Size(546, 305);
+			this.lstHistory.TabIndex = 0;
+			this.lstHistory.SelectionChanged += new System.EventHandler(this.lstHistory_SelectionChanged);
+			this.lstHistory.ItemActivated += new System.EventHandler<WallSwitch.HistoryList.ItemActivatedEventArgs>(this.lstHistory_ItemActivated);
+			// 
 			// cmHistory
 			// 
 			this.cmHistory.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ciOpenHistoryFile,
             this.ciExploreHistoryFile,
+            this.ciDeleteHistoryFile,
             this.toolStripMenuItem4,
             this.ciClearHistoryList});
 			this.cmHistory.Name = "cmHistory";
-			this.cmHistory.Size = new System.Drawing.Size(143, 76);
+			this.cmHistory.Size = new System.Drawing.Size(153, 120);
 			// 
 			// ciOpenHistoryFile
 			// 
 			this.ciOpenHistoryFile.Name = "ciOpenHistoryFile";
-			this.ciOpenHistoryFile.Size = new System.Drawing.Size(142, 22);
+			this.ciOpenHistoryFile.Size = new System.Drawing.Size(152, 22);
 			this.ciOpenHistoryFile.Text = "&Open File";
 			this.ciOpenHistoryFile.Click += new System.EventHandler(this.ciOpenHistoryFile_Click);
 			// 
 			// ciExploreHistoryFile
 			// 
 			this.ciExploreHistoryFile.Name = "ciExploreHistoryFile";
-			this.ciExploreHistoryFile.Size = new System.Drawing.Size(142, 22);
+			this.ciExploreHistoryFile.Size = new System.Drawing.Size(152, 22);
 			this.ciExploreHistoryFile.Text = "&Explore File";
 			this.ciExploreHistoryFile.Click += new System.EventHandler(this.ciExploreHistoryFile_Click);
 			// 
 			// toolStripMenuItem4
 			// 
 			this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-			this.toolStripMenuItem4.Size = new System.Drawing.Size(139, 6);
+			this.toolStripMenuItem4.Size = new System.Drawing.Size(149, 6);
 			// 
 			// ciClearHistoryList
 			// 
 			this.ciClearHistoryList.Name = "ciClearHistoryList";
-			this.ciClearHistoryList.Size = new System.Drawing.Size(142, 22);
+			this.ciClearHistoryList.Size = new System.Drawing.Size(152, 22);
 			this.ciClearHistoryList.Text = "&Clear History";
 			this.ciClearHistoryList.Click += new System.EventHandler(this.ciClearHistoryList_Click);
 			// 
@@ -1378,52 +1436,12 @@
 			this.grpNavButtons.TabIndex = 11;
 			this.grpNavButtons.TabStop = false;
 			// 
-			// c_activateThemeHotKey
+			// ciDeleteHistoryFile
 			// 
-			this.c_activateThemeHotKey.BackColor = System.Drawing.SystemColors.Window;
-			this.c_activateThemeHotKey.HotKey = null;
-			this.c_activateThemeHotKey.Location = new System.Drawing.Point(153, 45);
-			this.c_activateThemeHotKey.Name = "c_activateThemeHotKey";
-			this.c_activateThemeHotKey.ReadOnly = true;
-			this.c_activateThemeHotKey.Size = new System.Drawing.Size(141, 20);
-			this.c_activateThemeHotKey.TabIndex = 5;
-			this.c_activateThemeHotKey.HotKeyChanged += new System.EventHandler(this.ControlChanged);
-			// 
-			// clrBackTop
-			// 
-			this.clrBackTop.BackColor = System.Drawing.Color.Black;
-			this.clrBackTop.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.clrBackTop.Color = System.Drawing.Color.Black;
-			this.clrBackTop.Location = new System.Drawing.Point(153, 19);
-			this.clrBackTop.Name = "clrBackTop";
-			this.clrBackTop.Size = new System.Drawing.Size(30, 18);
-			this.clrBackTop.TabIndex = 1;
-			this.toolTip1.SetToolTip(this.clrBackTop, "Top color of background gradient");
-			this.clrBackTop.ColorChanged += new WallSwitch.ColorSample.ColorChangedEventHandler(this.clrBackTop_ColorChanged);
-			// 
-			// clrBackBottom
-			// 
-			this.clrBackBottom.BackColor = System.Drawing.Color.Black;
-			this.clrBackBottom.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.clrBackBottom.Color = System.Drawing.Color.Black;
-			this.clrBackBottom.Location = new System.Drawing.Point(153, 43);
-			this.clrBackBottom.Name = "clrBackBottom";
-			this.clrBackBottom.Size = new System.Drawing.Size(30, 18);
-			this.clrBackBottom.TabIndex = 3;
-			this.toolTip1.SetToolTip(this.clrBackBottom, "Bottom color of background gradient");
-			this.clrBackBottom.ColorChanged += new WallSwitch.ColorSample.ColorChangedEventHandler(this.clrBackBottom_ColorChanged);
-			// 
-			// lstHistory
-			// 
-			this.lstHistory.ContextMenuStrip = this.cmHistory;
-			this.lstHistory.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.lstHistory.ImageToolTip = this.toolTip1;
-			this.lstHistory.Location = new System.Drawing.Point(3, 3);
-			this.lstHistory.Name = "lstHistory";
-			this.lstHistory.Size = new System.Drawing.Size(546, 305);
-			this.lstHistory.TabIndex = 0;
-			this.lstHistory.SelectionChanged += new System.EventHandler(this.lstHistory_SelectionChanged);
-			this.lstHistory.ItemActivated += new System.EventHandler<WallSwitch.HistoryList.ItemActivatedEventArgs>(this.lstHistory_ItemActivated);
+			this.ciDeleteHistoryFile.Name = "ciDeleteHistoryFile";
+			this.ciDeleteHistoryFile.Size = new System.Drawing.Size(152, 22);
+			this.ciDeleteHistoryFile.Text = "&Delete File";
+			this.ciDeleteHistoryFile.Click += new System.EventHandler(this.ciDeleteHistoryFile_Click);
 			// 
 			// MainWindow
 			// 
@@ -1606,6 +1624,8 @@
 		private System.Windows.Forms.Label lblBackgroundBlurDistValue;
 		private System.Windows.Forms.TrackBar trkBackgroundBlurDist;
 		private System.Windows.Forms.CheckBox chkBackgroundBlur;
+		private System.Windows.Forms.ToolStripMenuItem miAddRssFeed;
+		private System.Windows.Forms.ToolStripMenuItem ciDeleteHistoryFile;
 
 	}
 }

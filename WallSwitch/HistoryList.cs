@@ -146,6 +146,23 @@ namespace WallSwitch
 				return (from i in _items select i.imageRec).ToArray();
 			}
 		}
+
+		public bool RemoveItem(ImageRec img)
+		{
+			foreach (var item in _items)
+			{
+				if (item.imageRec == null) continue;
+				if (item.imageRec.Equals(img))
+				{
+					_items.Remove(item);
+					if (_selectedItem.Equals(item)) _selectedItem = null;
+					UpdateLayout();
+					Invalidate();
+					return true;
+				}
+			}
+			return false;
+		}
 		#endregion
 
 		#region Layout / Drawing

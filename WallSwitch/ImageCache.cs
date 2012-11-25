@@ -14,6 +14,7 @@ namespace WallSwitch
 		{
 			public string location;
 			public string cacheFileName;
+			public DateTime? pubDate = null;
 		}
 		private static List<CacheEntry> _cache = new List<CacheEntry>();
 
@@ -32,31 +33,33 @@ namespace WallSwitch
 			return File.Exists(cacheFileName);
 		}
 
-		public static void SaveImage(ImageRec loc)
+		public static void SaveImage(ImageRec img)
 		{
 			try
 			{
-				var image = loc.Image;
+				var image = img.Image;
 				if (image == null) return;
 
-				var fmt = loc.ImageFormat ?? ImageFormat.Png;
+				var fmt = img.ImageFormat ?? ImageFormat.Png;
 				var fileName = string.Concat(Guid.NewGuid().ToString(), ImageFormatDesc.ImageFormatToExtension(fmt));
 
 				image.Save(Path.Combine(GetCacheDir(true), fileName), fmt);
 
 				var entry = (from c in _cache
-							 where c.location.Equals(loc.Location, StringComparison.OrdinalIgnoreCase)
+							 where c.location.Equals(img.Location, StringComparison.OrdinalIgnoreCase)
 							 select c).FirstOrDefault();
 				if (entry != null)
 				{
 					entry.cacheFileName = fileName;
+					entry.pubDate = img.PubDate;
 				}
 				else
 				{
 					_cache.Add(new CacheEntry
 					{
-						location = loc.Location,
-						cacheFileName = fileName
+						location = img.Location,
+						cacheFileName = fileName,
+						pubDate = img.PubDate
 					});
 				}
 			}
@@ -89,6 +92,7 @@ namespace WallSwitch
 				xml.WriteStartElement("CacheEntry");
 				xml.WriteAttributeString("File", entry.location);
 				xml.WriteAttributeString("Cache", entry.cacheFileName);
+				if (entry.pubDate.HasValue) xml.WriteAttributeString("PubDate", entry.pubDate.Value.ToString("s"));
 				xml.WriteEndElement();	// CacheEntry
 			}
 
@@ -105,12 +109,18 @@ namespace WallSwitch
 				var location = cacheEntry.GetAttribute("File");
 				var cacheFileName = cacheEntry.GetAttribute("Cache");
 
+				DateTime? pubDate = null;
+				DateTime dt;
+				var str = cacheEntry.GetAttribute("PubDate");
+				if (!string.IsNullOrWhiteSpace(str) && DateTime.TryParse(str, out dt)) pubDate = dt;
+
 				if (!string.IsNullOrWhiteSpace(location) && !string.IsNullOrWhiteSpace(cacheFileName))
 				{
 					_cache.Add(new CacheEntry
 					{
 						location = location,
-						cacheFileName = cacheFileName
+						cacheFileName = cacheFileName,
+						pubDate = pubDate
 					});
 				}
 			}

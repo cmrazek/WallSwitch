@@ -666,8 +666,14 @@ namespace WallSwitch
 			_currentTheme.BackColorBottom = clrBackBottom.Color;
 			_currentTheme.ImageSize = trkImageSize.Value;
 
-			_currentTheme.Locations = (from l in lstLocations.Items.Cast<ListViewItem>()
-									   select l.Tag as Location).ToArray();
+			var locationList = new List<Location>();
+			foreach (var lvi in lstLocations.Items.Cast<ListViewItem>())
+			{
+				var location = lvi.Tag as Location;
+				location.Disabled = !lvi.Checked;
+				locationList.Add(location);
+			}
+			_currentTheme.Locations = locationList;
 
 			_currentTheme.SeparateMonitors = chkSeparateMonitors.Checked;
 			if (!_currentTheme.HotKey.Equals(_changeThemeHotKey))
@@ -1551,6 +1557,7 @@ namespace WallSwitch
 		{
 			var lvi = new ListViewItem();
 			lvi.Tag = location;
+			lvi.Checked = !location.Disabled;
 			UpdateLocationLvi(lvi);
 			lstLocations.Items.Add(lvi);
 
@@ -1850,6 +1857,18 @@ namespace WallSwitch
 							break;
 					}
 				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void lstLocations_ItemChecked(object sender, ItemCheckedEventArgs e)
+		{
+			try
+			{
+				ControlChanged(sender, e);
 			}
 			catch (Exception ex)
 			{
@@ -2326,6 +2345,33 @@ namespace WallSwitch
 				this.ShowError(ex);
 			}
 		}
+
+		private void ciDeleteHistoryFile_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				var item = lstHistory.SelectedItem;
+				if (item != null)
+				{
+					var fileName = item.LocationOnDisk;
+					if (string.IsNullOrWhiteSpace(fileName))
+					{
+						this.ShowError(Res.Error_ImageFileMissing);
+					}
+					else if (MessageBox.Show(this, Res.Confirm_DeleteHistoryFile, Res.Confirm_DeleteHistoryFile_Caption,
+						MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)
+						== DialogResult.Yes)
+					{
+						FileUtil.RecycleFile(fileName);
+						lstHistory.RemoveItem(item);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
 		#endregion
 
 		#region Auto-Update Check
@@ -2422,5 +2468,6 @@ namespace WallSwitch
 			}
 		}
 		#endregion
+
 	}
 }

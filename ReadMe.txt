@@ -12,6 +12,12 @@ Contact:
 
 ChangeLog:
 
+Version 1.2.2 - (pending):
+- Added checkboxes to location list to allow disabling of locations without deleting them.
+- Added option to delete an image directly from the history list.
+- Fixed location list columns not resizing correctly.
+- Fixed missing 'Add Feed' option.
+
 Version 1.2.1 - 2012-11-12:
 - Improved collage image distribution to overlap older images first.
 - Set default collage background blur distance to 4 (provides a more gradual effect).

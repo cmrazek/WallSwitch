@@ -130,12 +130,18 @@ namespace WallSwitch
 				if (file == null)
 				{
 					Log.Write(LogLevel.Warning, "No image file passed.");
-					ClearBackground(thisScreenRect, 255);
+					if (_theme.Mode != ThemeMode.Collage)
+					{
+						ClearBackground(thisScreenRect, 255);
+					}
 				}
 				else if (!file.IsPresent)
 				{
 					Log.Write(LogLevel.Warning, "No image object is loaded.");
-					ClearBackground(thisScreenRect, 255);
+					if (_theme.Mode != ThemeMode.Collage)
+					{
+						ClearBackground(thisScreenRect, 255);
+					}
 				}
 				else
 				{

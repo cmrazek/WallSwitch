@@ -634,7 +634,9 @@ namespace WallSwitch
 
 			// Go through each location and find files.
 			var files = new List<ImageRec>();
-			foreach (Location loc in _locations) files.AddRange(loc.Files);
+			foreach (Location loc in (from l in _locations
+									  where !l.Disabled
+									  select l)) files.AddRange(loc.Files);
 
 			Log.Write(LogLevel.Debug, files.Count.ToString() + " files found.");
 
