@@ -450,4 +450,28 @@ namespace WallSwitch
 			}
 		}
 	}
+
+	public static class VersionUtil
+	{
+		public static string ToAppFormat(this Version ver)
+		{
+			var sb = new StringBuilder();
+
+			sb.Append(ver.Major);
+			sb.Append(".");
+			sb.Append(ver.Minor);
+			if (ver.Build > 0)
+			{
+				sb.Append(".");
+				sb.Append(ver.Build);
+			}
+			if (ver.Revision > 0)
+			{
+				sb.Append(".");
+				sb.Append(ver.Revision);
+			}
+
+			return sb.ToString();
+		}
+	}
 }

@@ -223,7 +223,8 @@
     <value>The theme frequency must be greater than zero.</value>
   </data>
   <data name="LogFile" xml:space="preserve">
-    <value>WallSwitch.log</value>
+    <value>WallSwitch {0}.log</value>
+    <comment>{0} = Time stamp</comment>
   </data>
   <data name="NewThemePrompt" xml:space="preserve">
     <value>Enter a name for the new theme:</value>
@@ -398,15 +399,19 @@
     <value>WallSwitch</value>
   </data>
   <data name="UpdateAvailableBalloonText" xml:space="preserve">
-    <value>A new version of WallSwitch is now available to download.
+    <value>A new version of Wall Switch is now available to download.
+(version {0})
 
 Click here to be taken to the download page.</value>
+    <comment>{0} = Version number</comment>
   </data>
   <data name="UpdateCheckFailedBalloonText" xml:space="preserve">
     <value>An error occurred when checking for updates.</value>
   </data>
   <data name="UpdateNotAvailableBalloonText" xml:space="preserve">
-    <value>WallSwitch is up to date.</value>
+    <value>You already have the most recent version of Wall Switch.
+(version {0})</value>
+    <comment>{0} = Version number</comment>
   </data>
   <data name="UpdateRssUrl" xml:space="preserve">
     <value>https://wallswitch.codeplex.com/project/feeds/rss?ProjectRSSFeed=codeplex%3a%2f%2frelease%2fwallswitch</value>
@@ -459,5 +464,38 @@ Click here to be taken to the download page.</value>
   </data>
   <data name="Confirm_DeleteHistoryFile_Caption" xml:space="preserve">
     <value>Delete File?</value>
+  </data>
+  <data name="Error_InvalidStartUpDelay" xml:space="preserve">
+    <value>Invalid start up delay.</value>
+  </data>
+  <data name="Error_ShowUpdatePage" xml:space="preserve">
+    <value>An error occurred when displaying the update page.</value>
+  </data>
+  <data name="SettingsUpdateAvailable" xml:space="preserve">
+    <value>A new version of Wall Switch is available to download.
+(version {0})
+
+Click 'yes' to be taken to the download page.</value>
+    <comment>{0} = Version number</comment>
+  </data>
+  <data name="SettingsUpdateCaption" xml:space="preserve">
+    <value>WallSwitch Verison</value>
+  </data>
+  <data name="SettingsUpdateFailed" xml:space="preserve">
+    <value>An error occurred when checking for updates.</value>
+  </data>
+  <data name="SettingsUpdateNotAvailable" xml:space="preserve">
+    <value>You already have the most recent version of Wall Switch.
+(version {0})</value>
+    <comment>{0} = Version number</comment>
+  </data>
+  <data name="AboutUpdateAvailable" xml:space="preserve">
+    <value>Update available (version {0})</value>
+  </data>
+  <data name="AboutUpdateNotAvailable" xml:space="preserve">
+    <value>Wall Switch is up to date</value>
+  </data>
+  <data name="Website" xml:space="preserve">
+    <value>http://wallswitch.codeplex.com/</value>
   </data>
 </root>

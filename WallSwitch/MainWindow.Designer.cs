@@ -92,13 +92,10 @@
 			this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
 			this.miFileExit = new System.Windows.Forms.ToolStripMenuItem();
 			this.menuTools = new System.Windows.Forms.ToolStripMenuItem();
-			this.miToolsStartWithWindows = new System.Windows.Forms.ToolStripMenuItem();
 			this.miHotKeys = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripSeparator();
-			this.miCheckForUpdatesOnStartup = new System.Windows.Forms.ToolStripMenuItem();
-			this.miCheckForUpdatesNow = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripMenuItem8 = new System.Windows.Forms.ToolStripSeparator();
 			this.miClearHistory = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItem11 = new System.Windows.Forms.ToolStripSeparator();
+			this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.menuHelp = new System.Windows.Forms.ToolStripMenuItem();
 			this.miHelpAbout = new System.Windows.Forms.ToolStripMenuItem();
 			this.tabThemeSettings = new System.Windows.Forms.TabControl();
@@ -149,11 +146,11 @@
 			this.cmHistory = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.ciOpenHistoryFile = new System.Windows.Forms.ToolStripMenuItem();
 			this.ciExploreHistoryFile = new System.Windows.Forms.ToolStripMenuItem();
+			this.ciDeleteHistoryFile = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripSeparator();
 			this.ciClearHistoryList = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.grpNavButtons = new System.Windows.Forms.GroupBox();
-			this.ciDeleteHistoryFile = new System.Windows.Forms.ToolStripMenuItem();
 			this.cmLocations.SuspendLayout();
 			this.grpTheme.SuspendLayout();
 			this.cmTheme.SuspendLayout();
@@ -758,62 +755,39 @@
 			// menuTools
 			// 
 			this.menuTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.miToolsStartWithWindows,
+            this.miClearHistory,
+            this.toolStripMenuItem11,
             this.miHotKeys,
-            this.toolStripMenuItem7,
-            this.miCheckForUpdatesOnStartup,
-            this.miCheckForUpdatesNow,
-            this.toolStripMenuItem8,
-            this.miClearHistory});
+            this.settingsToolStripMenuItem});
 			this.menuTools.Name = "menuTools";
 			this.menuTools.Size = new System.Drawing.Size(48, 20);
 			this.menuTools.Text = "&Tools";
-			this.menuTools.DropDownOpening += new System.EventHandler(this.menuTools_DropDownOpening);
-			// 
-			// miToolsStartWithWindows
-			// 
-			this.miToolsStartWithWindows.Name = "miToolsStartWithWindows";
-			this.miToolsStartWithWindows.Size = new System.Drawing.Size(234, 22);
-			this.miToolsStartWithWindows.Text = "&Start With Windows";
-			this.miToolsStartWithWindows.Click += new System.EventHandler(this.miToolsStartWithWindows_Click);
 			// 
 			// miHotKeys
 			// 
 			this.miHotKeys.Name = "miHotKeys";
-			this.miHotKeys.Size = new System.Drawing.Size(234, 22);
+			this.miHotKeys.Size = new System.Drawing.Size(152, 22);
 			this.miHotKeys.Text = "&Hot Keys";
 			this.miHotKeys.Click += new System.EventHandler(this.miHotKeys_Click);
-			// 
-			// toolStripMenuItem7
-			// 
-			this.toolStripMenuItem7.Name = "toolStripMenuItem7";
-			this.toolStripMenuItem7.Size = new System.Drawing.Size(231, 6);
-			// 
-			// miCheckForUpdatesOnStartup
-			// 
-			this.miCheckForUpdatesOnStartup.Name = "miCheckForUpdatesOnStartup";
-			this.miCheckForUpdatesOnStartup.Size = new System.Drawing.Size(234, 22);
-			this.miCheckForUpdatesOnStartup.Text = "Check for Updates on Start-up";
-			this.miCheckForUpdatesOnStartup.Click += new System.EventHandler(this.miCheckForUpdatesOnStartup_Click);
-			// 
-			// miCheckForUpdatesNow
-			// 
-			this.miCheckForUpdatesNow.Name = "miCheckForUpdatesNow";
-			this.miCheckForUpdatesNow.Size = new System.Drawing.Size(234, 22);
-			this.miCheckForUpdatesNow.Text = "Check for Updates Now";
-			this.miCheckForUpdatesNow.Click += new System.EventHandler(this.miCheckForUpdatesNow_Click);
-			// 
-			// toolStripMenuItem8
-			// 
-			this.toolStripMenuItem8.Name = "toolStripMenuItem8";
-			this.toolStripMenuItem8.Size = new System.Drawing.Size(231, 6);
 			// 
 			// miClearHistory
 			// 
 			this.miClearHistory.Name = "miClearHistory";
-			this.miClearHistory.Size = new System.Drawing.Size(234, 22);
+			this.miClearHistory.Size = new System.Drawing.Size(152, 22);
 			this.miClearHistory.Text = "&Clear History";
 			this.miClearHistory.Click += new System.EventHandler(this.miClearHistory_Click);
+			// 
+			// toolStripMenuItem11
+			// 
+			this.toolStripMenuItem11.Name = "toolStripMenuItem11";
+			this.toolStripMenuItem11.Size = new System.Drawing.Size(149, 6);
+			// 
+			// settingsToolStripMenuItem
+			// 
+			this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+			this.settingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.settingsToolStripMenuItem.Text = "&Settings";
+			this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
 			// 
 			// menuHelp
 			// 
@@ -826,7 +800,7 @@
 			// miHelpAbout
 			// 
 			this.miHelpAbout.Name = "miHelpAbout";
-			this.miHelpAbout.Size = new System.Drawing.Size(107, 22);
+			this.miHelpAbout.Size = new System.Drawing.Size(152, 22);
 			this.miHelpAbout.Text = "&About";
 			this.miHelpAbout.Click += new System.EventHandler(this.miHelpAbout_Click);
 			// 
@@ -1396,31 +1370,38 @@
             this.toolStripMenuItem4,
             this.ciClearHistoryList});
 			this.cmHistory.Name = "cmHistory";
-			this.cmHistory.Size = new System.Drawing.Size(153, 120);
+			this.cmHistory.Size = new System.Drawing.Size(143, 98);
 			// 
 			// ciOpenHistoryFile
 			// 
 			this.ciOpenHistoryFile.Name = "ciOpenHistoryFile";
-			this.ciOpenHistoryFile.Size = new System.Drawing.Size(152, 22);
+			this.ciOpenHistoryFile.Size = new System.Drawing.Size(142, 22);
 			this.ciOpenHistoryFile.Text = "&Open File";
 			this.ciOpenHistoryFile.Click += new System.EventHandler(this.ciOpenHistoryFile_Click);
 			// 
 			// ciExploreHistoryFile
 			// 
 			this.ciExploreHistoryFile.Name = "ciExploreHistoryFile";
-			this.ciExploreHistoryFile.Size = new System.Drawing.Size(152, 22);
+			this.ciExploreHistoryFile.Size = new System.Drawing.Size(142, 22);
 			this.ciExploreHistoryFile.Text = "&Explore File";
 			this.ciExploreHistoryFile.Click += new System.EventHandler(this.ciExploreHistoryFile_Click);
+			// 
+			// ciDeleteHistoryFile
+			// 
+			this.ciDeleteHistoryFile.Name = "ciDeleteHistoryFile";
+			this.ciDeleteHistoryFile.Size = new System.Drawing.Size(142, 22);
+			this.ciDeleteHistoryFile.Text = "&Delete File";
+			this.ciDeleteHistoryFile.Click += new System.EventHandler(this.ciDeleteHistoryFile_Click);
 			// 
 			// toolStripMenuItem4
 			// 
 			this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-			this.toolStripMenuItem4.Size = new System.Drawing.Size(149, 6);
+			this.toolStripMenuItem4.Size = new System.Drawing.Size(139, 6);
 			// 
 			// ciClearHistoryList
 			// 
 			this.ciClearHistoryList.Name = "ciClearHistoryList";
-			this.ciClearHistoryList.Size = new System.Drawing.Size(152, 22);
+			this.ciClearHistoryList.Size = new System.Drawing.Size(142, 22);
 			this.ciClearHistoryList.Text = "&Clear History";
 			this.ciClearHistoryList.Click += new System.EventHandler(this.ciClearHistoryList_Click);
 			// 
@@ -1435,13 +1416,6 @@
 			this.grpNavButtons.Size = new System.Drawing.Size(123, 50);
 			this.grpNavButtons.TabIndex = 11;
 			this.grpNavButtons.TabStop = false;
-			// 
-			// ciDeleteHistoryFile
-			// 
-			this.ciDeleteHistoryFile.Name = "ciDeleteHistoryFile";
-			this.ciDeleteHistoryFile.Size = new System.Drawing.Size(152, 22);
-			this.ciDeleteHistoryFile.Text = "&Delete File";
-			this.ciDeleteHistoryFile.Click += new System.EventHandler(this.ciDeleteHistoryFile_Click);
 			// 
 			// MainWindow
 			// 
@@ -1546,7 +1520,6 @@
 		private System.Windows.Forms.TrackBar trkOpacity;
 		private System.Windows.Forms.Label lblOpacity;
 		private System.Windows.Forms.Label lblOpacityDisplay;
-		private System.Windows.Forms.ToolStripMenuItem miToolsStartWithWindows;
 		private System.Windows.Forms.ComboBox cmbImageFit;
 		private System.Windows.Forms.ToolStripMenuItem miFileSave;
 		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
@@ -1581,10 +1554,6 @@
 		private System.Windows.Forms.ComboBox cmbColorEffectFore;
 		private System.Windows.Forms.Label lblColorEffectCollageFadeRatioUnit;
 		private System.Windows.Forms.TrackBar trkColorEffectCollageFadeRatio;
-		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem7;
-		private System.Windows.Forms.ToolStripMenuItem miCheckForUpdatesOnStartup;
-		private System.Windows.Forms.ToolStripMenuItem miCheckForUpdatesNow;
-		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem8;
 		private System.Windows.Forms.ComboBox cmbColorEffectBack;
 		private System.Windows.Forms.Button btnTheme;
 		private System.Windows.Forms.ContextMenuStrip cmTheme;
@@ -1626,6 +1595,8 @@
 		private System.Windows.Forms.CheckBox chkBackgroundBlur;
 		private System.Windows.Forms.ToolStripMenuItem miAddRssFeed;
 		private System.Windows.Forms.ToolStripMenuItem ciDeleteHistoryFile;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem11;
+		private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
 
 	}
 }

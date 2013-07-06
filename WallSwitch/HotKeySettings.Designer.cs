@@ -28,6 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HotKeySettings));
 			this.c_nextImageLabel = new System.Windows.Forms.Label();
 			this.c_nextImageHotKey = new WallSwitch.HotKeyTextBox();
 			this.c_prevImageHotKey = new WallSwitch.HotKeyTextBox();
@@ -40,6 +41,8 @@
 			this.c_clearHistoryLabel = new System.Windows.Forms.Label();
 			this.c_showWindowHotKey = new WallSwitch.HotKeyTextBox();
 			this.c_showWindowLabel = new System.Windows.Forms.Label();
+			this.panel1 = new System.Windows.Forms.Panel();
+			this.panel1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// c_nextImageLabel
@@ -83,7 +86,7 @@
 			// c_okButton
 			// 
 			this.c_okButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.c_okButton.Location = new System.Drawing.Point(106, 155);
+			this.c_okButton.Location = new System.Drawing.Point(115, 4);
 			this.c_okButton.Name = "c_okButton";
 			this.c_okButton.Size = new System.Drawing.Size(75, 23);
 			this.c_okButton.TabIndex = 5;
@@ -95,7 +98,7 @@
 			// 
 			this.c_cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.c_cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.c_cancelButton.Location = new System.Drawing.Point(187, 155);
+			this.c_cancelButton.Location = new System.Drawing.Point(196, 4);
 			this.c_cancelButton.Name = "c_cancelButton";
 			this.c_cancelButton.Size = new System.Drawing.Size(75, 23);
 			this.c_cancelButton.TabIndex = 6;
@@ -160,28 +163,44 @@
 			this.c_showWindowLabel.TabIndex = 9;
 			this.c_showWindowLabel.Text = "Show WallSwitch:";
 			// 
+			// panel1
+			// 
+			this.panel1.BackColor = System.Drawing.SystemColors.Control;
+			this.panel1.Controls.Add(this.c_okButton);
+			this.panel1.Controls.Add(this.c_cancelButton);
+			this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this.panel1.Location = new System.Drawing.Point(0, 144);
+			this.panel1.Name = "panel1";
+			this.panel1.Size = new System.Drawing.Size(274, 30);
+			this.panel1.TabIndex = 10;
+			// 
 			// HotKeySettings
 			// 
 			this.AcceptButton = this.c_okButton;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.BackColor = System.Drawing.SystemColors.Window;
 			this.CancelButton = this.c_cancelButton;
-			this.ClientSize = new System.Drawing.Size(274, 190);
+			this.ClientSize = new System.Drawing.Size(274, 174);
+			this.Controls.Add(this.panel1);
 			this.Controls.Add(this.c_showWindowHotKey);
 			this.Controls.Add(this.c_showWindowLabel);
 			this.Controls.Add(this.c_clearHistoryHotKey);
 			this.Controls.Add(this.c_clearHistoryLabel);
 			this.Controls.Add(this.c_pauseHotKey);
 			this.Controls.Add(this.c_pauseLabel);
-			this.Controls.Add(this.c_cancelButton);
-			this.Controls.Add(this.c_okButton);
 			this.Controls.Add(this.c_prevImageHotKey);
 			this.Controls.Add(this.c_prevImageLabel);
 			this.Controls.Add(this.c_nextImageHotKey);
 			this.Controls.Add(this.c_nextImageLabel);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.MaximumSize = new System.Drawing.Size(290, 212);
+			this.MinimumSize = new System.Drawing.Size(290, 212);
 			this.Name = "HotKeySettings";
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Hot Keys";
 			this.Load += new System.EventHandler(this.HotKeySettings_Load);
+			this.panel1.ResumeLayout(false);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -201,5 +220,6 @@
 		private System.Windows.Forms.Label c_clearHistoryLabel;
 		private HotKeyTextBox c_showWindowHotKey;
 		private System.Windows.Forms.Label c_showWindowLabel;
+		private System.Windows.Forms.Panel panel1;
 	}
 }

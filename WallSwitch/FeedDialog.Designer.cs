@@ -41,6 +41,8 @@
 			this.txtType = new System.Windows.Forms.TextBox();
 			this.btnBrowse = new System.Windows.Forms.Button();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+			this.panel1 = new System.Windows.Forms.Panel();
+			this.panel1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -101,7 +103,7 @@
 			// btnOk
 			// 
 			this.btnOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnOk.Location = new System.Drawing.Point(168, 92);
+			this.btnOk.Location = new System.Drawing.Point(177, 4);
 			this.btnOk.Name = "btnOk";
 			this.btnOk.Size = new System.Drawing.Size(75, 23);
 			this.btnOk.TabIndex = 4;
@@ -114,7 +116,7 @@
 			// 
 			this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.btnCancel.Location = new System.Drawing.Point(249, 92);
+			this.btnCancel.Location = new System.Drawing.Point(258, 4);
 			this.btnCancel.Name = "btnCancel";
 			this.btnCancel.Size = new System.Drawing.Size(75, 23);
 			this.btnCancel.TabIndex = 5;
@@ -153,18 +155,29 @@
 			this.btnBrowse.UseVisualStyleBackColor = true;
 			this.btnBrowse.Click += new System.EventHandler(this.btnBrowse_Click);
 			// 
+			// panel1
+			// 
+			this.panel1.BackColor = System.Drawing.SystemColors.Control;
+			this.panel1.Controls.Add(this.btnOk);
+			this.panel1.Controls.Add(this.btnCancel);
+			this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this.panel1.Location = new System.Drawing.Point(0, 97);
+			this.panel1.Name = "panel1";
+			this.panel1.Size = new System.Drawing.Size(336, 30);
+			this.panel1.TabIndex = 10;
+			// 
 			// FeedDialog
 			// 
 			this.AcceptButton = this.btnOk;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.BackColor = System.Drawing.SystemColors.Window;
 			this.CancelButton = this.btnCancel;
 			this.ClientSize = new System.Drawing.Size(336, 127);
+			this.Controls.Add(this.panel1);
 			this.Controls.Add(this.btnBrowse);
 			this.Controls.Add(this.txtType);
 			this.Controls.Add(this.label3);
-			this.Controls.Add(this.btnCancel);
-			this.Controls.Add(this.btnOk);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.cmbPeriod);
 			this.Controls.Add(this.txtFreq);
@@ -178,6 +191,7 @@
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Location Settings";
 			this.Load += new System.EventHandler(this.FeedDialog_Load);
+			this.panel1.ResumeLayout(false);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -196,5 +210,6 @@
 		private System.Windows.Forms.TextBox txtType;
 		private System.Windows.Forms.Button btnBrowse;
 		private System.Windows.Forms.ToolTip toolTip1;
+		private System.Windows.Forms.Panel panel1;
 	}
 }

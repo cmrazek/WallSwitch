@@ -102,6 +102,7 @@ namespace WallSwitch
 
 				// Start the switch thread
 				_switchThread = new SwitchThread();
+				_switchThread.SetStartUpDelay();
 				_switchThread.Start(activeTheme);
 				_switchThread.Switching += new SwitchThread.SwitchEventHandler(_switchThread_Switching);
 				_switchThread.Switched += new SwitchThread.SwitchEventHandler(_switchThread_Switched);
@@ -123,7 +124,7 @@ namespace WallSwitch
 				_serviceMgr = new WallSwitchServiceManager();
 				_serviceMgr.CreateService();
 
-				if (Settings.CheckForUpdatesOnStartup) CheckForUpdates(false);
+				if (Settings.CheckForUpdatesOnStartup) CheckForUpdates();
 			}
 			catch (Exception ex)
 			{
@@ -291,19 +292,6 @@ namespace WallSwitch
 						HotKey.OnWmHotKey(m.WParam.ToInt32());
 						break;
 				}
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex, Res.Exception_Generic);
-			}
-		}
-
-		private void miToolsStartWithWindows_Click(object sender, EventArgs e)
-		{
-			try
-			{
-				Settings.StartWithWindows = !Settings.StartWithWindows;
-				miToolsStartWithWindows.Checked = Settings.StartWithWindows;
 			}
 			catch (Exception ex)
 			{
@@ -903,19 +891,6 @@ namespace WallSwitch
 			lblOpacityDisplay.Text = String.Format(Res.BackOpacityPercent, trkOpacity.Value);
 		}
 
-		private void menuTools_DropDownOpening(object sender, EventArgs e)
-		{
-			try
-			{
-				miToolsStartWithWindows.Checked = Settings.StartWithWindows;
-				miCheckForUpdatesOnStartup.Checked = Settings.CheckForUpdatesOnStartup;
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex, Res.Exception_Generic);
-			}
-		}
-
 		private void trkFeather_Scroll(object sender, EventArgs e)
 		{
 			try
@@ -1116,6 +1091,22 @@ namespace WallSwitch
 			get
 			{
 				return Path.Combine(Util.AppDataDir, Res.SettingsFileName);
+			}
+		}
+
+		private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				var dlg = new SettingsDialog();
+				if (dlg.ShowDialog(this) == DialogResult.OK)
+				{
+					SaveSettings();
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
 			}
 		}
 		#endregion
@@ -2375,17 +2366,12 @@ namespace WallSwitch
 		#endregion
 
 		#region Auto-Update Check
-		private void CheckForUpdates(bool manualCheck)
+		public void CheckForUpdates()
 		{
 			try
 			{
 				var checker = new UpdateChecker();
 				checker.UpdateAvailable += new EventHandler<UpdateCheckEventArgs>(checker_UpdateAvailable);
-				if (manualCheck)
-				{
-					checker.NoUpdateAvailable += new EventHandler<UpdateCheckEventArgs>(checker_NoUpdateAvailable);
-					checker.UpdateCheckFailed += new EventHandler<UpdateCheckEventArgs>(checker_UpdateCheckFailed);
-				}
 				checker.Check();
 			}
 			catch (Exception ex)
@@ -2394,77 +2380,15 @@ namespace WallSwitch
 			}
 		}
 
-		void checker_UpdateAvailable(object sender, UpdateCheckEventArgs e)
+		private void checker_UpdateAvailable(object sender, UpdateCheckEventArgs e)
 		{
 			try
 			{
-				ShowNotification(Res.UpdateAvailableBalloonText, (x, y) => { OpenUpdateUrl(e.UpdateUrl); });
+				ShowNotification(string.Format(Res.UpdateAvailableBalloonText, e.WebVersion.ToAppFormat()), (x, y) => { e.OpenUpdateUrl(); });
 			}
 			catch (Exception ex)
 			{
 				Log.Write(ex, "Error when notifying that update available.");
-			}
-		}
-
-		void checker_NoUpdateAvailable(object sender, UpdateCheckEventArgs e)
-		{
-			try
-			{
-				ShowNotification(Res.UpdateNotAvailableBalloonText);
-			}
-			catch (Exception ex)
-			{
-				Log.Write(ex, "Error when notifying that no updated available.");
-			}
-		}
-
-		void checker_UpdateCheckFailed(object sender, UpdateCheckEventArgs e)
-		{
-			try
-			{
-				ShowNotification(Res.UpdateCheckFailedBalloonText);
-			}
-			catch (Exception ex)
-			{
-				Log.Write(ex, "Error when notifying that the update check failed.");
-			}
-		}
-
-		private void OpenUpdateUrl(string url)
-		{
-			try
-			{
-				var uri = new Uri(url);
-				if (uri.IsFile) throw new InvalidOperationException("Invalid update URL.");
-				Process.Start(uri.ToString());
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex, "Error when attempting to open the update page.");
-			}
-		}
-
-		private void miCheckForUpdatesOnStartup_Click(object sender, EventArgs e)
-		{
-			try
-			{
-				Settings.CheckForUpdatesOnStartup = !Settings.CheckForUpdatesOnStartup;
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex);
-			}
-		}
-
-		private void miCheckForUpdatesNow_Click(object sender, EventArgs e)
-		{
-			try
-			{
-				CheckForUpdates(true);
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex);
 			}
 		}
 		#endregion

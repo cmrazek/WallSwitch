@@ -31,6 +31,11 @@ namespace WallSwitch
 		private static StringBuilder _sb = new StringBuilder();
 		#endregion
 
+		#region Constants
+		public const string DateFormat = "yyyy/MM/dd HH:mm:ss.fff";
+		private const int PurgeDays = 14;
+		#endregion
+
 		#region Construction
 		/// <summary>
 		/// Opens the log file.
@@ -39,6 +44,8 @@ namespace WallSwitch
 		{
 			try
 			{
+				PurgeOldLogFiles();
+
 				string logFileName = LogFileName;
 				_file = new StreamWriter(logFileName, false);
 				Write(LogLevel.Info, "Log file opened: {0}", logFileName);
@@ -90,7 +97,7 @@ namespace WallSwitch
 		{
 			get
 			{
-				return Path.Combine(Util.AppDataDir, Res.LogFile);
+				return Path.Combine(Util.AppDataDir, string.Format(Res.LogFile, DateTime.Now.ToString("yyyy-MM-dd HH.mm.ss")));
 			}
 		}
 
@@ -101,6 +108,35 @@ namespace WallSwitch
 		{
 			get { return _level; }
 			set { _level = value; }
+		}
+
+		private static void PurgeOldLogFiles()
+		{
+			try 
+			{	        
+				var minPurgeDate = DateTime.Now.AddDays(PurgeDays * -1);
+
+				foreach (var fileName in Directory.GetFiles(Util.AppDataDir, "*.log"))
+				{
+					if (File.GetLastWriteTime(fileName) <= minPurgeDate)
+					{
+						try 
+						{
+							Write(LogLevel.Info, "Purging old log file: {0}", fileName);
+							File.Delete(fileName);
+						}
+						catch (Exception ex)
+						{
+							Write(ex, "Exception when deleting old log file: {0}", fileName);
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Write(ex, "Exception when purging old log files.");
+			}
+			
 		}
 		#endregion
 
@@ -125,7 +161,11 @@ namespace WallSwitch
 					_sb.Append(line);
 
 					var logEntry = _sb.ToString();
-					if (_file != null) _file.WriteLine(logEntry);
+					if (_file != null)
+					{
+						_file.WriteLine(logEntry);
+						_file.Flush();
+					}
 #if DEBUG
 					Debug.WriteLine(logEntry);
 #endif
@@ -139,7 +179,7 @@ namespace WallSwitch
 		{
 			get
 			{
-				return DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff");
+				return DateTime.Now.ToString(DateFormat);
 			}
 		}
 
@@ -168,6 +208,7 @@ namespace WallSwitch
 					{
 						_file.WriteLine(logEntry);
 						_file.WriteLine(ex.ToString());
+						_file.Flush();
 					}
 
 #if DEBUG
@@ -190,6 +231,12 @@ namespace WallSwitch
 		{
 			if (!_enabled) return;
 			Write(ex, String.Format(format, args));
+		}
+
+		public static void Write(Exception ex)
+		{
+			if (!_enabled) return;
+			Write(ex, "");
 		}
 
 		public static void Flush()

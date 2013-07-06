@@ -1,7 +1,7 @@
 WallSwitch
 Switches desktop wallpapers from a variety of sources.
 http://wallswitch.codeplex.com/
-Current Version: 1.2.1
+Current Version: 1.2.2
 
 Requirements:
 	.NET Framework 4:  http://www.microsoft.com/download/en/details.aspx?id=17718
@@ -12,7 +12,9 @@ Contact:
 
 ChangeLog:
 
-Version 1.2.2 - (pending):
+Version 1.2.2 - 2013-07-06:
+- Added settings dialog.
+- Added option to delay wallpaper switching after start up or resume from sleep mode.
 - Added checkboxes to location list to allow disabling of locations without deleting them.
 - Added option to delete an image directly from the history list.
 - Fixed location list columns not resizing correctly.

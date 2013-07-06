@@ -19,6 +19,7 @@ namespace WallSwitch
 		private volatile SwitchDir _switchNow = SwitchDir.None;
 		private volatile bool _locked = false;
 		private volatile bool _screensaverRunning = false;
+		private DateTime _startUpTime = DateTime.MinValue;
 
 		private object _themeLock = new object();
 		private Theme _theme = null;
@@ -95,6 +96,7 @@ namespace WallSwitch
 			try
 			{
 				SystemEvents.SessionSwitch += SystemEvents_SessionSwitch;
+				SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
 
 				while (!_kill)
 				{
@@ -132,7 +134,7 @@ namespace WallSwitch
 			Log.Write(LogLevel.Info, "Switch thread has ended.");
 		}
 
-		void SystemEvents_SessionSwitch(object sender, Microsoft.Win32.SessionSwitchEventArgs e)
+		void SystemEvents_SessionSwitch(object sender, SessionSwitchEventArgs e)
 		{
 			switch (e.Reason)
 			{
@@ -158,6 +160,20 @@ namespace WallSwitch
 			}
 		}
 
+		void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
+		{
+			Log.Write(LogLevel.Debug, "Detected PowerModeChanged event: {0}", e.Mode);
+			if (e.Mode == PowerModes.Resume)
+			{
+				SetStartUpDelay();
+			}
+		}
+
+		public void SetStartUpDelay()
+		{
+			_startUpTime = DateTime.Now;
+		}
+
 		private SwitchDir CheckSwitch()
 		{
 			// Check if the user initiated an early switch.
@@ -169,6 +185,19 @@ namespace WallSwitch
 			}
 
 			if (_paused) return SwitchDir.None;
+
+			if (_startUpTime != DateTime.MinValue)
+			{
+				var startUpDelay = Settings.StartUpDelay;
+				if (startUpDelay > 0 && _startUpTime.AddSeconds(startUpDelay) > DateTime.Now)
+				{
+					return SwitchDir.None;
+				}
+				else
+				{
+					_startUpTime = DateTime.MinValue;
+				}
+			}
 
 			// If the screensaver was last found to be running, then check now if the user has woken up.
 			if (_screensaverRunning)

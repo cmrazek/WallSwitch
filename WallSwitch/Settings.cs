@@ -12,15 +12,18 @@ namespace WallSwitch
 		#region Constants
 		private const bool k_defaultStartWithWindows = false;
 		private const bool k_defaultCheckForUpdatesOnStartup = true;
+		private const int k_defaultStartUpDelay = 0;
 		#endregion
 
 		#region Variables
 		private static bool _startWithWindows = k_defaultStartWithWindows;
 		private static bool _checkForUpdatesOnStartup = k_defaultCheckForUpdatesOnStartup;
+		private static int _startUpDelay = k_defaultStartUpDelay;
 		#endregion
 
 		#region XML Tag Names
 		private const string k_checkForUpdates = "CheckForUpdates";
+		private const string k_startUpDelay = "StartUpDelay";
 		#endregion
 
 		/// <summary>
@@ -43,12 +46,17 @@ namespace WallSwitch
 		public static void Save(XmlWriter xml)
 		{
 			xml.WriteElementString(k_checkForUpdates, _checkForUpdatesOnStartup.ToString());
+			xml.WriteElementString(k_startUpDelay, _startUpDelay.ToString());
 		}
 
 		public static void Load(XmlElement xmlSettings)
 		{
-			var xml = (XmlElement)xmlSettings.SelectSingleNode(k_checkForUpdates);
+			var xml = xmlSettings.SelectSingleNode(k_checkForUpdates) as XmlElement;
 			if (xml != null) _checkForUpdatesOnStartup = Util.ParseBool(xml.InnerText, k_defaultCheckForUpdatesOnStartup);
+
+			int i;
+			xml = xmlSettings.SelectSingleNode(k_startUpDelay) as XmlElement;
+			if (xml != null && int.TryParse(xml.InnerText, out i)) _startUpDelay = i;
 		}
 		#endregion
 
@@ -137,6 +145,12 @@ namespace WallSwitch
 		{
 			get { return _checkForUpdatesOnStartup; }
 			set { _checkForUpdatesOnStartup = value; }
+		}
+
+		public static int StartUpDelay
+		{
+			get { return _startUpDelay; }
+			set { _startUpDelay = value; }
 		}
 
 	}

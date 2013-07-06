@@ -53,7 +53,7 @@ int BlurImage32(void *pImageBits, int width, int height, int stride, int blurDis
 	}
 	delete [] pFilterD;
 
-	int		x, y, i, lineOff, min, max, start, end, off, xOff;
+	int		x, y, i, min, max, start, end, xOff;
 	DWORD	r, g, b, a;
 
 	// Horizontal Blur
@@ -87,10 +87,10 @@ int BlurImage32(void *pImageBits, int width, int height, int stride, int blurDis
 			if (b > 255) b = 255;
 			if (a > 255) a = 255;
 
-			*(pLinePos++) = b;
-			*(pLinePos++) = g;
-			*(pLinePos++) = r;
-			*(pLinePos++) = a;
+			*(pLinePos++) = (BYTE)b;
+			*(pLinePos++) = (BYTE)g;
+			*(pLinePos++) = (BYTE)r;
+			*(pLinePos++) = (BYTE)a;
 		}
 	}
 
@@ -133,10 +133,10 @@ int BlurImage32(void *pImageBits, int width, int height, int stride, int blurDis
 			if (a > 255) a = 255;
 
 			pLinePos = pImage + stride * y + xOff;
-			*(pLinePos++) = b;
-			*(pLinePos++) = g;
-			*(pLinePos++) = r;
-			*(pLinePos++) = a;
+			*(pLinePos++) = (BYTE)b;
+			*(pLinePos++) = (BYTE)g;
+			*(pLinePos++) = (BYTE)r;
+			*(pLinePos++) = (BYTE)a;
 		}
 	}
 
