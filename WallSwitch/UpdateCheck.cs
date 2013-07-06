@@ -99,7 +99,7 @@ namespace WallSwitch
 			var xmlDoc = GetFeedXml();
 			if (xmlDoc == null) return null;
 
-			var rx = new Regex(@"^Released:\s+WallSwitch\s+(\d+\.\d+\.*\d*)");
+			var rx = new Regex(@"^.*release.*:\s+WallSwitch\s+(\d+\.\d+\.*\d*)", RegexOptions.IgnoreCase);
 
 			var titleNode = (from n in xmlDoc.SelectNodes("/rss/channel/item/title").Cast<XmlNode>()
 			                 where rx.IsMatch(n.InnerText)
