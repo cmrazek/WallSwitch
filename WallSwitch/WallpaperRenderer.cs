@@ -202,15 +202,32 @@ namespace WallSwitch
 							clearRequired = true;
 
 							// Feather edges
-							if (scale > 0.0f && _theme.Feather && _theme.FeatherDist > 0)
+							if (scale > 0.0f)
 							{
-								int featherWidth = (int)((float)_theme.FeatherDist / scale);
-								if (featherWidth > 0) imgToDraw = FeatherImage(img, featherWidth);
-								else imgToDraw = img;
-							}
-							else
-							{
-								imgToDraw = img;
+								switch (_theme.EdgeMode)
+								{
+									case EdgeMode.Feather:
+										if (_theme.EdgeDist > 0)
+										{
+											int featherWidth = (int)((float)_theme.EdgeDist / scale);
+											if (featherWidth > 0) imgToDraw = FeatherImage(img, featherWidth);
+											else imgToDraw = img;
+										}
+										break;
+
+									case EdgeMode.SolidBorder:
+										if (_theme.EdgeDist > 0)
+										{
+											int edgeWidth = (int)((float)_theme.EdgeDist / scale);
+											if (edgeWidth > 0) imgToDraw = CreateSolidBorderImage(img, edgeWidth, _theme.BorderColor, ref srcRect);
+											else imgToDraw = img;
+										}
+										break;
+
+									case EdgeMode.None:
+										imgToDraw = img;
+										break;
+								}
 							}
 
 							if (_theme.DropShadow) DrawDropShadow(imgRect);
@@ -526,6 +543,25 @@ namespace WallSwitch
 
 			_theme.AddImageRectHistory(bestRect, _screenRects.Count);
 			return bestRect;
+		}
+
+		private Image CreateSolidBorderImage(Image img, int edgeWidth, Color borderColor, ref RectangleF srcRect)
+		{
+			var dstWidth = img.Width + edgeWidth * 2;
+			var dstHeight = img.Height + edgeWidth * 2;
+			var dstBitmap = new Bitmap(dstWidth, dstHeight);
+
+			using (var g = Graphics.FromImage(dstBitmap))
+			{
+				using (var brush = new SolidBrush(borderColor))
+				{
+					g.FillRectangle(brush, new Rectangle(0, 0, dstWidth, dstHeight));
+				}
+				g.DrawImage(img, new Rectangle(edgeWidth, edgeWidth, img.Width, img.Height));
+			}
+
+			srcRect = new RectangleF(0, 0, dstWidth, dstHeight);
+			return dstBitmap;
 		}
 	}
 }

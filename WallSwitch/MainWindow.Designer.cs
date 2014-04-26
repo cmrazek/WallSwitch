@@ -92,9 +92,9 @@
 			this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
 			this.miFileExit = new System.Windows.Forms.ToolStripMenuItem();
 			this.menuTools = new System.Windows.Forms.ToolStripMenuItem();
-			this.miHotKeys = new System.Windows.Forms.ToolStripMenuItem();
 			this.miClearHistory = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem11 = new System.Windows.Forms.ToolStripSeparator();
+			this.miHotKeys = new System.Windows.Forms.ToolStripMenuItem();
 			this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.menuHelp = new System.Windows.Forms.ToolStripMenuItem();
 			this.miHelpAbout = new System.Windows.Forms.ToolStripMenuItem();
@@ -118,18 +118,20 @@
 			this.clrBackTop = new WallSwitch.ColorSample();
 			this.clrBackBottom = new WallSwitch.ColorSample();
 			this.grpCollageDisplay = new System.Windows.Forms.GroupBox();
+			this.c_borderColor = new WallSwitch.ColorSample();
+			this.c_borderColorLabel = new System.Windows.Forms.Label();
+			this.c_edgeMode = new System.Windows.Forms.ComboBox();
 			this.trkDropShadowFeatherDist = new System.Windows.Forms.TrackBar();
 			this.trkDropShadowOpacity = new System.Windows.Forms.TrackBar();
 			this.lblDropShadowOpacity = new System.Windows.Forms.Label();
 			this.lblDropShadowOpacityValue = new System.Windows.Forms.Label();
 			this.lblDropShadowFeatherDist = new System.Windows.Forms.Label();
-			this.chkFeather = new System.Windows.Forms.CheckBox();
 			this.chkDropShadowFeather = new System.Windows.Forms.CheckBox();
 			this.chkDropShadow = new System.Windows.Forms.CheckBox();
 			this.lblDropShadowUnit = new System.Windows.Forms.Label();
 			this.trkDropShadow = new System.Windows.Forms.TrackBar();
-			this.lblFeatherUnit = new System.Windows.Forms.Label();
-			this.trkFeather = new System.Windows.Forms.TrackBar();
+			this.c_edgeDistLabel = new System.Windows.Forms.Label();
+			this.c_edgeDist = new System.Windows.Forms.TrackBar();
 			this.grpImageEffects = new System.Windows.Forms.GroupBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.cmbColorEffectFore = new System.Windows.Forms.ComboBox();
@@ -169,7 +171,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.trkDropShadowFeatherDist)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.trkDropShadowOpacity)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.trkDropShadow)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.trkFeather)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.c_edgeDist)).BeginInit();
 			this.grpImageEffects.SuspendLayout();
 			this.grpBackgroundColorEffects.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.trkBackgroundBlurDist)).BeginInit();
@@ -763,29 +765,29 @@
 			this.menuTools.Size = new System.Drawing.Size(48, 20);
 			this.menuTools.Text = "&Tools";
 			// 
-			// miHotKeys
-			// 
-			this.miHotKeys.Name = "miHotKeys";
-			this.miHotKeys.Size = new System.Drawing.Size(152, 22);
-			this.miHotKeys.Text = "&Hot Keys";
-			this.miHotKeys.Click += new System.EventHandler(this.miHotKeys_Click);
-			// 
 			// miClearHistory
 			// 
 			this.miClearHistory.Name = "miClearHistory";
-			this.miClearHistory.Size = new System.Drawing.Size(152, 22);
+			this.miClearHistory.Size = new System.Drawing.Size(142, 22);
 			this.miClearHistory.Text = "&Clear History";
 			this.miClearHistory.Click += new System.EventHandler(this.miClearHistory_Click);
 			// 
 			// toolStripMenuItem11
 			// 
 			this.toolStripMenuItem11.Name = "toolStripMenuItem11";
-			this.toolStripMenuItem11.Size = new System.Drawing.Size(149, 6);
+			this.toolStripMenuItem11.Size = new System.Drawing.Size(139, 6);
+			// 
+			// miHotKeys
+			// 
+			this.miHotKeys.Name = "miHotKeys";
+			this.miHotKeys.Size = new System.Drawing.Size(142, 22);
+			this.miHotKeys.Text = "&Hot Keys";
+			this.miHotKeys.Click += new System.EventHandler(this.miHotKeys_Click);
 			// 
 			// settingsToolStripMenuItem
 			// 
 			this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-			this.settingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.settingsToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
 			this.settingsToolStripMenuItem.Text = "&Settings";
 			this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
 			// 
@@ -800,7 +802,7 @@
 			// miHelpAbout
 			// 
 			this.miHelpAbout.Name = "miHelpAbout";
-			this.miHelpAbout.Size = new System.Drawing.Size(152, 22);
+			this.miHelpAbout.Size = new System.Drawing.Size(107, 22);
 			this.miHelpAbout.Text = "&About";
 			this.miHelpAbout.Click += new System.EventHandler(this.miHelpAbout_Click);
 			// 
@@ -1039,18 +1041,20 @@
 			// 
 			// grpCollageDisplay
 			// 
+			this.grpCollageDisplay.Controls.Add(this.c_borderColor);
+			this.grpCollageDisplay.Controls.Add(this.c_borderColorLabel);
+			this.grpCollageDisplay.Controls.Add(this.c_edgeMode);
 			this.grpCollageDisplay.Controls.Add(this.trkDropShadowFeatherDist);
 			this.grpCollageDisplay.Controls.Add(this.trkDropShadowOpacity);
 			this.grpCollageDisplay.Controls.Add(this.lblDropShadowOpacity);
 			this.grpCollageDisplay.Controls.Add(this.lblDropShadowOpacityValue);
 			this.grpCollageDisplay.Controls.Add(this.lblDropShadowFeatherDist);
-			this.grpCollageDisplay.Controls.Add(this.chkFeather);
 			this.grpCollageDisplay.Controls.Add(this.chkDropShadowFeather);
 			this.grpCollageDisplay.Controls.Add(this.chkDropShadow);
 			this.grpCollageDisplay.Controls.Add(this.lblDropShadowUnit);
 			this.grpCollageDisplay.Controls.Add(this.trkDropShadow);
-			this.grpCollageDisplay.Controls.Add(this.lblFeatherUnit);
-			this.grpCollageDisplay.Controls.Add(this.trkFeather);
+			this.grpCollageDisplay.Controls.Add(this.c_edgeDistLabel);
+			this.grpCollageDisplay.Controls.Add(this.c_edgeDist);
 			this.grpCollageDisplay.Controls.Add(this.trkImageSize);
 			this.grpCollageDisplay.Controls.Add(this.lblImageSize);
 			this.grpCollageDisplay.Controls.Add(this.lblImageSizeDisplay);
@@ -1061,6 +1065,36 @@
 			this.grpCollageDisplay.TabStop = false;
 			this.grpCollageDisplay.Text = "Collage Display";
 			// 
+			// c_borderColor
+			// 
+			this.c_borderColor.BackColor = System.Drawing.Color.Transparent;
+			this.c_borderColor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.c_borderColor.Color = System.Drawing.Color.Transparent;
+			this.c_borderColor.Location = new System.Drawing.Point(344, 54);
+			this.c_borderColor.Name = "c_borderColor";
+			this.c_borderColor.Size = new System.Drawing.Size(30, 18);
+			this.c_borderColor.TabIndex = 7;
+			this.c_borderColor.ColorChanged += new WallSwitch.ColorSample.ColorChangedEventHandler(this.c_borderColor_ColorChanged);
+			// 
+			// c_borderColorLabel
+			// 
+			this.c_borderColorLabel.AutoSize = true;
+			this.c_borderColorLabel.Location = new System.Drawing.Point(304, 57);
+			this.c_borderColorLabel.Name = "c_borderColorLabel";
+			this.c_borderColorLabel.Size = new System.Drawing.Size(34, 13);
+			this.c_borderColorLabel.TabIndex = 6;
+			this.c_borderColorLabel.Text = "Color:";
+			// 
+			// c_edgeMode
+			// 
+			this.c_edgeMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.c_edgeMode.FormattingEnabled = true;
+			this.c_edgeMode.Location = new System.Drawing.Point(6, 54);
+			this.c_edgeMode.Name = "c_edgeMode";
+			this.c_edgeMode.Size = new System.Drawing.Size(113, 21);
+			this.c_edgeMode.TabIndex = 3;
+			this.c_edgeMode.SelectedIndexChanged += new System.EventHandler(this.c_edgeMode_SelectedIndexChanged);
+			// 
 			// trkDropShadowFeatherDist
 			// 
 			this.trkDropShadowFeatherDist.BackColor = System.Drawing.SystemColors.Window;
@@ -1070,7 +1104,7 @@
 			this.trkDropShadowFeatherDist.Name = "trkDropShadowFeatherDist";
 			this.trkDropShadowFeatherDist.Size = new System.Drawing.Size(120, 45);
 			this.trkDropShadowFeatherDist.SmallChange = 10;
-			this.trkDropShadowFeatherDist.TabIndex = 13;
+			this.trkDropShadowFeatherDist.TabIndex = 15;
 			this.trkDropShadowFeatherDist.TickFrequency = 10;
 			this.toolTip1.SetToolTip(this.trkDropShadowFeatherDist, "Width of feathering at the edges of shadows");
 			this.trkDropShadowFeatherDist.Value = 50;
@@ -1085,7 +1119,7 @@
 			this.trkDropShadowOpacity.Name = "trkDropShadowOpacity";
 			this.trkDropShadowOpacity.Size = new System.Drawing.Size(120, 45);
 			this.trkDropShadowOpacity.SmallChange = 10;
-			this.trkDropShadowOpacity.TabIndex = 16;
+			this.trkDropShadowOpacity.TabIndex = 12;
 			this.trkDropShadowOpacity.TickFrequency = 10;
 			this.toolTip1.SetToolTip(this.trkDropShadowOpacity, "Opacity of the shadow (0% = solid black, 100% = completely transparent)");
 			this.trkDropShadowOpacity.Value = 50;
@@ -1097,7 +1131,7 @@
 			this.lblDropShadowOpacity.Location = new System.Drawing.Point(6, 132);
 			this.lblDropShadowOpacity.Name = "lblDropShadowOpacity";
 			this.lblDropShadowOpacity.Size = new System.Drawing.Size(88, 13);
-			this.lblDropShadowOpacity.TabIndex = 12;
+			this.lblDropShadowOpacity.TabIndex = 11;
 			this.lblDropShadowOpacity.Text = "Shadow Opacity:";
 			this.toolTip1.SetToolTip(this.lblDropShadowOpacity, "Opacity of the shadow (0% = solid black, 100% = completely transparent)");
 			// 
@@ -1107,7 +1141,7 @@
 			this.lblDropShadowOpacityValue.Location = new System.Drawing.Point(245, 132);
 			this.lblDropShadowOpacityValue.Name = "lblDropShadowOpacityValue";
 			this.lblDropShadowOpacityValue.Size = new System.Drawing.Size(15, 13);
-			this.lblDropShadowOpacityValue.TabIndex = 14;
+			this.lblDropShadowOpacityValue.TabIndex = 13;
 			this.lblDropShadowOpacityValue.Text = "%";
 			this.toolTip1.SetToolTip(this.lblDropShadowOpacityValue, "Opacity of the shadow (0% = solid black, 100% = completely transparent)");
 			// 
@@ -1117,21 +1151,9 @@
 			this.lblDropShadowFeatherDist.Location = new System.Drawing.Point(245, 168);
 			this.lblDropShadowFeatherDist.Name = "lblDropShadowFeatherDist";
 			this.lblDropShadowFeatherDist.Size = new System.Drawing.Size(33, 13);
-			this.lblDropShadowFeatherDist.TabIndex = 17;
+			this.lblDropShadowFeatherDist.TabIndex = 16;
 			this.lblDropShadowFeatherDist.Text = "pixels";
 			this.toolTip1.SetToolTip(this.lblDropShadowFeatherDist, "Width of feathering at the edges of shadows");
-			// 
-			// chkFeather
-			// 
-			this.chkFeather.AutoSize = true;
-			this.chkFeather.Location = new System.Drawing.Point(6, 56);
-			this.chkFeather.Name = "chkFeather";
-			this.chkFeather.Size = new System.Drawing.Size(95, 17);
-			this.chkFeather.TabIndex = 6;
-			this.chkFeather.Text = "Feather Edges";
-			this.toolTip1.SetToolTip(this.chkFeather, "Feather the edge of images?");
-			this.chkFeather.UseVisualStyleBackColor = true;
-			this.chkFeather.CheckedChanged += new System.EventHandler(this.ControlChanged);
 			// 
 			// chkDropShadowFeather
 			// 
@@ -1139,7 +1161,7 @@
 			this.chkDropShadowFeather.Location = new System.Drawing.Point(6, 167);
 			this.chkDropShadowFeather.Name = "chkDropShadowFeather";
 			this.chkDropShadowFeather.Size = new System.Drawing.Size(104, 17);
-			this.chkDropShadowFeather.TabIndex = 15;
+			this.chkDropShadowFeather.TabIndex = 14;
 			this.chkDropShadowFeather.Text = "Feather Shadow";
 			this.toolTip1.SetToolTip(this.chkDropShadowFeather, "Enable feathering on shadows?");
 			this.chkDropShadowFeather.UseVisualStyleBackColor = true;
@@ -1151,7 +1173,7 @@
 			this.chkDropShadow.Location = new System.Drawing.Point(6, 93);
 			this.chkDropShadow.Name = "chkDropShadow";
 			this.chkDropShadow.Size = new System.Drawing.Size(91, 17);
-			this.chkDropShadow.TabIndex = 9;
+			this.chkDropShadow.TabIndex = 8;
 			this.chkDropShadow.Text = "Drop Shadow";
 			this.toolTip1.SetToolTip(this.chkDropShadow, "Enable drop shadows?");
 			this.chkDropShadow.UseVisualStyleBackColor = true;
@@ -1163,7 +1185,7 @@
 			this.lblDropShadowUnit.Location = new System.Drawing.Point(245, 94);
 			this.lblDropShadowUnit.Name = "lblDropShadowUnit";
 			this.lblDropShadowUnit.Size = new System.Drawing.Size(33, 13);
-			this.lblDropShadowUnit.TabIndex = 11;
+			this.lblDropShadowUnit.TabIndex = 10;
 			this.lblDropShadowUnit.Text = "pixels";
 			this.toolTip1.SetToolTip(this.lblDropShadowUnit, "Offset of drop shadow");
 			// 
@@ -1176,36 +1198,36 @@
 			this.trkDropShadow.Name = "trkDropShadow";
 			this.trkDropShadow.Size = new System.Drawing.Size(120, 45);
 			this.trkDropShadow.SmallChange = 10;
-			this.trkDropShadow.TabIndex = 10;
+			this.trkDropShadow.TabIndex = 9;
 			this.trkDropShadow.TickFrequency = 10;
 			this.toolTip1.SetToolTip(this.trkDropShadow, "Offset of drop shadow");
 			this.trkDropShadow.Value = 50;
 			this.trkDropShadow.Scroll += new System.EventHandler(this.trkDropShadow_Scroll);
 			// 
-			// lblFeatherUnit
+			// c_edgeDistLabel
 			// 
-			this.lblFeatherUnit.AutoSize = true;
-			this.lblFeatherUnit.Location = new System.Drawing.Point(245, 57);
-			this.lblFeatherUnit.Name = "lblFeatherUnit";
-			this.lblFeatherUnit.Size = new System.Drawing.Size(33, 13);
-			this.lblFeatherUnit.TabIndex = 8;
-			this.lblFeatherUnit.Text = "pixels";
-			this.toolTip1.SetToolTip(this.lblFeatherUnit, "Width of feathering at the edges of images");
+			this.c_edgeDistLabel.AutoSize = true;
+			this.c_edgeDistLabel.Location = new System.Drawing.Point(245, 57);
+			this.c_edgeDistLabel.Name = "c_edgeDistLabel";
+			this.c_edgeDistLabel.Size = new System.Drawing.Size(33, 13);
+			this.c_edgeDistLabel.TabIndex = 5;
+			this.c_edgeDistLabel.Text = "pixels";
+			this.toolTip1.SetToolTip(this.c_edgeDistLabel, "Width of feathering at the edges of images");
 			// 
-			// trkFeather
+			// c_edgeDist
 			// 
-			this.trkFeather.BackColor = System.Drawing.SystemColors.Window;
-			this.trkFeather.LargeChange = 20;
-			this.trkFeather.Location = new System.Drawing.Point(119, 56);
-			this.trkFeather.Maximum = 100;
-			this.trkFeather.Name = "trkFeather";
-			this.trkFeather.Size = new System.Drawing.Size(120, 45);
-			this.trkFeather.SmallChange = 10;
-			this.trkFeather.TabIndex = 7;
-			this.trkFeather.TickFrequency = 10;
-			this.toolTip1.SetToolTip(this.trkFeather, "Width of feathering at the edges of images");
-			this.trkFeather.Value = 50;
-			this.trkFeather.Scroll += new System.EventHandler(this.trkFeather_Scroll);
+			this.c_edgeDist.BackColor = System.Drawing.SystemColors.Window;
+			this.c_edgeDist.LargeChange = 20;
+			this.c_edgeDist.Location = new System.Drawing.Point(119, 56);
+			this.c_edgeDist.Maximum = 100;
+			this.c_edgeDist.Name = "c_edgeDist";
+			this.c_edgeDist.Size = new System.Drawing.Size(120, 45);
+			this.c_edgeDist.SmallChange = 10;
+			this.c_edgeDist.TabIndex = 4;
+			this.c_edgeDist.TickFrequency = 10;
+			this.toolTip1.SetToolTip(this.c_edgeDist, "Width of feathering at the edges of images");
+			this.c_edgeDist.Value = 50;
+			this.c_edgeDist.Scroll += new System.EventHandler(this.trkFeather_Scroll);
 			// 
 			// grpImageEffects
 			// 
@@ -1459,7 +1481,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.trkDropShadowFeatherDist)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.trkDropShadowOpacity)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.trkDropShadow)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.trkFeather)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.c_edgeDist)).EndInit();
 			this.grpImageEffects.ResumeLayout(false);
 			this.grpImageEffects.PerformLayout();
 			this.grpBackgroundColorEffects.ResumeLayout(false);
@@ -1528,8 +1550,8 @@
 		private System.Windows.Forms.TabPage tabLocations;
 		private System.Windows.Forms.TabPage tabSettings;
 		private System.Windows.Forms.GroupBox grpCollageDisplay;
-		private System.Windows.Forms.TrackBar trkFeather;
-		private System.Windows.Forms.Label lblFeatherUnit;
+		private System.Windows.Forms.TrackBar c_edgeDist;
+		private System.Windows.Forms.Label c_edgeDistLabel;
 		private System.Windows.Forms.Button btnAddFeed;
 		private System.Windows.Forms.TabPage tabHistory;
 		private HistoryList lstHistory;
@@ -1566,7 +1588,6 @@
 		private System.Windows.Forms.CheckBox chkDropShadow;
 		private System.Windows.Forms.Label lblDropShadowUnit;
 		private System.Windows.Forms.TrackBar trkDropShadow;
-		private System.Windows.Forms.CheckBox chkFeather;
 		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem9;
 		private System.Windows.Forms.ToolStripMenuItem ciSaveTheme;
 		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem10;
@@ -1597,6 +1618,9 @@
 		private System.Windows.Forms.ToolStripMenuItem ciDeleteHistoryFile;
 		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem11;
 		private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
+		private System.Windows.Forms.ComboBox c_edgeMode;
+		private ColorSample c_borderColor;
+		private System.Windows.Forms.Label c_borderColorLabel;
 
 	}
 }

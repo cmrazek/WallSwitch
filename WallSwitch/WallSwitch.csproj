@@ -81,6 +81,7 @@
     <Compile Include="ColorSample.Designer.cs">
       <DependentUpon>ColorSample.cs</DependentUpon>
     </Compile>
+    <Compile Include="EdgeMode.cs" />
     <Compile Include="FeedDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -252,7 +253,7 @@
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

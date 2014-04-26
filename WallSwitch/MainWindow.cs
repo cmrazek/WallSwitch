@@ -110,6 +110,8 @@ namespace WallSwitch
 				cmbColorEffectFore.InitForEnum<ColorEffect>(ColorEffect.None);
 				cmbColorEffectBack.InitForEnum<ColorEffect>(ColorEffect.None);
 
+				c_edgeMode.InitForEnum<EdgeMode>(EdgeMode.Feather);
+
 				// Update all the controls
 				RefreshControls();
 				Text = Res.AppName;
@@ -507,8 +509,9 @@ namespace WallSwitch
 			trkOpacity.Value = _currentTheme.BackOpacity.Clamp(trkOpacity.Minimum, trkOpacity.Maximum);
 			UpdateBackOpacityDisplay();
 
-			chkFeather.Checked = _currentTheme.Feather;
-			trkFeather.Value = _currentTheme.FeatherDist.Clamp(trkFeather.Minimum, trkFeather.Maximum);
+			c_edgeMode.SetEnumValue<EdgeMode>(_currentTheme.EdgeMode);
+			c_edgeDist.Value = _currentTheme.EdgeDist.Clamp(c_edgeDist.Minimum, c_edgeDist.Maximum);
+			c_borderColor.Color = _currentTheme.BorderColor;
 			UpdateFeatherDisplay();
 
 			chkFadeTransition.Checked = _currentTheme.FadeTransition;
@@ -683,8 +686,9 @@ namespace WallSwitch
 			_currentTheme.ColorEffectBack = cmbColorEffectBack.GetEnumValue<ColorEffect>();
 			_currentTheme.ColorEffectBackRatio = trkColorEffectCollageFadeRatio.Value;
 
-			_currentTheme.Feather = chkFeather.Checked;
-			_currentTheme.FeatherDist = trkFeather.Value;
+			_currentTheme.EdgeMode = c_edgeMode.GetEnumValue<EdgeMode>();
+			_currentTheme.EdgeDist = c_edgeDist.Value;
+			_currentTheme.BorderColor = c_borderColor.Color;
 
 			_currentTheme.DropShadow = chkDropShadow.Checked;
 			_currentTheme.DropShadowDist = trkDropShadow.Value;
@@ -762,8 +766,11 @@ namespace WallSwitch
 			// Collage Display Group
 			grpCollageDisplay.Visible = cmbThemeMode.SelectedIndex == k_modeCollage;
 
-			trkFeather.Visible = chkFeather.Checked;
-			lblFeatherUnit.Visible = chkFeather.Checked;
+			var edgeMode = c_edgeMode.GetEnumValue<EdgeMode>();
+			c_edgeDist.Visible = edgeMode != EdgeMode.None;
+			c_edgeDistLabel.Visible = edgeMode != EdgeMode.None;
+			c_borderColorLabel.Visible = edgeMode == EdgeMode.SolidBorder;
+			c_borderColor.Visible = edgeMode == EdgeMode.SolidBorder;
 
 			var dropShadow = chkDropShadow.Checked;
 			trkDropShadow.Visible = dropShadow;
@@ -891,6 +898,18 @@ namespace WallSwitch
 			lblOpacityDisplay.Text = String.Format(Res.BackOpacityPercent, trkOpacity.Value);
 		}
 
+		private void c_edgeMode_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				ControlChanged(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
 		private void trkFeather_Scroll(object sender, EventArgs e)
 		{
 			try
@@ -904,9 +923,21 @@ namespace WallSwitch
 			}
 		}
 
+		private void c_borderColor_ColorChanged(object sender, ColorSample.ColorChangedEventArgs e)
+		{
+			try
+			{
+				ControlChanged(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
 		private void UpdateFeatherDisplay()
 		{
-			lblFeatherUnit.Text = String.Format(Res.FeatherWidth, trkFeather.Value);
+			c_edgeDistLabel.Text = String.Format(Res.FeatherWidth, c_edgeDist.Value);
 		}
 
 		private void c_colorEffectCollageFadeRatioTrackBar_Scroll(object sender, EventArgs e)
@@ -2392,6 +2423,5 @@ namespace WallSwitch
 			}
 		}
 		#endregion
-
 	}
 }

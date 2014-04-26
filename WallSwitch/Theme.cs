@@ -20,13 +20,15 @@ namespace WallSwitch
 		private const int k_defaultFreq = 5;
 		private const Period k_defaultPeriod = Period.Minutes;
 		private const ThemeMode k_defaultMode = ThemeMode.Random;
-		private static Color k_defaultBackColor = Color.Black;
+		private static readonly Color k_defaultBackColor = Color.Black;
 		private const bool k_defaultSeparateMonitors = true;
 		private const int k_defaultImageSize = 50;
 		private const int k_defaultBackOpacity = 15;
 		private const ImageFit k_defaultImageFit = ImageFit.Fit;
-		private const bool k_defaultFeatherEnable = true;
-		private const int k_defaultFeatherDist = 15;
+		private const bool k_defaultFeatherEnable = true;	// Deprecated
+		private const EdgeMode k_defaultEdgeMode = EdgeMode.Feather;
+		private const int k_defaultEdgeDist = 15;
+		private static readonly Color k_defaultBorderColor = Color.White;
 		private const bool k_defaultFadeTransition = true;
 		public const int k_defaultMaxImageScale = 200;
 		public const int k_defaultColorEffectBackRatio = 25;
@@ -67,8 +69,9 @@ namespace WallSwitch
 		private ColorEffect _colorEffectBack = ColorEffect.None;
 		private int _colorEffectBackRatio = k_defaultColorEffectBackRatio;
 
-		private bool _featherEnable = k_defaultFeatherEnable;
-		private int _featherDist = k_defaultFeatherDist;
+		private EdgeMode _edgeMode = k_defaultEdgeMode;
+		private int _edgeDist = k_defaultEdgeDist;
+		private Color _borderColor = k_defaultBorderColor;
 
 		private bool _dropShadow = k_defaultDropShadow;
 		private int _dropShadowDist = k_defaultDropShadowDist;
@@ -120,7 +123,7 @@ namespace WallSwitch
 				_backColorBottom = _backColorBottom,
 				_backOpacity = _backOpacity,
 				_imageFit = _imageFit,
-				_featherDist = _featherDist,
+				_edgeDist = _edgeDist,
 				_fadeTransition = _fadeTransition,
 				_maxImageScale = _maxImageScale,
 				_colorEffectFore = _colorEffectFore,
@@ -241,8 +244,11 @@ namespace WallSwitch
 		private const string k_colorEffectCollageFadeRatioXml = "ColorEffectCollageFadeRatio";
 		private const string k_location = "Location";
 
-		private const string k_featherEnableXml = "Feather";
+		private const string k_featherEnableXml = "Feather";	// Deprecated
 		private const string k_featherDistXml = "FeatherEdges";
+		private const string k_edgeModeXml = "EdgeMode";
+		private const string k_edgeDistXml = "EdgeDist";
+		private const string k_borderColorXml = "BorderColor";
 
 		private const string k_dropShadowXml = "DropShadow";
 		private const string k_dropShadowDistXml = "DropShadowDist";
@@ -282,8 +288,9 @@ namespace WallSwitch
 			if (_colorEffectBack != ColorEffect.None) xml.WriteAttributeString(k_colorEffectBackXml, _colorEffectBack.ToString());
 			if (_colorEffectBack != ColorEffect.None) xml.WriteAttributeString(k_colorEffectCollageFadeRatioXml, _colorEffectBackRatio.ToString());
 
-			if (_featherEnable != k_defaultFeatherEnable) xml.WriteAttributeString(k_featherEnableXml, _featherDist.ToString());
-			if (_featherDist != k_defaultFeatherDist) xml.WriteAttributeString(k_featherDistXml, _featherDist.ToString());
+			if (_edgeMode != k_defaultEdgeMode) xml.WriteAttributeString(k_edgeModeXml, _edgeMode.ToString());
+			if (_edgeDist != k_defaultEdgeDist) xml.WriteAttributeString(k_edgeDistXml, _edgeDist.ToString());
+			if (_borderColor != k_defaultBorderColor) xml.WriteAttributeString(k_borderColorXml, ColorUtil.ColorToString(_borderColor));
 
 			if (_dropShadow != k_defaultDropShadow) xml.WriteAttributeString(k_dropShadowXml, _dropShadow.ToString());
 			if (_dropShadowDist != k_defaultDropShadowDist) xml.WriteAttributeString(k_dropShadowDistXml, _dropShadowDist.ToString());
@@ -321,8 +328,16 @@ namespace WallSwitch
 			_separateMonitors = Util.ParseBool(xmlTheme, k_separateMonitorsXml, k_defaultSeparateMonitors);
 			_backOpacity = Util.ParseInt(xmlTheme, k_backOpacityXml, k_defaultBackOpacity);
 			_imageFit = Util.ParseEnum<ImageFit>(xmlTheme, k_imageFitXml, k_defaultImageFit);
-			_featherEnable = Util.ParseBool(xmlTheme, k_featherEnableXml, k_defaultFeatherEnable);
-			_featherDist = Util.ParseInt(xmlTheme, k_featherDistXml, k_defaultFeatherDist);
+			if (xmlTheme.HasAttribute(k_featherEnableXml))
+			{
+				_edgeMode = Util.ParseBool(xmlTheme, k_featherEnableXml, k_defaultFeatherEnable) ? EdgeMode.Feather : WallSwitch.EdgeMode.None;
+			}
+			else
+			{
+				_edgeMode = Util.ParseEnum<EdgeMode>(xmlTheme, k_edgeModeXml, k_defaultEdgeMode);
+			}
+			_edgeDist = Util.ParseInt(xmlTheme, k_featherDistXml, k_defaultEdgeDist);
+			_borderColor = ColorUtil.ParseColor(xmlTheme, k_borderColorXml, k_defaultBorderColor);
 			_fadeTransition = Util.ParseBool(xmlTheme, k_fadeTransitionXml, k_defaultFadeTransition);
 			_lastWallpaperFile = Util.ParseString(xmlTheme, k_lastWallpaperFileXml, string.Empty);
 			_maxImageScale = Util.ParseInt(xmlTheme, k_maxImageScaleXml, k_defaultMaxImageScale);
@@ -827,21 +842,27 @@ namespace WallSwitch
 		}
 		#endregion
 
-		#region Feather
-		public bool Feather
+		#region Edges
+		public EdgeMode EdgeMode
 		{
-			get { return _featherEnable; }
-			set { _featherEnable = value; }
+			get { return _edgeMode; }
+			set { _edgeMode = value; }
 		}
 
-		public int FeatherDist
+		public int EdgeDist
 		{
-			get { return _featherDist; }
+			get { return _edgeDist; }
 			set
 			{
-				if (value < 0) throw new ArgumentOutOfRangeException("Feather cannot be less than zero.");
-				_featherDist = value;
+				if (value < 0) throw new ArgumentOutOfRangeException("Edge distance cannot be less than zero.");
+				_edgeDist = value;
 			}
+		}
+
+		public Color BorderColor
+		{
+			get { return _borderColor; }
+			set { _borderColor = value; }
 		}
 		#endregion
 

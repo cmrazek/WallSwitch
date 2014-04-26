@@ -35,9 +35,11 @@ namespace WallSwitch
 			dlg.Color = BackColor;
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
-				if (BackColor.ToArgb() != dlg.Color.ToArgb())
+				if (BackColor.R != dlg.Color.R ||
+					BackColor.G != dlg.Color.G ||
+					BackColor.B != dlg.Color.B)
 				{
-					BackColor = dlg.Color;
+					BackColor = Color.FromArgb(255, dlg.Color.R, dlg.Color.G, dlg.Color.B);
 
 					ColorChangedEventArgs args = new ColorChangedEventArgs();
 					args.OldColor = BackColor;
