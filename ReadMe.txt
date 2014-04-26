@@ -1,7 +1,7 @@
 WallSwitch
 Switches desktop wallpapers from a variety of sources.
 http://wallswitch.codeplex.com/
-Current Version: 1.2.3
+Current Version: 1.2.4
 
 Requirements:
 	.NET Framework 4:  http://www.microsoft.com/download/en/details.aspx?id=17718
@@ -11,6 +11,9 @@ Contact:
 	Email: chrismrazek@gmail.com
 
 ChangeLog:
+
+Version 1.2.4 - 2014-04-26:
+- Added an option to put a solid border around the image in collage mode.
 
 Version 1.2.3 - 2013-07-06:
 - Fixed issue with auto-update version number detection.
