@@ -336,7 +336,7 @@ namespace WallSwitch
 			{
 				_edgeMode = Util.ParseEnum<EdgeMode>(xmlTheme, k_edgeModeXml, k_defaultEdgeMode);
 			}
-			_edgeDist = Util.ParseInt(xmlTheme, k_featherDistXml, k_defaultEdgeDist);
+			_edgeDist = Util.ParseInt(xmlTheme, k_edgeDistXml, k_defaultEdgeDist);
 			_borderColor = ColorUtil.ParseColor(xmlTheme, k_borderColorXml, k_defaultBorderColor);
 			_fadeTransition = Util.ParseBool(xmlTheme, k_fadeTransitionXml, k_defaultFadeTransition);
 			_lastWallpaperFile = Util.ParseString(xmlTheme, k_lastWallpaperFileXml, string.Empty);

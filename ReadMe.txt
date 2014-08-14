@@ -12,6 +12,9 @@ Contact:
 
 ChangeLog:
 
+Version 1.2.5 - Pending:
+- Fixed bug where border width wasn't being loaded properly, and was reverting to default values.
+
 Version 1.2.4 - 2014-04-26:
 - Added an option to put a solid border around the image in collage mode.
 
