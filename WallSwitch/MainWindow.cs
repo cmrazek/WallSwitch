@@ -53,9 +53,12 @@ namespace WallSwitch
 		private const int k_periodDays = 3;
 
 		// Items in theme mode combo
-		private const int k_modeSequential = 0;
-		private const int k_modeRandom = 1;
-		private const int k_modeCollage = 2;
+		private const int k_modeFullScreen = 0;
+		private const int k_modeCollage = 1;
+
+		// Items in theme order combo
+		private const int k_orderSequential = 0;
+		private const int k_orderRandom = 1;
 
 		// Hotkeys
 		private const int k_hotkeySwitchNext = 1;
@@ -479,17 +482,29 @@ namespace WallSwitch
 
 			switch(_currentTheme.Mode)
 			{
-				case ThemeMode.Sequential:
-					cmbThemeMode.SelectedIndex = k_modeSequential;
-					break;
-				case ThemeMode.Random:
-					cmbThemeMode.SelectedIndex = k_modeRandom;
+				case ThemeMode.FullScreen:
+					c_themeMode.SelectedIndex = k_modeFullScreen;
 					break;
 				case ThemeMode.Collage:
-					cmbThemeMode.SelectedIndex = k_modeCollage;
+					c_themeMode.SelectedIndex = k_modeCollage;
 					break;
 				default:
-					cmbThemeMode.SelectedIndex = k_modeRandom;
+					c_themeMode.SelectedIndex = k_modeFullScreen;
+					break;
+			}
+
+			// Theme order
+
+			switch (_currentTheme.Order)
+			{
+				case ThemeOrder.Sequential:
+					c_themeOrder.SelectedIndex = k_orderSequential;
+					break;
+				case ThemeOrder.Random:
+					c_themeOrder.SelectedIndex = k_orderRandom;
+					break;
+				default:
+					c_themeOrder.SelectedIndex = k_orderRandom;
 					break;
 			}
 
@@ -501,10 +516,10 @@ namespace WallSwitch
 			trkImageSize.Value = _currentTheme.ImageSize.Clamp(trkImageSize.Minimum, trkImageSize.Maximum);
 			UpdateImageSizeDisplay();
 
-			chkSeparateMonitors.Checked = _currentTheme.SeparateMonitors;
+			c_separateMonitors.Checked = _currentTheme.SeparateMonitors;
 			_changeThemeHotKey.Copy(_currentTheme.HotKey);
 
-			cmbImageFit.SelectedIndex = (int)_currentTheme.ImageFit;
+			c_imageFit.SelectedIndex = (int)_currentTheme.ImageFit;
 
 			trkOpacity.Value = _currentTheme.BackOpacity.Clamp(trkOpacity.Minimum, trkOpacity.Maximum);
 			UpdateBackOpacityDisplay();
@@ -518,13 +533,13 @@ namespace WallSwitch
 
 			if (_currentTheme.MaxImageScale > 0)
 			{
-				chkLimitScale.Checked = true;
-				txtMaxScale.Text = _currentTheme.MaxImageScale.ToString();
+				c_limitScale.Checked = true;
+				c_maxScale.Text = _currentTheme.MaxImageScale.ToString();
 			}
 			else
 			{
-				chkLimitScale.Checked = false;
-				txtMaxScale.Text = string.Empty;
+				c_limitScale.Checked = false;
+				c_maxScale.Text = string.Empty;
 			}
 
 			cmbColorEffectFore.SetEnumValue<ColorEffect>(_currentTheme.ColorEffectFore);
@@ -604,14 +619,11 @@ namespace WallSwitch
 				return false;
 			}
 
-			ThemeMode mode = ThemeMode.Sequential;
-			switch(cmbThemeMode.SelectedIndex)
+			ThemeMode mode = ThemeMode.FullScreen;
+			switch(c_themeMode.SelectedIndex)
 			{
-				case k_modeSequential:
-					mode = ThemeMode.Sequential;
-					break;
-				case k_modeRandom:
-					mode = ThemeMode.Random;
+				case k_modeFullScreen:
+					mode = ThemeMode.FullScreen;
 					break;
 				case k_modeCollage:
 					mode = ThemeMode.Collage;
@@ -620,21 +632,40 @@ namespace WallSwitch
 					if (showErrors)
 					{
 						tabThemeSettings.SelectedTab = tabSettings;
-						cmbThemeMode.Focus();
+						c_themeMode.Focus();
+						this.ShowError(Res.Error_InvalidThemeMode);
+					}
+					return false;
+			}
+
+			ThemeOrder order = ThemeOrder.Random;
+			switch (c_themeOrder.SelectedIndex)
+			{
+				case k_orderSequential:
+					order = ThemeOrder.Sequential;
+					break;
+				case k_orderRandom:
+					order = ThemeOrder.Random;
+					break;
+				default:
+					if (showErrors)
+					{
+						tabThemeSettings.SelectedTab = tabSettings;
+						c_themeOrder.Focus();
 						this.ShowError(Res.Error_InvalidThemeOrder);
 					}
 					return false;
 			}
 
 			int maxImageScale = 0;
-			if (chkLimitScale.Checked)
+			if (c_limitScale.Checked)
 			{
-				if (!int.TryParse(txtMaxScale.Text, out maxImageScale))
+				if (!int.TryParse(c_maxScale.Text, out maxImageScale))
 				{
 					if (showErrors)
 					{
 						tabThemeSettings.SelectedTab = tabSettings;
-						txtMaxScale.Focus();
+						c_maxScale.Focus();
 						this.ShowError(Res.Error_InvalidMaxImageScale);
 					}
 					return false;
@@ -644,7 +675,7 @@ namespace WallSwitch
 					if (showErrors)
 					{
 						tabThemeSettings.SelectedTab = tabSettings;
-						txtMaxScale.Focus();
+						c_maxScale.Focus();
 						this.ShowError(Res.Error_NegativeMaxImageScale);
 					}
 				}
@@ -653,6 +684,7 @@ namespace WallSwitch
 			_currentTheme.Frequency = freq;
 			_currentTheme.Period = period;
 			_currentTheme.Mode = mode;
+			_currentTheme.Order = order;
 			_currentTheme.BackColorTop = clrBackTop.Color;
 			_currentTheme.BackColorBottom = clrBackBottom.Color;
 			_currentTheme.ImageSize = trkImageSize.Value;
@@ -666,7 +698,7 @@ namespace WallSwitch
 			}
 			_currentTheme.Locations = locationList;
 
-			_currentTheme.SeparateMonitors = chkSeparateMonitors.Checked;
+			_currentTheme.SeparateMonitors = c_separateMonitors.Checked;
 			if (!_currentTheme.HotKey.Equals(_changeThemeHotKey))
 			{
 				// Hot key is changing. Need to reregister.
@@ -677,7 +709,7 @@ namespace WallSwitch
 				_currentTheme.HotKey = _changeThemeHotKey;
 			}
 
-			_currentTheme.ImageFit = (ImageFit)cmbImageFit.SelectedIndex;
+			_currentTheme.ImageFit = (ImageFit)c_imageFit.SelectedIndex;
 			_currentTheme.BackOpacity = trkOpacity.Value;
 			_currentTheme.FadeTransition = chkFadeTransition.Checked;
 			_currentTheme.MaxImageScale = maxImageScale;
@@ -754,9 +786,9 @@ namespace WallSwitch
 			btnPause.Image = _switchThread != null && _switchThread.Paused ? Res.PlayIcon : Res.PauseIcon;
 
 			// Display Mode Group
-			chkSeparateMonitors.Visible = Screen.AllScreens.Length > 1;
-			cmbImageFit.Visible = cmbThemeMode.SelectedIndex != k_modeCollage;
-			txtMaxScale.Enabled = chkLimitScale.Checked;
+			c_separateMonitors.Visible = Screen.AllScreens.Length > 1;
+			c_imageFit.Visible = c_themeMode.SelectedIndex != k_modeCollage;
+			c_maxScale.Enabled = c_limitScale.Checked;
 
 			// Change Frequency Group
 			chkFadeTransition.Visible = OsUtil.Win7Available;
@@ -764,7 +796,7 @@ namespace WallSwitch
 			// Background Color Group
 
 			// Collage Display Group
-			grpCollageDisplay.Visible = cmbThemeMode.SelectedIndex == k_modeCollage;
+			grpCollageDisplay.Visible = c_themeMode.SelectedIndex == k_modeCollage;
 
 			var edgeMode = c_edgeMode.GetEnumValue<EdgeMode>();
 			c_edgeDist.Visible = edgeMode != EdgeMode.None;
@@ -785,7 +817,7 @@ namespace WallSwitch
 			// Foreground Effects Group
 
 			// Background Effects Group
-			if (cmbThemeMode.SelectedIndex == k_modeCollage)
+			if (c_themeMode.SelectedIndex == k_modeCollage)
 			{
 				grpBackgroundColorEffects.Visible = true;
 				trkColorEffectCollageFadeRatio.Visible = lblColorEffectCollageFadeRatioUnit.Visible = cmbColorEffectBack.GetEnumValue<ColorEffect>() != ColorEffect.None;
@@ -2039,17 +2071,17 @@ namespace WallSwitch
 		{
 			try
 			{
-				if (chkLimitScale.Checked)
+				if (c_limitScale.Checked)
 				{
 					int scale = _currentTheme.MaxImageScale;
 					if (scale <= 0) scale = Theme.k_defaultMaxImageScale;
-					txtMaxScale.Text = scale.ToString();
-					txtMaxScale.Enabled = true;
+					c_maxScale.Text = scale.ToString();
+					c_maxScale.Enabled = true;
 				}
 				else
 				{
-					txtMaxScale.Text = string.Empty;
-					txtMaxScale.Enabled = false;
+					c_maxScale.Text = string.Empty;
+					c_maxScale.Enabled = false;
 				}
 				EnableControls();
 				ControlChanged(sender, e);

@@ -59,18 +59,18 @@
 			this.btnSwitchNow = new System.Windows.Forms.Button();
 			this.btnPause = new System.Windows.Forms.Button();
 			this.btnPrevious = new System.Windows.Forms.Button();
-			this.cmbImageFit = new System.Windows.Forms.ComboBox();
+			this.c_imageFit = new System.Windows.Forms.ComboBox();
 			this.lblOpacityDisplay = new System.Windows.Forms.Label();
 			this.trkOpacity = new System.Windows.Forms.TrackBar();
 			this.lblOpacity = new System.Windows.Forms.Label();
-			this.chkSeparateMonitors = new System.Windows.Forms.CheckBox();
+			this.c_separateMonitors = new System.Windows.Forms.CheckBox();
 			this.lblImageSizeDisplay = new System.Windows.Forms.Label();
 			this.lblImageSize = new System.Windows.Forms.Label();
 			this.trkImageSize = new System.Windows.Forms.TrackBar();
 			this.lblBackBottom = new System.Windows.Forms.Label();
 			this.lblBackTop = new System.Windows.Forms.Label();
 			this.btnAddImage = new System.Windows.Forms.Button();
-			this.cmbThemeMode = new System.Windows.Forms.ComboBox();
+			this.c_themeMode = new System.Windows.Forms.ComboBox();
 			this.btnAddFolder = new System.Windows.Forms.Button();
 			this.trayIcon = new System.Windows.Forms.NotifyIcon(this.components);
 			this.cmTray = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -104,21 +104,18 @@
 			this.tabSettings = new System.Windows.Forms.TabPage();
 			this.flowDisplay = new System.Windows.Forms.FlowLayoutPanel();
 			this.grpDisplayMode = new System.Windows.Forms.GroupBox();
-			this.lblScalePct = new System.Windows.Forms.Label();
-			this.txtMaxScale = new System.Windows.Forms.TextBox();
-			this.chkLimitScale = new System.Windows.Forms.CheckBox();
+			this.c_themeOrder = new System.Windows.Forms.ComboBox();
+			this.c_maxScalePct = new System.Windows.Forms.Label();
+			this.c_maxScale = new System.Windows.Forms.TextBox();
+			this.c_limitScale = new System.Windows.Forms.CheckBox();
 			this.grpFrequency = new System.Windows.Forms.GroupBox();
 			this.chkFadeTransition = new System.Windows.Forms.CheckBox();
 			this.c_activateThemeLabel = new System.Windows.Forms.Label();
 			this.cmbThemePeriod = new System.Windows.Forms.ComboBox();
 			this.lblFrequency = new System.Windows.Forms.Label();
 			this.txtThemeFreq = new System.Windows.Forms.TextBox();
-			this.c_activateThemeHotKey = new WallSwitch.HotKeyTextBox();
 			this.grpBackgroundColor = new System.Windows.Forms.GroupBox();
-			this.clrBackTop = new WallSwitch.ColorSample();
-			this.clrBackBottom = new WallSwitch.ColorSample();
 			this.grpCollageDisplay = new System.Windows.Forms.GroupBox();
-			this.c_borderColor = new WallSwitch.ColorSample();
 			this.c_borderColorLabel = new System.Windows.Forms.Label();
 			this.c_edgeMode = new System.Windows.Forms.ComboBox();
 			this.trkDropShadowFeatherDist = new System.Windows.Forms.TrackBar();
@@ -144,7 +141,6 @@
 			this.lblColorEffectCollageFadeRatioUnit = new System.Windows.Forms.Label();
 			this.trkColorEffectCollageFadeRatio = new System.Windows.Forms.TrackBar();
 			this.tabHistory = new System.Windows.Forms.TabPage();
-			this.lstHistory = new WallSwitch.HistoryList();
 			this.cmHistory = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.ciOpenHistoryFile = new System.Windows.Forms.ToolStripMenuItem();
 			this.ciExploreHistoryFile = new System.Windows.Forms.ToolStripMenuItem();
@@ -153,6 +149,11 @@
 			this.ciClearHistoryList = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.grpNavButtons = new System.Windows.Forms.GroupBox();
+			this.c_activateThemeHotKey = new WallSwitch.HotKeyTextBox();
+			this.clrBackTop = new WallSwitch.ColorSample();
+			this.clrBackBottom = new WallSwitch.ColorSample();
+			this.c_borderColor = new WallSwitch.ColorSample();
+			this.lstHistory = new WallSwitch.HistoryList();
 			this.cmLocations.SuspendLayout();
 			this.grpTheme.SuspendLayout();
 			this.cmTheme.SuspendLayout();
@@ -446,21 +447,21 @@
 			this.btnPrevious.UseVisualStyleBackColor = true;
 			this.btnPrevious.Click += new System.EventHandler(this.btnPrevious_Click);
 			// 
-			// cmbImageFit
+			// c_imageFit
 			// 
-			this.cmbImageFit.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.cmbImageFit.FormattingEnabled = true;
-			this.cmbImageFit.Items.AddRange(new object[] {
+			this.c_imageFit.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.c_imageFit.FormattingEnabled = true;
+			this.c_imageFit.Items.AddRange(new object[] {
             "Original Size",
             "Stretch",
             "Fit",
             "Fill"});
-			this.cmbImageFit.Location = new System.Drawing.Point(153, 19);
-			this.cmbImageFit.Name = "cmbImageFit";
-			this.cmbImageFit.Size = new System.Drawing.Size(141, 21);
-			this.cmbImageFit.TabIndex = 1;
-			this.toolTip1.SetToolTip(this.cmbImageFit, "Wallpaper sizing mode");
-			this.cmbImageFit.SelectedIndexChanged += new System.EventHandler(this.ControlChanged);
+			this.c_imageFit.Location = new System.Drawing.Point(6, 46);
+			this.c_imageFit.Name = "c_imageFit";
+			this.c_imageFit.Size = new System.Drawing.Size(141, 21);
+			this.c_imageFit.TabIndex = 3;
+			this.toolTip1.SetToolTip(this.c_imageFit, "Wallpaper sizing mode");
+			this.c_imageFit.SelectedIndexChanged += new System.EventHandler(this.ControlChanged);
 			// 
 			// lblOpacityDisplay
 			// 
@@ -497,19 +498,19 @@
 			this.lblOpacity.Text = "Background Opacity:";
 			this.toolTip1.SetToolTip(this.lblOpacity, "Opacity of background used to fade out previous images");
 			// 
-			// chkSeparateMonitors
+			// c_separateMonitors
 			// 
-			this.chkSeparateMonitors.AutoSize = true;
-			this.chkSeparateMonitors.Checked = true;
-			this.chkSeparateMonitors.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.chkSeparateMonitors.Location = new System.Drawing.Point(325, 21);
-			this.chkSeparateMonitors.Name = "chkSeparateMonitors";
-			this.chkSeparateMonitors.Size = new System.Drawing.Size(179, 17);
-			this.chkSeparateMonitors.TabIndex = 2;
-			this.chkSeparateMonitors.Text = "Separate image for each monitor";
-			this.toolTip1.SetToolTip(this.chkSeparateMonitors, "Display a separate image on each monitor");
-			this.chkSeparateMonitors.UseVisualStyleBackColor = true;
-			this.chkSeparateMonitors.CheckedChanged += new System.EventHandler(this.chkSeparateMonitors_CheckedChanged);
+			this.c_separateMonitors.AutoSize = true;
+			this.c_separateMonitors.Checked = true;
+			this.c_separateMonitors.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.c_separateMonitors.Location = new System.Drawing.Point(300, 21);
+			this.c_separateMonitors.Name = "c_separateMonitors";
+			this.c_separateMonitors.Size = new System.Drawing.Size(179, 17);
+			this.c_separateMonitors.TabIndex = 2;
+			this.c_separateMonitors.Text = "Separate image for each monitor";
+			this.toolTip1.SetToolTip(this.c_separateMonitors, "Display a separate image on each monitor");
+			this.c_separateMonitors.UseVisualStyleBackColor = true;
+			this.c_separateMonitors.CheckedChanged += new System.EventHandler(this.chkSeparateMonitors_CheckedChanged);
 			// 
 			// lblImageSizeDisplay
 			// 
@@ -577,20 +578,19 @@
 			this.btnAddImage.UseVisualStyleBackColor = true;
 			this.btnAddImage.Click += new System.EventHandler(this.btnAddImage_Click);
 			// 
-			// cmbThemeMode
+			// c_themeMode
 			// 
-			this.cmbThemeMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.cmbThemeMode.FormattingEnabled = true;
-			this.cmbThemeMode.Items.AddRange(new object[] {
-            "Sequential",
-            "Random",
+			this.c_themeMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.c_themeMode.FormattingEnabled = true;
+			this.c_themeMode.Items.AddRange(new object[] {
+            "Full Screen",
             "Collage"});
-			this.cmbThemeMode.Location = new System.Drawing.Point(6, 19);
-			this.cmbThemeMode.Name = "cmbThemeMode";
-			this.cmbThemeMode.Size = new System.Drawing.Size(141, 21);
-			this.cmbThemeMode.TabIndex = 0;
-			this.toolTip1.SetToolTip(this.cmbThemeMode, "Wallpaper display mode");
-			this.cmbThemeMode.SelectedIndexChanged += new System.EventHandler(this.ControlChanged);
+			this.c_themeMode.Location = new System.Drawing.Point(6, 19);
+			this.c_themeMode.Name = "c_themeMode";
+			this.c_themeMode.Size = new System.Drawing.Size(141, 21);
+			this.c_themeMode.TabIndex = 0;
+			this.toolTip1.SetToolTip(this.c_themeMode, "Wallpaper display mode");
+			this.c_themeMode.SelectedIndexChanged += new System.EventHandler(this.ControlChanged);
 			// 
 			// btnAddFolder
 			// 
@@ -876,46 +876,60 @@
 			// 
 			// grpDisplayMode
 			// 
-			this.grpDisplayMode.Controls.Add(this.cmbThemeMode);
-			this.grpDisplayMode.Controls.Add(this.lblScalePct);
-			this.grpDisplayMode.Controls.Add(this.cmbImageFit);
-			this.grpDisplayMode.Controls.Add(this.txtMaxScale);
-			this.grpDisplayMode.Controls.Add(this.chkLimitScale);
-			this.grpDisplayMode.Controls.Add(this.chkSeparateMonitors);
+			this.grpDisplayMode.Controls.Add(this.c_themeOrder);
+			this.grpDisplayMode.Controls.Add(this.c_themeMode);
+			this.grpDisplayMode.Controls.Add(this.c_maxScalePct);
+			this.grpDisplayMode.Controls.Add(this.c_imageFit);
+			this.grpDisplayMode.Controls.Add(this.c_maxScale);
+			this.grpDisplayMode.Controls.Add(this.c_limitScale);
+			this.grpDisplayMode.Controls.Add(this.c_separateMonitors);
 			this.grpDisplayMode.Location = new System.Drawing.Point(3, 3);
 			this.grpDisplayMode.Name = "grpDisplayMode";
-			this.grpDisplayMode.Size = new System.Drawing.Size(520, 78);
+			this.grpDisplayMode.Size = new System.Drawing.Size(520, 103);
 			this.grpDisplayMode.TabIndex = 0;
 			this.grpDisplayMode.TabStop = false;
 			this.grpDisplayMode.Text = "Display Mode";
 			// 
-			// lblScalePct
+			// c_themeOrder
 			// 
-			this.lblScalePct.AutoSize = true;
-			this.lblScalePct.Location = new System.Drawing.Point(209, 49);
-			this.lblScalePct.Name = "lblScalePct";
-			this.lblScalePct.Size = new System.Drawing.Size(15, 13);
-			this.lblScalePct.TabIndex = 5;
-			this.lblScalePct.Text = "%";
+			this.c_themeOrder.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.c_themeOrder.FormattingEnabled = true;
+			this.c_themeOrder.Items.AddRange(new object[] {
+            "Sequential",
+            "Random"});
+			this.c_themeOrder.Location = new System.Drawing.Point(153, 19);
+			this.c_themeOrder.Name = "c_themeOrder";
+			this.c_themeOrder.Size = new System.Drawing.Size(141, 21);
+			this.c_themeOrder.TabIndex = 1;
+			this.c_themeOrder.SelectedIndexChanged += new System.EventHandler(this.ControlChanged);
 			// 
-			// txtMaxScale
+			// c_maxScalePct
 			// 
-			this.txtMaxScale.Location = new System.Drawing.Point(153, 46);
-			this.txtMaxScale.Name = "txtMaxScale";
-			this.txtMaxScale.Size = new System.Drawing.Size(50, 20);
-			this.txtMaxScale.TabIndex = 4;
-			this.txtMaxScale.TextChanged += new System.EventHandler(this.ControlChanged);
+			this.c_maxScalePct.AutoSize = true;
+			this.c_maxScalePct.Location = new System.Drawing.Point(209, 74);
+			this.c_maxScalePct.Name = "c_maxScalePct";
+			this.c_maxScalePct.Size = new System.Drawing.Size(15, 13);
+			this.c_maxScalePct.TabIndex = 6;
+			this.c_maxScalePct.Text = "%";
 			// 
-			// chkLimitScale
+			// c_maxScale
 			// 
-			this.chkLimitScale.AutoSize = true;
-			this.chkLimitScale.Location = new System.Drawing.Point(6, 48);
-			this.chkLimitScale.Name = "chkLimitScale";
-			this.chkLimitScale.Size = new System.Drawing.Size(126, 17);
-			this.chkLimitScale.TabIndex = 3;
-			this.chkLimitScale.Text = "Limit image scaling to";
-			this.chkLimitScale.UseVisualStyleBackColor = true;
-			this.chkLimitScale.CheckedChanged += new System.EventHandler(this.chkLimitScale_CheckedChanged);
+			this.c_maxScale.Location = new System.Drawing.Point(153, 71);
+			this.c_maxScale.Name = "c_maxScale";
+			this.c_maxScale.Size = new System.Drawing.Size(50, 20);
+			this.c_maxScale.TabIndex = 5;
+			this.c_maxScale.TextChanged += new System.EventHandler(this.ControlChanged);
+			// 
+			// c_limitScale
+			// 
+			this.c_limitScale.AutoSize = true;
+			this.c_limitScale.Location = new System.Drawing.Point(6, 73);
+			this.c_limitScale.Name = "c_limitScale";
+			this.c_limitScale.Size = new System.Drawing.Size(126, 17);
+			this.c_limitScale.TabIndex = 4;
+			this.c_limitScale.Text = "Limit image scaling to";
+			this.c_limitScale.UseVisualStyleBackColor = true;
+			this.c_limitScale.CheckedChanged += new System.EventHandler(this.chkLimitScale_CheckedChanged);
 			// 
 			// grpFrequency
 			// 
@@ -925,7 +939,7 @@
 			this.grpFrequency.Controls.Add(this.lblFrequency);
 			this.grpFrequency.Controls.Add(this.txtThemeFreq);
 			this.grpFrequency.Controls.Add(this.c_activateThemeHotKey);
-			this.grpFrequency.Location = new System.Drawing.Point(3, 87);
+			this.grpFrequency.Location = new System.Drawing.Point(3, 112);
 			this.grpFrequency.Name = "grpFrequency";
 			this.grpFrequency.Size = new System.Drawing.Size(520, 76);
 			this.grpFrequency.TabIndex = 1;
@@ -988,17 +1002,6 @@
 			this.toolTip1.SetToolTip(this.txtThemeFreq, "Wallpaper change interval");
 			this.txtThemeFreq.TextChanged += new System.EventHandler(this.ControlChanged);
 			// 
-			// c_activateThemeHotKey
-			// 
-			this.c_activateThemeHotKey.BackColor = System.Drawing.SystemColors.Window;
-			this.c_activateThemeHotKey.HotKey = null;
-			this.c_activateThemeHotKey.Location = new System.Drawing.Point(153, 45);
-			this.c_activateThemeHotKey.Name = "c_activateThemeHotKey";
-			this.c_activateThemeHotKey.ReadOnly = true;
-			this.c_activateThemeHotKey.Size = new System.Drawing.Size(141, 20);
-			this.c_activateThemeHotKey.TabIndex = 5;
-			this.c_activateThemeHotKey.HotKeyChanged += new System.EventHandler(this.ControlChanged);
-			// 
 			// grpBackgroundColor
 			// 
 			this.grpBackgroundColor.Controls.Add(this.clrBackTop);
@@ -1008,36 +1011,12 @@
 			this.grpBackgroundColor.Controls.Add(this.trkOpacity);
 			this.grpBackgroundColor.Controls.Add(this.lblOpacity);
 			this.grpBackgroundColor.Controls.Add(this.lblOpacityDisplay);
-			this.grpBackgroundColor.Location = new System.Drawing.Point(3, 169);
+			this.grpBackgroundColor.Location = new System.Drawing.Point(3, 194);
 			this.grpBackgroundColor.Name = "grpBackgroundColor";
 			this.grpBackgroundColor.Size = new System.Drawing.Size(520, 72);
 			this.grpBackgroundColor.TabIndex = 2;
 			this.grpBackgroundColor.TabStop = false;
 			this.grpBackgroundColor.Text = "Background Color";
-			// 
-			// clrBackTop
-			// 
-			this.clrBackTop.BackColor = System.Drawing.Color.Black;
-			this.clrBackTop.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.clrBackTop.Color = System.Drawing.Color.Black;
-			this.clrBackTop.Location = new System.Drawing.Point(153, 19);
-			this.clrBackTop.Name = "clrBackTop";
-			this.clrBackTop.Size = new System.Drawing.Size(30, 18);
-			this.clrBackTop.TabIndex = 1;
-			this.toolTip1.SetToolTip(this.clrBackTop, "Top color of background gradient");
-			this.clrBackTop.ColorChanged += new WallSwitch.ColorSample.ColorChangedEventHandler(this.clrBackTop_ColorChanged);
-			// 
-			// clrBackBottom
-			// 
-			this.clrBackBottom.BackColor = System.Drawing.Color.Black;
-			this.clrBackBottom.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.clrBackBottom.Color = System.Drawing.Color.Black;
-			this.clrBackBottom.Location = new System.Drawing.Point(153, 43);
-			this.clrBackBottom.Name = "clrBackBottom";
-			this.clrBackBottom.Size = new System.Drawing.Size(30, 18);
-			this.clrBackBottom.TabIndex = 3;
-			this.toolTip1.SetToolTip(this.clrBackBottom, "Bottom color of background gradient");
-			this.clrBackBottom.ColorChanged += new WallSwitch.ColorSample.ColorChangedEventHandler(this.clrBackBottom_ColorChanged);
 			// 
 			// grpCollageDisplay
 			// 
@@ -1058,23 +1037,12 @@
 			this.grpCollageDisplay.Controls.Add(this.trkImageSize);
 			this.grpCollageDisplay.Controls.Add(this.lblImageSize);
 			this.grpCollageDisplay.Controls.Add(this.lblImageSizeDisplay);
-			this.grpCollageDisplay.Location = new System.Drawing.Point(3, 247);
+			this.grpCollageDisplay.Location = new System.Drawing.Point(3, 272);
 			this.grpCollageDisplay.Name = "grpCollageDisplay";
 			this.grpCollageDisplay.Size = new System.Drawing.Size(520, 216);
 			this.grpCollageDisplay.TabIndex = 3;
 			this.grpCollageDisplay.TabStop = false;
 			this.grpCollageDisplay.Text = "Collage Display";
-			// 
-			// c_borderColor
-			// 
-			this.c_borderColor.BackColor = System.Drawing.Color.Transparent;
-			this.c_borderColor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.c_borderColor.Color = System.Drawing.Color.Transparent;
-			this.c_borderColor.Location = new System.Drawing.Point(344, 54);
-			this.c_borderColor.Name = "c_borderColor";
-			this.c_borderColor.Size = new System.Drawing.Size(30, 18);
-			this.c_borderColor.TabIndex = 7;
-			this.c_borderColor.ColorChanged += new WallSwitch.ColorSample.ColorChangedEventHandler(this.c_borderColor_ColorChanged);
 			// 
 			// c_borderColorLabel
 			// 
@@ -1233,7 +1201,7 @@
 			// 
 			this.grpImageEffects.Controls.Add(this.label1);
 			this.grpImageEffects.Controls.Add(this.cmbColorEffectFore);
-			this.grpImageEffects.Location = new System.Drawing.Point(3, 469);
+			this.grpImageEffects.Location = new System.Drawing.Point(3, 494);
 			this.grpImageEffects.Name = "grpImageEffects";
 			this.grpImageEffects.Size = new System.Drawing.Size(520, 50);
 			this.grpImageEffects.TabIndex = 4;
@@ -1271,7 +1239,7 @@
 			this.grpBackgroundColorEffects.Controls.Add(this.cmbColorEffectBack);
 			this.grpBackgroundColorEffects.Controls.Add(this.lblColorEffectCollageFadeRatioUnit);
 			this.grpBackgroundColorEffects.Controls.Add(this.trkColorEffectCollageFadeRatio);
-			this.grpBackgroundColorEffects.Location = new System.Drawing.Point(3, 525);
+			this.grpBackgroundColorEffects.Location = new System.Drawing.Point(3, 550);
 			this.grpBackgroundColorEffects.Name = "grpBackgroundColorEffects";
 			this.grpBackgroundColorEffects.Size = new System.Drawing.Size(520, 120);
 			this.grpBackgroundColorEffects.TabIndex = 5;
@@ -1371,18 +1339,6 @@
 			this.tabHistory.Text = "History";
 			this.tabHistory.UseVisualStyleBackColor = true;
 			// 
-			// lstHistory
-			// 
-			this.lstHistory.ContextMenuStrip = this.cmHistory;
-			this.lstHistory.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.lstHistory.ImageToolTip = this.toolTip1;
-			this.lstHistory.Location = new System.Drawing.Point(3, 3);
-			this.lstHistory.Name = "lstHistory";
-			this.lstHistory.Size = new System.Drawing.Size(546, 305);
-			this.lstHistory.TabIndex = 0;
-			this.lstHistory.SelectionChanged += new System.EventHandler(this.lstHistory_SelectionChanged);
-			this.lstHistory.ItemActivated += new System.EventHandler<WallSwitch.HistoryList.ItemActivatedEventArgs>(this.lstHistory_ItemActivated);
-			// 
 			// cmHistory
 			// 
 			this.cmHistory.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -1438,6 +1394,64 @@
 			this.grpNavButtons.Size = new System.Drawing.Size(123, 50);
 			this.grpNavButtons.TabIndex = 11;
 			this.grpNavButtons.TabStop = false;
+			// 
+			// c_activateThemeHotKey
+			// 
+			this.c_activateThemeHotKey.BackColor = System.Drawing.SystemColors.Window;
+			this.c_activateThemeHotKey.HotKey = null;
+			this.c_activateThemeHotKey.Location = new System.Drawing.Point(153, 45);
+			this.c_activateThemeHotKey.Name = "c_activateThemeHotKey";
+			this.c_activateThemeHotKey.ReadOnly = true;
+			this.c_activateThemeHotKey.Size = new System.Drawing.Size(141, 20);
+			this.c_activateThemeHotKey.TabIndex = 5;
+			this.c_activateThemeHotKey.HotKeyChanged += new System.EventHandler(this.ControlChanged);
+			// 
+			// clrBackTop
+			// 
+			this.clrBackTop.BackColor = System.Drawing.Color.Black;
+			this.clrBackTop.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.clrBackTop.Color = System.Drawing.Color.Black;
+			this.clrBackTop.Location = new System.Drawing.Point(153, 19);
+			this.clrBackTop.Name = "clrBackTop";
+			this.clrBackTop.Size = new System.Drawing.Size(30, 18);
+			this.clrBackTop.TabIndex = 1;
+			this.toolTip1.SetToolTip(this.clrBackTop, "Top color of background gradient");
+			this.clrBackTop.ColorChanged += new WallSwitch.ColorSample.ColorChangedEventHandler(this.clrBackTop_ColorChanged);
+			// 
+			// clrBackBottom
+			// 
+			this.clrBackBottom.BackColor = System.Drawing.Color.Black;
+			this.clrBackBottom.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.clrBackBottom.Color = System.Drawing.Color.Black;
+			this.clrBackBottom.Location = new System.Drawing.Point(153, 43);
+			this.clrBackBottom.Name = "clrBackBottom";
+			this.clrBackBottom.Size = new System.Drawing.Size(30, 18);
+			this.clrBackBottom.TabIndex = 3;
+			this.toolTip1.SetToolTip(this.clrBackBottom, "Bottom color of background gradient");
+			this.clrBackBottom.ColorChanged += new WallSwitch.ColorSample.ColorChangedEventHandler(this.clrBackBottom_ColorChanged);
+			// 
+			// c_borderColor
+			// 
+			this.c_borderColor.BackColor = System.Drawing.Color.Transparent;
+			this.c_borderColor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.c_borderColor.Color = System.Drawing.Color.Transparent;
+			this.c_borderColor.Location = new System.Drawing.Point(344, 54);
+			this.c_borderColor.Name = "c_borderColor";
+			this.c_borderColor.Size = new System.Drawing.Size(30, 18);
+			this.c_borderColor.TabIndex = 7;
+			this.c_borderColor.ColorChanged += new WallSwitch.ColorSample.ColorChangedEventHandler(this.c_borderColor_ColorChanged);
+			// 
+			// lstHistory
+			// 
+			this.lstHistory.ContextMenuStrip = this.cmHistory;
+			this.lstHistory.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.lstHistory.ImageToolTip = this.toolTip1;
+			this.lstHistory.Location = new System.Drawing.Point(3, 3);
+			this.lstHistory.Name = "lstHistory";
+			this.lstHistory.Size = new System.Drawing.Size(546, 305);
+			this.lstHistory.TabIndex = 0;
+			this.lstHistory.SelectionChanged += new System.EventHandler(this.lstHistory_SelectionChanged);
+			this.lstHistory.ItemActivated += new System.EventHandler<WallSwitch.HistoryList.ItemActivatedEventArgs>(this.lstHistory_ItemActivated);
 			// 
 			// MainWindow
 			// 
@@ -1504,7 +1518,7 @@
 		private System.Windows.Forms.Button btnAddImage;
 		private System.Windows.Forms.Button btnAddFolder;
 		private System.Windows.Forms.ColumnHeader colLocation;
-		private System.Windows.Forms.ComboBox cmbThemeMode;
+		private System.Windows.Forms.ComboBox c_themeMode;
 		private System.Windows.Forms.NotifyIcon trayIcon;
 		private System.Windows.Forms.ContextMenuStrip cmTray;
 		private System.Windows.Forms.ToolStripMenuItem cmShowMainWindow;
@@ -1538,11 +1552,11 @@
 		private System.Windows.Forms.Label lblImageSize;
 		private System.Windows.Forms.TrackBar trkImageSize;
 		private System.Windows.Forms.Label lblImageSizeDisplay;
-		private System.Windows.Forms.CheckBox chkSeparateMonitors;
+		private System.Windows.Forms.CheckBox c_separateMonitors;
 		private System.Windows.Forms.TrackBar trkOpacity;
 		private System.Windows.Forms.Label lblOpacity;
 		private System.Windows.Forms.Label lblOpacityDisplay;
-		private System.Windows.Forms.ComboBox cmbImageFit;
+		private System.Windows.Forms.ComboBox c_imageFit;
 		private System.Windows.Forms.ToolStripMenuItem miFileSave;
 		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
 		private System.Windows.Forms.ToolStripMenuItem miClearHistory;
@@ -1567,9 +1581,9 @@
 		private System.Windows.Forms.ToolStripMenuItem ciLocationProperties;
 		private System.Windows.Forms.ToolStripMenuItem ciLocationExplore;
 		private System.Windows.Forms.ToolTip toolTip1;
-		private System.Windows.Forms.Label lblScalePct;
-		private System.Windows.Forms.TextBox txtMaxScale;
-		private System.Windows.Forms.CheckBox chkLimitScale;
+		private System.Windows.Forms.Label c_maxScalePct;
+		private System.Windows.Forms.TextBox c_maxScale;
+		private System.Windows.Forms.CheckBox c_limitScale;
 		private System.Windows.Forms.Button btnPause;
 		private System.Windows.Forms.ToolStripMenuItem miHotKeys;
 		private System.Windows.Forms.GroupBox grpBackgroundColorEffects;
@@ -1621,6 +1635,7 @@
 		private System.Windows.Forms.ComboBox c_edgeMode;
 		private ColorSample c_borderColor;
 		private System.Windows.Forms.Label c_borderColorLabel;
+		private System.Windows.Forms.ComboBox c_themeOrder;
 
 	}
 }

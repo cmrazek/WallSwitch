@@ -16,7 +16,7 @@ namespace WallSwitch
 		Url
 	}
 
-	public class ImageRec
+	public class ImageRec : IComparable<ImageRec>
 	{
 		#region Member Variables
 		private string _location;
@@ -95,8 +95,10 @@ namespace WallSwitch
 
 		public override bool Equals(object obj)
 		{
-			if (obj == null || obj.GetType() != typeof(ImageRec)) return false;
-			return _location.Equals((obj as ImageRec)._location);
+			var other = obj as ImageRec;
+			if (other == null) return false;
+
+			return _location == other._location;
 		}
 
 		public override int GetHashCode()
@@ -249,6 +251,11 @@ namespace WallSwitch
 			get { return _thumbnail; }
 		}
 		#endregion
+
+		public int CompareTo(ImageRec other)	// For IComparable
+		{
+			return string.Compare(_location, other._location);
+		}
 
 	}
 }

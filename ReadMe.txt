@@ -13,7 +13,9 @@ Contact:
 ChangeLog:
 
 Version 1.2.5 - Pending:
+- Added support for sequential order in collage mode.
 - Fixed bug where border width wasn't being loaded properly, and was reverting to default values.
+- Fixed bug where sequential order was repeating images on multiple monitors.
 
 Version 1.2.4 - 2014-04-26:
 - Added an option to put a solid border around the image in collage mode.

@@ -152,6 +152,7 @@
     </Compile>
     <Compile Include="ThemeMode.cs" />
     <Compile Include="Period.cs" />
+    <Compile Include="ThemeOrder.cs" />
     <Compile Include="UpdateCheck.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="WallpaperRenderer.cs" />
@@ -253,7 +254,7 @@
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
