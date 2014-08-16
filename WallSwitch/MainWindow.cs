@@ -559,6 +559,8 @@ namespace WallSwitch
 			trkBackgroundBlurDist.Value = _currentTheme.BackgroundBlurDist.Clamp(trkBackgroundBlurDist.Minimum, trkBackgroundBlurDist.Maximum);
 			lblBackgroundBlurDistValue.Text = string.Format(Res.BackgroundBlurDist, trkBackgroundBlurDist.Value);
 
+			c_numCollageImages.Text = _currentTheme.NumCollageImages.ToString();
+
 			Dirty = false;
 
 			RefreshLocations();
@@ -681,6 +683,28 @@ namespace WallSwitch
 				}
 			}
 
+			int numCollageImages = Theme.k_defaultNumCollageImages;
+			if (!int.TryParse(c_numCollageImages.Text, out numCollageImages))
+			{
+				if (showErrors)
+				{
+					tabThemeSettings.SelectedTab = tabSettings;
+					c_numCollageImages.Focus();
+					this.ShowError(Res.Error_InvalidNumCollageImages);
+				}
+				return false;
+			}
+			else if (numCollageImages <= 0 || numCollageImages > Theme.k_maxNumCollageImages)
+			{
+				if (showErrors)
+				{
+					tabThemeSettings.SelectedTab = tabSettings;
+					c_numCollageImages.Focus();
+					this.ShowError(Res.Error_OutOfRangeNumCollageImages);
+				}
+				return false;
+			}
+
 			_currentTheme.Frequency = freq;
 			_currentTheme.Period = period;
 			_currentTheme.Mode = mode;
@@ -713,6 +737,7 @@ namespace WallSwitch
 			_currentTheme.BackOpacity = trkOpacity.Value;
 			_currentTheme.FadeTransition = chkFadeTransition.Checked;
 			_currentTheme.MaxImageScale = maxImageScale;
+			_currentTheme.NumCollageImages = numCollageImages;
 
 			_currentTheme.ColorEffectFore = cmbColorEffectFore.GetEnumValue<ColorEffect>();
 			_currentTheme.ColorEffectBack = cmbColorEffectBack.GetEnumValue<ColorEffect>();
@@ -829,7 +854,7 @@ namespace WallSwitch
 				grpBackgroundColorEffects.Visible = false;
 			}
 
-
+			c_numCollageImages.Visible = c_numCollageImagesLabel.Visible = c_themeMode.SelectedIndex == k_modeCollage;
 
 			EnableLocationsContextMenu();
 		}

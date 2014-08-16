@@ -1,7 +1,7 @@
 WallSwitch
 Switches desktop wallpapers from a variety of sources.
 http://wallswitch.codeplex.com/
-Current Version: 1.2.4
+Current Version: 1.2.5
 
 Requirements:
 	.NET Framework 4:  http://www.microsoft.com/download/en/details.aspx?id=17718
@@ -12,10 +12,12 @@ Contact:
 
 ChangeLog:
 
-Version 1.2.5 - Pending:
+Version 1.2.5 - 2014-08-16:
 - Added support for sequential order in collage mode.
+- Added option to display multiple images per switch in collage mode.
 - Fixed bug where border width wasn't being loaded properly, and was reverting to default values.
 - Fixed bug where sequential order was repeating images on multiple monitors.
+- Decreased likelihood of random images being repeated.
 
 Version 1.2.4 - 2014-04-26:
 - Added an option to put a solid border around the image in collage mode.

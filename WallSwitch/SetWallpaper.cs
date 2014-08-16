@@ -1334,20 +1334,47 @@ namespace WallSwitch
 			try
 			{
 				var screenRects = (from s in Screen.AllScreens select s.Bounds).ToArray();
+
+				// Keep track of which screens have been cleared.
+				var screenInits = new bool[screenRects.Length];
+				for (int i = 0; i < screenInits.Length; i++) screenInits[i] = false;
+
 				using (_renderer = new WallpaperRenderer())
 				{
 					Bitmap lastImage = null;
 					if (theme.Mode == ThemeMode.Collage) lastImage = LoadLastWallpaper(theme);
 					if (_renderer.InitFrame(screenRects, theme, lastImage))
 					{
-						var imageIndex = 0;
 						var fileArray = files.ToArray();
-						foreach (var screenRect in screenRects)
+						if (fileArray.Length <= screenRects.Length)
 						{
-							if (imageIndex >= fileArray.Length) imageIndex = 0;
-							if (imageIndex < fileArray.Length) _renderer.RenderScreen(fileArray[imageIndex], screenRect);
-							else _renderer.RenderBlankScreen(screenRect);
-							imageIndex++;
+							var imageIndex = 0;
+							for (int screenIndex = 0; screenIndex < screenRects.Length; screenIndex++)
+							{
+								var screenRect = screenRects[screenIndex];
+								var firstImage = screenInits[screenIndex] == false;
+
+								if (imageIndex >= fileArray.Length) imageIndex = 0;
+								if (imageIndex < fileArray.Length) _renderer.RenderImageOnScreen(fileArray[imageIndex], screenRect, firstImage);
+								else _renderer.RenderBlankScreen(screenRect);
+
+								imageIndex++;
+								screenInits[screenIndex] = true;
+							}
+						}
+						else // Multiple images per monitor
+						{
+							int screenIndex = 0;
+							foreach (var file in fileArray)
+							{
+								var firstImage = screenInits[screenIndex] == false;
+
+								_renderer.RenderImageOnScreen(file, screenRects[screenIndex], firstImage);
+
+								screenInits[screenIndex] = true;
+								screenIndex++;
+								if (screenIndex >= screenRects.Length) screenIndex = 0;
+							}
 						}
 
 						// Apply to desktop background.

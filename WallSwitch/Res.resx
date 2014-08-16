@@ -498,7 +498,13 @@ Click 'yes' to be taken to the download page.</value>
   <data name="Website" xml:space="preserve">
     <value>http://wallswitch.codeplex.com/</value>
   </data>
+  <data name="Error_InvalidNumCollageImages" xml:space="preserve">
+    <value>Invalid number of images per switch.</value>
+  </data>
   <data name="Error_InvalidThemeMode" xml:space="preserve">
     <value>Invalid theme mode.</value>
+  </data>
+  <data name="Error_OutOfRangeNumCollageImages" xml:space="preserve">
+    <value>Number of images per switch must be between 1 and 10.</value>
   </data>
 </root>

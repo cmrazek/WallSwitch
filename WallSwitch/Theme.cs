@@ -16,7 +16,10 @@ namespace WallSwitch
 		#region Constants
 		private const int k_maxHistory = 10;
 		private const int k_maxRetrievalRetries = 10;
+		private const int k_maxRepeatHistoryRetries = 3;
+		private const int k_maxRepeatNowRetries = 10;
 		private const int k_maxImageRectHistory = 3;
+		public const int k_maxNumCollageImages = 10;
 
 		private const int k_defaultFreq = 5;
 		private const Period k_defaultPeriod = Period.Minutes;
@@ -33,6 +36,7 @@ namespace WallSwitch
 		private static readonly Color k_defaultBorderColor = Color.White;
 		private const bool k_defaultFadeTransition = true;
 		public const int k_defaultMaxImageScale = 200;
+		public const int k_defaultNumCollageImages = 1;
 		public const int k_defaultColorEffectBackRatio = 25;
 		private const bool k_defaultDropShadow = false;
 		private const int k_defaultDropShadowDist = 15;
@@ -67,6 +71,7 @@ namespace WallSwitch
 		private bool _fadeTransition = k_defaultFadeTransition;
 		private string _lastWallpaperFile = string.Empty;
 		private int _maxImageScale = k_defaultMaxImageScale;
+		private int _numCollageImages = k_defaultNumCollageImages;
 
 		private ColorEffect _colorEffectFore = ColorEffect.None;
 		private ColorEffect _colorEffectBack = ColorEffect.None;
@@ -229,6 +234,12 @@ namespace WallSwitch
 			get { return _maxImageScale; }
 			set { _maxImageScale = value; }
 		}
+
+		public int NumCollageImages
+		{
+			get { return _numCollageImages; }
+			set { _numCollageImages = value; }
+		}
 		#endregion
 
 		#region Save/Load
@@ -257,6 +268,7 @@ namespace WallSwitch
 			if (_fadeTransition != k_defaultFadeTransition) xml.WriteAttributeString("FadeTransition", _fadeTransition.ToString());
 			if (!string.IsNullOrEmpty(_lastWallpaperFile)) xml.WriteAttributeString("LastWallpaperFile", _lastWallpaperFile);
 			if (_maxImageScale != k_defaultMaxImageScale) xml.WriteAttributeString("MaxImageScale", _maxImageScale.ToString());
+			if (_numCollageImages != k_defaultNumCollageImages) xml.WriteAttributeString("NumCollageImages", _numCollageImages.ToString());
 
 			if (_colorEffectFore != ColorEffect.None) xml.WriteAttributeString("ColorEffectFore", _colorEffectFore.ToString());
 			if (_colorEffectBack != ColorEffect.None) xml.WriteAttributeString("ColorEffectBack", _colorEffectBack.ToString());
@@ -333,6 +345,7 @@ namespace WallSwitch
 			_fadeTransition = Util.ParseBool(xmlTheme, "FadeTransition", k_defaultFadeTransition);
 			_lastWallpaperFile = Util.ParseString(xmlTheme, "LastWallpaperFile", string.Empty);
 			_maxImageScale = Util.ParseInt(xmlTheme, "MaxImageScale", k_defaultMaxImageScale);
+			_numCollageImages = Util.ParseInt(xmlTheme, "NumCollageImages", k_defaultNumCollageImages);
 
 			// Old XML settings use a single attribute to store a fore/back color effect.
 			// New XML uses a separate attribute for each.
@@ -601,7 +614,11 @@ namespace WallSwitch
 		public void AddImageRectHistory(RectangleF rect, int numMonitors)
 		{
 			_imageRectHistory.Add(rect);
-			while (_imageRectHistory.Count > k_maxImageRectHistory * numMonitors)
+
+			var maxHistory = k_maxImageRectHistory * numMonitors;
+			if (_mode == ThemeMode.Collage) maxHistory *= _numCollageImages;
+
+			while (_imageRectHistory.Count > maxHistory)
 			{
 				_imageRectHistory.RemoveAt(0);
 			}
@@ -639,6 +656,9 @@ namespace WallSwitch
 				if (allFound) return imageSet;
 			}
 
+			int numImagesToFind = _separateMonitors ? numMonitors : 1;
+			if (_mode == ThemeMode.Collage) numImagesToFind *= _numCollageImages;
+
 			// Go through each location and find files.
 			var files = new List<ImageRec>();
 			foreach (Location loc in (from l in _locations
@@ -649,27 +669,15 @@ namespace WallSwitch
 
 			if (files.Count > 0)
 			{
-				if (!_separateMonitors) numMonitors = 1;
-
 				if (_order == ThemeOrder.Random)
 				{
 					// Pick N number of files to display.
-					var pickedFiles = new List<ImageRec>(numMonitors);
-					var retries = 0;
-					while (pickedFiles.Count < numMonitors && retries < k_maxRetrievalRetries)
+					var pickedFiles = new List<ImageRec>(numImagesToFind);
+					while (pickedFiles.Count < numImagesToFind)
 					{
-						var index = _rand.Next(files.Count);
-						var loc = files[index];
-						if (loc.Retrieve())
-						{
-							Log.Write(LogLevel.Debug, "Choosing file # {0}: {1}", index, loc);
-							pickedFiles.Add(loc);
-							retries = 0;
-						}
-						else
-						{
-							retries++;
-						}
+						var img = PickRandomImage(files, pickedFiles);
+						if (img == null) break;
+						pickedFiles.Add(img);
 					}
 
 					ret = pickedFiles;
@@ -699,11 +707,17 @@ namespace WallSwitch
 					}
 
 					// Pick N number of files to display.
-					var pickedFiles = new List<ImageRec>(numMonitors);
+					var pickedFiles = new List<ImageRec>(numImagesToFind);
 					var retries = 0;
-					while (pickedFiles.Count < numMonitors && fileIndex < files.Count && retries < k_maxRetrievalRetries)
+					while (pickedFiles.Count < numImagesToFind)
 					{
-						var loc = files[fileIndex++];
+						if (fileIndex >= files.Count)
+						{
+							if (fileIndex == 0) break;
+							fileIndex = 0;
+						}
+
+						var loc = files[fileIndex];
 						if (loc.Retrieve())
 						{
 							Log.Write(LogLevel.Debug, "Choosing file # {0}: {1}", fileIndex, loc);
@@ -713,7 +727,10 @@ namespace WallSwitch
 						else
 						{
 							retries++;
+							if (retries > k_maxRetrievalRetries) break;
 						}
+
+						fileIndex++;
 					}
 
 					ret = pickedFiles;
@@ -737,6 +754,61 @@ namespace WallSwitch
 			}
 
 			return ret;
+		}
+
+		private ImageRec PickRandomImage(List<ImageRec> files, List<ImageRec> filesPickedThisTime)
+		{
+			var repeatNowRetries = 0;
+			var repeatHistoryRetries = 0;
+			var loadRetries = 0;
+
+			while (true)
+			{
+				var index = _rand.Next(files.Count - 1);
+				var img = files[index];
+
+				if (filesPickedThisTime.Contains(img))
+				{
+					Log.Write(LogLevel.Debug, "Repeat now image # {0}: {1} (retries {2})", index, img, repeatNowRetries);
+					repeatNowRetries++;
+					if (repeatNowRetries <= k_maxRepeatNowRetries) continue;
+				}
+				repeatNowRetries = 0;
+
+				if (ImageRecIsInHistory(img))
+				{
+					Log.Write(LogLevel.Debug, "Repeat history image # {0}: {1} (retries {2})", index, img, repeatHistoryRetries);
+					repeatHistoryRetries++;
+					if (repeatHistoryRetries <= k_maxRepeatHistoryRetries) continue;
+				}
+				repeatHistoryRetries = 0;
+
+				if (img.Retrieve())
+				{
+					Log.Write(LogLevel.Debug, "Using image # {0}: {1}", index, img);
+					return img;
+				}
+
+				Log.Write(LogLevel.Debug, "Failed to load image # {0}: {1} (retries {2})", index, img, loadRetries);
+				loadRetries++;
+				if (loadRetries > k_maxRetrievalRetries) break;
+			}
+
+			return null;
+		}
+
+		private bool ImageRecIsInHistory(ImageRec img)
+		{
+			foreach (var h in _history)
+			{
+				if (h == null) continue;
+				foreach (var i in h)
+				{
+					if (i.Equals(img)) return true;
+				}
+			}
+
+			return false;
 		}
 
 		public IEnumerable<ImageRec> GetPrevImages()

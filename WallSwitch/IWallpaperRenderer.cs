@@ -10,7 +10,7 @@ namespace WallSwitch
 	{
 		Image WallpaperImage { get; }
 		bool InitFrame(Rectangle[] screenRects, Theme theme, Bitmap lastImage);
-		void RenderScreen(ImageRec file, Rectangle thisScreenRect);
+		void RenderImageOnScreen(ImageRec file, Rectangle thisScreenRect, bool firstImage);
 		void RenderBlankScreen(Rectangle screenRect);
 	}
 }

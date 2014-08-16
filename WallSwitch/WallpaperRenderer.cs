@@ -123,7 +123,7 @@ namespace WallSwitch
 			}
 		}
 
-		public void RenderScreen(ImageRec file, Rectangle thisScreenRect)
+		public void RenderImageOnScreen(ImageRec file, Rectangle thisScreenRect, bool firstImage)
 		{
 			try
 			{
@@ -199,7 +199,7 @@ namespace WallSwitch
 
 							if (_firstRender) clearOpacity = 255;
 							else clearOpacity = _theme.BackOpacity255;
-							clearRequired = true;
+							clearRequired = firstImage;	// Don't clear the screen if this isn't the first image.
 
 							// Feather edges
 							if (scale > 0.0f)
@@ -510,28 +510,26 @@ namespace WallSwitch
 		private RectangleF GetRandomImageRect(Rectangle screenRect, float imgWidth, float imgHeight)
 		{
 			var retries = k_randomRectRetries;
-			RectangleF bestRect = new RectangleF(0.0f, 0.0f, 0.0f, 0.0f);
-			RectangleF rect;
+			var bestRect = new RectangleF(0.0f, 0.0f, 0.0f, 0.0f);
 			var bestOverlap = -1.0f;
-			var oldRects = new List<RectangleF>();
-			RectangleF screenRectF = screenRect;
+			var screenRectF = screenRect;
+			var oldRects = _theme.ImageRectHistory.ToArray();
 
 			while (retries-- > 0)
 			{
-				rect = new RectangleF(
+				var rect = new RectangleF(
 					(float)(_rand.NextDouble() * (screenRect.Width - imgWidth)) + screenRect.X,
 					(float)(_rand.NextDouble() * (screenRect.Height - imgHeight)) + screenRect.Y,
 					imgWidth, imgHeight);
 
 				var overlap = 0.0f;
-				var scale = 1.0f;
-				foreach (var oldRect in _theme.ImageRectHistory)
+
+				for (int i = 0; i < oldRects.Length; i++)
 				{
-					if (screenRectF.Contains(oldRect))
-					{
-						overlap += oldRect.IntersectArea(rect) * scale;
-						scale += 1.0f;
-					}
+					var ratio = (double)(i + 1) / (double)oldRects.Length;
+					var importance = Math.Pow(ratio, Math.E);
+
+					overlap += oldRects[i].IntersectArea(rect) * (float)importance;
 				}
 
 				if (overlap < bestOverlap || bestOverlap < 0)

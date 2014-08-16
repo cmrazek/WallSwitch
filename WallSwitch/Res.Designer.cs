@@ -433,6 +433,15 @@ namespace WallSwitch {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid number of images per switch..
+        /// </summary>
+        internal static string Error_InvalidNumCollageImages {
+            get {
+                return ResourceManager.GetString("Error_InvalidNumCollageImages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid start up delay..
         /// </summary>
         internal static string Error_InvalidStartUpDelay {
@@ -519,6 +528,15 @@ namespace WallSwitch {
         internal static string Error_NewTheme {
             get {
                 return ResourceManager.GetString("Error_NewTheme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Number of images per switch must be between 1 and 10..
+        /// </summary>
+        internal static string Error_OutOfRangeNumCollageImages {
+            get {
+                return ResourceManager.GetString("Error_OutOfRangeNumCollageImages", resourceCulture);
             }
         }
         

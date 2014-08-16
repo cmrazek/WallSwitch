@@ -149,6 +149,8 @@
 			this.ciClearHistoryList = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.grpNavButtons = new System.Windows.Forms.GroupBox();
+			this.c_numCollageImagesLabel = new System.Windows.Forms.Label();
+			this.c_numCollageImages = new System.Windows.Forms.TextBox();
 			this.c_activateThemeHotKey = new WallSwitch.HotKeyTextBox();
 			this.clrBackTop = new WallSwitch.ColorSample();
 			this.clrBackBottom = new WallSwitch.ColorSample();
@@ -456,11 +458,11 @@
             "Stretch",
             "Fit",
             "Fill"});
-			this.c_imageFit.Location = new System.Drawing.Point(6, 46);
+			this.c_imageFit.Location = new System.Drawing.Point(300, 19);
 			this.c_imageFit.Name = "c_imageFit";
 			this.c_imageFit.Size = new System.Drawing.Size(141, 21);
-			this.c_imageFit.TabIndex = 3;
-			this.toolTip1.SetToolTip(this.c_imageFit, "Wallpaper sizing mode");
+			this.c_imageFit.TabIndex = 2;
+			this.toolTip1.SetToolTip(this.c_imageFit, "Image sizing method");
 			this.c_imageFit.SelectedIndexChanged += new System.EventHandler(this.ControlChanged);
 			// 
 			// lblOpacityDisplay
@@ -503,10 +505,10 @@
 			this.c_separateMonitors.AutoSize = true;
 			this.c_separateMonitors.Checked = true;
 			this.c_separateMonitors.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.c_separateMonitors.Location = new System.Drawing.Point(300, 21);
+			this.c_separateMonitors.Location = new System.Drawing.Point(6, 50);
 			this.c_separateMonitors.Name = "c_separateMonitors";
 			this.c_separateMonitors.Size = new System.Drawing.Size(179, 17);
-			this.c_separateMonitors.TabIndex = 2;
+			this.c_separateMonitors.TabIndex = 3;
 			this.c_separateMonitors.Text = "Separate image for each monitor";
 			this.toolTip1.SetToolTip(this.c_separateMonitors, "Display a separate image on each monitor");
 			this.c_separateMonitors.UseVisualStyleBackColor = true;
@@ -556,6 +558,7 @@
 			this.lblBackBottom.Size = new System.Drawing.Size(113, 13);
 			this.lblBackBottom.TabIndex = 2;
 			this.lblBackBottom.Text = "Bottom Gradient Color:";
+			this.toolTip1.SetToolTip(this.lblBackBottom, "Bottom color of background gradient");
 			// 
 			// lblBackTop
 			// 
@@ -565,6 +568,7 @@
 			this.lblBackTop.Size = new System.Drawing.Size(99, 13);
 			this.lblBackTop.TabIndex = 0;
 			this.lblBackTop.Text = "Top Gradient Color:";
+			this.toolTip1.SetToolTip(this.lblBackTop, "Top color of background gradient");
 			// 
 			// btnAddImage
 			// 
@@ -589,7 +593,7 @@
 			this.c_themeMode.Name = "c_themeMode";
 			this.c_themeMode.Size = new System.Drawing.Size(141, 21);
 			this.c_themeMode.TabIndex = 0;
-			this.toolTip1.SetToolTip(this.c_themeMode, "Wallpaper display mode");
+			this.toolTip1.SetToolTip(this.c_themeMode, "Display mode");
 			this.c_themeMode.SelectedIndexChanged += new System.EventHandler(this.ControlChanged);
 			// 
 			// btnAddFolder
@@ -901,6 +905,7 @@
 			this.c_themeOrder.Name = "c_themeOrder";
 			this.c_themeOrder.Size = new System.Drawing.Size(141, 21);
 			this.c_themeOrder.TabIndex = 1;
+			this.toolTip1.SetToolTip(this.c_themeOrder, "Display order");
 			this.c_themeOrder.SelectedIndexChanged += new System.EventHandler(this.ControlChanged);
 			// 
 			// c_maxScalePct
@@ -911,6 +916,7 @@
 			this.c_maxScalePct.Size = new System.Drawing.Size(15, 13);
 			this.c_maxScalePct.TabIndex = 6;
 			this.c_maxScalePct.Text = "%";
+			this.toolTip1.SetToolTip(this.c_maxScalePct, "Maximum amount of magnification (in percent)");
 			// 
 			// c_maxScale
 			// 
@@ -918,6 +924,7 @@
 			this.c_maxScale.Name = "c_maxScale";
 			this.c_maxScale.Size = new System.Drawing.Size(50, 20);
 			this.c_maxScale.TabIndex = 5;
+			this.toolTip1.SetToolTip(this.c_maxScale, "Maximum amount of magnification (in percent)");
 			this.c_maxScale.TextChanged += new System.EventHandler(this.ControlChanged);
 			// 
 			// c_limitScale
@@ -928,6 +935,7 @@
 			this.c_limitScale.Size = new System.Drawing.Size(126, 17);
 			this.c_limitScale.TabIndex = 4;
 			this.c_limitScale.Text = "Limit image scaling to";
+			this.toolTip1.SetToolTip(this.c_limitScale, "Limit the magnification of images?");
 			this.c_limitScale.UseVisualStyleBackColor = true;
 			this.c_limitScale.CheckedChanged += new System.EventHandler(this.chkLimitScale_CheckedChanged);
 			// 
@@ -1020,6 +1028,8 @@
 			// 
 			// grpCollageDisplay
 			// 
+			this.grpCollageDisplay.Controls.Add(this.c_numCollageImagesLabel);
+			this.grpCollageDisplay.Controls.Add(this.c_numCollageImages);
 			this.grpCollageDisplay.Controls.Add(this.c_borderColor);
 			this.grpCollageDisplay.Controls.Add(this.c_borderColorLabel);
 			this.grpCollageDisplay.Controls.Add(this.c_edgeMode);
@@ -1050,8 +1060,9 @@
 			this.c_borderColorLabel.Location = new System.Drawing.Point(304, 57);
 			this.c_borderColorLabel.Name = "c_borderColorLabel";
 			this.c_borderColorLabel.Size = new System.Drawing.Size(34, 13);
-			this.c_borderColorLabel.TabIndex = 6;
+			this.c_borderColorLabel.TabIndex = 8;
 			this.c_borderColorLabel.Text = "Color:";
+			this.toolTip1.SetToolTip(this.c_borderColorLabel, "Border color");
 			// 
 			// c_edgeMode
 			// 
@@ -1060,7 +1071,8 @@
 			this.c_edgeMode.Location = new System.Drawing.Point(6, 54);
 			this.c_edgeMode.Name = "c_edgeMode";
 			this.c_edgeMode.Size = new System.Drawing.Size(113, 21);
-			this.c_edgeMode.TabIndex = 3;
+			this.c_edgeMode.TabIndex = 5;
+			this.toolTip1.SetToolTip(this.c_edgeMode, "Decoration on edge of image");
 			this.c_edgeMode.SelectedIndexChanged += new System.EventHandler(this.c_edgeMode_SelectedIndexChanged);
 			// 
 			// trkDropShadowFeatherDist
@@ -1072,7 +1084,7 @@
 			this.trkDropShadowFeatherDist.Name = "trkDropShadowFeatherDist";
 			this.trkDropShadowFeatherDist.Size = new System.Drawing.Size(120, 45);
 			this.trkDropShadowFeatherDist.SmallChange = 10;
-			this.trkDropShadowFeatherDist.TabIndex = 15;
+			this.trkDropShadowFeatherDist.TabIndex = 17;
 			this.trkDropShadowFeatherDist.TickFrequency = 10;
 			this.toolTip1.SetToolTip(this.trkDropShadowFeatherDist, "Width of feathering at the edges of shadows");
 			this.trkDropShadowFeatherDist.Value = 50;
@@ -1087,7 +1099,7 @@
 			this.trkDropShadowOpacity.Name = "trkDropShadowOpacity";
 			this.trkDropShadowOpacity.Size = new System.Drawing.Size(120, 45);
 			this.trkDropShadowOpacity.SmallChange = 10;
-			this.trkDropShadowOpacity.TabIndex = 12;
+			this.trkDropShadowOpacity.TabIndex = 14;
 			this.trkDropShadowOpacity.TickFrequency = 10;
 			this.toolTip1.SetToolTip(this.trkDropShadowOpacity, "Opacity of the shadow (0% = solid black, 100% = completely transparent)");
 			this.trkDropShadowOpacity.Value = 50;
@@ -1099,7 +1111,7 @@
 			this.lblDropShadowOpacity.Location = new System.Drawing.Point(6, 132);
 			this.lblDropShadowOpacity.Name = "lblDropShadowOpacity";
 			this.lblDropShadowOpacity.Size = new System.Drawing.Size(88, 13);
-			this.lblDropShadowOpacity.TabIndex = 11;
+			this.lblDropShadowOpacity.TabIndex = 13;
 			this.lblDropShadowOpacity.Text = "Shadow Opacity:";
 			this.toolTip1.SetToolTip(this.lblDropShadowOpacity, "Opacity of the shadow (0% = solid black, 100% = completely transparent)");
 			// 
@@ -1109,7 +1121,7 @@
 			this.lblDropShadowOpacityValue.Location = new System.Drawing.Point(245, 132);
 			this.lblDropShadowOpacityValue.Name = "lblDropShadowOpacityValue";
 			this.lblDropShadowOpacityValue.Size = new System.Drawing.Size(15, 13);
-			this.lblDropShadowOpacityValue.TabIndex = 13;
+			this.lblDropShadowOpacityValue.TabIndex = 15;
 			this.lblDropShadowOpacityValue.Text = "%";
 			this.toolTip1.SetToolTip(this.lblDropShadowOpacityValue, "Opacity of the shadow (0% = solid black, 100% = completely transparent)");
 			// 
@@ -1119,7 +1131,7 @@
 			this.lblDropShadowFeatherDist.Location = new System.Drawing.Point(245, 168);
 			this.lblDropShadowFeatherDist.Name = "lblDropShadowFeatherDist";
 			this.lblDropShadowFeatherDist.Size = new System.Drawing.Size(33, 13);
-			this.lblDropShadowFeatherDist.TabIndex = 16;
+			this.lblDropShadowFeatherDist.TabIndex = 18;
 			this.lblDropShadowFeatherDist.Text = "pixels";
 			this.toolTip1.SetToolTip(this.lblDropShadowFeatherDist, "Width of feathering at the edges of shadows");
 			// 
@@ -1129,7 +1141,7 @@
 			this.chkDropShadowFeather.Location = new System.Drawing.Point(6, 167);
 			this.chkDropShadowFeather.Name = "chkDropShadowFeather";
 			this.chkDropShadowFeather.Size = new System.Drawing.Size(104, 17);
-			this.chkDropShadowFeather.TabIndex = 14;
+			this.chkDropShadowFeather.TabIndex = 16;
 			this.chkDropShadowFeather.Text = "Feather Shadow";
 			this.toolTip1.SetToolTip(this.chkDropShadowFeather, "Enable feathering on shadows?");
 			this.chkDropShadowFeather.UseVisualStyleBackColor = true;
@@ -1141,7 +1153,7 @@
 			this.chkDropShadow.Location = new System.Drawing.Point(6, 93);
 			this.chkDropShadow.Name = "chkDropShadow";
 			this.chkDropShadow.Size = new System.Drawing.Size(91, 17);
-			this.chkDropShadow.TabIndex = 8;
+			this.chkDropShadow.TabIndex = 10;
 			this.chkDropShadow.Text = "Drop Shadow";
 			this.toolTip1.SetToolTip(this.chkDropShadow, "Enable drop shadows?");
 			this.chkDropShadow.UseVisualStyleBackColor = true;
@@ -1153,7 +1165,7 @@
 			this.lblDropShadowUnit.Location = new System.Drawing.Point(245, 94);
 			this.lblDropShadowUnit.Name = "lblDropShadowUnit";
 			this.lblDropShadowUnit.Size = new System.Drawing.Size(33, 13);
-			this.lblDropShadowUnit.TabIndex = 10;
+			this.lblDropShadowUnit.TabIndex = 12;
 			this.lblDropShadowUnit.Text = "pixels";
 			this.toolTip1.SetToolTip(this.lblDropShadowUnit, "Offset of drop shadow");
 			// 
@@ -1166,7 +1178,7 @@
 			this.trkDropShadow.Name = "trkDropShadow";
 			this.trkDropShadow.Size = new System.Drawing.Size(120, 45);
 			this.trkDropShadow.SmallChange = 10;
-			this.trkDropShadow.TabIndex = 9;
+			this.trkDropShadow.TabIndex = 11;
 			this.trkDropShadow.TickFrequency = 10;
 			this.toolTip1.SetToolTip(this.trkDropShadow, "Offset of drop shadow");
 			this.trkDropShadow.Value = 50;
@@ -1178,7 +1190,7 @@
 			this.c_edgeDistLabel.Location = new System.Drawing.Point(245, 57);
 			this.c_edgeDistLabel.Name = "c_edgeDistLabel";
 			this.c_edgeDistLabel.Size = new System.Drawing.Size(33, 13);
-			this.c_edgeDistLabel.TabIndex = 5;
+			this.c_edgeDistLabel.TabIndex = 7;
 			this.c_edgeDistLabel.Text = "pixels";
 			this.toolTip1.SetToolTip(this.c_edgeDistLabel, "Width of feathering at the edges of images");
 			// 
@@ -1191,7 +1203,7 @@
 			this.c_edgeDist.Name = "c_edgeDist";
 			this.c_edgeDist.Size = new System.Drawing.Size(120, 45);
 			this.c_edgeDist.SmallChange = 10;
-			this.c_edgeDist.TabIndex = 4;
+			this.c_edgeDist.TabIndex = 6;
 			this.c_edgeDist.TickFrequency = 10;
 			this.toolTip1.SetToolTip(this.c_edgeDist, "Width of feathering at the edges of images");
 			this.c_edgeDist.Value = 50;
@@ -1216,6 +1228,7 @@
 			this.label1.Size = new System.Drawing.Size(65, 13);
 			this.label1.TabIndex = 1;
 			this.label1.Text = "Color Effect:";
+			this.toolTip1.SetToolTip(this.label1, "Color effect to be applied to image being displayed.");
 			// 
 			// cmbColorEffectFore
 			// 
@@ -1291,6 +1304,7 @@
 			this.label2.Size = new System.Drawing.Size(65, 13);
 			this.label2.TabIndex = 3;
 			this.label2.Text = "Color Effect:";
+			this.toolTip1.SetToolTip(this.label2, "Color effect to be applied to background images.");
 			// 
 			// cmbColorEffectBack
 			// 
@@ -1395,6 +1409,25 @@
 			this.grpNavButtons.TabIndex = 11;
 			this.grpNavButtons.TabStop = false;
 			// 
+			// c_numCollageImagesLabel
+			// 
+			this.c_numCollageImagesLabel.AutoSize = true;
+			this.c_numCollageImagesLabel.Location = new System.Drawing.Point(353, 19);
+			this.c_numCollageImagesLabel.Name = "c_numCollageImagesLabel";
+			this.c_numCollageImagesLabel.Size = new System.Drawing.Size(97, 13);
+			this.c_numCollageImagesLabel.TabIndex = 4;
+			this.c_numCollageImagesLabel.Text = "image(s) per switch";
+			this.toolTip1.SetToolTip(this.c_numCollageImagesLabel, "Number of images to draw each time the wallpaper changes");
+			// 
+			// c_numCollageImages
+			// 
+			this.c_numCollageImages.Location = new System.Drawing.Point(307, 16);
+			this.c_numCollageImages.Name = "c_numCollageImages";
+			this.c_numCollageImages.Size = new System.Drawing.Size(40, 20);
+			this.c_numCollageImages.TabIndex = 3;
+			this.toolTip1.SetToolTip(this.c_numCollageImages, "Number of images to draw each time the wallpaper changes");
+			this.c_numCollageImages.TextChanged += new System.EventHandler(this.ControlChanged);
+			// 
 			// c_activateThemeHotKey
 			// 
 			this.c_activateThemeHotKey.BackColor = System.Drawing.SystemColors.Window;
@@ -1404,6 +1437,7 @@
 			this.c_activateThemeHotKey.ReadOnly = true;
 			this.c_activateThemeHotKey.Size = new System.Drawing.Size(141, 20);
 			this.c_activateThemeHotKey.TabIndex = 5;
+			this.toolTip1.SetToolTip(this.c_activateThemeHotKey, "Hot key to change to this theme");
 			this.c_activateThemeHotKey.HotKeyChanged += new System.EventHandler(this.ControlChanged);
 			// 
 			// clrBackTop
@@ -1438,7 +1472,8 @@
 			this.c_borderColor.Location = new System.Drawing.Point(344, 54);
 			this.c_borderColor.Name = "c_borderColor";
 			this.c_borderColor.Size = new System.Drawing.Size(30, 18);
-			this.c_borderColor.TabIndex = 7;
+			this.c_borderColor.TabIndex = 9;
+			this.toolTip1.SetToolTip(this.c_borderColor, "Border color");
 			this.c_borderColor.ColorChanged += new WallSwitch.ColorSample.ColorChangedEventHandler(this.c_borderColor_ColorChanged);
 			// 
 			// lstHistory
@@ -1636,6 +1671,8 @@
 		private ColorSample c_borderColor;
 		private System.Windows.Forms.Label c_borderColorLabel;
 		private System.Windows.Forms.ComboBox c_themeOrder;
+		private System.Windows.Forms.Label c_numCollageImagesLabel;
+		private System.Windows.Forms.TextBox c_numCollageImages;
 
 	}
 }
