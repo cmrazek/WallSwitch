@@ -4,14 +4,23 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 
-namespace WidgetInterface
+namespace WallSwitch.WidgetInterface
 {
+	/// <summary>
+	/// Contains information for a single screen.
+	/// </summary>
 	public struct Screen
 	{
 		private Rectangle _bounds;
 		private Rectangle _workingArea;
 		private bool _primary;
 
+		/// <summary>
+		/// Creates a new Screen object.
+		/// </summary>
+		/// <param name="bounds">The bounds of the screen</param>
+		/// <param name="workingArea">The bounds of the working area</param>
+		/// <param name="primary">A flag indicating if this is the primary screen</param>
 		public Screen(Rectangle bounds, Rectangle workingArea, bool primary)
 		{
 			_bounds = bounds;

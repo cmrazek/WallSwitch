@@ -25,6 +25,7 @@ namespace WallSwitch
 		private ImageFormat _imageFormat = null;
 		private Bitmap _thumbnail = null;
 		private DateTime? _pubDate = null;
+		private int _hashCode;
 		#endregion
 
 		#region Construction
@@ -37,6 +38,7 @@ namespace WallSwitch
 			var loc = new ImageRec();
 			loc._location = fileName;
 			loc._type = ImageLocationType.File;
+			loc._hashCode = loc._location.ToLower().GetHashCode();
 			return loc;
 		}
 
@@ -45,6 +47,7 @@ namespace WallSwitch
 			var loc = new ImageRec();
 			loc._location = pathName;
 			loc._type = ImageLocationType.File;
+			loc._hashCode = loc._location.ToLower().GetHashCode();
 			return loc;
 		}
 
@@ -54,6 +57,7 @@ namespace WallSwitch
 			loc._location = url;
 			loc._type = ImageLocationType.Url;
 			loc._pubDate = pubDate;
+			loc._hashCode = loc._location.ToLower().GetHashCode();
 			return loc;
 		}
 
@@ -68,6 +72,7 @@ namespace WallSwitch
 			var loc = new ImageRec();
 			loc._location = path;
 			loc._type = type;
+			loc._hashCode = loc._location.ToLower().GetHashCode();
 			return loc;
 		}
 
@@ -98,12 +103,12 @@ namespace WallSwitch
 			var other = obj as ImageRec;
 			if (other == null) return false;
 
-			return _location == other._location;
+			return string.Equals(_location, other._location, StringComparison.OrdinalIgnoreCase);
 		}
 
 		public override int GetHashCode()
 		{
-			return _location.GetHashCode();
+			return _hashCode;
 		}
 
 		public string LocationOnDisk
@@ -254,7 +259,7 @@ namespace WallSwitch
 
 		public int CompareTo(ImageRec other)	// For IComparable
 		{
-			return string.Compare(_location, other._location);
+			return string.Compare(_location, other._location, StringComparison.OrdinalIgnoreCase);
 		}
 
 	}

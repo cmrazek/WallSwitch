@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Xml;
@@ -9,20 +10,24 @@ namespace WallSwitch
 	public class ImageLayout
 	{
 		public ImageRec ImageRec { get; set; }
-		public int StartMonitor { get; set; }
-		public int NumMonitors { get; set; }
+		public int[] Monitors { get; set; }
 
-		public ImageLayout(ImageRec img, int startMonitor, int numMonitors)
+		public ImageLayout(ImageRec img, int[] monitors)
 		{
 			ImageRec = img;
-			StartMonitor = startMonitor;
-			NumMonitors = numMonitors;
+			Monitors = monitors;
 		}
 
 		public void Save(XmlWriter xml)
 		{
-			xml.WriteAttributeString("StartMonitor", StartMonitor.ToString());
-			xml.WriteAttributeString("NumMonitors", NumMonitors.ToString());
+			var sb = new StringBuilder();
+			foreach (var monitor in Monitors)
+			{
+				if (sb.Length > 0) sb.Append(",");
+				sb.Append(monitor);
+			}
+			xml.WriteAttributeString("Monitors", sb.ToString());
+
 			ImageRec.Save(xml);
 		}
 
@@ -32,20 +37,23 @@ namespace WallSwitch
 			if (imageRec == null) return null;
 
 			string str;
-			int startMonitor = 0;
-			int numMonitors = 1;
+			List<int> monitors = new List<int>();
 
-			if (string.IsNullOrEmpty(str = element.GetAttribute("StartMonitor")) || !int.TryParse(str, out startMonitor))
+			str = element.GetAttribute("Monitors");
+			if (!string.IsNullOrEmpty(str))
 			{
-				startMonitor = 0;
+				foreach (var monStr in str.Split(','))
+				{
+					int monitor;
+					if (int.TryParse(monStr.Trim(), out monitor))
+					{
+						monitors.Add(monitor);
+					}
+				}
 			}
+			if (monitors.Count == 0) monitors.Add(0);
 
-			if (string.IsNullOrEmpty(str = element.GetAttribute("NumMonitors")) || !int.TryParse(str, out numMonitors))
-			{
-				numMonitors = 1;
-			}
-
-			return new ImageLayout(imageRec, startMonitor, numMonitors);
+			return new ImageLayout(imageRec, monitors.ToArray());
 		}
 	}
 }

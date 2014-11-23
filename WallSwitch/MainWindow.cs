@@ -518,6 +518,7 @@ namespace WallSwitch
 			UpdateImageSizeDisplay();
 
 			c_separateMonitors.Checked = _currentTheme.SeparateMonitors;
+			c_allowSpanning.Checked = _currentTheme.AllowSpanning;
 			_changeThemeHotKey.Copy(_currentTheme.HotKey);
 
 			c_imageFit.SelectedIndex = (int)_currentTheme.ImageFit;
@@ -567,6 +568,7 @@ namespace WallSwitch
 			Dirty = false;
 
 			RefreshLocations();
+			RefreshWidgetList();
 			EnableControls();
 
 			_refreshing = false;
@@ -726,6 +728,7 @@ namespace WallSwitch
 			_currentTheme.Locations = locationList;
 
 			_currentTheme.SeparateMonitors = c_separateMonitors.Checked;
+			_currentTheme.AllowSpanning = c_allowSpanning.Checked;
 			if (!_currentTheme.HotKey.Equals(_changeThemeHotKey))
 			{
 				// Hot key is changing. Need to reregister.
@@ -816,7 +819,9 @@ namespace WallSwitch
 			btnPause.Image = _switchThread != null && _switchThread.Paused ? Res.PlayIcon : Res.PauseIcon;
 
 			// Display Mode Group
-			c_separateMonitors.Visible = Screen.AllScreens.Length > 1;
+			var numScreens = Screen.AllScreens.Length;
+			c_separateMonitors.Visible = numScreens > 1 && c_themeMode.SelectedIndex != k_modeCollage;
+			c_allowSpanning.Visible = numScreens > 1 && c_themeMode.SelectedIndex != k_modeCollage;
 			c_imageFit.Visible = c_themeMode.SelectedIndex != k_modeCollage;
 			c_maxScale.Enabled = c_limitScale.Checked;
 
@@ -1065,6 +1070,18 @@ namespace WallSwitch
 			try
 			{
 				lblBackgroundBlurDistValue.Text = string.Format(Res.BackgroundBlurDist, trkBackgroundBlurDist.Value);
+				ControlChanged(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void c_allowSpanning_CheckedChanged(object sender, EventArgs e)
+		{
+			try
+			{
 				ControlChanged(sender, e);
 			}
 			catch (Exception ex)
@@ -2329,7 +2346,10 @@ namespace WallSwitch
 
 			try
 			{
-				foreach (var img in e.Images) c_historyTab.AddHistory(img.ImageRec);
+				foreach (var img in (from i in e.Images select i.ImageRec).Distinct())
+				{
+					c_historyTab.AddHistory(img);
+				}
 			}
 			catch (Exception ex)
 			{
@@ -2502,7 +2522,7 @@ namespace WallSwitch
 		private void EnableWidgetControls()
 		{
 			c_addWidgetButton.Enabled = c_widgetTypes.SelectedItem != null;
-			c_deleteWidgetButton.Enabled = c_widgetLayout.SelectedWidget != null;
+			c_widgetDeleteButton.Enabled = c_widgetLayout.SelectedWidget != null;
 		}
 
 		private void c_addWidgetButton_Click(object sender, EventArgs e)
@@ -2535,6 +2555,7 @@ namespace WallSwitch
 			try
 			{
 				ControlChanged(sender, e);
+				//RefreshWidgetList();
 			}
 			catch (Exception ex)
 			{
@@ -2542,11 +2563,22 @@ namespace WallSwitch
 			}
 		}
 
-		private void c_widgetLayout_SelectedWidgetChanged(object sender, WidgetLayoutControl.SelectedWidgetChangedEventArgs e)
+		private void c_widgetLayout_SelectedWidgetChanged(object sender, WidgetLayoutControl.WidgetEventArgs e)
 		{
 			try
 			{
 				EnableWidgetControls();
+
+				if (e.Widget != null)
+				{
+					c_widgetPropertyGrid.SelectedObject = e.Widget.Properties;
+					SelectWidgetInList(e.Widget);
+				}
+				else
+				{
+					c_widgetPropertyGrid.SelectedObject = null;
+					SelectWidgetInList(null);
+				}
 			}
 			catch (Exception ex)
 			{
@@ -2559,6 +2591,155 @@ namespace WallSwitch
 			try
 			{
 				EnableWidgetControls();
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void c_widgetPropertyGrid_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
+		{
+			try
+			{
+				ControlChanged(c_widgetPropertyGrid, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void c_widgetMoveUpButton_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				var widget = c_widgetLayout.SelectedWidget;
+				if (widget != null)
+				{
+					c_widgetLayout.MoveWidget(widget, WidgetLayoutControl.WidgetMoveDirection.Up);
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void c_widgetMoveDownButton_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				var widget = c_widgetLayout.SelectedWidget;
+				if (widget != null)
+				{
+					c_widgetLayout.MoveWidget(widget, WidgetLayoutControl.WidgetMoveDirection.Down);
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void c_widgetDeleteButton_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				c_widgetLayout.DeleteSelectedWidget();
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void RefreshWidgetList()
+		{
+			WidgetInstance selectedWidget = null;
+			var selectedLvi = c_widgetList.SelectedItems.Cast<ListViewItem>().FirstOrDefault();
+			if (selectedLvi != null) selectedWidget = selectedLvi.Tag as WidgetInstance;
+
+			c_widgetList.Items.Clear();
+
+			foreach (var widget in c_widgetLayout.Widgets)
+			{
+				var lvi = new ListViewItem(widget.DisplayName);
+				lvi.Tag = widget;
+				c_widgetList.Items.Add(lvi);
+			}
+
+			if (selectedWidget != null)
+			{
+				SelectWidgetInList(selectedWidget);
+			}
+		}
+
+		private void SelectWidgetInList(WidgetInstance widget)
+		{
+			ListViewItem widgetLvi = null;
+			if (widget != null) widgetLvi = (from l in c_widgetList.Items.Cast<ListViewItem>() where l.Tag == widget select l).FirstOrDefault();
+
+			if (widgetLvi != null)
+			{
+				if (!widgetLvi.Selected)
+				{
+					widgetLvi.Selected = true;
+					c_widgetList.EnsureVisible(widgetLvi.Index);
+				}
+			}
+			else
+			{
+				foreach (var lvi in (from l in c_widgetList.Items.Cast<ListViewItem>() where l.Selected select l))
+				{
+					lvi.Selected = false;
+				}
+			}
+		}
+
+		private void c_widgetList_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				var selectedWidget = (from l in c_widgetList.SelectedItems.Cast<ListViewItem>() select l.Tag as WidgetInstance).FirstOrDefault();
+				c_widgetLayout.SelectWidget(selectedWidget, false);
+				EnableWidgetControls();
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void c_widgetLayout_WidgetAdded(object sender, WidgetLayoutControl.WidgetEventArgs e)
+		{
+			try
+			{
+				RefreshWidgetList();
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void c_widgetLayout_WidgetDeleted(object sender, WidgetLayoutControl.WidgetEventArgs e)
+		{
+			try
+			{
+				RefreshWidgetList();
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void c_widgetLayout_WidgetOrderChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				RefreshWidgetList();
 			}
 			catch (Exception ex)
 			{

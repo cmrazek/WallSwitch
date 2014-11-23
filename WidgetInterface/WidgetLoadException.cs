@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace WidgetInterface
+namespace WallSwitch.WidgetInterface
 {
 	/// <summary>
 	/// Exception that occurs when a widget is unable to be loaded from the settings file.

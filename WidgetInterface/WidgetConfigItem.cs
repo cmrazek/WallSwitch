@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace WidgetInterface
+namespace WallSwitch.WidgetInterface
 {
 	/// <summary>
 	/// An instance of a single setting name and value.

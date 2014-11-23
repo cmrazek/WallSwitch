@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using Microsoft.Win32;
+using WallSwitch.WidgetInterface;
 
 namespace WallSwitch
 {
@@ -290,7 +291,11 @@ namespace WallSwitch
 				switch (dir)
 				{
 					case SwitchDir.Next:
-						images = _theme.GetNextImages(wallpaperSetter.MonitorRects.ToArray());
+						{
+							var screenList = new ScreenList();
+							var monitorRects = (from s in screenList select s.Bounds).ToArray();
+							images = _theme.GetNextImages(monitorRects);
+						}
 						break;
 
 					case SwitchDir.Prev:

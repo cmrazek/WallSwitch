@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using WidgetInterface;
+using WallSwitch.WidgetInterface;
 
 namespace WallSwitch
 {
@@ -106,28 +107,34 @@ namespace WallSwitch
 			_widget.Draw(args);
 		}
 
-		public bool OffsetBoundsSafe(Point offset)
+		public bool OffsetBoundsSafe(Point offset, bool dragFinished)
 		{
 			var newBounds = _bounds;
 			newBounds.Offset(offset);
 
-			return ChangeBoundsSafe(newBounds);
+			return ChangeBoundsSafe(newBounds, dragFinished);
 		}
 
-		public bool ChangeBoundsSafe(Rectangle newBounds)
+		public bool ChangeBoundsSafe(Rectangle newBounds, bool dragFinished)
 		{
 			var screens = new ScreenList();
 
-			if (newBounds.Width <= 0 || newBounds.Height <= 0) return false;
-
-			if (!screens.Contains(newBounds.TopLeft()) || !screens.Contains(newBounds.TopRight()) ||
-				!screens.Contains(newBounds.BottomLeft()) || !screens.Contains(newBounds.BottomRight()))
+			if (newBounds.Width <= 0 || newBounds.Height <= 0)
 			{
+				Debug.WriteLine("Bounds rejected because width or height was empty.");	// TODO: remove
 				return false;
 			}
 
-			var args = new WidgetSizeChangedArgs(_config, newBounds, _bounds);
-			_widget.OnSizeChanged(args);
+			var envelope = screens.Select(s => s.Bounds).ToArray().GetEnvelope();
+			if (!envelope.Contains(newBounds.TopLeft()) && !envelope.Contains(newBounds.TopRight()) &&
+				!envelope.Contains(newBounds.BottomLeft()) && !envelope.Contains(newBounds.BottomRight()))
+			{
+				Debug.WriteLine("Bounds rejects because all corners are outside the screen envelope.");	// TODO: remove
+				return false;
+			}
+
+			var args = new WidgetBoundsChangedArgs(_config, newBounds, _bounds, new ScreenList(), dragFinished);
+			_widget.OnBoundsChanged(args);
 
 			_bounds = args.Bounds;
 			return true;
@@ -147,6 +154,16 @@ namespace WallSwitch
 		public bool IsFixedSize
 		{
 			get { return _widget.IsFixedSize; }
+		}
+
+		public object Properties
+		{
+			get { return _widget.Properties; }
+		}
+
+		public string DisplayName
+		{
+			get { return _wtype.Name; }
 		}
 	}
 }

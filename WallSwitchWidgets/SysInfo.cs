@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -7,18 +8,23 @@ using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
 using System.Text;
-using WidgetInterface;
+using WallSwitch.WidgetInterface;
 
-namespace WallSwitchWidgets
+namespace WallSwitch.Widgets
 {
+	[DisplayName("Sys Info")]
 	public class SysInfo : IWidget
 	{
+		private SysInfoProperties _props = new SysInfoProperties();
+
 		private int _row;
 		private Rectangle _bounds;
 		private Graphics _g;
 		private Font _labelFont;
 		private Font _valueFont;
 		private bool _sample;
+		private Brush _labelBrush;
+		private Brush _valueBrush;
 
 		private const int k_defaultWidth = 500;
 		private const int k_defaultHeight = 500;
@@ -58,10 +64,12 @@ namespace WallSwitchWidgets
 
 		public void Load(WidgetConfig config)
 		{
+			_props.Load(config);
 		}
 
 		public void Save(WidgetConfig config)
 		{
+			_props.Save(config);
 		}
 
 		public Rectangle GetPreferredBounds(ScreenList screens)
@@ -79,47 +87,25 @@ namespace WallSwitchWidgets
 
 			_labelFont = new Font(FontFamily.GenericSansSerif, k_rowHeight, FontStyle.Bold, GraphicsUnit.Pixel);
 			_valueFont = new Font(FontFamily.GenericSansSerif, k_rowHeight, FontStyle.Regular, GraphicsUnit.Pixel);
+			_labelBrush = new SolidBrush(_props.LabelColor);
+			_valueBrush = new SolidBrush(_props.ValueColor);
 
-			/*
-			Boot Time:			<Boot Time>				done
-			CPU:				<CPU>					done
-			Default Gateway:	<Default Gateway>		done
-			DHCP Server:		<DHCP Server>			done
-			DNS Server:			<DNS Server>			done
-			Free Space:			<Free Space>			done
-			Host Name:			<Host Name>				done
-			IE Version:			<IE Version>
-			IP Address:			<IP Address>			done
-			Logon Domain:		<Logon Domain>			done
-			Logon Server:		<Logon Server>
-			MAC Address:		<MAC Address>			done
-			Machine Domain:		<Machine Domain>		done
-			Memory:				<Memory>
-			Network Card:		<Network Card>
-			Network Speed:		<Network Speed>
-			Network Type:		<Network Type>
-			OS Version:			<OS Version>
-			Service Pack:		<Service Pack>
-			Snapshot Time:		<Snapshot Time>
-			Subnet Mask:		<Subnet Mask>
-			System Type:		<System Type>
-			User Name:			<User Name>
-			Volumes:			<Volumes>
-			*/
+			if (_props.HostName) DrawItem("Host Name:", ValueType.HostName);
+			if (_props.LogonDomain) DrawItem("Logon Domain:", ValueType.LogonDomain);
+			if (_props.IpAddress) DrawItem("IP Address:", ValueType.IpAddress);
+			if (_props.MachineDomain) DrawItem("Machine Domain:", ValueType.MachineDomain);
+			if (_props.MacAddress) DrawItem("MAC Address:", ValueType.MacAddress);
+			if (_props.BootTime) DrawItem("Boot Time:", ValueType.BootTime);
+			if (_props.Cpu) DrawItem("CPU:", ValueType.CPU);
+			if (_props.DefaultGateway) DrawItem("Default Gateway:", ValueType.DefaultGateway);
+			if (_props.DhcpServer) DrawItem("DHCP Server:", ValueType.DhcpServer);
+			if (_props.DnsServer) DrawItem("DNS Server:", ValueType.DnsServer);
+			if (_props.FreeSpace) DrawItem("Free Space:", ValueType.FreeSpace);
 
-			DrawItem("Boot Time:", ValueType.BootTime);
-			DrawItem("CPU:", ValueType.CPU);
-			DrawItem("Default Gateway:", ValueType.DefaultGateway);
-			DrawItem("DHCP Server:", ValueType.DhcpServer);
-			DrawItem("DNS Server:", ValueType.DnsServer);
-			DrawItem("Free Space:", ValueType.FreeSpace);
-			DrawItem("Host Name:", ValueType.HostName);
-			DrawItem("IP Address:", ValueType.IpAddress);
-			DrawItem("Logon Domain:", ValueType.LogonDomain);
-			DrawItem("MAC Address:", ValueType.MacAddress);
-			DrawItem("Machine Domain:", ValueType.MachineDomain);
-			
-
+			_labelFont = null;
+			_valueFont = null;
+			_labelBrush = null;
+			_valueBrush = null;
 			_g = null;
 		}
 
@@ -127,7 +113,6 @@ namespace WallSwitchWidgets
 		{
 			var values = GetValue(vtype);
 			if (values == null || !values.Any()) values = new string[] { k_unknown };
-
 			DrawItemWithValues(label, values);
 		}
 
@@ -135,7 +120,7 @@ namespace WallSwitchWidgets
 		{
 			var valueLeft = _bounds.Width / 2 + _bounds.Left;
 
-			_g.DrawString(label, _labelFont, Brushes.White, new PointF(_bounds.Left, _row));
+			_g.DrawString(label, _labelFont, _labelBrush, new PointF(_bounds.Left, _row));
 
 			var gotValue = false;
 			foreach (var value in values)
@@ -144,7 +129,7 @@ namespace WallSwitchWidgets
 
 				gotValue = true;
 
-				_g.DrawString(value, _valueFont, Brushes.White, new PointF(valueLeft, _row));
+				_g.DrawString(value, _valueFont, _valueBrush, new PointF(valueLeft, _row));
 				_row += k_rowHeight;
 			}
 
@@ -156,7 +141,7 @@ namespace WallSwitchWidgets
 			get { return false; }
 		}
 
-		public void OnSizeChanged(WidgetSizeChangedArgs args)
+		public void OnBoundsChanged(WidgetBoundsChangedArgs args)
 		{
 		}
 
@@ -206,6 +191,133 @@ namespace WallSwitchWidgets
 				sb.Append(item);
 			}
 			return sb.ToString();
+		}
+
+		public object Properties
+		{
+			get { return _props; }
+		}
+
+		public class SysInfoProperties
+		{
+			[Category("Data")]
+			public bool HostName { get; set; }
+
+			[Category("Data")]
+			public bool LogonDomain { get; set; }
+
+			[Category("Data")]
+			public bool IpAddress { get; set; }
+
+			[Category("Data")]
+			public bool MachineDomain { get; set; }
+
+			[Category("Data")]
+			public bool MacAddress { get; set; }
+
+			[Category("Data")]
+			public bool BootTime { get; set; }
+
+			[Category("Data")]
+			public bool Cpu { get; set; }
+
+			[Category("Data")]
+			public bool DefaultGateway { get; set; }
+
+			[Category("Data")]
+			public bool DhcpServer { get; set; }
+
+			[Category("Data")]
+			public bool DnsServer { get; set; }
+
+			[Category("Data")]
+			public bool FreeSpace { get; set; }
+
+			[Category("Appearance")]
+			public Color LabelColor { get; set; }
+
+			[Category("Appearance")]
+			public Color ValueColor { get; set; }
+
+			public SysInfoProperties()
+			{
+				HostName = true;
+				LogonDomain = true;
+				IpAddress = true;
+				MachineDomain = true;
+				MacAddress = true;
+				BootTime = true;
+				Cpu = true;
+				DefaultGateway = true;
+				DhcpServer = true;
+				DnsServer = true;
+				FreeSpace = true;
+
+				LabelColor = Color.Silver;
+				ValueColor = Color.White;
+			}
+
+			public void Save(WidgetConfig config)
+			{
+				config["HostName"] = HostName.ToString();
+				config["LogonDomain"] = LogonDomain.ToString();
+				config["IpAddress"] = IpAddress.ToString();
+				config["MachineDomain"] = MachineDomain.ToString();
+				config["MacAddress"] = MacAddress.ToString();
+				config["BootTime"] = BootTime.ToString();
+				config["Cpu"] = Cpu.ToString();
+				config["DefaultGateway"] = DefaultGateway.ToString();
+				config["DhcpServer"] = DhcpServer.ToString();
+				config["DnsServer"] = DnsServer.ToString();
+				config["FreeSpace"] = FreeSpace.ToString();
+
+				config["LabelColor"] = ColorTranslator.ToHtml(LabelColor);
+				config["ValueColor"] = ColorTranslator.ToHtml(ValueColor);
+			}
+
+			public void Load(WidgetConfig config)
+			{
+				HostName = GetConfigBool(config, "HostName", true);
+				LogonDomain = GetConfigBool(config, "LogonDomain", true);
+				IpAddress = GetConfigBool(config, "IpAddress", true);
+				MachineDomain = GetConfigBool(config, "MachineDomain", true);
+				MacAddress = GetConfigBool(config, "MacAddress", true);
+				BootTime = GetConfigBool(config, "BootTime", true);
+				Cpu = GetConfigBool(config, "Cpu", true);
+				DefaultGateway = GetConfigBool(config, "DefaultGateway", true);
+				DhcpServer = GetConfigBool(config, "DhcpServer", true);
+				DnsServer = GetConfigBool(config, "DnsServer", true);
+				FreeSpace = GetConfigBool(config, "FreeSpace", true);
+
+				LabelColor = GetConfigColor(config, "LabelColor", Color.Silver);
+				ValueColor = GetConfigColor(config, "ValueColor", Color.White);
+			}
+
+			private bool GetConfigBool(WidgetConfig config, string name, bool defVal)
+			{
+				var item = config.TryGetItem(name);
+				if (item == null) return defVal;
+
+				bool value;
+				if (!bool.TryParse(item.Value, out value)) return defVal;
+
+				return value;
+			}
+
+			private Color GetConfigColor(WidgetConfig config, string name, Color defVal)
+			{
+				var item = config.TryGetItem(name);
+				if (item == null) return defVal;
+
+				try
+				{
+					return ColorTranslator.FromHtml(item.Value);
+				}
+				catch (Exception)
+				{
+					return defVal;
+				}
+			}
 		}
 
 		#region O/S
@@ -401,7 +513,6 @@ namespace WallSwitchWidgets
 		#endregion
 
 		#region Domains
-		private string _logonDomain;
 		private string _machineDomain;
 
 		private string GetUserDomain()

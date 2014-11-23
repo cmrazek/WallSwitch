@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
-using WidgetInterface;
+using WallSwitch.WidgetInterface;
 
-namespace WallSwitchWidgets
+namespace WallSwitch.Widgets
 {
+	[DisplayName("Calendar")]
 	public class CalendarWidget : IWidget
 	{
 		private Rectangle _lastBounds;
@@ -140,7 +142,7 @@ namespace WallSwitchWidgets
 			get { return false; }
 		}
 
-		public void OnSizeChanged(WidgetSizeChangedArgs args)
+		public void OnBoundsChanged(WidgetBoundsChangedArgs args)
 		{
 			// The size must remain a perfect square.
 
@@ -149,6 +151,11 @@ namespace WallSwitchWidgets
 				if (args.Bounds.Width != args.OldBounds.Width) args.Bounds = new Rectangle(args.Bounds.Location, new Size(args.Bounds.Width, args.Bounds.Width));
 				else args.Bounds = new Rectangle(args.Bounds.Location, new Size(args.Bounds.Height, args.Bounds.Height));
 			}
+		}
+
+		public object Properties
+		{
+			get { return null; }
 		}
 	}
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace WidgetInterface
+namespace WallSwitch.WidgetInterface
 {
 	/// <summary>
 	/// A storage place for widgets to store configuration values.

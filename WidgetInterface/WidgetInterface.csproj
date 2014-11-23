@@ -7,7 +7,7 @@
     <ProjectGuid>{BE06C925-2EDD-419F-9655-3EF6BE49C809}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WidgetInterface</RootNamespace>
+    <RootNamespace>WallSwitch.WidgetInterface</RootNamespace>
     <AssemblyName>WidgetInterface</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -51,7 +51,7 @@
     <Compile Include="WidgetLoadException.cs" />
     <Compile Include="WidgetConfigItem.cs" />
     <Compile Include="WidgetConfig.cs" />
-    <Compile Include="WidgetSizeChangedArgs.cs" />
+    <Compile Include="WidgetBoundsChangedArgs.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

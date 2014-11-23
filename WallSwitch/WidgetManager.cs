@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
-using WidgetInterface;
+using WallSwitch.WidgetInterface;
 
 namespace WallSwitch
 {

@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Win32;
-using WidgetInterface;
+using WallSwitch.WidgetInterface;
 
 namespace WallSwitch
 {
@@ -1341,17 +1341,6 @@ namespace WallSwitch
 			get { return System.Windows.Forms.Screen.AllScreens.Length; }
 		}
 
-		public IEnumerable<Rectangle> MonitorRects
-		{
-			get
-			{
-				foreach (var screen in System.Windows.Forms.Screen.AllScreens)
-				{
-					yield return screen.Bounds;
-				}
-			}
-		}
-
 		public void Set(Theme theme, IEnumerable<ImageLayout> files)
 		{
 			if (theme == null) throw new ArgumentNullException("Theme is null.");
@@ -1359,7 +1348,8 @@ namespace WallSwitch
 
 			try
 			{
-				var screenRects = (from s in System.Windows.Forms.Screen.AllScreens select s.Bounds).ToArray();
+				var screenList = new ScreenList();
+				var screenRects = (from s in screenList select s.Bounds).ToArray();
 
 				// Keep track of which screens have been cleared.
 				var screenInits = new bool[screenRects.Length];
@@ -1375,60 +1365,25 @@ namespace WallSwitch
 						{
 							if (theme.Mode == ThemeMode.Collage)
 							{
-								if (imgLayout.StartMonitor < screenRects.Length)
+								if (imgLayout.Monitors.Length >= 1 && imgLayout.Monitors[0] < screenRects.Length)
 								{
-									_renderer.RenderCollageImageOnScreen(imgLayout.ImageRec, screenRects[imgLayout.StartMonitor]);
+									_renderer.RenderCollageImageOnScreen(imgLayout.ImageRec, screenRects[imgLayout.Monitors[0]]);
 								}
 							}
 							else
 							{
 								// Check that the monitor range doesn't exceed the actual number of monitors available.
-								if (imgLayout.StartMonitor >= screenRects.Length) continue;
-								var startMonitor = imgLayout.StartMonitor;
-								var numMonitors = imgLayout.NumMonitors;
-								if (startMonitor + numMonitors > screenRects.Length) numMonitors = screenRects.Length - startMonitor;
-
-								var spanRect = screenRects.Skip(startMonitor).Take(numMonitors).GetEnvelope();
-
-								for (var monitorIndex = 0; monitorIndex < numMonitors; monitorIndex++)
+								var screens = (from m in imgLayout.Monitors where m < screenRects.Length select screenRects[m]).ToArray();
+								var spanRect = screens.GetEnvelope();
+								if (!spanRect.IsEmpty)
 								{
-									_renderer.RenderFullScreenImageOnScreen(imgLayout.ImageRec, screenRects[startMonitor + monitorIndex], spanRect);
+									foreach (var screen in screens)
+									{
+										_renderer.RenderFullScreenImageOnScreen(imgLayout.ImageRec, screen, spanRect);
+									}
 								}
 							}
 						}
-
-						// TODO: remove
-						//var fileArray = files.ToArray();
-						//if (fileArray.Length <= screenRects.Length)
-						//{
-						//	var imageIndex = 0;
-						//	for (int screenIndex = 0; screenIndex < screenRects.Length; screenIndex++)
-						//	{
-						//		var screenRect = screenRects[screenIndex];
-						//		var firstImage = screenInits[screenIndex] == false;
-
-						//		if (imageIndex >= fileArray.Length) imageIndex = 0;
-						//		if (imageIndex < fileArray.Length) _renderer.RenderImageOnScreen(fileArray[imageIndex], screenRect, firstImage);
-						//		else _renderer.RenderBlankScreen(screenRect);
-
-						//		imageIndex++;
-						//		screenInits[screenIndex] = true;
-						//	}
-						//}
-						//else // Multiple images per monitor
-						//{
-						//	int screenIndex = 0;
-						//	foreach (var file in fileArray)
-						//	{
-						//		var firstImage = screenInits[screenIndex] == false;
-
-						//		_renderer.RenderImageOnScreen(file, screenRects[screenIndex], firstImage);
-
-						//		screenInits[screenIndex] = true;
-						//		screenIndex++;
-						//		if (screenIndex >= screenRects.Length) screenIndex = 0;
-						//	}
-						//}
 
 						// Draw widgets
 						var baseImage = _renderer.WallpaperImage;
@@ -1529,7 +1484,7 @@ namespace WallSwitch
 			{
 				try
 				{
-					widget.Draw(new WidgetDrawArgs(widget.Config, widget.Bounds, graphics, false));
+					widget.Draw(new WidgetDrawArgs(widget.Config, widget.Bounds, graphics, image, false));
 				}
 				catch (Exception ex)
 				{

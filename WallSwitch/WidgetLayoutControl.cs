@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
-using WidgetInterface;
+using WallSwitch.WidgetInterface;
 
 namespace WallSwitch
 {
@@ -25,12 +26,15 @@ namespace WallSwitch
 
 		public event EventHandler WidgetsChanged;
 
-		public event EventHandler<SelectedWidgetChangedEventArgs> SelectedWidgetChanged;
-		public class SelectedWidgetChangedEventArgs : EventArgs
+		public event EventHandler<WidgetEventArgs> SelectedWidgetChanged;
+		public event EventHandler<WidgetEventArgs> WidgetAdded;
+		public event EventHandler<WidgetEventArgs> WidgetDeleted;
+		public event EventHandler WidgetOrderChanged;
+		public class WidgetEventArgs : EventArgs
 		{
 			public WidgetInstance Widget { get; private set; }
 
-			public SelectedWidgetChangedEventArgs(WidgetInstance widget)
+			public WidgetEventArgs(WidgetInstance widget)
 			{
 				Widget = widget;
 			}
@@ -96,7 +100,9 @@ namespace WallSwitch
 				matrix.Scale(_displayScale, _displayScale);
 				g.Transform = matrix;
 
-				foreach (var screen in System.Windows.Forms.Screen.AllScreens)
+				var screenList = new ScreenList();
+
+				foreach (var screen in screenList)
 				{
 					using (var brush = GraphicsUtil.CreateRadialGradientBrush(screen.Bounds, Color.Blue, Color.Navy))
 					{
@@ -106,13 +112,13 @@ namespace WallSwitch
 
 				foreach (var widget in _widgets)
 				{
-					var args = new WidgetDrawArgs(widget.Config, widget.Bounds, g, true);
+					var args = new WidgetDrawArgs(widget.Config, widget.Bounds, g, null, true);
 					g.SetClip(widget.Bounds);
 					widget.Draw(args);
 					g.ResetClip();
 				}
 
-				foreach (var screen in System.Windows.Forms.Screen.AllScreens)
+				foreach (var screen in screenList)
 				{
 					g.DrawRectangle(SystemPens.ControlDarkDark, screen.Bounds);
 				}
@@ -131,7 +137,14 @@ namespace WallSwitch
 			if (_selectedWidget == null) return;
 
 			var bounds = _selectedWidget.DesignBounds;
-			g.DrawRectangle(Pens.White, _selectedWidget.DesignBounds);
+
+			var highlightColor = Color.FromArgb(127, SystemColors.Highlight);
+			using (var highlightBrush = new SolidBrush(highlightColor))
+			{
+				g.FillRectangle(highlightBrush, _selectedWidget.DesignBounds);
+			}
+
+			g.DrawRectangle(SystemPens.Highlight, _selectedWidget.DesignBounds);
 
 			if (!_selectedWidget.IsFixedSize)
 			{
@@ -174,7 +187,13 @@ namespace WallSwitch
 				widget.Bounds = widget.GetPreferredBounds();
 				_widgets.Add(widget);
 				Invalidate();
+
+				var ev = WidgetAdded;
+				if (ev != null) ev(this, new WidgetEventArgs(widget));
+
 				OnWidgetsChanged(widget);
+
+				SelectWidget(widget, true);
 			}
 			catch (Exception ex)
 			{
@@ -187,9 +206,15 @@ namespace WallSwitch
 		{
 			if (_selectedWidget != null)
 			{
+				var removedWidget = _selectedWidget;
+
 				if (_widgets.Remove(_selectedWidget))
 				{
 					SelectWidget(null);
+
+					var ev = WidgetDeleted;
+					if (ev != null) ev(this, new WidgetEventArgs(removedWidget));
+
 					OnWidgetsChanged(_selectedWidget);
 				}
 			}
@@ -234,7 +259,9 @@ namespace WallSwitch
 
 			foreach (var xmlWidget in xmlDoc.SelectNodes("/Widgets/" + WidgetInstance.XmlElementName).Cast<XmlElement>())
 			{
-				yield return WidgetInstance.Load(xmlWidget);
+				var widget = WidgetInstance.Load(xmlWidget);
+				widget.DesignBounds = ScreenToScaledClient(widget.Bounds);
+				yield return widget;
 			}
 		}
 
@@ -251,7 +278,17 @@ namespace WallSwitch
 
 		private WidgetInstance HitTest(Point mousePt, out DragMethod dragMethod)
 		{
-			foreach (var widget in _widgets)
+			if (_selectedWidget != null)
+			{
+				var dm = HitTest(_selectedWidget, mousePt);
+				if (dm != DragMethod.None)
+				{
+					dragMethod = dm;
+					return _selectedWidget;
+				}
+			}
+
+			foreach (var widget in (from w in _widgets where w != _selectedWidget select w))
 			{
 				var dm = HitTest(widget, mousePt);
 				if (dm != DragMethod.None)
@@ -348,12 +385,19 @@ namespace WallSwitch
 					{
 						// User has finished dragging
 
+						Debug.WriteLine("Finished dragging");	// TODO: remove
+
+						_selectedWidget.ChangeBoundsSafe(_selectedWidget.Bounds, true);
+						OnWidgetsChanged(_selectedWidget);
+
 						_dragging = false;
 						Invalidate();
 					}
 					else
 					{
 						// User clicked to select
+
+						Debug.WriteLine("Clicked");	// TODO: remove
 					}
 				}
 			}
@@ -380,7 +424,7 @@ namespace WallSwitch
 						switch (_dragMethod)
 						{
 							case DragMethod.Move:
-								if (_selectedWidget.OffsetBoundsSafe(dist))
+								if (_selectedWidget.OffsetBoundsSafe(dist, false))
 								{
 									Invalidate();
 									OnWidgetsChanged(_selectedWidget);
@@ -389,7 +433,7 @@ namespace WallSwitch
 							case DragMethod.ResizeTopLeft:
 								{
 									var bounds = _selectedWidget.Bounds;
-									if (_selectedWidget.ChangeBoundsSafe(new Rectangle(bounds.Left + dist.X, bounds.Top + dist.Y, bounds.Width - dist.X, bounds.Height - dist.Y)))
+									if (_selectedWidget.ChangeBoundsSafe(new Rectangle(bounds.Left + dist.X, bounds.Top + dist.Y, bounds.Width - dist.X, bounds.Height - dist.Y), false))
 									{
 										Invalidate();
 										OnWidgetsChanged(_selectedWidget);
@@ -399,7 +443,7 @@ namespace WallSwitch
 							case DragMethod.ResizeTopRight:
 								{
 									var bounds = _selectedWidget.Bounds;
-									if (_selectedWidget.ChangeBoundsSafe(new Rectangle(bounds.Left, bounds.Top + dist.Y, bounds.Width + dist.X, bounds.Height - dist.Y)))
+									if (_selectedWidget.ChangeBoundsSafe(new Rectangle(bounds.Left, bounds.Top + dist.Y, bounds.Width + dist.X, bounds.Height - dist.Y), false))
 									{
 										Invalidate();
 										OnWidgetsChanged(_selectedWidget);
@@ -409,7 +453,7 @@ namespace WallSwitch
 							case DragMethod.ResizeBottomLeft:
 								{
 									var bounds = _selectedWidget.Bounds;
-									if (_selectedWidget.ChangeBoundsSafe(new Rectangle(bounds.Left + dist.X, bounds.Top, bounds.Width - dist.X, bounds.Height + dist.Y)))
+									if (_selectedWidget.ChangeBoundsSafe(new Rectangle(bounds.Left + dist.X, bounds.Top, bounds.Width - dist.X, bounds.Height + dist.Y), false))
 									{
 										Invalidate();
 										OnWidgetsChanged(_selectedWidget);
@@ -419,7 +463,7 @@ namespace WallSwitch
 							case DragMethod.ResizeBottomRight:
 								{
 									var bounds = _selectedWidget.Bounds;
-									if (_selectedWidget.ChangeBoundsSafe(new Rectangle(bounds.Left, bounds.Top, bounds.Width + dist.X, bounds.Height + dist.Y)))
+									if (_selectedWidget.ChangeBoundsSafe(new Rectangle(bounds.Left, bounds.Top, bounds.Width + dist.X, bounds.Height + dist.Y), false))
 									{
 										Invalidate();
 										OnWidgetsChanged(_selectedWidget);
@@ -464,7 +508,7 @@ namespace WallSwitch
 			}
 		}
 
-		private void SelectWidget(WidgetInstance widget)
+		public void SelectWidget(WidgetInstance widget, bool notify = true)
 		{
 			if (_selectedWidget != widget)
 			{
@@ -472,14 +516,68 @@ namespace WallSwitch
 
 				Invalidate();
 
-				var ev = SelectedWidgetChanged;
-				if (ev != null) ev(this, new SelectedWidgetChangedEventArgs(_selectedWidget));
+				if (notify)
+				{
+					var ev = SelectedWidgetChanged;
+					if (ev != null) ev(this, new WidgetEventArgs(_selectedWidget));
+				}
 			}
 		}
 
 		public WidgetInstance SelectedWidget
 		{
 			get { return _selectedWidget; }
+		}
+
+		public IEnumerable<WidgetInstance> Widgets
+		{
+			get
+			{
+				return _widgets;
+			}
+		}
+
+		public enum WidgetMoveDirection
+		{
+			Up,
+			Down
+		}
+
+		public void MoveWidget(WidgetInstance widget, WidgetMoveDirection direction)
+		{
+			int index = _widgets.FindIndex(w => w == widget);
+			if (index < 0) return;
+
+			var orderChanged = false;
+
+			switch (direction)
+			{
+				case WidgetMoveDirection.Up:
+					if (index > 0)
+					{
+						_widgets.Remove(widget);
+						_widgets.Insert(index - 1, widget);
+						orderChanged = true;
+					}
+					break;
+
+				case WidgetMoveDirection.Down:
+					if (index < _widgets.Count - 1)
+					{
+						_widgets.Remove(widget);
+						_widgets.Insert(index + 1, widget);
+						orderChanged = true;
+					}
+					break;
+			}
+
+			if (orderChanged)
+			{
+				var ev = WidgetOrderChanged;
+				if (ev != null) ev(this, EventArgs.Empty);
+
+				OnWidgetsChanged(widget);
+			}
 		}
 	}
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace WallSwitchWidgets
+namespace WallSwitch.Widgets
 {
 	internal static class Util
 	{
