@@ -15,7 +15,7 @@ using System.Linq;
 
 namespace WallSwitch
 {
-	public partial class MainWindow : Form
+	internal partial class MainWindow : Form
 	{
 		#region Variables
 		private List<Theme> _themes = new List<Theme>();
@@ -116,6 +116,7 @@ namespace WallSwitch
 				c_edgeMode.InitForEnum<EdgeMode>(EdgeMode.Feather);
 
 				// Update all the controls
+				PopulateWidgetCombo();
 				RefreshControls();
 				Text = Res.AppName;
 				trayIcon.Visible = true;
@@ -561,6 +562,8 @@ namespace WallSwitch
 
 			c_numCollageImages.Text = _currentTheme.NumCollageImages.ToString();
 
+			c_widgetLayout.LoadFromTheme(_currentTheme);
+
 			Dirty = false;
 
 			RefreshLocations();
@@ -578,7 +581,7 @@ namespace WallSwitch
 			{
 				if (showErrors)
 				{
-					tabThemeSettings.SelectedTab = tabSettings;
+					c_themeTabControl.SelectedTab = c_settingsTab;
 					txtThemeFreq.Focus();
 					this.ShowError(Res.Error_InvalidThemeFreq);
 				}
@@ -603,7 +606,7 @@ namespace WallSwitch
 				default:
 					if (showErrors)
 					{
-						tabThemeSettings.SelectedTab = tabSettings;
+						c_themeTabControl.SelectedTab = c_settingsTab;
 						cmbThemePeriod.Focus();
 						this.ShowError(Res.Error_InvalidThemePeriod);
 					}
@@ -614,7 +617,7 @@ namespace WallSwitch
 			{
 				if (showErrors)
 				{
-					tabThemeSettings.SelectedTab = tabSettings;
+					c_themeTabControl.SelectedTab = c_settingsTab;
 					txtThemeFreq.Focus();
 					this.ShowError(Res.Error_ShortUpdateInterval);
 				}
@@ -633,7 +636,7 @@ namespace WallSwitch
 				default:
 					if (showErrors)
 					{
-						tabThemeSettings.SelectedTab = tabSettings;
+						c_themeTabControl.SelectedTab = c_settingsTab;
 						c_themeMode.Focus();
 						this.ShowError(Res.Error_InvalidThemeMode);
 					}
@@ -652,7 +655,7 @@ namespace WallSwitch
 				default:
 					if (showErrors)
 					{
-						tabThemeSettings.SelectedTab = tabSettings;
+						c_themeTabControl.SelectedTab = c_settingsTab;
 						c_themeOrder.Focus();
 						this.ShowError(Res.Error_InvalidThemeOrder);
 					}
@@ -666,7 +669,7 @@ namespace WallSwitch
 				{
 					if (showErrors)
 					{
-						tabThemeSettings.SelectedTab = tabSettings;
+						c_themeTabControl.SelectedTab = c_settingsTab;
 						c_maxScale.Focus();
 						this.ShowError(Res.Error_InvalidMaxImageScale);
 					}
@@ -676,7 +679,7 @@ namespace WallSwitch
 				{
 					if (showErrors)
 					{
-						tabThemeSettings.SelectedTab = tabSettings;
+						c_themeTabControl.SelectedTab = c_settingsTab;
 						c_maxScale.Focus();
 						this.ShowError(Res.Error_NegativeMaxImageScale);
 					}
@@ -688,7 +691,7 @@ namespace WallSwitch
 			{
 				if (showErrors)
 				{
-					tabThemeSettings.SelectedTab = tabSettings;
+					c_themeTabControl.SelectedTab = c_settingsTab;
 					c_numCollageImages.Focus();
 					this.ShowError(Res.Error_InvalidNumCollageImages);
 				}
@@ -698,7 +701,7 @@ namespace WallSwitch
 			{
 				if (showErrors)
 				{
-					tabThemeSettings.SelectedTab = tabSettings;
+					c_themeTabControl.SelectedTab = c_settingsTab;
 					c_numCollageImages.Focus();
 					this.ShowError(Res.Error_OutOfRangeNumCollageImages);
 				}
@@ -755,6 +758,8 @@ namespace WallSwitch
 
 			_currentTheme.BackgroundBlur = chkBackgroundBlur.Checked;
 			_currentTheme.BackgroundBlurDist = trkBackgroundBlurDist.Value;
+
+			c_widgetLayout.SaveToTheme(_currentTheme);
 
 			Dirty = false;
 			EnableControls();
@@ -857,6 +862,7 @@ namespace WallSwitch
 			c_numCollageImages.Visible = c_numCollageImagesLabel.Visible = c_themeMode.SelectedIndex == k_modeCollage;
 
 			EnableLocationsContextMenu();
+			EnableWidgetControls();
 		}
 
 		private void cmLocations_Opening(object sender, CancelEventArgs e)
@@ -2052,7 +2058,7 @@ namespace WallSwitch
 		private void ClearHistory()
 		{
 			foreach (var theme in _themes) theme.ClearHistory();
-			lstHistory.Clear();
+			c_historyTab.Clear();
 			ClearExpiredCache();
 		}
 
@@ -2081,12 +2087,12 @@ namespace WallSwitch
 				{
 					foreach (var loc in historyItem)
 					{
-						keepLocations.Add(loc.Location);
+						keepLocations.Add(loc.ImageRec.Location);
 					}
 				}
 			}
 
-			keepLocations.AddRange(from h in lstHistory.History select h.Location);
+			keepLocations.AddRange(from h in c_historyTab.History select h.Location);
 
 			// Tell the image cache object to delete all others.
 			ImageCache.ClearExpiredCache(keepLocations);
@@ -2323,7 +2329,7 @@ namespace WallSwitch
 
 			try
 			{
-				foreach (var img in e.Images) lstHistory.AddHistory(img);
+				foreach (var img in e.Images) c_historyTab.AddHistory(img.ImageRec);
 			}
 			catch (Exception ex)
 			{
@@ -2335,7 +2341,7 @@ namespace WallSwitch
 		{
 			try
 			{
-				var item = lstHistory.SelectedItem;
+				var item = c_historyTab.SelectedItem;
 				ciOpenHistoryFile.Enabled = item != null;
 				ciExploreHistoryFile.Enabled = item != null;
 			}
@@ -2349,7 +2355,7 @@ namespace WallSwitch
 		{
 			try
 			{
-				var item = lstHistory.SelectedItem;
+				var item = c_historyTab.SelectedItem;
 				if (item != null)
 				{
 					var fileName = item.LocationOnDisk;
@@ -2373,7 +2379,7 @@ namespace WallSwitch
 		{
 			try
 			{
-				var item = lstHistory.SelectedItem;
+				var item = c_historyTab.SelectedItem;
 				if (item != null)
 				{
 					var fileName = item.LocationOnDisk;
@@ -2429,7 +2435,7 @@ namespace WallSwitch
 		{
 			try
 			{
-				var item = lstHistory.SelectedItem;
+				var item = c_historyTab.SelectedItem;
 				if (item != null)
 				{
 					var fileName = item.LocationOnDisk;
@@ -2442,7 +2448,7 @@ namespace WallSwitch
 						== DialogResult.Yes)
 					{
 						FileUtil.RecycleFile(fileName);
-						lstHistory.RemoveItem(item);
+						c_historyTab.RemoveItem(item);
 					}
 				}
 			}
@@ -2477,6 +2483,86 @@ namespace WallSwitch
 			catch (Exception ex)
 			{
 				Log.Write(ex, "Error when notifying that update available.");
+			}
+		}
+		#endregion
+
+		#region Widgets
+		private void PopulateWidgetCombo()
+		{
+			c_widgetTypes.Items.Clear();
+			foreach (var wt in WidgetManager.Types)
+			{
+				c_widgetTypes.Items.Add(new TagString(wt.Name, wt));
+			}
+
+			if (c_widgetTypes.Items.Count > 0) c_widgetTypes.SelectedIndex = 0;
+		}
+
+		private void EnableWidgetControls()
+		{
+			c_addWidgetButton.Enabled = c_widgetTypes.SelectedItem != null;
+			c_deleteWidgetButton.Enabled = c_widgetLayout.SelectedWidget != null;
+		}
+
+		private void c_addWidgetButton_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				var tag = c_widgetTypes.SelectedItem as TagString;
+				if (tag != null) c_widgetLayout.AddNewWidget((WidgetType)tag.Tag);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void c_deleteWidgetButton_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				c_widgetLayout.DeleteSelectedWidget();
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void c_widgetLayout_WidgetsChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				ControlChanged(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void c_widgetLayout_SelectedWidgetChanged(object sender, WidgetLayoutControl.SelectedWidgetChangedEventArgs e)
+		{
+			try
+			{
+				EnableWidgetControls();
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void c_widgetTypes_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				EnableWidgetControls();
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
 			}
 		}
 		#endregion

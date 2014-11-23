@@ -13,3 +13,7 @@
 /WallSwitch/obj/*
 /WallSwitchImgProc/Debug/*
 /WallSwitchImgProc/Release/*
+/WallSwitchWidgets/bin/*
+/WallSwitchWidgets/obj/*
+/WidgetInterface/bin/*
+/WidgetInterface/obj/*

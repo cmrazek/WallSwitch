@@ -11,7 +11,7 @@ using System.Xml;
 
 namespace WallSwitch
 {
-	public class Theme
+	internal class Theme
 	{
 		#region Constants
 		private const int k_maxHistory = 10;
@@ -20,6 +20,7 @@ namespace WallSwitch
 		private const int k_maxRepeatNowRetries = 10;
 		private const int k_maxImageRectHistory = 3;
 		public const int k_maxNumCollageImages = 10;
+		public const float k_aspectThreshold = 0.1f;	// The maximum distortion in aspect for spanning a monitor.
 
 		private const int k_defaultFreq = 5;
 		private const Period k_defaultPeriod = Period.Minutes;
@@ -45,6 +46,7 @@ namespace WallSwitch
 		private const int k_defaultDropShadowOpacity = 50;
 		private const bool k_defaultBackgroundBlur = false;
 		private const int k_defaultBackgroundBlurDist = 4;
+		private const bool k_defaultAllowImageSpanning = true;
 		#endregion
 
 		#region Variables
@@ -64,7 +66,7 @@ namespace WallSwitch
 		private Color _backColorBottom = k_defaultBackColor;
 		private int _backOpacity = k_defaultBackOpacity;
 		private ImageFit _imageFit = k_defaultImageFit;
-		private List<IEnumerable<ImageRec>> _history = new List<IEnumerable<ImageRec>>();
+		private List<IEnumerable<ImageLayout>> _history = new List<IEnumerable<ImageLayout>>();
 		private List<RectangleF> _imageRectHistory = new List<RectangleF>();
 		private int _historyIndex = -1;
 		private Random _rand = null;
@@ -72,6 +74,7 @@ namespace WallSwitch
 		private string _lastWallpaperFile = string.Empty;
 		private int _maxImageScale = k_defaultMaxImageScale;
 		private int _numCollageImages = k_defaultNumCollageImages;
+		private bool _allowImageSpanning = k_defaultAllowImageSpanning;
 
 		private ColorEffect _colorEffectFore = ColorEffect.None;
 		private ColorEffect _colorEffectBack = ColorEffect.None;
@@ -89,6 +92,8 @@ namespace WallSwitch
 
 		private bool _backgroundBlur = k_defaultBackgroundBlur;
 		private int _backgroundBlurDist = k_defaultBackgroundBlurDist;
+
+		private List<WidgetInstance> _widgets = new List<WidgetInstance>();
 		#endregion
 
 		#region Construction
@@ -289,11 +294,16 @@ namespace WallSwitch
 
 			_hotKey.SaveXml(xml);
 
-			foreach (Location loc in _locations)
+			foreach (var loc in _locations)
 			{
 				xml.WriteStartElement("Location");
 				loc.Save(xml);
 				xml.WriteEndElement();	// Location
+			}
+
+			foreach (var widget in _widgets)
+			{
+				widget.Save(xml);
 			}
 
 			SaveHistory(xml);
@@ -375,12 +385,12 @@ namespace WallSwitch
 			_backgroundBlur = Util.ParseBool(xmlTheme, "BackgroundBlur", k_defaultBackgroundBlur);
 			_backgroundBlurDist = Util.ParseInt(xmlTheme, "BackgroundBlurDist", k_defaultBackgroundBlurDist);
 
-			foreach (XmlElement xmlHotKey in xmlTheme.SelectNodes(HotKey.XmlElementName))
+			foreach (var xmlHotKey in xmlTheme.SelectNodes(HotKey.XmlElementName).Cast<XmlElement>())
 			{
 				_hotKey.LoadXml(xmlHotKey);
 			}
 
-			foreach (XmlElement xmlLoc in xmlTheme.SelectNodes("Location"))
+			foreach (var xmlLoc in xmlTheme.SelectNodes("Location").Cast<XmlElement>())
 			{
 				try
 				{
@@ -392,6 +402,19 @@ namespace WallSwitch
 				catch (Exception ex)
 				{
 					Log.Write(ex, "Error when loading location from settings file.");
+				}
+			}
+
+			foreach (var xmlWidget in xmlTheme.SelectNodes(WidgetInstance.XmlElementName).Cast<XmlElement>())
+			{
+				try
+				{
+					var widget = WidgetInstance.Load(xmlWidget);
+					_widgets.Add(widget);
+				}
+				catch (Exception ex)
+				{
+					Log.Write(ex, "Error when loading widget from settings file.");
 				}
 			}
 
@@ -554,10 +577,10 @@ namespace WallSwitch
 				bool current = false;
 				if (xmlHistory.HasAttribute("Current")) Boolean.TryParse(xmlHistory.GetAttribute("Current"), out current);
 
-				var images = new List<ImageRec>();
+				var images = new List<ImageLayout>();
 				foreach (XmlElement xmlImage in xmlHistory.SelectNodes("Image"))
 				{
-					var image = ImageRec.FromXml(xmlImage);
+					var image = ImageLayout.FromXml(xmlImage);
 					if (image != null) images.Add(image);
 				}
 
@@ -589,19 +612,28 @@ namespace WallSwitch
 			_history.Clear();
 			_historyIndex = -1;
 
-			var fileName = GetWallpaperFileName(ImageFormat.Bmp);
+			var fileName = GetBaseWallpaperFileName(ImageFormat.Bmp);
 			if (File.Exists(fileName)) File.Delete(fileName);
 
-			fileName = GetWallpaperFileName(ImageFormat.Jpeg);
+			fileName = GetBaseWallpaperFileName(ImageFormat.Jpeg);
 			if (File.Exists(fileName)) File.Delete(fileName);
 
-			fileName = GetWallpaperFileName(ImageFormat.Png);
+			fileName = GetBaseWallpaperFileName(ImageFormat.Png);
+			if (File.Exists(fileName)) File.Delete(fileName);
+
+			fileName = GetDisplayWallpaperFileName(ImageFormat.Bmp);
+			if (File.Exists(fileName)) File.Delete(fileName);
+
+			fileName = GetDisplayWallpaperFileName(ImageFormat.Jpeg);
+			if (File.Exists(fileName)) File.Delete(fileName);
+
+			fileName = GetDisplayWallpaperFileName(ImageFormat.Png);
 			if (File.Exists(fileName)) File.Delete(fileName);
 
 			_imageRectHistory.Clear();
 		}
 
-		public IEnumerable<IEnumerable<ImageRec>> History
+		public IEnumerable<IEnumerable<ImageLayout>> History
 		{
 			get { return _history; }
 		}
@@ -631,9 +663,9 @@ namespace WallSwitch
 		#endregion
 
 		#region ImageSelection
-		public IEnumerable<ImageRec> GetNextImages(int numMonitors)
+		public IEnumerable<ImageLayout> GetNextImages(Rectangle[] monitorRects)
 		{
-			IEnumerable<ImageRec> ret = null;
+			IEnumerable<ImageLayout> ret = null;
 
 			Log.Write(LogLevel.Debug, "Finding next images...");
 
@@ -647,7 +679,7 @@ namespace WallSwitch
 
 				foreach (var image in imageSet)
 				{
-					if (!image.Retrieve())
+					if (!image.ImageRec.Retrieve())
 					{
 						allFound = false;
 						break;
@@ -656,85 +688,22 @@ namespace WallSwitch
 				if (allFound) return imageSet;
 			}
 
-			int numImagesToFind = _separateMonitors ? numMonitors : 1;
-			if (_mode == ThemeMode.Collage) numImagesToFind *= _numCollageImages;
+			// TODO: remove
+			//int numImagesToFind = _separateMonitors ? numMonitors : 1;
+			//if (_mode == ThemeMode.Collage) numImagesToFind *= _numCollageImages;
 
 			// Go through each location and find files.
-			var files = new List<ImageRec>();
+			var allFiles = new List<ImageRec>();
 			foreach (Location loc in (from l in _locations
 									  where !l.Disabled
-									  select l)) files.AddRange(loc.Files);
+									  select l)) allFiles.AddRange(loc.Files);
 
-			Log.Write(LogLevel.Debug, files.Count.ToString() + " files found.");
+			Log.Write(LogLevel.Debug, allFiles.Count.ToString() + " files found.");
 
-			if (files.Count > 0)
+			if (allFiles.Count > 0)
 			{
-				if (_order == ThemeOrder.Random)
-				{
-					// Pick N number of files to display.
-					var pickedFiles = new List<ImageRec>(numImagesToFind);
-					while (pickedFiles.Count < numImagesToFind)
-					{
-						var img = PickRandomImage(files, pickedFiles);
-						if (img == null) break;
-						pickedFiles.Add(img);
-					}
-
-					ret = pickedFiles;
-				}
-				else // Sequential
-				{
-					files.Sort();
-
-					int fileIndex = 0;
-					if (_history.Count > 0)
-					{
-						var currentImages = _history[_history.Count - 1];
-
-						// Find the where the current images are in the list.
-						int index = 0;
-						foreach (var file in files)
-						{
-							foreach (var cur in currentImages)
-							{
-								if (file.Equals(cur))
-								{
-									if (index + 1 > fileIndex) fileIndex = index + 1;
-								}
-							}
-							index++;
-						}
-					}
-
-					// Pick N number of files to display.
-					var pickedFiles = new List<ImageRec>(numImagesToFind);
-					var retries = 0;
-					while (pickedFiles.Count < numImagesToFind)
-					{
-						if (fileIndex >= files.Count)
-						{
-							if (fileIndex == 0) break;
-							fileIndex = 0;
-						}
-
-						var loc = files[fileIndex];
-						if (loc.Retrieve())
-						{
-							Log.Write(LogLevel.Debug, "Choosing file # {0}: {1}", fileIndex, loc);
-							pickedFiles.Add(loc);
-							retries = 0;
-						}
-						else
-						{
-							retries++;
-							if (retries > k_maxRetrievalRetries) break;
-						}
-
-						fileIndex++;
-					}
-
-					ret = pickedFiles;
-				}
+				allFiles.Sort();
+				ret = PickImages(allFiles, monitorRects);
 			}
 
 			if (ret != null)
@@ -756,7 +725,87 @@ namespace WallSwitch
 			return ret;
 		}
 
-		private ImageRec PickRandomImage(List<ImageRec> files, List<ImageRec> filesPickedThisTime)
+		/// <summary>
+		/// Creates a list of images to be displayed for all monitors.
+		/// This function takes into account collage/fullscreen mode, and random/sequential order.
+		/// </summary>
+		/// <param name="allFiles">A list of all available image files</param>
+		/// <param name="monitorRects">A list of all monitor rectangles</param>
+		/// <returns>A list of images to be rendered</returns>
+		private List<ImageLayout> PickImages(List<ImageRec> allFiles, Rectangle[] monitorRects)
+		{
+			if (_mode == ThemeMode.Collage)
+			{
+				var pickedFiles = new List<ImageLayout>();
+
+				for (int monitorIndex = 0; monitorIndex < monitorRects.Length; monitorIndex++)
+				{
+					for (int imageIndex = 0; imageIndex < _numCollageImages; imageIndex++)
+					{
+						var img = PickRandomOrSequentialImage(allFiles, pickedFiles);
+						if (img == null) break;
+						pickedFiles.Add(new ImageLayout(img, monitorIndex, 1));
+					}
+				}
+
+				return pickedFiles;
+			}
+			else // fullscreen
+			{
+				var monitorSelections = (from m in monitorRects select new MonitorSelection { Rect = m, ImageRec = null }).ToArray();
+				var retries = 0;
+				var pickedFiles = new List<ImageLayout>();
+
+				while (monitorSelections.Any(m => m.ImageRec == null) && retries <= k_maxRetrievalRetries)
+				{
+					var img = PickRandomOrSequentialImage(allFiles, pickedFiles);
+					if (img == null) break;
+					img.Retrieve();
+
+					if (!FindBestMonitorSelection(img, monitorSelections)) retries++;
+					else retries = 0;
+
+					GenerateImageLayoutsFromMonitorSelections(monitorSelections, pickedFiles);
+				}
+
+				return pickedFiles;
+			}
+		}
+
+		private void GenerateImageLayoutsFromMonitorSelections(MonitorSelection[] monitorSelections, List<ImageLayout> imageLayouts)
+		{
+			imageLayouts.Clear();
+
+			for (int m = 0; m < monitorSelections.Length; m++)
+			{
+				var img = monitorSelections[m].ImageRec;
+				if (img == null) continue;
+
+				var pickedFile = (from p in imageLayouts where p.ImageRec == img && p.StartMonitor + p.NumMonitors == m select p).FirstOrDefault();
+				if (pickedFile != null)
+				{
+					pickedFile.NumMonitors++;
+				}
+				else
+				{
+					imageLayouts.Add(new ImageLayout(img, m, 1));
+				}
+			}
+		}
+
+		private ImageRec PickRandomOrSequentialImage(List<ImageRec> allFiles, List<ImageLayout> filesPickedThisTime)
+		{
+			if (_order == ThemeOrder.Random)
+			{
+				return PickRandomImage(allFiles, filesPickedThisTime);
+			}
+			else // sequential
+			{
+				return PickSequentialImage(allFiles, filesPickedThisTime);
+			}
+		}
+
+		private ImageRec PickRandomImage(List<ImageRec> allFiles, List<ImageLayout> filesPickedThisTime)
 		{
 			var repeatNowRetries = 0;
 			var repeatHistoryRetries = 0;
@@ -764,10 +813,10 @@ namespace WallSwitch
 
 			while (true)
 			{
-				var index = _rand.Next(files.Count - 1);
-				var img = files[index];
+				var index = _rand.Next(allFiles.Count - 1);
+				var img = allFiles[index];
 
-				if (filesPickedThisTime.Contains(img))
+				if (filesPickedThisTime.Any(i => i.ImageRec == img))
 				{
 					Log.Write(LogLevel.Debug, "Repeat now image # {0}: {1} (retries {2})", index, img, repeatNowRetries);
 					repeatNowRetries++;
@@ -797,6 +846,256 @@ namespace WallSwitch
 			return null;
 		}
 
+		private ImageRec PickSequentialImage(List<ImageRec> allFiles, List<ImageLayout> filesPickedThisTime)
+		{
+			int fileIndex = 0;
+			if (_history.Count > 0)
+			{
+				var currentImages = _history[_history.Count - 1];
+
+				// Find the where the current images are in the list.
+				int index = 0;
+				foreach (var file in allFiles)
+				{
+					// TODO: look closer into what happens when currentImages is at the end of the ist, and filesPickedThisTime are at the beginning.
+					// TODO: I think it would select the first image repeatedly.
+
+					if (currentImages.Any(i => i.ImageRec == file) || filesPickedThisTime.Any(i => i.ImageRec == file))
+					{
+						if (index + 1 > fileIndex) fileIndex = index + 1;
+					}
+					index++;
+				}
+
+				if (fileIndex >= allFiles.Count) fileIndex = 0;
+				return allFiles[fileIndex];
+			}
+			else if (allFiles.Count > 0)
+			{
+				return allFiles[0];
+			}
+			else
+			{
+				return null;
+			}
+		}
+
+		// TODO: remove
+		//private List<ImageLayout> PickSequentialImages(List<ImageRec> allFiles, Rectangle[] monitorRects)
+		//{
+		//	// TODO: add support for multiple collage images per monitor
+
+		//	if (_mode == ThemeMode.Collage)
+		//	{
+		//	}
+		//	else
+		//	{
+		//	}
+
+		//	int fileIndex = 0;
+		//	if (_history.Count > 0)
+		//	{
+		//		var currentImages = _history[_history.Count - 1];
+
+		//		// Find the where the current images are in the list.
+		//		int index = 0;
+		//		foreach (var file in allFiles)
+		//		{
+		//			foreach (var cur in currentImages)
+		//			{
+		//				if (file.Equals(cur))
+		//				{
+		//					if (index + 1 > fileIndex) fileIndex = index + 1;
+		//				}
+		//			}
+		//			index++;
+		//		}
+		//	}
+
+		//	// Pick N number of files to display.
+		//	var pickedFiles = new List<ImageRec>(monitorRects.Length);
+		//	var retries = 0;
+		//	while (pickedFiles.Count < monitorRects.Length)
+		//	{
+		//		if (fileIndex >= allFiles.Count)
+		//		{
+		//			if (fileIndex == 0) break;
+		//			fileIndex = 0;
+		//		}
+
+		//		var loc = allFiles[fileIndex];
+		//		if (loc.Retrieve())
+		//		{
+		//			Log.Write(LogLevel.Debug, "Choosing file # {0}: {1}", fileIndex, loc);
+		//			pickedFiles.Add(loc);
+		//			retries = 0;
+		//		}
+		//		else
+		//		{
+		//			retries++;
+		//			if (retries > k_maxRetrievalRetries) break;
+		//		}
+
+		//		fileIndex++;
+		//	}
+
+		//	return pickedFiles;
+		//}
+
+		private class MonitorSelection
+		{
+			public Rectangle Rect { get; set; }
+			public ImageRec ImageRec { get; set; }
+		}
+
+		private bool FindBestMonitorSelection(ImageRec img, MonitorSelection[] monitorSelections)
+		{
+			// TODO: Don't allow displacement if selecting sequential images.
+
+			var imgSize = img.Image.Size;
+			var imageAspect = imgSize.GetAspect();
+			Log.Write(LogLevel.Debug, "Finding monitor fit for image size [{0}] aspect [{1}]", imgSize, imageAspect);
+
+			int bestUnusedStart = -1;
+			int bestUnusedCount = -1;
+			float bestUnusedAspectDiff = 0.0f;
+
+			int bestUsedStart = -1;
+			int bestUsedCount = -1;
+			float bestUsedAspectDiff = 0.0f;
+			List<ImageRec> bestUsedImages = new List<ImageRec>();
+
+			for (var startMonitor = 0; startMonitor < monitorSelections.Length; startMonitor++)
+			{
+				for (var numMonitors = 1; numMonitors <= monitorSelections.Length - startMonitor; numMonitors++)
+				{
+					var monitors = monitorSelections.Skip(startMonitor).Take(numMonitors).ToArray();
+					var envelope = (from m in monitors select m.Rect).GetEnvelope();
+					var aspect = envelope.Size.GetAspect();
+					var aspectDiff = Math.Abs(aspect - imageAspect);
+					Log.Write(LogLevel.Debug, "Trying monitor start [{0}] count [{1}] envelope [{2}] aspect [{3}] aspectdiff [{4}]", startMonitor, numMonitors, envelope, aspect, aspectDiff);
+
+					if (monitors.Any(m => m.ImageRec != null))
+					{
+						if (bestUsedStart == -1 || aspectDiff < bestUsedAspectDiff)
+						{
+							bestUsedStart = startMonitor;
+							bestUsedCount = numMonitors;
+							bestUsedAspectDiff = aspectDiff;
+
+							bestUsedImages.Clear();
+							foreach (var monitor in monitors)
+							{
+								if (!bestUsedImages.Contains(monitor.ImageRec)) bestUsedImages.Remove(monitor.ImageRec);
+							}
+						}
+					}
+					else
+					{
+						if (bestUnusedStart == -1 || aspectDiff < bestUnusedAspectDiff)
+						{
+							bestUnusedStart = startMonitor;
+							bestUnusedCount = numMonitors;
+							bestUnusedAspectDiff = aspectDiff;
+						}
+					}
+				}
+			}
+
+			if (bestUnusedStart != -1)
+			{
+				if (bestUsedStart != -1 && bestUsedAspectDiff < bestUnusedAspectDiff && Math.Abs(bestUsedAspectDiff - bestUnusedAspectDiff) > k_aspectThreshold)
+				{
+					// There's a better fit if we displace a previously selected image.
+					Log.Write(LogLevel.Debug, "Using monitor range start [{0}] count [{1}] (displaced previously picked images)", bestUsedStart, bestUsedCount);
+					for (int i = bestUsedStart; i < bestUsedStart + bestUsedCount; i++) monitorSelections[i].ImageRec = img;
+
+					// Clear out any other places that image may have been selected (so we don't displace half a spanned image)
+					foreach (var monitor in monitorSelections)
+					{
+						if (bestUsedImages.Contains(monitor.ImageRec)) monitor.ImageRec = null;
+					}
+
+					return true;
+				}
+				else
+				{
+					// Use the unused range
+					Log.Write(LogLevel.Debug, "Using monitor range start [{0}] count [{1}] (unused range)", bestUnusedStart, bestUnusedCount);
+					for (int i = bestUnusedStart; i < bestUnusedStart + bestUnusedCount; i++) monitorSelections[i].ImageRec = img;
+
+					return true;
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// This function will attempt to fit an image to one or more monitors (depending if spanning is enabled).
+		/// </summary>
+		/// <param name="img">The image to fit</param>
+		/// <param name="allMonitorRects">The bounds of monitors the image should attempt to fit to.</param>
+		/// <returns>The number of monitors this image should be spanned across, or 0 if the image can't be loaded.</returns>
+		private int FitImageToMonitorRects(ImageRec img, Rectangle[] allMonitorRects)
+		{
+			Log.Write(LogLevel.Debug, "Attempting to fit image [{0}] to {1} monitors", img.Location, allMonitorRects.Length);	// TODO
+
+			if (!img.Retrieve())
+			{
+				Log.Write(LogLevel.Warning, "Failed to retrieve image [{0}]", img.Location);
+				return 0;
+			}
+
+			if (allMonitorRects.Length == 1)
+			{
+				Log.Write(LogLevel.Debug, "There's only 1 monitor available, so defaulting to 1.");	// TODO
+				return 1;	// Don't need to check if the aspect matches for a single monitor.
+			}
+
+			var imgSize = img.Image.Size;
+			var imageAspect = imgSize.GetAspect();
+
+			// Find the best fit
+			int bestNumMonitors = -1;
+			float bestAspectDiff = 0.0f;
+
+			for (var monitorCount = 1; monitorCount <= allMonitorRects.Length; monitorCount++)
+			{
+				// Get the aspect for this number of monitors, and check if it matches the aspect of the image.
+				var monitorEnvelope = allMonitorRects.Take(monitorCount).GetEnvelope();
+				Log.Write(LogLevel.Debug, "Trying {0} monitor(s) [{1}]", monitorCount, monitorEnvelope);	// TODO
+				var monitorAspect = monitorEnvelope.Size.GetAspect();
+				var aspectDiff = Math.Abs(monitorAspect - imageAspect);
+				Log.Write(LogLevel.Debug, "Aspect differential [{0}]", aspectDiff);
+
+				if (bestNumMonitors == -1 || aspectDiff < bestAspectDiff)
+				{
+					bestAspectDiff = aspectDiff;
+					bestNumMonitors = monitorCount;
+				}
+			}
+
+			Log.Write(LogLevel.Debug, "Best number of monitors [{0}]", bestNumMonitors);
+			return bestNumMonitors == -1 ? 1 : bestNumMonitors;
+
+			// TODO: remove
+			//for (var monitorCount = 1; monitorCount <= monitorRects.Length; monitorCount++)
+			//{
+			//	// Get the aspect for this number of monitors, and check if it matches the aspect of the image.
+			//	var monitorAspect = monitorRects.Take(monitorCount).GetEnvelope().Size.GetAspect();
+			//	if (Math.Abs(monitorAspect - imageAspect) <= k_aspectThreshold)
+			//	{
+			//		return monitorCount;
+			//	}
+			//}
+
+			// If we got here, then the image doesn't match any monitor set perfectly, so just display it on the first monitor.
+			//return 1;
+		}
+
 		private bool ImageRecIsInHistory(ImageRec img)
 		{
 			foreach (var h in _history)
@@ -811,13 +1110,13 @@ namespace WallSwitch
 			return false;
 		}
 
-		public IEnumerable<ImageRec> GetPrevImages()
+		public IEnumerable<ImageLayout> GetPrevImages()
 		{
 			Log.Write(LogLevel.Debug, "Going back to previous images.");
 			if (_historyIndex > 0)
 			{
 				var imageSet = _history[--_historyIndex];
-				foreach (var image in imageSet) image.Retrieve();
+				foreach (var image in imageSet) image.ImageRec.Retrieve();
 				return imageSet;
 			}
 			return null;
@@ -829,9 +1128,16 @@ namespace WallSwitch
 		{
 		}
 
-		public string GetWallpaperFileName(ImageFormat format)
+		public string GetBaseWallpaperFileName(ImageFormat format)
 		{
-			return String.Format("{0}\\{1}{2}", Util.AppDataDir, _id, ImageFormatDesc.ImageFormatToExtension(format));
+			var fileName = string.Concat(_id.ToString(), ImageFormatDesc.ImageFormatToExtension(format));
+			return Path.Combine(Util.AppDataDir, fileName);
+		}
+
+		public string GetDisplayWallpaperFileName(ImageFormat format)
+		{
+			var fileName = string.Concat(_id.ToString(), "_display", ImageFormatDesc.ImageFormatToExtension(format));
+			return Path.Combine(Util.AppDataDir, fileName);
 		}
 		#endregion
 
@@ -849,16 +1155,16 @@ namespace WallSwitch
 		public event EventHandler<HistoryAddedEventArgs> HistoryAdded;
 		public class HistoryAddedEventArgs : ThemeEventArgs
 		{
-			public IEnumerable<ImageRec> Images { get; set; }
+			public IEnumerable<ImageLayout> Images { get; set; }
 
-			public HistoryAddedEventArgs(Theme theme, IEnumerable<ImageRec> images)
+			public HistoryAddedEventArgs(Theme theme, IEnumerable<ImageLayout> images)
 				: base(theme)
 			{
 				Images = images;
 			}
 		}
 
-		private void FireHistoryAdded(IEnumerable<ImageRec> images)
+		private void FireHistoryAdded(IEnumerable<ImageLayout> images)
 		{
 			EventHandler<HistoryAddedEventArgs> ev = HistoryAdded;
 			if (ev != null) ev(this, new HistoryAddedEventArgs(this, images));
@@ -985,6 +1291,19 @@ namespace WallSwitch
 				_backgroundBlurDist = value;
 				if (_backgroundBlurDist < 0) _backgroundBlurDist = 0;
 			}
+		}
+		#endregion
+
+		#region Widgets
+		public IEnumerable<WidgetInstance> Widgets
+		{
+			get { return _widgets; }
+		}
+
+		public void ReplaceWidgets(IEnumerable<WidgetInstance> widgets)
+		{
+			_widgets.Clear();
+			_widgets.AddRange(widgets);
 		}
 		#endregion
 	}

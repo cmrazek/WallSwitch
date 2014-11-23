@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Runtime.InteropServices;
 using System.ComponentModel;
 using System.Drawing;
-using System.IO;
-using System.Drawing.Imaging;
-using Microsoft.Win32;
-using System.Windows.Forms;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
+using System.Windows.Forms;
+using Microsoft.Win32;
+using WidgetInterface;
 
 namespace WallSwitch
 {
@@ -1256,10 +1257,17 @@ namespace WallSwitch
 		#endregion // SPI
 		#endregion
 
-		private void ChangeWallpaper(Theme theme, Image wallpaperImage)
+		private void ChangeWallpaper(Theme theme, Image baseImage, Image displayImage)
 		{
-			var fileName = theme.GetWallpaperFileName(ImageFormat.Bmp);
-			wallpaperImage.Save(fileName, ImageFormat.Bmp);
+			string baseFileName = null;
+			string displayFileName = theme.GetDisplayWallpaperFileName(ImageFormat.Bmp);
+			if (baseImage != null)
+			{
+				baseFileName = theme.GetBaseWallpaperFileName(ImageFormat.Png);
+				baseImage.Save(baseFileName, ImageFormat.Png);
+			}
+
+			displayImage.Save(displayFileName, ImageFormat.Bmp);
 
 			RegistryKey key = Registry.CurrentUser.OpenSubKey("Control Panel\\Desktop", true);
 			try 
@@ -1273,23 +1281,30 @@ namespace WallSwitch
 				key.Close();
 			}
 
-			string location = fileName;
+			string location = displayFileName;
 			if (!SystemParametersInfo(SPI.SPI_SETDESKWALLPAPER, 0, Marshal.StringToHGlobalAnsi(location), SPIF.SPIF_SENDWININICHANGE | SPIF.SPIF_UPDATEINIFILE))
 			{
 				throw new InvalidOperationException("Failed to set wallpaper.");
 			}
 
-			theme.LastWallpaperFile = fileName;
+			theme.LastWallpaperFile = baseImage != null ? baseFileName : displayFileName;
 		}
 
-		private void ChangeWallpaperFade(Theme theme, Image wallpaperImage)
+		private void ChangeWallpaperFade(Theme theme, Image baseImage, Image displayImage)
 		{
 			try
 			{
 				int result;
 
-				var fileName = theme.GetWallpaperFileName(ImageFormat.Png);
-				wallpaperImage.Save(fileName, ImageFormat.Png);
+				string baseFileName = null;
+				string displayFileName = theme.GetDisplayWallpaperFileName(ImageFormat.Png);
+				if (baseImage != null)
+				{
+					baseFileName = theme.GetBaseWallpaperFileName(ImageFormat.Png);
+					baseImage.Save(baseFileName, ImageFormat.Png);
+				}
+
+				displayImage.Save(displayFileName, ImageFormat.Png);
 
 				var hwnd = FindWindow("Progman", null);
 				if (hwnd == null) throw new Exception(string.Format("Couldn't find Progman window (GetLastError = 0x{0:X8})", Marshal.GetLastWin32Error()));
@@ -1298,7 +1313,7 @@ namespace WallSwitch
 				var ad = shlobj.GetActiveDesktop();
 				if (ad == null) throw new Exception("Couldn't get IActiveDesktop object.");
 
-				if ((result = ad.SetWallpaper(fileName, 0)) != 0)
+				if ((result = ad.SetWallpaper(displayFileName, 0)) != 0)
 					throw new Exception(string.Format("IActiveDesktop.SetWallpaper failed with HRESULT 0x{0:X8}", result));
 
 				var opt = new WALLPAPEROPT
@@ -1312,28 +1327,39 @@ namespace WallSwitch
 				if ((result = ad.ApplyChanges(AD_Apply.ALL | AD_Apply.BUFFERED_REFRESH)) != 0)
 					throw new Exception(string.Format("IActiveDesktop.ApplyChanges failed with HRESULT 0x{0:X8}", result));
 
-				theme.LastWallpaperFile = fileName;
+				theme.LastWallpaperFile = baseImage != null ? baseFileName : displayFileName;
 			}
 			catch (Exception ex)
 			{
 				Log.Write(ex, "Exception when fading desktop background.");
-				ChangeWallpaper(theme, wallpaperImage);
+				ChangeWallpaper(theme, baseImage, displayImage);
 			}
 		}
 
 		public int NumMonitors
 		{
-			get { return Screen.AllScreens.Length; }
+			get { return System.Windows.Forms.Screen.AllScreens.Length; }
 		}
 
-		public void Set(Theme theme, IEnumerable<ImageRec> files)
+		public IEnumerable<Rectangle> MonitorRects
+		{
+			get
+			{
+				foreach (var screen in System.Windows.Forms.Screen.AllScreens)
+				{
+					yield return screen.Bounds;
+				}
+			}
+		}
+
+		public void Set(Theme theme, IEnumerable<ImageLayout> files)
 		{
 			if (theme == null) throw new ArgumentNullException("Theme is null.");
 			if (files == null) throw new ArgumentNullException("Files list is null.");
 
 			try
 			{
-				var screenRects = (from s in Screen.AllScreens select s.Bounds).ToArray();
+				var screenRects = (from s in System.Windows.Forms.Screen.AllScreens select s.Bounds).ToArray();
 
 				// Keep track of which screens have been cleared.
 				var screenInits = new bool[screenRects.Length];
@@ -1345,41 +1371,79 @@ namespace WallSwitch
 					if (theme.Mode == ThemeMode.Collage) lastImage = LoadLastWallpaper(theme);
 					if (_renderer.InitFrame(screenRects, theme, lastImage))
 					{
-						var fileArray = files.ToArray();
-						if (fileArray.Length <= screenRects.Length)
+						foreach (var imgLayout in files)
 						{
-							var imageIndex = 0;
-							for (int screenIndex = 0; screenIndex < screenRects.Length; screenIndex++)
+							if (theme.Mode == ThemeMode.Collage)
 							{
-								var screenRect = screenRects[screenIndex];
-								var firstImage = screenInits[screenIndex] == false;
+								if (imgLayout.StartMonitor < screenRects.Length)
+								{
+									_renderer.RenderCollageImageOnScreen(imgLayout.ImageRec, screenRects[imgLayout.StartMonitor]);
+								}
+							}
+							else
+							{
+								// Check that the monitor range doesn't exceed the actual number of monitors available.
+								if (imgLayout.StartMonitor >= screenRects.Length) continue;
+								var startMonitor = imgLayout.StartMonitor;
+								var numMonitors = imgLayout.NumMonitors;
+								if (startMonitor + numMonitors > screenRects.Length) numMonitors = screenRects.Length - startMonitor;
 
-								if (imageIndex >= fileArray.Length) imageIndex = 0;
-								if (imageIndex < fileArray.Length) _renderer.RenderImageOnScreen(fileArray[imageIndex], screenRect, firstImage);
-								else _renderer.RenderBlankScreen(screenRect);
+								var spanRect = screenRects.Skip(startMonitor).Take(numMonitors).GetEnvelope();
 
-								imageIndex++;
-								screenInits[screenIndex] = true;
+								for (var monitorIndex = 0; monitorIndex < numMonitors; monitorIndex++)
+								{
+									_renderer.RenderFullScreenImageOnScreen(imgLayout.ImageRec, screenRects[startMonitor + monitorIndex], spanRect);
+								}
 							}
 						}
-						else // Multiple images per monitor
+
+						// TODO: remove
+						//var fileArray = files.ToArray();
+						//if (fileArray.Length <= screenRects.Length)
+						//{
+						//	var imageIndex = 0;
+						//	for (int screenIndex = 0; screenIndex < screenRects.Length; screenIndex++)
+						//	{
+						//		var screenRect = screenRects[screenIndex];
+						//		var firstImage = screenInits[screenIndex] == false;
+
+						//		if (imageIndex >= fileArray.Length) imageIndex = 0;
+						//		if (imageIndex < fileArray.Length) _renderer.RenderImageOnScreen(fileArray[imageIndex], screenRect, firstImage);
+						//		else _renderer.RenderBlankScreen(screenRect);
+
+						//		imageIndex++;
+						//		screenInits[screenIndex] = true;
+						//	}
+						//}
+						//else // Multiple images per monitor
+						//{
+						//	int screenIndex = 0;
+						//	foreach (var file in fileArray)
+						//	{
+						//		var firstImage = screenInits[screenIndex] == false;
+
+						//		_renderer.RenderImageOnScreen(file, screenRects[screenIndex], firstImage);
+
+						//		screenInits[screenIndex] = true;
+						//		screenIndex++;
+						//		if (screenIndex >= screenRects.Length) screenIndex = 0;
+						//	}
+						//}
+
+						// Draw widgets
+						var baseImage = _renderer.WallpaperImage;
+						Image displayImage = null;
+						DrawWidgets(theme, baseImage, out displayImage);
+
+						if (displayImage == null)
 						{
-							int screenIndex = 0;
-							foreach (var file in fileArray)
-							{
-								var firstImage = screenInits[screenIndex] == false;
-
-								_renderer.RenderImageOnScreen(file, screenRects[screenIndex], firstImage);
-
-								screenInits[screenIndex] = true;
-								screenIndex++;
-								if (screenIndex >= screenRects.Length) screenIndex = 0;
-							}
+							displayImage = baseImage;
+							baseImage = null;
 						}
 
 						// Apply to desktop background.
-						if (theme.FadeTransition && OsUtil.Win7Available) ChangeWallpaperFade(theme, _renderer.WallpaperImage);
-						else ChangeWallpaper(theme, _renderer.WallpaperImage);
+						if (theme.FadeTransition && OsUtil.Win7Available) ChangeWallpaperFade(theme, baseImage, displayImage);
+						else ChangeWallpaper(theme, baseImage, displayImage);
 					}
 					else
 					{
@@ -1400,14 +1464,29 @@ namespace WallSwitch
 				var fileName = theme.LastWallpaperFile;
 				if (string.IsNullOrEmpty(fileName) || !File.Exists(fileName))
 				{
-					fileName = theme.GetWallpaperFileName(ImageFormat.Png);
+					fileName = theme.GetBaseWallpaperFileName(ImageFormat.Png);
 					if (!File.Exists(fileName))
 					{
-						fileName = theme.GetWallpaperFileName(ImageFormat.Jpeg);
+						fileName = theme.GetBaseWallpaperFileName(ImageFormat.Jpeg);
 						if (!File.Exists(fileName))
 						{
-							fileName = theme.GetWallpaperFileName(ImageFormat.Bmp);
-							if (!File.Exists(fileName)) return null;
+							fileName = theme.GetBaseWallpaperFileName(ImageFormat.Bmp);
+							if (!File.Exists(fileName))
+							{
+								fileName = theme.GetDisplayWallpaperFileName(ImageFormat.Png);
+								if (!File.Exists(fileName))
+								{
+									fileName = theme.GetDisplayWallpaperFileName(ImageFormat.Jpeg);
+									if (!File.Exists(fileName))
+									{
+										fileName = theme.GetDisplayWallpaperFileName(ImageFormat.Bmp);
+										if (!File.Exists(fileName))
+										{
+											return null;
+										}
+									}
+								}
+							}
 						}
 					}
 				}
@@ -1432,6 +1511,33 @@ namespace WallSwitch
 				Log.Write(ex, "Exception when loading previous wallpaper.");
 				return null;
 			}
+		}
+
+		private void DrawWidgets(Theme theme, Image baseImage, out Image displayImage)
+		{
+			var widgets = theme.Widgets.ToArray();
+			if (widgets.Length == 0)
+			{
+				displayImage = null;
+				return;
+			}
+
+			var image = new Bitmap(baseImage);
+			var graphics = Graphics.FromImage(image);
+
+			foreach (var widget in widgets)
+			{
+				try
+				{
+					widget.Draw(new WidgetDrawArgs(widget.Config, widget.Bounds, graphics, false));
+				}
+				catch (Exception ex)
+				{
+					Log.Write(ex, "Exception in Widget.Draw()");
+				}
+			}
+
+			displayImage = image;
 		}
 	}
 }

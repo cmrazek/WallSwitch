@@ -1151,5 +1151,14 @@ namespace WallSwitch {
                 return ResourceManager.GetString("Website", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Widgets.
+        /// </summary>
+        internal static string WidgetDirName {
+            get {
+                return ResourceManager.GetString("WidgetDirName", resourceCulture);
+            }
+        }
     }
 }

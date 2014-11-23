@@ -9,7 +9,7 @@ using System.Text;
 
 namespace WallSwitch
 {
-	class WallpaperRenderer : IWallpaperRenderer
+	class WallpaperRenderer : IDisposable
 	{
 		[DllImport("WallSwitchImgProc.dll", CallingConvention = CallingConvention.Cdecl)]
 		private static extern int BlurImage(IntPtr pImageBits, int width, int height, int iImageFormat, int stride, int blurDist);
@@ -23,7 +23,6 @@ namespace WallSwitch
 		private Graphics _g = null;
 		private Theme _theme = null;
 		private Random _rand = new Random();
-		private bool _firstRender = true;
 
 		private const int k_randomRectRetries = 10;
 
@@ -79,27 +78,46 @@ namespace WallSwitch
 			{
 				_bitmap = lastImage;
 				_g = Graphics.FromImage(_bitmap);
-				_firstRender = false;
 			}
 			else
 			{
 				_bitmap = new Bitmap(_fullSize.Width, _fullSize.Height);
 				_g = Graphics.FromImage(_bitmap);
 				_g.Clear(Color.Black);
-				_firstRender = true;
 				_theme.ClearImageRectHistory();
 			}
 
 			if (_theme.Mode == ThemeMode.Collage &&
 				lastImage != null && lastImage.Width == _bitmap.Width && lastImage.Height == _bitmap.Height)
 			{
-				DrawBackground(lastImage);
+				DrawLastBackgroundImage(lastImage);
+			}
+
+			if (_theme.Mode == ThemeMode.Collage)
+			{
+				if (_theme.BackOpacity255 > 0)
+				{
+					foreach (var screenRect in screenRects)
+					{
+						DrawBackgroundColor(screenRect, _theme.BackOpacity255);
+					}
+				}
+			}
+			else
+			{
+				if (_theme.BackColorTop != Color.Black || _theme.BackColorBottom != Color.Black)
+				{
+					foreach (var screenRect in screenRects)
+					{
+						DrawBackgroundColor(screenRect, 255);
+					}
+				}
 			}
 
 			return true;
 		}
 
-		private void DrawBackground(Bitmap lastImage)
+		private void DrawLastBackgroundImage(Bitmap lastImage)
 		{
 			var image = lastImage;
 
@@ -123,137 +141,274 @@ namespace WallSwitch
 			}
 		}
 
-		public void RenderImageOnScreen(ImageRec file, Rectangle thisScreenRect, bool firstImage)
+		//public void RenderImageOnScreen(ImageRec file, Rectangle thisScreenRect, bool firstImage)
+		//{
+		//	try
+		//	{
+		//		if (file == null)
+		//		{
+		//			Log.Write(LogLevel.Warning, "No image file passed.");
+		//			if (_theme.Mode != ThemeMode.Collage)
+		//			{
+		//				DrawBackgroundColor(thisScreenRect, 255);
+		//			}
+		//		}
+		//		else if (!file.IsPresent)
+		//		{
+		//			Log.Write(LogLevel.Warning, "No image object is loaded.");
+		//			if (_theme.Mode != ThemeMode.Collage)
+		//			{
+		//				DrawBackgroundColor(thisScreenRect, 255);
+		//			}
+		//		}
+		//		else
+		//		{
+		//			Image img = file.Image;
+		//			Image imgToDraw = null;
+		//			lock (img)
+		//			{
+		//				bool clearRequired = false;
+		//				int clearOpacity = 255;
+		//				float imgWidth = img.Width;
+		//				float imgHeight = img.Height;
+		//				if (imgWidth <= 0.0f || imgHeight <= 0.0f) return;
+
+		//				RectangleF screenRect = thisScreenRect;
+		//				RectangleF imgRect = new RectangleF(0, 0, img.Width, img.Height);
+		//				RectangleF srcRect = imgRect;
+
+		//				_g.SetClip(screenRect);
+
+		//				if (_theme.Mode == ThemeMode.Collage)
+		//				{
+		//					// The maximum image size will be determined by the number of pixels (area), not by the max width/height.
+		//					// This will provide a more consistent image size when there are pictures with different aspect ratios.
+		//					float imgArea = imgWidth * imgHeight;
+		//					float imgSize = (float)_theme.ImageSize / 100.0f;
+		//					float screenArea = screenRect.Width * imgSize * screenRect.Height * imgSize;
+		//					float scale = (float)Math.Sqrt(screenArea / imgArea);
+
+		//					if (_theme.MaxImageScale > 0)
+		//					{
+		//						var maxScale = (float)_theme.MaxImageScale / 100.0f;
+		//						if (maxScale > 0.0f && scale > maxScale) scale = maxScale;
+		//					}
+		//					imgWidth *= scale;
+		//					imgHeight *= scale;
+
+		//					// If one of the dimensions is still wider/taller than the screen, then scale it down more.
+		//					if (imgWidth > screenRect.Width)
+		//					{
+		//						float ratio = screenRect.Width / imgWidth;
+		//						imgWidth = screenRect.Width;
+		//						imgHeight *= ratio;
+		//						scale *= ratio;
+		//					}
+
+		//					if (imgHeight > screenRect.Height)
+		//					{
+		//						float ratio = screenRect.Height / imgHeight;
+		//						imgHeight = screenRect.Height;
+		//						imgWidth *= ratio;
+		//						scale *= ratio;
+		//					}
+
+		//					imgRect = GetRandomImageRect(thisScreenRect, imgWidth, imgHeight);
+
+		//					if (_firstRender) clearOpacity = 255;
+		//					else clearOpacity = _theme.BackOpacity255;
+		//					clearRequired = firstImage;	// Don't clear the screen if this isn't the first image.
+
+		//					// Feather edges
+		//					if (scale > 0.0f)
+		//					{
+		//						switch (_theme.EdgeMode)
+		//						{
+		//							case EdgeMode.Feather:
+		//								if (_theme.EdgeDist > 0)
+		//								{
+		//									int featherWidth = (int)((float)_theme.EdgeDist / scale);
+		//									if (featherWidth > 0) imgToDraw = FeatherImage(img, featherWidth);
+		//									else imgToDraw = img;
+		//								}
+		//								break;
+
+		//							case EdgeMode.SolidBorder:
+		//								if (_theme.EdgeDist > 0)
+		//								{
+		//									int edgeWidth = (int)((float)_theme.EdgeDist / scale);
+		//									if (edgeWidth > 0) imgToDraw = CreateSolidBorderImage(img, edgeWidth, _theme.BorderColor, ref srcRect);
+		//									else imgToDraw = img;
+		//								}
+		//								break;
+
+		//							case EdgeMode.None:
+		//								imgToDraw = img;
+		//								break;
+		//						}
+		//					}
+
+		//					if (_theme.DropShadow) DrawDropShadow(imgRect);
+		//				}
+		//				else // Sequential or Random - one image per screen
+		//				{
+		//					imgRect = FitImage(imgRect, ref srcRect, screenRect, _theme.ImageFit, img.Size, ref clearRequired);
+		//					imgToDraw = img;
+		//				}
+
+		//				if (clearRequired && clearOpacity > 0) DrawBackgroundColor(thisScreenRect, clearOpacity);
+
+		//				if (_theme.ColorEffectFore == ColorEffect.None)
+		//				{
+		//					_g.DrawImage(imgToDraw, imgRect, srcRect, GraphicsUnit.Pixel);
+		//				}
+		//				else
+		//				{
+		//					_g.DrawImageWithColorMatrix(imgToDraw, imgRect, srcRect, _theme.ColorEffectFore.GetColorMatrix());
+		//				}
+		//			}
+		//		}
+		//	}
+		//	catch (Exception ex)
+		//	{
+		//		Log.Write(ex, "Exception when drawing image '{0}':", file);
+		//	}
+		//}
+
+		public void RenderCollageImageOnScreen(ImageRec file, Rectangle screenRect)
 		{
 			try
 			{
-				if (file == null)
+				if (file == null || !file.IsPresent) return;
+
+				_g.SetClip(screenRect);
+
+				var img = file.Image;
+				lock (img)
 				{
-					Log.Write(LogLevel.Warning, "No image file passed.");
-					if (_theme.Mode != ThemeMode.Collage)
+					// The maximum image size will be determined by the number of pixels (area), not by the max width/height.
+					// This will provide a more consistent image size when there are pictures with different aspect ratios.
+					float imgWidth = file.Image.Width;
+					float imgHeight = file.Image.Height;
+					float imgArea = imgWidth * imgHeight;
+					float imgSize = (float)_theme.ImageSize / 100.0f;
+					float screenArea = screenRect.Width * imgSize * screenRect.Height * imgSize;
+					float scale = (float)Math.Sqrt(screenArea / imgArea);
+
+					if (_theme.MaxImageScale > 0)
 					{
-						ClearBackground(thisScreenRect, 255);
+						var maxScale = (float)_theme.MaxImageScale / 100.0f;
+						if (maxScale > 0.0f && scale > maxScale) scale = maxScale;
 					}
-				}
-				else if (!file.IsPresent)
-				{
-					Log.Write(LogLevel.Warning, "No image object is loaded.");
-					if (_theme.Mode != ThemeMode.Collage)
+					imgWidth *= scale;
+					imgHeight *= scale;
+
+					// If one of the dimensions is still wider/taller than the screen, then scale it down more.
+					if (imgWidth > screenRect.Width)
 					{
-						ClearBackground(thisScreenRect, 255);
+						float ratio = screenRect.Width / imgWidth;
+						imgWidth = screenRect.Width;
+						imgHeight *= ratio;
+						scale *= ratio;
 					}
-				}
-				else
-				{
-					Image img = file.Image;
-					Image imgToDraw = null;
-					lock (img)
+
+					if (imgHeight > screenRect.Height)
 					{
-						bool clearRequired = false;
-						int clearOpacity = 255;
-						float imgWidth = img.Width;
-						float imgHeight = img.Height;
-						if (imgWidth <= 0.0f || imgHeight <= 0.0f) return;
+						float ratio = screenRect.Height / imgHeight;
+						imgHeight = screenRect.Height;
+						imgWidth *= ratio;
+						scale *= ratio;
+					}
 
-						RectangleF screenRect = thisScreenRect;
-						RectangleF imgRect = new RectangleF(0, 0, img.Width, img.Height);
-						RectangleF srcRect = imgRect;
+					var imgRect = GetRandomImageRect(screenRect, imgWidth, imgHeight);
+					var imgToDraw = img;
+					RectangleF srcRect = new RectangleF(0, 0, img.Width, img.Height);
 
-						_g.SetClip(screenRect);
-
-						if (_theme.Mode == ThemeMode.Collage)
+					// Feather edges
+					if (scale > 0.0f)
+					{
+						switch (_theme.EdgeMode)
 						{
-							// The maximum image size will be determined by the number of pixels (area), not by the max width/height.
-							// This will provide a more consistent image size when there are pictures with different aspect ratios.
-							float imgArea = imgWidth * imgHeight;
-							float imgSize = (float)_theme.ImageSize / 100.0f;
-							float screenArea = screenRect.Width * imgSize * screenRect.Height * imgSize;
-							float scale = (float)Math.Sqrt(screenArea / imgArea);
-
-							if (_theme.MaxImageScale > 0)
-							{
-								var maxScale = (float)_theme.MaxImageScale / 100.0f;
-								if (maxScale > 0.0f && scale > maxScale) scale = maxScale;
-							}
-							imgWidth *= scale;
-							imgHeight *= scale;
-
-							// If one of the dimensions is still wider/taller than the screen, then scale it down more.
-							if (imgWidth > screenRect.Width)
-							{
-								float ratio = screenRect.Width / imgWidth;
-								imgWidth = screenRect.Width;
-								imgHeight *= ratio;
-								scale *= ratio;
-							}
-
-							if (imgHeight > screenRect.Height)
-							{
-								float ratio = screenRect.Height / imgHeight;
-								imgHeight = screenRect.Height;
-								imgWidth *= ratio;
-								scale *= ratio;
-							}
-
-							imgRect = GetRandomImageRect(thisScreenRect, imgWidth, imgHeight);
-
-							if (_firstRender) clearOpacity = 255;
-							else clearOpacity = _theme.BackOpacity255;
-							clearRequired = firstImage;	// Don't clear the screen if this isn't the first image.
-
-							// Feather edges
-							if (scale > 0.0f)
-							{
-								switch (_theme.EdgeMode)
+							case EdgeMode.Feather:
+								if (_theme.EdgeDist > 0)
 								{
-									case EdgeMode.Feather:
-										if (_theme.EdgeDist > 0)
-										{
-											int featherWidth = (int)((float)_theme.EdgeDist / scale);
-											if (featherWidth > 0) imgToDraw = FeatherImage(img, featherWidth);
-											else imgToDraw = img;
-										}
-										break;
-
-									case EdgeMode.SolidBorder:
-										if (_theme.EdgeDist > 0)
-										{
-											int edgeWidth = (int)((float)_theme.EdgeDist / scale);
-											if (edgeWidth > 0) imgToDraw = CreateSolidBorderImage(img, edgeWidth, _theme.BorderColor, ref srcRect);
-											else imgToDraw = img;
-										}
-										break;
-
-									case EdgeMode.None:
-										imgToDraw = img;
-										break;
+									int featherWidth = (int)((float)_theme.EdgeDist / scale);
+									if (featherWidth > 0) imgToDraw = FeatherImage(img, featherWidth);
+									else imgToDraw = img;
 								}
-							}
+								break;
 
-							if (_theme.DropShadow) DrawDropShadow(imgRect);
-						}
-						else // Sequential or Random - one image per screen
-						{
-							imgRect = FitImage(imgRect, ref srcRect, screenRect, _theme.ImageFit, img.Size, ref clearRequired);
-							imgToDraw = img;
-						}
+							case EdgeMode.SolidBorder:
+								if (_theme.EdgeDist > 0)
+								{
+									int edgeWidth = (int)((float)_theme.EdgeDist / scale);
+									if (edgeWidth > 0) imgToDraw = CreateSolidBorderImage(img, edgeWidth, _theme.BorderColor, ref srcRect);
+									else imgToDraw = img;
+								}
+								break;
 
-						if (clearRequired && clearOpacity > 0) ClearBackground(thisScreenRect, clearOpacity);
+							case EdgeMode.None:
+								imgToDraw = img;
+								break;
+						}
+					}
 
-						if (_theme.ColorEffectFore == ColorEffect.None)
-						{
-							_g.DrawImage(imgToDraw, imgRect, srcRect, GraphicsUnit.Pixel);
-						}
-						else
-						{
-							_g.DrawImageWithColorMatrix(imgToDraw, imgRect, srcRect, _theme.ColorEffectFore.GetColorMatrix());
-						}
+					if (_theme.DropShadow) DrawDropShadow(imgRect);
+
+					if (_theme.ColorEffectFore == ColorEffect.None)
+					{
+						_g.DrawImage(imgToDraw, imgRect, srcRect, GraphicsUnit.Pixel);
+					}
+					else
+					{
+						_g.DrawImageWithColorMatrix(imgToDraw, imgRect, srcRect, _theme.ColorEffectFore.GetColorMatrix());
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				Log.Write(ex, "Exception when drawing image '{0}':", file);
+				Log.Write(ex, "Exception when drawing collage image '{0}':", file);
+			}
+		}
+
+		/// <summary>
+		/// Draws a full screen image to a single monitor.
+		/// </summary>
+		/// <param name="file">The image to be drawn</param>
+		/// <param name="screenRect">The rectangle of the current screen</param>
+		/// <param name="spanRect">The rectangle for all screens that this image is to be spanned across</param>
+		public void RenderFullScreenImageOnScreen(ImageRec file, Rectangle screenRect, Rectangle spanRect)
+		{
+			try
+			{
+				if (file == null || !file.IsPresent) return;
+
+				Image img = file.Image;
+				Image imgToDraw = null;
+				lock (img)
+				{
+					RectangleF spanRectF = spanRect;
+					RectangleF imgRect = new RectangleF(0, 0, img.Width, img.Height);
+					RectangleF srcRect = imgRect;
+
+					_g.SetClip(screenRect);
+
+					imgRect = FitFullScreenImage(imgRect, ref srcRect, spanRectF, _theme.ImageFit, img.Size);
+					imgToDraw = img;
+
+					if (_theme.ColorEffectFore == ColorEffect.None)
+					{
+						_g.DrawImage(imgToDraw, imgRect, srcRect, GraphicsUnit.Pixel);
+					}
+					else
+					{
+						_g.DrawImageWithColorMatrix(imgToDraw, imgRect, srcRect, _theme.ColorEffectFore.GetColorMatrix());
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Exception when drawing full screen image '{0}':", file);
 			}
 		}
 
@@ -261,11 +416,11 @@ namespace WallSwitch
 		{
 			if (_theme.Mode != ThemeMode.Collage)
 			{
-				ClearBackground(screenRect, 255);
+				DrawBackgroundColor(screenRect, 255);
 			}
 		}
 
-		private void ClearBackground(Rectangle screenRect, int opacity)
+		private void DrawBackgroundColor(Rectangle screenRect, int opacity)
 		{
 			Color topColor = Color.FromArgb(opacity, _theme.BackColorTop.R, _theme.BackColorTop.G, _theme.BackColorTop.B);
 			Color bottomColor = Color.FromArgb(opacity, _theme.BackColorBottom.R, _theme.BackColorBottom.G, _theme.BackColorBottom.B);
@@ -286,7 +441,7 @@ namespace WallSwitch
 			brush.Dispose();
 		}
 
-		private RectangleF FitImage(RectangleF imgRect, ref RectangleF srcRect, RectangleF screenRect, ImageFit fit, SizeF imgSize, ref bool clearBackground)
+		private RectangleF FitFullScreenImage(RectangleF imgRect, ref RectangleF srcRect, RectangleF screenRect, ImageFit fit, SizeF imgSize)
 		{
 			SizeF screenSize = screenRect.Size;
 			RectangleF origImgRect = imgRect;
@@ -331,7 +486,6 @@ namespace WallSwitch
 					throw new ArgumentException("Invalid image fit value.");
 			}
 
-			clearBackground = !screenRect.CompletelyInside(imgRect);
 			return imgRect;
 		}
 

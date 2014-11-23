@@ -507,4 +507,7 @@ Click 'yes' to be taken to the download page.</value>
   <data name="Error_OutOfRangeNumCollageImages" xml:space="preserve">
     <value>Number of images per switch must be between 1 and 10.</value>
   </data>
+  <data name="WidgetDirName" xml:space="preserve">
+    <value>Widgets</value>
+  </data>
 </root>

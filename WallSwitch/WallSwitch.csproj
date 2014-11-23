@@ -35,7 +35,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -45,7 +45,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -109,6 +109,7 @@
     <Compile Include="ImageCache.cs" />
     <Compile Include="ImageFit.cs" />
     <Compile Include="ImageFormatDesc.cs" />
+    <Compile Include="ImageLayout.cs" />
     <Compile Include="ImageListView.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -158,6 +159,15 @@
     <Compile Include="WallpaperRenderer.cs" />
     <Compile Include="WallSwitchService.cs" />
     <Compile Include="WallSwitchServiceManager.cs" />
+    <Compile Include="WidgetInstance.cs" />
+    <Compile Include="WidgetLayoutControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="WidgetLayoutControl.Designer.cs">
+      <DependentUpon>WidgetLayoutControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WidgetManager.cs" />
+    <Compile Include="WidgetType.cs" />
     <EmbeddedResource Include="AboutDialog.resx">
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -196,6 +206,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="SettingsDialog.resx">
       <DependentUpon>SettingsDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WidgetLayoutControl.resx">
+      <DependentUpon>WidgetLayoutControl.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="Properties\Settings.settings">
@@ -247,6 +260,12 @@
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WidgetInterface\WidgetInterface.csproj">
+      <Project>{be06c925-2edd-419f-9655-3ef6be49c809}</Project>
+      <Name>WidgetInterface</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
@@ -254,7 +273,7 @@
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

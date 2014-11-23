@@ -13,19 +13,19 @@ if exist "C:\Program Files\NSIS\makensis.exe" (
 if not exist bin mkdir bin
 if not exist output mkdir output
 
-copy ..\WallSwitch\bin\Release\WallSwitch.exe bin\
+copy ..\Release\WallSwitch.exe bin\
 if errorlevel 1 (
 	echo Failed to copy WallSwitch.exe
 	goto :eof
 )
 
-copy ..\WallSwitch\bin\Release\HtmlAgilityPack.dll bin\
+copy ..\Release\HtmlAgilityPack.dll bin\
 if errorlevel 1 (
 	echo Failed to copy HtmlAgilityPack.dll
 	goto :eof
 )
 
-copy ..\WallSwitch\bin\Release\HtmlAgilityPack.xml bin\
+copy ..\Release\HtmlAgilityPack.xml bin\
 if errorlevel 1 (
 	echo Failed to copy HtmlAgilityPack.xml
 	goto :eof

@@ -41,6 +41,7 @@ namespace WallSwitch
 #endif
 
 						Settings.Initialize();
+						WidgetManager.SearchForWidgets();
 
 						Application.EnableVisualStyles();
 						Application.SetCompatibleTextRenderingDefault(false);

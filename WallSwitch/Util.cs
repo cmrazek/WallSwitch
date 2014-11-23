@@ -169,6 +169,91 @@ namespace WallSwitch
 			var inter = RectangleF.Intersect(self, rect);
 			return inter.Width * inter.Height;
 		}
+
+		public static Rectangle ToRectangle(this RectangleF self)
+		{
+			return new Rectangle((int)Math.Round(self.Left), (int)Math.Round(self.Top), (int)Math.Round(self.Width), (int)Math.Round(self.Height));
+		}
+
+		public static Point TopLeft(this Rectangle rect)
+		{
+			return new Point(rect.Left, rect.Top);
+		}
+
+		public static Point TopRight(this Rectangle rect)
+		{
+			return new Point(rect.Right, rect.Top);
+		}
+
+		public static Point BottomLeft(this Rectangle rect)
+		{
+			return new Point(rect.Left, rect.Bottom);
+		}
+
+		public static Point BottomRight(this Rectangle rect)
+		{
+			return new Point(rect.Right, rect.Bottom);
+		}
+
+		public static Rectangle GetEnvelope(this IEnumerable<Rectangle> rects)
+		{
+			int left = -1, top = -1, right = -1, bottom = -1;
+
+			foreach (var rect in rects)
+			{
+				if (left == -1)
+				{
+					left = rect.Left;
+					top = rect.Top;
+					right = rect.Right;
+					bottom = rect.Bottom;
+				}
+				else
+				{
+					if (rect.Left < left) left = rect.Left;
+					if (rect.Top < top) top = rect.Top;
+					if (rect.Right > right) right = rect.Right;
+					if (rect.Bottom > bottom) bottom = rect.Bottom;
+				}
+			}
+
+			if (left == -1)
+			{
+				return Rectangle.Empty;
+			}
+			else
+			{
+				return new Rectangle(left, top, right - left, bottom - top);
+			}
+		}
+	}
+
+	static class PointUtil
+	{
+		public static bool IsCloseTo(this Point pt1, Point pt2, int dist)
+		{
+			return Math.Abs(pt1.X - pt2.X) <= dist && Math.Abs(pt1.Y - pt2.Y) <= dist;
+		}
+
+		public static Point Subtract(this Point pt1, Point pt2)
+		{
+			return new Point(pt1.X - pt2.X, pt1.Y - pt2.Y);
+		}
+
+		public static Point Subtract(this Point pt, int x, int y)
+		{
+			return new Point(pt.X - x, pt.Y - y);
+		}
+
+		public static Point Add(this Point pt1, Point pt2)
+		{
+			return new Point(pt1.X + pt2.X, pt1.Y + pt2.Y);
+		}
+
+		public static Point Add(this Point pt, int x, int y)
+		{
+			return new Point(pt.X + x, pt.Y + y);
+		}
 	}
 
 	static class TimeSpanUtil
@@ -425,6 +510,26 @@ namespace WallSwitch
 			if (img == null || colorMatrix == null) return;
 			DrawImageWithColorMatrix(g, img, imgRect, new RectangleF(0, 0, img.Width, img.Height), colorMatrix);
 		}
+
+		public static PathGradientBrush CreateRadialGradientBrush(Rectangle rect, Color centerColor, Color outsideColor)
+		{
+			PathGradientBrush pgb;
+			using (var path = new GraphicsPath())
+			{
+				var ellipseBounds = rect;
+				ellipseBounds.Inflate((int)Math.Round(ellipseBounds.Width * .414f * .5f), (int)Math.Round(ellipseBounds.Height * .414f * .5f));
+				path.AddEllipse(ellipseBounds);
+
+				pgb = new PathGradientBrush(path);
+				pgb.CenterPoint = new PointF(rect.Left + rect.Width * .5f, rect.Top + rect.Height * .5f);
+				pgb.CenterColor = centerColor;
+				pgb.SurroundColors = new[] { outsideColor };
+				pgb.FocusScales = new PointF(0, 0);
+				pgb.WrapMode = WrapMode.Clamp;
+			}
+
+			return pgb;
+		}
 	}
 
 	public static class OsUtil
@@ -472,6 +577,15 @@ namespace WallSwitch
 			}
 
 			return sb.ToString();
+		}
+	}
+
+	public static class SizeUtil
+	{
+		public static float GetAspect(this Size size)
+		{
+			if (size.Height <= 0 || size.Width <= 0) return 0.0f;
+			return (float)size.Width / (float)size.Height;
 		}
 	}
 }

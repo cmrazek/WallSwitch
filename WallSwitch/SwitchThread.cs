@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using System.IO;
 using Microsoft.Win32;
-using System.Runtime.InteropServices;
 
 namespace WallSwitch
 {
@@ -285,11 +286,11 @@ namespace WallSwitch
 				if (ev != null) ev(this, new EventArgs());
 
 				// Get the list of images to display next.
-				IEnumerable<ImageRec> images = null;
+				IEnumerable<ImageLayout> images = null;
 				switch (dir)
 				{
 					case SwitchDir.Next:
-						images = _theme.GetNextImages(wallpaperSetter.NumMonitors);
+						images = _theme.GetNextImages(wallpaperSetter.MonitorRects.ToArray());
 						break;
 
 					case SwitchDir.Prev:
@@ -297,7 +298,7 @@ namespace WallSwitch
 						break;
 
 					default:
-						images = new ImageRec[0];
+						images = new ImageLayout[0];
 						break;
 				}
 
@@ -307,7 +308,7 @@ namespace WallSwitch
 					foreach (var img in images) Log.Write(LogLevel.Debug, "  Image: {0}", img);
 					if (images != null) wallpaperSetter.Set(_theme, images);
 
-					foreach (var img in images) img.Release();
+					foreach (var img in images) img.ImageRec.Release();
 				}
 
 				Log.Write(LogLevel.Debug, "Finished switching wallpaper.");
