@@ -812,7 +812,7 @@ namespace WallSwitch
 
 			// Display Mode Group
 			var numScreens = Screen.AllScreens.Length;
-			c_separateMonitors.Visible = numScreens > 1 && c_themeMode.SelectedIndex != k_modeCollage;
+			c_separateMonitors.Visible = numScreens > 1;
 			c_allowSpanning.Visible = numScreens > 1 && c_themeMode.SelectedIndex != k_modeCollage;
 			c_imageFit.Visible = c_themeMode.SelectedIndex != k_modeCollage;
 			c_maxScale.Enabled = c_limitScale.Checked;

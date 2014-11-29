@@ -748,14 +748,28 @@ namespace WallSwitch
 			if (_mode == ThemeMode.Collage)
 			{
 				var pickedFiles = new List<ImageLayout>();
+				var numMonitors = _separateMonitors ? monitorRects.Length : 1;
 
-				for (int monitorIndex = 0; monitorIndex < monitorRects.Length; monitorIndex++)
+				for (int monitorIndex = 0; monitorIndex < numMonitors; monitorIndex++)
 				{
 					for (int imageIndex = 0; imageIndex < _numCollageImages; imageIndex++)
 					{
 						var img = PickRandomOrSequentialImage(allFiles, pickedFiles);
 						if (img == null) break;
-						pickedFiles.Add(new ImageLayout(img, new int[] { monitorIndex }));
+						img.Retrieve();
+
+						if (_separateMonitors)
+						{
+							pickedFiles.Add(new ImageLayout(img, new int[] { monitorIndex }));
+						}
+						else
+						{
+							// This one image will be displayed on all the monitors.
+							for (int layoutMonitor = 0; layoutMonitor < monitorRects.Length; layoutMonitor++)
+							{
+								pickedFiles.Add(new ImageLayout(img, new int[] { layoutMonitor }));
+							}
+						}
 					}
 				}
 
@@ -927,11 +941,25 @@ namespace WallSwitch
 			}
 
 			// Find the first image that is greater than the last file.
-			var img = allFiles.FirstOrDefault(i => string.Compare(i.Location, _lastImage, StringComparison.OrdinalIgnoreCase) > 0);
-			if (img != null)
+			var lastImage = _lastImage;
+			while (true)
 			{
-				Log.Write(LogLevel.Debug, "Next sequential image is [{0}]", img.Location);
-				return img;
+				var img = allFiles.FirstOrDefault(i => string.Compare(i.Location, lastImage, StringComparison.OrdinalIgnoreCase) > 0);
+				if (img != null)
+				{
+					Log.Write(LogLevel.Debug, "Next sequential image is [{0}]", img.Location);
+					if (img.Retrieve())
+					{
+						return img;
+					}
+					else
+					{
+						lastImage = img.Location;
+						continue;
+					}
+				}
+
+				break;
 			}
 
 			Log.Write(LogLevel.Debug, "No images greater than last image; returning first image [{0}]", allFiles[0].Location);

@@ -1,7 +1,7 @@
 WallSwitch
 Switches desktop wallpapers from a variety of sources.
 http://wallswitch.codeplex.com/
-Current Version: 1.3.1
+Current Version: 1.3.2
 
 Requirements:
 	.NET Framework 4:  http://www.microsoft.com/download/en/details.aspx?id=17718
@@ -11,6 +11,10 @@ Contact:
 	Email: chrismrazek@gmail.com
 
 ChangeLog:
+
+Version 1.3.2 - 2014-11-29:
+- Fixed collage/sequential images not being displayed.
+- Re-enabled the 'Separate image for each monitor' checkbox in collage mode.
 
 Version 1.3.1 - 2014-11-29:
 - Fixed error with version 1.3 installer.

@@ -23,6 +23,12 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "WallSwitchSetup", "WallSwit
 		{258A45C4-2116-4522-BE10-1CAC045ED338} = {258A45C4-2116-4522-BE10-1CAC045ED338}
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{43F3B861-FFE2-4F02-89A0-04604FC1F67C}"
+	ProjectSection(SolutionItems) = preProject
+		License.rtf = License.rtf
+		ReadMe.txt = ReadMe.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

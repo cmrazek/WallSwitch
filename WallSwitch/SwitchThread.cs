@@ -310,7 +310,7 @@ namespace WallSwitch
 				// Display the images.
 				if (images != null)
 				{
-					foreach (var img in images) Log.Write(LogLevel.Debug, "  Image: {0}", img);
+					foreach (var img in images) Log.Write(LogLevel.Debug, "  Image: {0}", img.ImageRec.Location);
 					if (images != null) wallpaperSetter.Set(_theme, images);
 
 					foreach (var img in images) img.ImageRec.Release();
