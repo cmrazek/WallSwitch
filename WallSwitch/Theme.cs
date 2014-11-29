@@ -644,6 +644,8 @@ namespace WallSwitch
 			if (File.Exists(fileName)) File.Delete(fileName);
 
 			_imageRectHistory.Clear();
+
+			_lastImage = null;
 		}
 
 		public IEnumerable<IEnumerable<ImageLayout>> History

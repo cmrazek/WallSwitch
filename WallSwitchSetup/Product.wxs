@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="*" Name="WallSwitch" Language="1033" Version="1.3" Manufacturer="Chris Mrazek" UpgradeCode="e762d06c-68ce-43b7-b423-527cf651db2b">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+		<WixVariable Id="WixUILicenseRtf" Value="..\License.rtf" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of WallSwitch is already installed." />
+		<MediaTemplate />
+		
+		<Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+		<UI>
+			<UIRef Id="WixUI_InstallDir" />
+			<Publish Dialog="ExitDialog"
+				Control="Finish"
+				Event="DoAction"
+				Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed</Publish>
+		</UI>
+		
+		<Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch WallSwitch" />
+		<Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1"/>
+		<Property Id="WixShellExecTarget" Value="[#WallSwitch.exe]" />
+		<CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
+
+		<Icon Id="icon.ico" SourceFile="..\WallSwitch\AppIcon.ico"/>
+		<Property Id="ARPPRODUCTICON" Value="icon.ico" />
+
+		<WixVariable Id="WixUIBannerBmp" Value="..\Images\WixTopBanner.bmp"/>
+		<WixVariable Id="WixUIDialogBmp" Value="..\Images\WixBackground.bmp"/>
+
+		<Feature Id="ProductFeature" Title="WallSwitch" Level="1">
+			<ComponentRef Id="WallSwitch.exe"/>
+			<ComponentRef Id="HtmlAgilityPack.dll"/>
+			<ComponentRef Id="HtmlAgilityPack.xml"/>
+			<ComponentRef Id="ReadMe.txt"/>
+			<ComponentRef Id="WallSwitchImgProc.dll"/>
+			<ComponentRef Id="WallSwitch.WidgetInterface.dll"/>
+			<ComponentRef Id="WallSwitch.WidgetInterface.xml"/>
+			<ComponentRef Id="WallSwitchWidgets.dll"/>
+
+			<ComponentRef Id="ApplicationShortcut"/>
+
+			<ComponentRef Id="LegacyRegistryRemoval"/>
+			<ComponentRef Id="LegacyUninstallerRemoval"/>
+			<ComponentRef Id="LegacyIconRemoval"/>
+			<ComponentRef Id="LegacyUninstallShortcutRemoval"/>
+		</Feature>
+
+		<!-- Directories -->
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="INSTALLFOLDER" Name="WallSwitch">
+					<Directory Id="WIDGETSFOLDER" Name="Widgets"/>
+				</Directory>
+			</Directory>
+			<Directory Id="ProgramMenuFolder">
+				<Directory Id="ApplicationProgramsFolder" Name="WallSwitch"/>
+			</Directory>
+		</Directory>
+
+		<!-- Files to be installed -->
+		<DirectoryRef Id="INSTALLFOLDER">
+			<Component Id="WallSwitch.exe" Guid="fb5fa9ed-9dd4-400b-ad6b-84fcc11d1d2a">
+				<File Id="WallSwitch.exe" Source="..\Release\WallSwitch.exe" KeyPath="yes" Checksum="yes"/>
+			</Component>
+			<Component Id="HtmlAgilityPack.dll" Guid="9ec306b6-d55d-4664-84da-c5138ac8c68a">
+				<File Id="HtmlAgilityPack.dll" Source="..\Release\HtmlAgilityPack.dll" KeyPath="yes" Checksum="yes"/>
+			</Component>
+			<Component Id="HtmlAgilityPack.xml" Guid="fc0a2cc3-97fc-4797-8335-b22eb6c4165e">
+				<File Id="HtmlAgilityPack.xml" Source="..\Release\HtmlAgilityPack.xml" KeyPath="yes"/>
+			</Component>
+			<Component Id="ReadMe.txt" Guid="2b661a52-ed61-4416-b723-fe78756e0f8d">
+				<File Id="ReadMe.txt.xml" Source="..\ReadMe.txt" KeyPath="yes"/>
+			</Component>
+			<Component Id="WallSwitchImgProc.dll" Guid="c03816f3-b188-4a41-bf0d-2f308621201e">
+				<File Id="WallSwitchImgProc.dll" Source="..\Release\WallSwitchImgProc.dll" KeyPath="yes" Checksum="yes"/>
+			</Component>
+			<Component Id="WallSwitch.WidgetInterface.dll" Guid="7218642c-3066-46a7-ba4b-a8eaf2efc978">
+				<File Id="WallSwitch.WidgetInterface.dll" Source="..\Release\WallSwitch.WidgetInterface.dll" KeyPath="yes" Checksum="yes" Assembly=".net"/>
+			</Component>
+			<Component Id="WallSwitch.WidgetInterface.xml" Guid="3a69c6ed-d2eb-4eb7-b248-ed7d5b6e07b1">
+				<File Id="WallSwitch.WidgetInterface.xml" Source="..\Release\WallSwitch.WidgetInterface.xml" KeyPath="yes"/>
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="WIDGETSFOLDER">
+			<Component Id="WallSwitchWidgets.dll" Guid="c93b72b0-841a-42f6-8c41-b7b4d50c4dbf">
+				<File Id="WallSwitchWidgets.dll" Source="..\Release\WallSwitchWidgets.dll" KeyPath="yes" Checksum="yes"/>
+			</Component>
+		</DirectoryRef>
+
+		<!-- Start Menu shortcut -->
+		<DirectoryRef Id="ApplicationProgramsFolder">
+			<Component Id="ApplicationShortcut" Guid="abaa63b5-2f99-4737-8489-190e7dc3a001">
+				<Shortcut Id="ApplicationStartMenuShortcut" Name="WallSwitch" Target="[INSTALLFOLDER]WallSwitch.exe" WorkingDirectory="INSTALLFOLDER"/>
+				<RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
+				<RegistryValue Root="HKCU" Key="Software\WallSwitch" Name="Installed" Type="integer" Value="1" KeyPath="yes"/>
+			</Component>
+		</DirectoryRef>
+
+		<!-- NSIS installer removal actions -->
+		<DirectoryRef Id="TARGETDIR">
+			<Component Id="LegacyRegistryRemoval" Guid="c1c6e098-8002-42ff-adc0-65f833106790">
+				<RemoveRegistryKey Root="HKCU" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\WallSwitch" Action="removeOnInstall"/>
+			</Component>
+			<Component Id="LegacyUninstallerRemoval" Guid="2f24d4be-06ba-446f-85c4-f0a3229eddc8">
+				<RemoveFile Id="Uninstall.exe" Directory="INSTALLFOLDER" Name="Uninstall.exe" On="install"/>
+			</Component>
+			<Component Id="LegacyIconRemoval" Guid="6271f494-f639-42bb-844b-546870e6bc30">
+				<RemoveFile Id="WallSwitch.ico" Directory="INSTALLFOLDER" Name="WallSwitch.ico" On="install"/>
+			</Component>
+			<Component Id="LegacyUninstallShortcutRemoval" Guid="a12d073e-3f76-469f-986c-ecc78e97edce">
+				<RemoveFile Id="Uninstall.lnk" Directory="ApplicationProgramsFolder" Name="WallSwitch.ico" On="install"/>
+			</Component>
+		</DirectoryRef>
+		
+	</Product>
+</Wix>
