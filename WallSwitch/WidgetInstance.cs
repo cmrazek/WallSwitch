@@ -121,7 +121,6 @@ namespace WallSwitch
 
 			if (newBounds.Width <= 0 || newBounds.Height <= 0)
 			{
-				Debug.WriteLine("Bounds rejected because width or height was empty.");	// TODO: remove
 				return false;
 			}
 
@@ -129,7 +128,6 @@ namespace WallSwitch
 			if (!envelope.Contains(newBounds.TopLeft()) && !envelope.Contains(newBounds.TopRight()) &&
 				!envelope.Contains(newBounds.BottomLeft()) && !envelope.Contains(newBounds.BottomRight()))
 			{
-				Debug.WriteLine("Bounds rejects because all corners are outside the screen envelope.");	// TODO: remove
 				return false;
 			}
 

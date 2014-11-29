@@ -44,6 +44,8 @@ namespace WallSwitch
 		{
 			try
 			{
+				Log.Write(LogLevel.Info, "Service thread is starting");
+
 				var uri = new Uri(k_url);
 				using (var host = new ServiceHost(typeof(WallSwitchService), new Uri[] { uri }))
 				{
@@ -53,6 +55,8 @@ namespace WallSwitch
 
 					_killWait.WaitOne();
 				}
+
+				Log.Write(LogLevel.Info, "Service thread is ending");
 			}
 			catch (Exception ex)
 			{

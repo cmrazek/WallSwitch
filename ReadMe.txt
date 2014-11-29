@@ -1,7 +1,7 @@
 WallSwitch
 Switches desktop wallpapers from a variety of sources.
 http://wallswitch.codeplex.com/
-Current Version: 1.3
+Current Version: 1.3.1
 
 Requirements:
 	.NET Framework 4:  http://www.microsoft.com/download/en/details.aspx?id=17718
@@ -11,6 +11,12 @@ Contact:
 	Email: chrismrazek@gmail.com
 
 ChangeLog:
+
+Version 1.3.1 - 2014-11-29:
+- Fixed error with version 1.3 installer.
+- Fixed problem with application not shutting down properly when killed by the installer.
+  Note: Previous versions of WallSwitch may not shutdown correctly during installation.
+  When upgrading to 1.3.1, I recommend exiting WallSwitch before installing.
 
 Version 1.3 - 2014-11-29:
 - Added 'widgets' which allow users to create their own custom objects that can be rendered over the

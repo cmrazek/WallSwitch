@@ -1086,8 +1086,6 @@ namespace WallSwitch
 		/// <returns>The number of monitors this image should be spanned across, or 0 if the image can't be loaded.</returns>
 		private int FitImageToMonitorRects(ImageRec img, Rectangle[] allMonitorRects)
 		{
-			Log.Write(LogLevel.Debug, "Attempting to fit image [{0}] to {1} monitors", img.Location, allMonitorRects.Length);	// TODO
-
 			if (!img.Retrieve())
 			{
 				Log.Write(LogLevel.Warning, "Failed to retrieve image [{0}]", img.Location);

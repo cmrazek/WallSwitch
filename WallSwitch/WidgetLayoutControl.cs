@@ -385,19 +385,11 @@ namespace WallSwitch
 					{
 						// User has finished dragging
 
-						Debug.WriteLine("Finished dragging");	// TODO: remove
-
 						_selectedWidget.ChangeBoundsSafe(_selectedWidget.Bounds, true);
 						OnWidgetsChanged(_selectedWidget);
 
 						_dragging = false;
 						Invalidate();
-					}
-					else
-					{
-						// User clicked to select
-
-						Debug.WriteLine("Clicked");	// TODO: remove
 					}
 				}
 			}

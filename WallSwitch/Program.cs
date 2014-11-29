@@ -10,6 +10,9 @@ namespace WallSwitch
 	{
 		private const string k_guid = "57FF779B-63F3-430A-B420-AD436F2D2AEB";
 
+		private static WallSwitchServiceManager _serviceMgr = null;
+		private static SwitchThread _switchThread = null;
+
 		/// <summary>
 		/// The main entry point for the application.
 		/// </summary>
@@ -49,6 +52,32 @@ namespace WallSwitch
 					}
 					finally
 					{
+						try
+						{
+							if (_serviceMgr != null)
+							{
+								_serviceMgr.Dispose();
+								_serviceMgr = null;
+							}
+						}
+						catch (Exception ex)
+						{
+							Log.Write(ex);
+						}
+
+						try
+						{
+							if (_switchThread != null && _switchThread.IsAlive)
+							{
+								_switchThread.Kill();
+								_switchThread = null;
+							}
+						}
+						catch (Exception ex)
+						{
+							Log.Write(ex);
+						}
+
 						Log.Close();
 					}
 				}
@@ -61,6 +90,18 @@ namespace WallSwitch
 			{
 				MessageBox.Show(ex.ToString(), "Error when starting WallSwitch", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
+		}
+
+		public static SwitchThread SwitchThread
+		{
+			get { return _switchThread; }
+			set { _switchThread = value; }
+		}
+
+		public static WallSwitchServiceManager ServiceManager
+		{
+			get { return _serviceMgr; }
+			set { _serviceMgr = value; }
 		}
 	}
 }

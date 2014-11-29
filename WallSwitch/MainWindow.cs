@@ -23,7 +23,6 @@ namespace WallSwitch
 		private bool _reallyClose = false;
 		private bool _refreshing = false;
 		private bool _dirty = false;
-		private SwitchThread _switchThread = null;
 		private ImageList _locationImages = new ImageList();
 		private bool _winStart = false;
 		private HotKey _changeThemeHotKey = new HotKey();
@@ -31,7 +30,7 @@ namespace WallSwitch
 
 		private delegate void VoidDelegate();
 		private VoidDelegate _appActivateFunc = null;
-		private WallSwitchServiceManager _serviceMgr = null;
+		
 		private EventHandler _balloonClickedHandler = null;
 		#endregion
 
@@ -104,11 +103,12 @@ namespace WallSwitch
 				c_activateThemeHotKey.HotKey = _changeThemeHotKey;
 
 				// Start the switch thread
-				_switchThread = new SwitchThread();
-				_switchThread.SetStartUpDelay();
-				_switchThread.Start(activeTheme);
-				_switchThread.Switching += new SwitchThread.SwitchEventHandler(_switchThread_Switching);
-				_switchThread.Switched += new SwitchThread.SwitchEventHandler(_switchThread_Switched);
+				var switchThread = new SwitchThread();
+				switchThread.SetStartUpDelay();
+				switchThread.Start(activeTheme);
+				switchThread.Switching += new SwitchThread.SwitchEventHandler(SwitchThread_Switching);
+				switchThread.Switched += new SwitchThread.SwitchEventHandler(SwitchThread_Switched);
+				Program.SwitchThread = switchThread;
 
 				cmbColorEffectFore.InitForEnum<ColorEffect>(ColorEffect.None);
 				cmbColorEffectBack.InitForEnum<ColorEffect>(ColorEffect.None);
@@ -127,8 +127,9 @@ namespace WallSwitch
 
 				RegisterHotKeys();
 
-				_serviceMgr = new WallSwitchServiceManager();
-				_serviceMgr.CreateService();
+				var serviceMgr = new WallSwitchServiceManager();
+				serviceMgr.CreateService();
+				Program.ServiceManager = serviceMgr;
 
 				if (Settings.CheckForUpdatesOnStartup) CheckForUpdates();
 			}
@@ -142,13 +143,10 @@ namespace WallSwitch
 		{
 			try
 			{
-				UnregisterHotKeys();
+				Log.Write(LogLevel.Debug, "Main window closed.");
 
-				if (_serviceMgr != null)
-				{
-					_serviceMgr.Dispose();
-					_serviceMgr = null;
-				}
+				SaveSettings();
+				UnregisterHotKeys();
 			}
 			catch (Exception ex)
 			{
@@ -158,16 +156,8 @@ namespace WallSwitch
 
 		private void Shutdown(bool closeWindow)
 		{
-			SaveSettings();
-
 			_reallyClose = true;
 			if (closeWindow) Close();
-
-			if (_switchThread != null && _switchThread.IsAlive)
-			{
-				_switchThread.Kill();
-				_switchThread = null;
-			}
 		}
 
 		private void cmExit_Click(object sender, EventArgs e)
@@ -806,17 +796,19 @@ namespace WallSwitch
 
 		private void EnableControls()
 		{
+			var switchThread = Program.SwitchThread;
+
 			// Theme Group
 			btnSave.Enabled = ciSaveTheme.Enabled = miFileSave.Enabled = Dirty;
-			btnActivate.Enabled = _switchThread == null || _switchThread.Theme == null || !_switchThread.Theme.Equals(_currentTheme);
+			btnActivate.Enabled = switchThread == null || switchThread.Theme == null || !switchThread.Theme.Equals(_currentTheme);
 			ciDeleteTheme.Enabled = miFileDeleteTheme.Enabled = cmbTheme.Items.Count > 1;
 
 			// Prev/Pause/Next Group
-			var isSwitching = _switchThread != null && _switchThread.IsSwitching;
+			var isSwitching = switchThread != null && switchThread.IsSwitching;
 			Theme activeTheme = GetActiveTheme();
 			btnPrevious.Enabled = activeTheme != null && activeTheme.CanGoPrev && !isSwitching;
 			btnSwitchNow.Enabled = activeTheme != null && !isSwitching;
-			btnPause.Image = _switchThread != null && _switchThread.Paused ? Res.PlayIcon : Res.PauseIcon;
+			btnPause.Image = switchThread != null && switchThread.Paused ? Res.PlayIcon : Res.PauseIcon;
 
 			// Display Mode Group
 			var numScreens = Screen.AllScreens.Length;
@@ -1473,7 +1465,11 @@ namespace WallSwitch
 			try
 			{
 				if (!setTheme.IsActive) ActivateTheme(setTheme);
-				else _switchThread.SwitchNow(SwitchDir.Next);
+				else
+				{
+					var switchThread = Program.SwitchThread;
+					if (switchThread != null) switchThread.SwitchNow(SwitchDir.Next);
+				}
 			}
 			catch (Exception ex)
 			{
@@ -1486,7 +1482,9 @@ namespace WallSwitch
 			_refreshing = true;
 			try
 			{
-				_switchThread.Theme = setTheme;
+				var switchThread = Program.SwitchThread;
+				if (switchThread == null) return;
+				switchThread.Theme = setTheme;
 				setTheme.IsActive = true;
 
 				for (int i = 0; i < cmbTheme.Items.Count; i++)
@@ -1506,7 +1504,7 @@ namespace WallSwitch
 					cmbTheme.Items[i] = new TagString(name, theme);
 				}
 
-				_switchThread.SwitchNow(SwitchDir.Next);
+				switchThread.SwitchNow(SwitchDir.Next);
 
 				SaveSettings();
 			}
@@ -1630,7 +1628,9 @@ namespace WallSwitch
 		{
 			try
 			{
-				_switchThread.Paused = !_switchThread.Paused;
+				var switchThread = Program.SwitchThread;
+				if (switchThread == null) return;
+				switchThread.Paused = !switchThread.Paused;
 				EnableControls();
 			}
 			catch (Exception ex)
@@ -1984,7 +1984,8 @@ namespace WallSwitch
 		{
 			try
 			{
-				_switchThread.SwitchNow(SwitchDir.Next);
+				var switchThread = Program.SwitchThread;
+				if (switchThread != null) switchThread.SwitchNow(SwitchDir.Next);
 			}
 			catch (Exception ex)
 			{
@@ -1996,7 +1997,8 @@ namespace WallSwitch
 		{
 			try
 			{
-				_switchThread.SwitchNow(SwitchDir.Prev);
+				var switchThread = Program.SwitchThread;
+				if (switchThread != null) switchThread.SwitchNow(SwitchDir.Prev);
 			}
 			catch (Exception ex)
 			{
@@ -2009,7 +2011,8 @@ namespace WallSwitch
 		{
 			try
 			{
-				_switchThread.SwitchNow(SwitchDir.Next);
+				var switchThread = Program.SwitchThread;
+				if (switchThread != null) switchThread.SwitchNow(SwitchDir.Next);
 			}
 			catch (Exception ex)
 			{
@@ -2021,7 +2024,8 @@ namespace WallSwitch
 		{
 			try
 			{
-				_switchThread.SwitchNow(SwitchDir.Prev);
+				var switchThread = Program.SwitchThread;
+				if (switchThread != null)  switchThread.SwitchNow(SwitchDir.Prev);
 			}
 			catch (Exception ex)
 			{
@@ -2030,14 +2034,14 @@ namespace WallSwitch
 		}
 
 		private SwitchThread.SwitchEventHandler _switchThread_Switching_func = null;
-		void _switchThread_Switching(object sender, EventArgs e)
+		void SwitchThread_Switching(object sender, EventArgs e)
 		{
 			try
 			{
 				if (InvokeRequired)
 				{
 					// If not in the main thread, then invoke it.
-					if (_switchThread_Switching_func == null) _switchThread_Switching_func = new SwitchThread.SwitchEventHandler(_switchThread_Switching);
+					if (_switchThread_Switching_func == null) _switchThread_Switching_func = new SwitchThread.SwitchEventHandler(SwitchThread_Switching);
 					BeginInvoke(_switchThread_Switching_func, new object[] { sender, e });
 					return;
 				}
@@ -2051,14 +2055,14 @@ namespace WallSwitch
 		}
 
 		private SwitchThread.SwitchEventHandler _switchThread_Switched_func = null;
-		void _switchThread_Switched(object sender, EventArgs e)
+		void SwitchThread_Switched(object sender, EventArgs e)
 		{
 			try
 			{
 				if (InvokeRequired)
 				{
 					// If not in the main thread, then invoke it.
-					if (_switchThread_Switched_func == null) _switchThread_Switched_func = new SwitchThread.SwitchEventHandler(_switchThread_Switched);
+					if (_switchThread_Switched_func == null) _switchThread_Switched_func = new SwitchThread.SwitchEventHandler(SwitchThread_Switched);
 					BeginInvoke(_switchThread_Switched_func, new object[] { sender, e });
 					return;
 				}
@@ -2084,7 +2088,9 @@ namespace WallSwitch
 			try
 			{
 				ClearHistory();
-				_switchThread.SwitchNow(SwitchDir.Clear);
+
+				var switchThread = Program.SwitchThread;
+				if (switchThread != null) switchThread.SwitchNow(SwitchDir.Clear);
 			}
 			catch (Exception ex)
 			{
@@ -2174,19 +2180,19 @@ namespace WallSwitch
 			foreach (Theme theme in _themes) theme.HotKey.Register(this);
 
 			_nextImageHotKey.Register(this);
-			_nextImageHotKey.HotKeyPressed += new EventHandler(_nextImageHotKey_HotKeyPressed);
+			_nextImageHotKey.HotKeyPressed += new EventHandler(NextImageHotKey_HotKeyPressed);
 
 			_prevImageHotKey.Register(this);
-			_prevImageHotKey.HotKeyPressed += new EventHandler(_prevImageHotKey_HotKeyPressed);
+			_prevImageHotKey.HotKeyPressed += new EventHandler(PrevImageHotKey_HotKeyPressed);
 
 			_pauseHotKey.Register(this);
-			_pauseHotKey.HotKeyPressed += new EventHandler(_pauseHotKey_HotKeyPressed);
+			_pauseHotKey.HotKeyPressed += new EventHandler(PauseHotKey_HotKeyPressed);
 
 			_clearHistoryHotKey.Register(this);
-			_clearHistoryHotKey.HotKeyPressed += new EventHandler(_clearHistoryHotKey_HotKeyPressed);
+			_clearHistoryHotKey.HotKeyPressed += new EventHandler(ClearHistoryHotKey_HotKeyPressed);
 
 			_showWindowHotKey.Register(this);
-			_showWindowHotKey.HotKeyPressed += new EventHandler(_showWindowHotKey_HotKeyPressed);
+			_showWindowHotKey.HotKeyPressed += new EventHandler(ShowWindowHotKey_HotKeyPressed);
 		}
 
 		private void UnregisterHotKeys()
@@ -2271,11 +2277,12 @@ namespace WallSwitch
 			}
 		}
 
-		void _nextImageHotKey_HotKeyPressed(object sender, EventArgs e)
+		void NextImageHotKey_HotKeyPressed(object sender, EventArgs e)
 		{
 			try
 			{
-				_switchThread.SwitchNow(SwitchDir.Next);
+				var switchThread = Program.SwitchThread;
+				if (switchThread != null) switchThread.SwitchNow(SwitchDir.Next);
 			}
 			catch (Exception ex)
 			{
@@ -2283,11 +2290,12 @@ namespace WallSwitch
 			}
 		}
 
-		void _prevImageHotKey_HotKeyPressed(object sender, EventArgs e)
+		void PrevImageHotKey_HotKeyPressed(object sender, EventArgs e)
 		{
 			try
 			{
-				_switchThread.SwitchNow(SwitchDir.Prev);
+				var switchThread = Program.SwitchThread;
+				if (switchThread != null) switchThread.SwitchNow(SwitchDir.Prev);
 			}
 			catch (Exception ex)
 			{
@@ -2295,13 +2303,15 @@ namespace WallSwitch
 			}
 		}
 
-		void _pauseHotKey_HotKeyPressed(object sender, EventArgs e)
+		void PauseHotKey_HotKeyPressed(object sender, EventArgs e)
 		{
 			try
 			{
-				_switchThread.Paused = !_switchThread.Paused;
+				var switchThread = Program.SwitchThread;
+				if (switchThread == null) return;
+				switchThread.Paused = !switchThread.Paused;
 				EnableControls();
-				ShowNotification(_switchThread.Paused ? Res.Notify_Paused : Res.Notify_Unpaused, null);
+				ShowNotification(switchThread.Paused ? Res.Notify_Paused : Res.Notify_Unpaused, null);
 			}
 			catch (Exception ex)
 			{
@@ -2309,7 +2319,7 @@ namespace WallSwitch
 			}
 		}
 
-		void _clearHistoryHotKey_HotKeyPressed(object sender, EventArgs e)
+		void ClearHistoryHotKey_HotKeyPressed(object sender, EventArgs e)
 		{
 			try
 			{
@@ -2322,7 +2332,7 @@ namespace WallSwitch
 			}
 		}
 
-		void _showWindowHotKey_HotKeyPressed(object sender, EventArgs e)
+		void ShowWindowHotKey_HotKeyPressed(object sender, EventArgs e)
 		{
 			try
 			{
