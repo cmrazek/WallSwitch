@@ -1,7 +1,7 @@
 WallSwitch
 Switches desktop wallpapers from a variety of sources.
 http://wallswitch.codeplex.com/
-Current Version: 1.2.5
+Current Version: 1.3
 
 Requirements:
 	.NET Framework 4:  http://www.microsoft.com/download/en/details.aspx?id=17718
@@ -11,6 +11,16 @@ Contact:
 	Email: chrismrazek@gmail.com
 
 ChangeLog:
+
+Version 1.3 - 2014-11-29:
+- Added 'widgets' which allow users to create their own custom objects that can be rendered over the
+  wallpaper.
+- Added 3 initial widgets:
+    - Calendar - Displays the current month's calendar
+	- Sys Info - Displays information about your computer
+	- Flip Image - Inverts the image of a single monitor, horizontally or vertically.
+- Added ability to span images across multiple monitors, if they have a suitable aspect ratio.
+- Change installer from NSIS to WiX due to blue screens caused by NSIS.
 
 Version 1.2.5 - 2014-08-16:
 - Added support for sequential order in collage mode.

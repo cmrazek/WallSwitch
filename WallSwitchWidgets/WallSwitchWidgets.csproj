@@ -51,10 +51,9 @@
     <Compile Include="Util.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WidgetInterface\WidgetInterface.csproj">
+    <ProjectReference Include="..\WidgetInterface\WallSwitch.WidgetInterface.csproj">
       <Project>{be06c925-2edd-419f-9655-3ef6be49c809}</Project>
-      <Name>WidgetInterface</Name>
-      <Private>False</Private>
+      <Name>WallSwitch.WidgetInterface</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

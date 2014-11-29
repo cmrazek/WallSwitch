@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WallSwitch", "WallSwitch\Wa
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WallSwitchImgProc", "WallSwitchImgProc\WallSwitchImgProc.vcxproj", "{FA6A314B-EC69-4651-8041-D966486FED98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WidgetInterface", "WidgetInterface\WidgetInterface.csproj", "{BE06C925-2EDD-419F-9655-3EF6BE49C809}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WallSwitch.WidgetInterface", "WidgetInterface\WallSwitch.WidgetInterface.csproj", "{BE06C925-2EDD-419F-9655-3EF6BE49C809}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WallSwitchWidgets", "WallSwitchWidgets\WallSwitchWidgets.csproj", "{2948A747-047F-4F6F-8F14-0B07358ABF81}"
 EndProject

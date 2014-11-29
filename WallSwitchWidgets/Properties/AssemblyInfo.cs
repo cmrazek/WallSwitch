@@ -9,8 +9,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("WallSwitchWidgets")]
-[assembly: AssemblyCopyright("Copyright ©  2014")]
+[assembly: AssemblyProduct("WallSwitch")]
+[assembly: AssemblyCopyright("Copyright ©  2014 Chris Mrazek")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

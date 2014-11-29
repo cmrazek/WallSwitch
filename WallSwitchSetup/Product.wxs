@@ -83,7 +83,7 @@
 		</DirectoryRef>
 		<DirectoryRef Id="WIDGETSFOLDER">
 			<Component Id="WallSwitchWidgets.dll" Guid="c93b72b0-841a-42f6-8c41-b7b4d50c4dbf">
-				<File Id="WallSwitchWidgets.dll" Source="..\Release\WallSwitchWidgets.dll" KeyPath="yes" Checksum="yes"/>
+				<File Id="WallSwitchWidgets.dll" Source="..\Release\Widgets\WallSwitchWidgets.dll" KeyPath="yes" Checksum="yes"/>
 			</Component>
 		</DirectoryRef>
 
