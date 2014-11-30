@@ -13,17 +13,14 @@ namespace WallSwitch
 		private const bool k_defaultStartWithWindows = false;
 		private const bool k_defaultCheckForUpdatesOnStartup = true;
 		private const int k_defaultStartUpDelay = 0;
+		private const bool k_defaultIgnoreHiddenFiles = true;
 		#endregion
 
 		#region Variables
 		private static bool _startWithWindows = k_defaultStartWithWindows;
 		private static bool _checkForUpdatesOnStartup = k_defaultCheckForUpdatesOnStartup;
 		private static int _startUpDelay = k_defaultStartUpDelay;
-		#endregion
-
-		#region XML Tag Names
-		private const string k_checkForUpdates = "CheckForUpdates";
-		private const string k_startUpDelay = "StartUpDelay";
+		private static bool _ignoreHiddenFiles = k_defaultIgnoreHiddenFiles;
 		#endregion
 
 		/// <summary>
@@ -45,18 +42,23 @@ namespace WallSwitch
 		#region Save / Load
 		public static void Save(XmlWriter xml)
 		{
-			xml.WriteElementString(k_checkForUpdates, _checkForUpdatesOnStartup.ToString());
-			xml.WriteElementString(k_startUpDelay, _startUpDelay.ToString());
+			xml.WriteElementString("CheckForUpdates", _checkForUpdatesOnStartup.ToString());
+			xml.WriteElementString("StartUpDelay", _startUpDelay.ToString());
+			if (_ignoreHiddenFiles != k_defaultIgnoreHiddenFiles) xml.WriteElementString("IgnoreHiddenFiles", _ignoreHiddenFiles.ToString());
 		}
 
 		public static void Load(XmlElement xmlSettings)
 		{
-			var xml = xmlSettings.SelectSingleNode(k_checkForUpdates) as XmlElement;
+			var xml = xmlSettings.SelectSingleNode("CheckForUpdates") as XmlElement;
 			if (xml != null) _checkForUpdatesOnStartup = Util.ParseBool(xml.InnerText, k_defaultCheckForUpdatesOnStartup);
 
 			int i;
-			xml = xmlSettings.SelectSingleNode(k_startUpDelay) as XmlElement;
+			xml = xmlSettings.SelectSingleNode("StartUpDelay") as XmlElement;
 			if (xml != null && int.TryParse(xml.InnerText, out i)) _startUpDelay = i;
+
+			bool bValue;
+			xml = xmlSettings.SelectSingleNode("IgnoreHiddenFiles") as XmlElement;
+			if (xml != null && bool.TryParse(xml.InnerText, out bValue)) _ignoreHiddenFiles = bValue;
 		}
 		#endregion
 
@@ -151,6 +153,12 @@ namespace WallSwitch
 		{
 			get { return _startUpDelay; }
 			set { _startUpDelay = value; }
+		}
+
+		public static bool IgnoreHiddenFiles
+		{
+			get { return _ignoreHiddenFiles; }
+			set { _ignoreHiddenFiles = value; }
 		}
 
 	}

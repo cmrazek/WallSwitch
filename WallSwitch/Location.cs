@@ -118,12 +118,21 @@ namespace WallSwitch
 				string[] imageFiles = Directory.GetFiles(dir);
 				foreach (string file in imageFiles)
 				{
-					if (ImageFormatDesc.FileNameToImageFormat(file) != null) _files.Add(ImageRec.FromFile(file));
+					if (Settings.IgnoreHiddenFiles == false || (File.GetAttributes(file) & FileAttributes.Hidden) == 0)
+					{
+						if (ImageFormatDesc.FileNameToImageFormat(file) != null) _files.Add(ImageRec.FromFile(file));
+					}
 				}
 
 				// Search sub-folders in this directory.
 				string[] subDirs = Directory.GetDirectories(dir);
-				foreach (string subDir in subDirs) SearchDir(subDir);
+				foreach (string subDir in subDirs)
+				{
+					if (Settings.IgnoreHiddenFiles == false || (File.GetAttributes(subDir) & FileAttributes.Hidden) == 0)
+					{
+						SearchDir(subDir);
+					}
+				}
 			}
 			catch (Exception ex)
 			{

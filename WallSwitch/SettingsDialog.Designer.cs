@@ -38,32 +38,33 @@
 			this.chkCheckForUpdates = new System.Windows.Forms.CheckBox();
 			this.btnCheckForUpdates = new System.Windows.Forms.Button();
 			this.panel1 = new System.Windows.Forms.Panel();
+			this.c_ignoreHiddenFilesCheckbox = new System.Windows.Forms.CheckBox();
 			this.panel1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// lblStartUpDelay
 			// 
 			this.lblStartUpDelay.AutoSize = true;
-			this.lblStartUpDelay.Location = new System.Drawing.Point(10, 71);
+			this.lblStartUpDelay.Location = new System.Drawing.Point(10, 84);
 			this.lblStartUpDelay.Name = "lblStartUpDelay";
 			this.lblStartUpDelay.Size = new System.Drawing.Size(121, 13);
-			this.lblStartUpDelay.TabIndex = 0;
+			this.lblStartUpDelay.TabIndex = 4;
 			this.lblStartUpDelay.Text = "Start-up/Resume Delay:";
 			// 
 			// txtStartUpDelay
 			// 
-			this.txtStartUpDelay.Location = new System.Drawing.Point(137, 68);
+			this.txtStartUpDelay.Location = new System.Drawing.Point(137, 81);
 			this.txtStartUpDelay.Name = "txtStartUpDelay";
 			this.txtStartUpDelay.Size = new System.Drawing.Size(60, 20);
-			this.txtStartUpDelay.TabIndex = 1;
+			this.txtStartUpDelay.TabIndex = 5;
 			// 
 			// lblStartUpDelayUnit
 			// 
 			this.lblStartUpDelayUnit.AutoSize = true;
-			this.lblStartUpDelayUnit.Location = new System.Drawing.Point(203, 71);
+			this.lblStartUpDelayUnit.Location = new System.Drawing.Point(203, 84);
 			this.lblStartUpDelayUnit.Name = "lblStartUpDelayUnit";
 			this.lblStartUpDelayUnit.Size = new System.Drawing.Size(53, 13);
-			this.lblStartUpDelayUnit.TabIndex = 2;
+			this.lblStartUpDelayUnit.TabIndex = 6;
 			this.lblStartUpDelayUnit.Text = "(seconds)";
 			// 
 			// btnOk
@@ -95,7 +96,7 @@
 			this.chkStartWithWindows.Location = new System.Drawing.Point(13, 12);
 			this.chkStartWithWindows.Name = "chkStartWithWindows";
 			this.chkStartWithWindows.Size = new System.Drawing.Size(120, 17);
-			this.chkStartWithWindows.TabIndex = 5;
+			this.chkStartWithWindows.TabIndex = 0;
 			this.chkStartWithWindows.Text = "Start With Windows";
 			this.chkStartWithWindows.UseVisualStyleBackColor = true;
 			// 
@@ -105,7 +106,7 @@
 			this.chkCheckForUpdates.Location = new System.Drawing.Point(13, 35);
 			this.chkCheckForUpdates.Name = "chkCheckForUpdates";
 			this.chkCheckForUpdates.Size = new System.Drawing.Size(172, 17);
-			this.chkCheckForUpdates.TabIndex = 6;
+			this.chkCheckForUpdates.TabIndex = 1;
 			this.chkCheckForUpdates.Text = "Check for Updates on Start Up";
 			this.chkCheckForUpdates.UseVisualStyleBackColor = true;
 			// 
@@ -114,7 +115,7 @@
 			this.btnCheckForUpdates.Location = new System.Drawing.Point(206, 31);
 			this.btnCheckForUpdates.Name = "btnCheckForUpdates";
 			this.btnCheckForUpdates.Size = new System.Drawing.Size(75, 23);
-			this.btnCheckForUpdates.TabIndex = 7;
+			this.btnCheckForUpdates.TabIndex = 2;
 			this.btnCheckForUpdates.Text = "Check Now";
 			this.btnCheckForUpdates.UseVisualStyleBackColor = true;
 			this.btnCheckForUpdates.Click += new System.EventHandler(this.btnCheckForUpdates_Click);
@@ -125,10 +126,20 @@
 			this.panel1.Controls.Add(this.btnOk);
 			this.panel1.Controls.Add(this.btnCancel);
 			this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.panel1.Location = new System.Drawing.Point(0, 102);
+			this.panel1.Location = new System.Drawing.Point(0, 112);
 			this.panel1.Name = "panel1";
 			this.panel1.Size = new System.Drawing.Size(284, 30);
 			this.panel1.TabIndex = 8;
+			// 
+			// c_ignoreHiddenFilesCheckbox
+			// 
+			this.c_ignoreHiddenFilesCheckbox.AutoSize = true;
+			this.c_ignoreHiddenFilesCheckbox.Location = new System.Drawing.Point(13, 58);
+			this.c_ignoreHiddenFilesCheckbox.Name = "c_ignoreHiddenFilesCheckbox";
+			this.c_ignoreHiddenFilesCheckbox.Size = new System.Drawing.Size(175, 17);
+			this.c_ignoreHiddenFilesCheckbox.TabIndex = 3;
+			this.c_ignoreHiddenFilesCheckbox.Text = "Ignore Hidden Files and Folders";
+			this.c_ignoreHiddenFilesCheckbox.UseVisualStyleBackColor = true;
 			// 
 			// SettingsDialog
 			// 
@@ -137,7 +148,8 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.SystemColors.Window;
 			this.CancelButton = this.btnCancel;
-			this.ClientSize = new System.Drawing.Size(284, 132);
+			this.ClientSize = new System.Drawing.Size(284, 142);
+			this.Controls.Add(this.c_ignoreHiddenFilesCheckbox);
 			this.Controls.Add(this.panel1);
 			this.Controls.Add(this.btnCheckForUpdates);
 			this.Controls.Add(this.chkCheckForUpdates);
@@ -146,8 +158,7 @@
 			this.Controls.Add(this.txtStartUpDelay);
 			this.Controls.Add(this.lblStartUpDelay);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-			this.MaximumSize = new System.Drawing.Size(300, 170);
-			this.MinimumSize = new System.Drawing.Size(300, 170);
+			this.MinimumSize = new System.Drawing.Size(300, 180);
 			this.Name = "SettingsDialog";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Settings";
@@ -169,5 +180,6 @@
 		private System.Windows.Forms.CheckBox chkCheckForUpdates;
 		private System.Windows.Forms.Button btnCheckForUpdates;
 		private System.Windows.Forms.Panel panel1;
+		private System.Windows.Forms.CheckBox c_ignoreHiddenFilesCheckbox;
 	}
 }

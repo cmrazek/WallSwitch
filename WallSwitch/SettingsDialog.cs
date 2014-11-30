@@ -25,6 +25,7 @@ namespace WallSwitch
 				txtStartUpDelay.Text = Settings.StartUpDelay.ToString();
 				chkStartWithWindows.Checked = Settings.StartWithWindows;
 				chkCheckForUpdates.Checked = Settings.CheckForUpdatesOnStartup;
+				c_ignoreHiddenFilesCheckbox.Checked = Settings.IgnoreHiddenFiles;
 			}
 			catch (Exception ex)
 			{
@@ -49,6 +50,7 @@ namespace WallSwitch
 				Settings.StartUpDelay = startUpDelay;
 				Settings.StartWithWindows = chkStartWithWindows.Checked;
 				Settings.CheckForUpdatesOnStartup = chkCheckForUpdates.Checked;
+				Settings.IgnoreHiddenFiles = c_ignoreHiddenFilesCheckbox.Checked;
 			}
 
 			return true;
