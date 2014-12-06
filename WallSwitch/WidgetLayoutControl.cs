@@ -60,6 +60,8 @@ namespace WallSwitch
 			try
 			{
 				UpdateLayout();
+
+				Microsoft.Win32.SystemEvents.DisplaySettingsChanged += SystemEvents_DisplaySettingsChanged;
 			}
 			catch (Exception ex)
 			{
@@ -73,7 +75,9 @@ namespace WallSwitch
 			clientRect.Inflate(-2, -2);
 			if (clientRect.Width <= 0 || clientRect.Height <= 0) return;
 
-			var totalBounds = (RectangleF)GetTotalScreenArea();
+			var screens = new ScreenList();
+
+			var totalBounds = (RectangleF)GetTotalScreenArea(screens);
 			if (totalBounds.Width <= 0 || totalBounds.Height <= 0) return;
 			var scaledBounds = totalBounds.ScaleRectWidth(clientRect.Width);
 			if (scaledBounds.Height > clientRect.Height) scaledBounds = scaledBounds.ScaleRectHeight(clientRect.Height);
@@ -85,6 +89,18 @@ namespace WallSwitch
 			foreach (var widget in _widgets)
 			{
 				widget.DesignBounds = ScreenToScaledClient(widget.Bounds);
+			}
+		}
+
+		void SystemEvents_DisplaySettingsChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				UpdateLayout();
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex);
 			}
 		}
 
@@ -155,10 +171,10 @@ namespace WallSwitch
 			}
 		}
 
-		private RectangleF GetTotalScreenArea()
+		private RectangleF GetTotalScreenArea(ScreenList screens)
 		{
 			float width = 0.0f, height = 0.0f;
-			foreach (var screen in System.Windows.Forms.Screen.AllScreens)
+			foreach (var screen in screens)
 			{
 				if ((float)screen.Bounds.Right > width) width = (float)screen.Bounds.Right;
 				if ((float)screen.Bounds.Bottom > height) height = (float)screen.Bounds.Bottom;

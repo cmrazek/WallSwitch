@@ -28,6 +28,17 @@ namespace WallSwitch.WidgetInterface
 			_primary = primary;
 		}
 
+		internal Screen CloneWithOffsetedBounds(int offsetX, int offsetY)
+		{
+			var bounds = _bounds;
+			bounds.Offset(offsetX, offsetY);
+
+			var workingArea = _workingArea;
+			workingArea.Offset(offsetX, offsetY);
+
+			return new Screen(bounds, workingArea, _primary);
+		}
+
 		/// <summary>
 		/// Gets the rectangle that encompasses this screen.
 		/// </summary>

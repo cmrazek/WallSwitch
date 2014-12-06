@@ -81,6 +81,10 @@
     <Compile Include="ColorSample.Designer.cs">
       <DependentUpon>ColorSample.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data.cs">
+      <DependentUpon>Data.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="DataEx.cs" />
     <Compile Include="EdgeMode.cs" />
     <Compile Include="FeedDialog.cs">
       <SubType>Form</SubType>
@@ -167,6 +171,7 @@
     </Compile>
     <Compile Include="WidgetManager.cs" />
     <Compile Include="WidgetType.cs" />
+    <Compile Include="Xml.cs" />
     <EmbeddedResource Include="AboutDialog.resx">
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -210,6 +215,9 @@
       <DependentUpon>WidgetLayoutControl.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
+    <None Include="Data.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -273,9 +281,12 @@
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>xsd $(ProjectDir)Data.xsd /classes /namespace:WallSwitch.Data</PreBuildEvent>
+  </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1257,17 +1257,39 @@ namespace WallSwitch
 		#endregion // SPI
 		#endregion
 
-		private void ChangeWallpaper(Theme theme, Image baseImage, Image displayImage)
+		private void ChangeWallpaperCommon(Theme theme, ref Bitmap baseImage, ref Bitmap displayImage, ScreenList screens)
 		{
+			RegistryKey key = Registry.CurrentUser.OpenSubKey("Control Panel\\Desktop", true);
+			try
+			{
+				key.SetValue("WallpaperOriginX", 0);
+				key.SetValue("WallpaperOriginY", 0);
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Failed to set offset registry keys.");
+				key.Close();
+			}
+
+			//if (baseImage != null) baseImage = WrapImage(baseImage, screens.Offset);				TODO: remove
+			//if (displayImage != null) displayImage = WrapImage(displayImage, screens.Offset);
+		}
+
+		private void ChangeWallpaper(Theme theme, Bitmap baseImage, Bitmap displayImage, ScreenList screens)
+		{
+			ChangeWallpaperCommon(theme, ref baseImage, ref displayImage, screens);
+
 			string baseFileName = null;
-			string displayFileName = theme.GetDisplayWallpaperFileName(ImageFormat.Bmp);
+			var displayFileName = theme.GetDisplayWallpaperFileName(ImageFormat.Bmp);
 			if (baseImage != null)
 			{
 				baseFileName = theme.GetBaseWallpaperFileName(ImageFormat.Png);
-				baseImage.Save(baseFileName, ImageFormat.Png);
+				SaveWallpaperImage(baseFileName, baseImage, ImageFormat.Png, screens);
+				//baseImage.Save(baseFileName, ImageFormat.Png);
 			}
 
-			displayImage.Save(displayFileName, ImageFormat.Bmp);
+			SaveWallpaperImage(displayFileName, displayImage, ImageFormat.Bmp, screens);
+			//displayImage.Save(displayFileName, ImageFormat.Bmp);
 
 			RegistryKey key = Registry.CurrentUser.OpenSubKey("Control Panel\\Desktop", true);
 			try 
@@ -1290,21 +1312,25 @@ namespace WallSwitch
 			theme.LastWallpaperFile = baseImage != null ? baseFileName : displayFileName;
 		}
 
-		private void ChangeWallpaperFade(Theme theme, Image baseImage, Image displayImage)
+		private void ChangeWallpaperFade(Theme theme, Bitmap baseImage, Bitmap displayImage, ScreenList screens)
 		{
 			try
 			{
 				int result;
 
+				ChangeWallpaperCommon(theme, ref baseImage, ref displayImage, screens);
+
 				string baseFileName = null;
-				string displayFileName = theme.GetDisplayWallpaperFileName(ImageFormat.Png);
+				var displayFileName = theme.GetDisplayWallpaperFileName(ImageFormat.Png);
 				if (baseImage != null)
 				{
 					baseFileName = theme.GetBaseWallpaperFileName(ImageFormat.Png);
-					baseImage.Save(baseFileName, ImageFormat.Png);
+					SaveWallpaperImage(baseFileName, baseImage, ImageFormat.Png, screens);
+					//baseImage.Save(baseFileName, ImageFormat.Png);
 				}
 
-				displayImage.Save(displayFileName, ImageFormat.Png);
+				SaveWallpaperImage(displayFileName, displayImage, ImageFormat.Png, screens);
+				//displayImage.Save(displayFileName, ImageFormat.Png);
 
 				var hwnd = FindWindow("Progman", null);
 				if (hwnd == null) throw new Exception(string.Format("Couldn't find Progman window (GetLastError = 0x{0:X8})", Marshal.GetLastWin32Error()));
@@ -1332,13 +1358,8 @@ namespace WallSwitch
 			catch (Exception ex)
 			{
 				Log.Write(ex, "Exception when fading desktop background.");
-				ChangeWallpaper(theme, baseImage, displayImage);
+				ChangeWallpaper(theme, baseImage, displayImage, screens);
 			}
-		}
-
-		public int NumMonitors
-		{
-			get { return System.Windows.Forms.Screen.AllScreens.Length; }
 		}
 
 		public void Set(Theme theme, IEnumerable<ImageLayout> files)
@@ -1358,7 +1379,7 @@ namespace WallSwitch
 				using (_renderer = new WallpaperRenderer())
 				{
 					Bitmap lastImage = null;
-					if (theme.Mode == ThemeMode.Collage) lastImage = LoadLastWallpaper(theme);
+					if (theme.Mode == ThemeMode.Collage) lastImage = LoadLastWallpaper(theme, screenList);
 					if (_renderer.InitFrame(screenRects, theme, lastImage))
 					{
 						foreach (var imgLayout in files)
@@ -1387,7 +1408,7 @@ namespace WallSwitch
 
 						// Draw widgets
 						var baseImage = _renderer.WallpaperImage;
-						Image displayImage = null;
+						Bitmap displayImage = null;
 						DrawWidgets(theme, baseImage, out displayImage);
 
 						if (displayImage == null)
@@ -1397,8 +1418,8 @@ namespace WallSwitch
 						}
 
 						// Apply to desktop background.
-						if (theme.FadeTransition && OsUtil.Win7Available) ChangeWallpaperFade(theme, baseImage, displayImage);
-						else ChangeWallpaper(theme, baseImage, displayImage);
+						if (theme.FadeTransition && OsUtil.Win7Available) ChangeWallpaperFade(theme, baseImage, displayImage, screenList);
+						else ChangeWallpaper(theme, baseImage, displayImage, screenList);
 					}
 					else
 					{
@@ -1412,54 +1433,20 @@ namespace WallSwitch
 			}
 		}
 
-		private Bitmap LoadLastWallpaper(Theme theme)
+		private Bitmap LoadLastWallpaper(Theme theme, ScreenList screens)
 		{
 			try
 			{
-				var fileName = theme.LastWallpaperFile;
-				if (string.IsNullOrEmpty(fileName) || !File.Exists(fileName))
-				{
-					fileName = theme.GetBaseWallpaperFileName(ImageFormat.Png);
-					if (!File.Exists(fileName))
-					{
-						fileName = theme.GetBaseWallpaperFileName(ImageFormat.Jpeg);
-						if (!File.Exists(fileName))
-						{
-							fileName = theme.GetBaseWallpaperFileName(ImageFormat.Bmp);
-							if (!File.Exists(fileName))
-							{
-								fileName = theme.GetDisplayWallpaperFileName(ImageFormat.Png);
-								if (!File.Exists(fileName))
-								{
-									fileName = theme.GetDisplayWallpaperFileName(ImageFormat.Jpeg);
-									if (!File.Exists(fileName))
-									{
-										fileName = theme.GetDisplayWallpaperFileName(ImageFormat.Bmp);
-										if (!File.Exists(fileName))
-										{
-											return null;
-										}
-									}
-								}
-							}
-						}
-					}
-				}
+				Bitmap img;
 
-				Log.Write(LogLevel.Debug, "Loading previous wallpaper bitmap: {0}.", fileName);
-
-				// Need to load through a stream so we can force it to close.
-				// Image.FromFile leaves the file open for a while.
-				using (FileStream stream = new FileStream(fileName, FileMode.Open))
-				{
-					long len = stream.Length;
-					if (len > 0) return new Bitmap(Bitmap.FromStream(stream));
-					else
-					{
-						Log.Write(LogLevel.Debug, "The file has no content.");
-						return null;
-					}
-				}
+				if ((img = LoadWallpaperImage(theme.LastWallpaperFile, screens)) != null) return img;
+				if ((img = LoadWallpaperImage(theme.GetBaseWallpaperFileName(ImageFormat.Png), screens)) != null) return img;
+				if ((img = LoadWallpaperImage(theme.GetBaseWallpaperFileName(ImageFormat.Jpeg), screens)) != null) return img;
+				if ((img = LoadWallpaperImage(theme.GetBaseWallpaperFileName(ImageFormat.Bmp), screens)) != null) return img;
+				if ((img = LoadWallpaperImage(theme.GetDisplayWallpaperFileName(ImageFormat.Png), screens)) != null) return img;
+				if ((img = LoadWallpaperImage(theme.GetDisplayWallpaperFileName(ImageFormat.Jpeg), screens)) != null) return img;
+				if ((img = LoadWallpaperImage(theme.GetDisplayWallpaperFileName(ImageFormat.Bmp), screens)) != null) return img;
+				return null;
 			}
 			catch (Exception ex)
 			{
@@ -1468,7 +1455,7 @@ namespace WallSwitch
 			}
 		}
 
-		private void DrawWidgets(Theme theme, Image baseImage, out Image displayImage)
+		private void DrawWidgets(Theme theme, Bitmap baseImage, out Bitmap displayImage)
 		{
 			var widgets = theme.Widgets.ToArray();
 			if (widgets.Length == 0)
@@ -1493,6 +1480,143 @@ namespace WallSwitch
 			}
 
 			displayImage = image;
+		}
+
+		private Bitmap WrapImage(Bitmap src, Point offset)
+		{
+			var size = src.Size;
+			
+			if (offset.X < 0 || offset.X >= size.Width) offset.X = 0;
+			if (offset.Y < 0 || offset.Y >= size.Height) offset.Y = 0;
+			if (offset.X == 0 && offset.Y == 0) return src;
+
+			var dst = new Bitmap(src);
+			var g = Graphics.FromImage(dst);
+			
+			var remain = new Point(size.Width - offset.X, size.Height - offset.Y);
+
+			// Move top-left corner to bottom-right
+			if (offset.X > 0 && offset.Y > 0)
+			{
+				g.DrawImage(src,
+					new Rectangle(remain.X, remain.Y, offset.X, offset.Y),
+					new Rectangle(0, 0, offset.X, offset.Y),
+					GraphicsUnit.Pixel);
+			}
+
+			if (offset.Y > 0)
+			{
+				// Move top-right to bottom-left
+				g.DrawImage(src,
+					new Rectangle(0, remain.Y, remain.X, offset.Y),
+					new Rectangle(offset.X, 0, remain.X, offset.Y),
+					GraphicsUnit.Pixel);
+			}
+
+			if (offset.X > 0)
+			{
+				// Move bottom-left to top-right
+				g.DrawImage(src,
+					new Rectangle(remain.X, 0, offset.X, remain.Y),
+					new Rectangle(0, offset.Y, offset.X, remain.Y),
+					GraphicsUnit.Pixel);
+			}
+
+			// Move bottom-right to top-left
+			g.DrawImage(src,
+				new Rectangle(0, 0, remain.X, remain.Y),
+				new Rectangle(offset.X, offset.Y, remain.X, remain.Y),
+				GraphicsUnit.Pixel);
+
+			return dst;
+		}
+
+		private Bitmap UnwrapImage(Bitmap src, Point offset)
+		{
+			var size = src.Size;
+
+			if (offset.X < 0 || offset.X >= size.Width) offset.X = 0;
+			if (offset.Y < 0 || offset.Y >= size.Height) offset.Y = 0;
+			if (offset.X == 0 && offset.Y == 0) return src;
+
+			return WrapImage(src, new Point(size.Width - offset.X, size.Height - offset.Y));
+		}
+
+		private void SaveWallpaperImage(string fileName, Bitmap image, ImageFormat format, ScreenList screens)
+		{
+			try
+			{
+				var file = new Data.WallpaperImageFile
+				{
+					Name = Path.GetFileName(fileName),
+					Size = image.Size.ToData(),
+					Offset = screens.Offset.ToData(),
+					Screen = screens.ToData().ToArray()
+				};
+
+				var wrappedImage = WrapImage(image, screens.Offset);
+				wrappedImage.Save(fileName, format);
+				Xml.SerializeToFile(file, fileName + ".wall");
+
+#if DEBUG
+				var unwrappedFileName = Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + "_unwrapped" + Path.GetExtension(fileName));
+				image.Save(unwrappedFileName, ImageFormat.Png);
+#endif
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex);
+			}
+		}
+
+		private Bitmap LoadWallpaperImage(string fileName, ScreenList screens)
+		{
+			try
+			{
+				// Both the image and the description file must exist.
+				if (!File.Exists(fileName)) return null;
+				var descFileName = fileName + ".wall";
+				if (!File.Exists(descFileName)) return null;
+
+				// Load the description file
+				var desc = Xml.DeserializeFromFile<Data.WallpaperImageFile>(descFileName);
+				if (desc == null) return null;
+
+				// Validate all the screen dimensions
+				if (desc.Offset.ToPoint() != screens.Offset) return null;
+				if (desc.Screen == null || desc.Screen.Length != screens.Count) return null;
+				for (int i = 0; i < desc.Screen.Length; i++)
+				{
+					if (desc.Screen[i].Primary != screens[i].Primary) return null;
+					if (desc.Screen[i].Bounds.ToRectangle() != screens[i].Bounds) return null;
+					if (desc.Screen[i].WorkingArea.ToRectangle() != screens[i].WorkingArea) return null;
+				}
+
+				// Load the image
+				var img = LoadBitmapFromFile(fileName);
+				return UnwrapImage(img, screens.Offset);
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex);
+				return null;
+			}
+		}
+
+		private Bitmap LoadBitmapFromFile(string fileName)
+		{
+			// Need to load through a stream so we can force it to close.
+			// Image.FromFile leaves the file open for a while.
+			using (FileStream stream = new FileStream(fileName, FileMode.Open))
+			{
+				long len = stream.Length;
+				if (len > 0) return new Bitmap(Bitmap.FromStream(stream));
+				else
+				{
+					Log.Write(LogLevel.Debug, "The file has no content.");
+					return null;
+				}
+			}
 		}
 	}
 }

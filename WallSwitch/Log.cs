@@ -239,6 +239,16 @@ namespace WallSwitch
 			Write(ex, "");
 		}
 
+		public static void WriteDebug(string message)
+		{
+			Write(LogLevel.Debug, message);
+		}
+
+		public static void WriteDebug(string format, params object[] args)
+		{
+			Write(LogLevel.Debug, format, args);
+		}
+
 		public static void Flush()
 		{
 			if (_file != null)

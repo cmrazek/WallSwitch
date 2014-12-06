@@ -121,7 +121,7 @@ namespace WallSwitch
 				Text = Res.AppName;
 				trayIcon.Visible = true;
 				EnableControls();
-				lstLocations_Resize(this, null);
+				Locations_Resize(this, null);
 
 				if (_winStart) HideToTray();
 
@@ -196,7 +196,7 @@ namespace WallSwitch
 			}
 		}
 
-		private void trayIcon_DoubleClick(object sender, EventArgs e)
+		private void TrayIcon_DoubleClick(object sender, EventArgs e)
 		{
 			try
 			{
@@ -509,6 +509,8 @@ namespace WallSwitch
 
 			c_separateMonitors.Checked = _currentTheme.SeparateMonitors;
 			c_allowSpanning.Checked = _currentTheme.AllowSpanning;
+			c_maxClipTrackBar.Value = _currentTheme.MaxImageClip;
+			UpdateMaxClipPercent();
 			_changeThemeHotKey.Copy(_currentTheme.HotKey);
 
 			c_imageFit.SelectedIndex = (int)_currentTheme.ImageFit;
@@ -719,6 +721,7 @@ namespace WallSwitch
 
 			_currentTheme.SeparateMonitors = c_separateMonitors.Checked;
 			_currentTheme.AllowSpanning = c_allowSpanning.Checked;
+			_currentTheme.MaxImageClip = c_maxClipTrackBar.Value;
 			if (!_currentTheme.HotKey.Equals(_changeThemeHotKey))
 			{
 				// Hot key is changing. Need to reregister.
@@ -771,7 +774,7 @@ namespace WallSwitch
 			foreach (var loc in _currentTheme.Locations) AddLocationItem(loc);
 		}
 
-		private void btnApply_Click(object sender, EventArgs e)
+		private void Apply_Click(object sender, EventArgs e)
 		{
 			try
 			{
@@ -783,9 +786,9 @@ namespace WallSwitch
 			}
 		}
 
-		private void miFileSave_Click(object sender, EventArgs e)
+		private void FileSave_Click(object sender, EventArgs e)
 		{
-			btnApply_Click(sender, e);
+			Apply_Click(sender, e);
 		}
 
 		private void ControlChanged(object sender, EventArgs e)
@@ -814,6 +817,12 @@ namespace WallSwitch
 			var numScreens = Screen.AllScreens.Length;
 			c_separateMonitors.Visible = numScreens > 1;
 			c_allowSpanning.Visible = numScreens > 1 && c_themeMode.SelectedIndex != k_modeCollage;
+
+			var maxClipTrackBarVisible = numScreens > 1 && c_themeMode.SelectedIndex != k_modeCollage && c_allowSpanning.Checked;
+			c_maxClipTrackBar.Visible = maxClipTrackBarVisible;
+			c_maxClipLabel.Visible = maxClipTrackBarVisible;
+			c_maxClipPercent.Visible = maxClipTrackBarVisible;
+
 			c_imageFit.Visible = c_themeMode.SelectedIndex != k_modeCollage;
 			c_maxScale.Enabled = c_limitScale.Checked;
 
@@ -862,7 +871,7 @@ namespace WallSwitch
 			EnableWidgetControls();
 		}
 
-		private void cmLocations_Opening(object sender, CancelEventArgs e)
+		private void Locations_Opening(object sender, CancelEventArgs e)
 		{
 			try
 			{
@@ -874,43 +883,7 @@ namespace WallSwitch
 			}
 		}
 
-		private void clrBackTop_ColorChanged(object sender, ColorSample.ColorChangedEventArgs e)
-		{
-			try
-			{
-				ControlChanged(sender, e);
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex, Res.Exception_Generic);
-			}
-		}
-
-		private void clrBackBottom_ColorChanged(object sender, ColorSample.ColorChangedEventArgs e)
-		{
-			try
-			{
-				ControlChanged(sender, e);
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex, Res.Exception_Generic);
-			}
-		}
-
-		private void trayMenu_Opening(object sender, CancelEventArgs e)
-		{
-			try
-			{
-				PopulateThemeContextMenu();
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex, Res.Exception_Generic);
-			}
-		}
-
-		private void lstLocations_Resize(object sender, EventArgs e)
+		private void Locations_Resize(object sender, EventArgs e)
 		{
 			try
 			{
@@ -922,7 +895,43 @@ namespace WallSwitch
 			}
 		}
 
-		private void trkImageSize_Scroll(object sender, EventArgs e)
+		private void BackTop_ColorChanged(object sender, ColorSample.ColorChangedEventArgs e)
+		{
+			try
+			{
+				ControlChanged(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex, Res.Exception_Generic);
+			}
+		}
+
+		private void BackBottom_ColorChanged(object sender, ColorSample.ColorChangedEventArgs e)
+		{
+			try
+			{
+				ControlChanged(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex, Res.Exception_Generic);
+			}
+		}
+
+		private void TrayMenu_Opening(object sender, CancelEventArgs e)
+		{
+			try
+			{
+				PopulateThemeContextMenu();
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex, Res.Exception_Generic);
+			}
+		}
+
+		private void ImageSize_Scroll(object sender, EventArgs e)
 		{
 			try
 			{
@@ -940,7 +949,7 @@ namespace WallSwitch
 			lblImageSizeDisplay.Text = String.Format(Res.ImageSizePercent, trkImageSize.Value);
 		}
 
-		private void trkOpacity_Scroll(object sender, EventArgs e)
+		private void Opacity_Scroll(object sender, EventArgs e)
 		{
 			try
 			{
@@ -958,7 +967,7 @@ namespace WallSwitch
 			lblOpacityDisplay.Text = String.Format(Res.BackOpacityPercent, trkOpacity.Value);
 		}
 
-		private void c_edgeMode_SelectedIndexChanged(object sender, EventArgs e)
+		private void EdgeMode_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			try
 			{
@@ -970,7 +979,7 @@ namespace WallSwitch
 			}
 		}
 
-		private void trkFeather_Scroll(object sender, EventArgs e)
+		private void Feather_Scroll(object sender, EventArgs e)
 		{
 			try
 			{
@@ -983,7 +992,7 @@ namespace WallSwitch
 			}
 		}
 
-		private void c_borderColor_ColorChanged(object sender, ColorSample.ColorChangedEventArgs e)
+		private void BorderColor_ColorChanged(object sender, ColorSample.ColorChangedEventArgs e)
 		{
 			try
 			{
@@ -1000,7 +1009,7 @@ namespace WallSwitch
 			c_edgeDistLabel.Text = String.Format(Res.FeatherWidth, c_edgeDist.Value);
 		}
 
-		private void c_colorEffectCollageFadeRatioTrackBar_Scroll(object sender, EventArgs e)
+		private void ColorEffectCollageFadeRatioTrackBar_Scroll(object sender, EventArgs e)
 		{
 			try
 			{
@@ -1018,7 +1027,7 @@ namespace WallSwitch
 			lblColorEffectCollageFadeRatioUnit.Text = string.Format(Res.CollageFadeRatioPercent, trkColorEffectCollageFadeRatio.Value);
 		}
 
-		private void trkDropShadow_Scroll(object sender, EventArgs e)
+		private void DropShadow_Scroll(object sender, EventArgs e)
 		{
 			try
 			{
@@ -1031,7 +1040,7 @@ namespace WallSwitch
 			}
 		}
 
-		private void trkDropShadowFeatherDist_Scroll(object sender, EventArgs e)
+		private void DropShadowFeatherDist_Scroll(object sender, EventArgs e)
 		{
 			try
 			{
@@ -1044,7 +1053,7 @@ namespace WallSwitch
 			}
 		}
 
-		private void trkDropShadowOpacity_Scroll(object sender, EventArgs e)
+		private void DropShadowOpacity_Scroll(object sender, EventArgs e)
 		{
 			try
 			{
@@ -1057,7 +1066,7 @@ namespace WallSwitch
 			}
 		}
 
-		private void trkBackgroundBlurDist_Scroll(object sender, EventArgs e)
+		private void BackgroundBlurDist_Scroll(object sender, EventArgs e)
 		{
 			try
 			{
@@ -1070,7 +1079,7 @@ namespace WallSwitch
 			}
 		}
 
-		private void c_allowSpanning_CheckedChanged(object sender, EventArgs e)
+		private void AllowSpanning_CheckedChanged(object sender, EventArgs e)
 		{
 			try
 			{
@@ -1080,6 +1089,24 @@ namespace WallSwitch
 			{
 				this.ShowError(ex);
 			}
+		}
+
+		private void MaxClipTrackBar_Scroll(object sender, EventArgs e)
+		{
+			try
+			{
+				UpdateMaxClipPercent();
+				ControlChanged(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void UpdateMaxClipPercent()
+		{
+			c_maxClipPercent.Text = String.Format(Res.MaxClipPercent, c_maxClipTrackBar.Value);
 		}
 		#endregion
 
@@ -1316,7 +1343,7 @@ namespace WallSwitch
 			}
 		}
 
-		private void c_themeMenuButton_Click(object sender, EventArgs e)
+		private void ThemeMenuButton_Click(object sender, EventArgs e)
 		{
 			try
 			{
@@ -2757,5 +2784,20 @@ namespace WallSwitch
 			}
 		}
 		#endregion
+
+		private void clrBackTop_ColorChanged(object sender, ColorSample.ColorChangedEventArgs e)
+		{
+
+		}
+
+		private void clrBackBottom_ColorChanged(object sender, ColorSample.ColorChangedEventArgs e)
+		{
+
+		}
+
+		private void c_borderColor_ColorChanged(object sender, ColorSample.ColorChangedEventArgs e)
+		{
+
+		}
 	}
 }

@@ -12,6 +12,7 @@ namespace WallSwitch.WidgetInterface
 	public class ScreenList : ICollection<Screen>
 	{
 		private Screen[] _screens;
+		private Point _offset;
 
 		/// <summary>
 		/// Generates a new list of screens.
@@ -29,6 +30,22 @@ namespace WallSwitch.WidgetInterface
 
 					return 0;
 				});
+
+			var minX = 0;
+			var minY = 0;
+			foreach (var screen in screens)
+			{
+				if (screen.Bounds.Left < minX) minX = screen.Bounds.Left;
+				if (screen.Bounds.Top < minY) minY = screen.Bounds.Top;
+			}
+
+			if (minX < 0 || minY < 0)
+			{
+				screens = (from s in screens select s.CloneWithOffsetedBounds(-minX, -minY)).ToList();
+			}
+
+			_offset = new Point(-minX, -minY);
+
 			_screens = screens.ToArray();
 		}
 
@@ -135,6 +152,15 @@ namespace WallSwitch.WidgetInterface
 				if (screen.Bounds.Contains(pt)) return true;
 			}
 			return false;
+		}
+
+		/// <summary>
+		/// Gets the distance the wallpaper image is shifted away from the origin.
+		/// This compensates for the fact that some screens natively have coordinates with negative values, but are normalized in this list.
+		/// </summary>
+		public Point Offset
+		{
+			get { return _offset; }
 		}
 	}
 }

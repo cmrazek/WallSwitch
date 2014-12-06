@@ -170,6 +170,18 @@ namespace WallSwitch
 			return inter.Width * inter.Height;
 		}
 
+		public static int IntersectArea(this Rectangle self, Rectangle rect)
+		{
+			if (!self.IntersectsWith(rect)) return 0;
+			var inter = Rectangle.Intersect(self, rect);
+			return inter.Width * inter.Height;
+		}
+
+		public static int Area(this Rectangle self)
+		{
+			return self.Width * self.Height;
+		}
+
 		public static Rectangle ToRectangle(this RectangleF self)
 		{
 			return new Rectangle((int)Math.Round(self.Left), (int)Math.Round(self.Top), (int)Math.Round(self.Width), (int)Math.Round(self.Height));

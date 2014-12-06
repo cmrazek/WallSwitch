@@ -897,6 +897,15 @@ namespace WallSwitch {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0}%.
+        /// </summary>
+        internal static string MaxClipPercent {
+            get {
+                return ResourceManager.GetString("MaxClipPercent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap MoveDown {

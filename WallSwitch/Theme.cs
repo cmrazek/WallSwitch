@@ -47,6 +47,7 @@ namespace WallSwitch
 		private const bool k_defaultBackgroundBlur = false;
 		private const int k_defaultBackgroundBlurDist = 4;
 		private const bool k_defaultAllowSpanning = true;
+		private const int k_defaultMaxImageClip = 15;
 		#endregion
 
 		#region Variables
@@ -75,6 +76,7 @@ namespace WallSwitch
 		private int _maxImageScale = k_defaultMaxImageScale;
 		private int _numCollageImages = k_defaultNumCollageImages;
 		private bool _allowSpanning = k_defaultAllowSpanning;
+		private int _maxImageClip = k_defaultMaxImageClip;
 		private string _lastImage = null;
 
 		private ColorEffect _colorEffectFore = ColorEffect.None;
@@ -213,6 +215,16 @@ namespace WallSwitch
 			set { _allowSpanning = value; }
 		}
 
+		public int MaxImageClip
+		{
+			get { return _maxImageClip; }
+			set
+			{
+				if (value < 0 || value > 100) throw new ArgumentOutOfRangeException();
+				_maxImageClip = value;
+			}
+		}
+
 		public HotKey HotKey
 		{
 			get { return _hotKey; }
@@ -268,6 +280,7 @@ namespace WallSwitch
 			xml.WriteAttributeString("BackColorBottom", ColorUtil.ColorToString(_backColorBottom));
 			if (_separateMonitors != k_defaultSeparateMonitors) xml.WriteAttributeString("SeparateMonitors", _separateMonitors.ToString());
 			if (_allowSpanning != k_defaultAllowSpanning) xml.WriteAttributeString("AllowSpanning", _allowSpanning.ToString());
+			if (_maxImageClip != k_defaultMaxImageClip) xml.WriteAttributeString("MaxImageClip", _maxImageClip.ToString());
 
 			if (_mode == ThemeMode.Collage)
 			{
@@ -351,6 +364,11 @@ namespace WallSwitch
 			_backColorBottom = ColorUtil.ParseColor(xmlTheme, "BackColorBottom", k_defaultBackColor);
 			_separateMonitors = Util.ParseBool(xmlTheme, "SeparateMonitors", k_defaultSeparateMonitors);
 			_allowSpanning = Util.ParseBool(xmlTheme, "AllowSpanning", k_defaultAllowSpanning);
+
+			_maxImageClip = Util.ParseInt(xmlTheme, "MaxImageClip", k_defaultMaxImageClip);
+			if (_maxImageClip < 0) _maxImageClip = 0;
+			else if (_maxImageClip > 100) _maxImageClip = 100;
+
 			_backOpacity = Util.ParseInt(xmlTheme, "BackOpacity", k_defaultBackOpacity);
 			_imageFit = Util.ParseEnum<ImageFit>(xmlTheme, "ImageFit", k_defaultImageFit);
 			if (xmlTheme.HasAttribute("Feather"))	// Deprecated
@@ -991,7 +1009,13 @@ namespace WallSwitch
 			{
 				for (var numMonitors = 1; numMonitors <= monitorSelections.Length - startMonitor; numMonitors++)
 				{
-					if (!MonitorsAreAdjascent(monitorSelections, startMonitor, numMonitors)) continue;
+					Log.WriteDebug("Testing monitor selection: start [{0}] count [{1}]", startMonitor, numMonitors);
+
+					if (!MonitorsAreAdjascent(monitorSelections, startMonitor, numMonitors))
+					{
+						Log.WriteDebug("Discarding monitor selection because monitors are not adjascent.");
+						continue;
+					}
 
 					var monitors = monitorSelections.Skip(startMonitor).Take(numMonitors).ToArray();
 					var envelope = (from m in monitors select m.Rect).GetEnvelope();
@@ -1002,14 +1026,17 @@ namespace WallSwitch
 					{
 						if (bestUsedStart == -1 || aspectDiff < bestUsedAspectDiff)
 						{
-							bestUsedStart = startMonitor;
-							bestUsedCount = numMonitors;
-							bestUsedAspectDiff = aspectDiff;
-
-							bestUsedImages.Clear();
-							foreach (var monitor in monitors)
+							if (CheckSpanImageClip(monitors, envelope, imgSize))
 							{
-								if (!bestUsedImages.Contains(monitor.ImageRec)) bestUsedImages.Remove(monitor.ImageRec);
+								bestUsedStart = startMonitor;
+								bestUsedCount = numMonitors;
+								bestUsedAspectDiff = aspectDiff;
+
+								bestUsedImages.Clear();
+								foreach (var monitor in monitors)
+								{
+									if (!bestUsedImages.Contains(monitor.ImageRec)) bestUsedImages.Remove(monitor.ImageRec);
+								}
 							}
 						}
 					}
@@ -1017,11 +1044,16 @@ namespace WallSwitch
 					{
 						if (bestUnusedStart == -1 || aspectDiff < bestUnusedAspectDiff)
 						{
-							bestUnusedStart = startMonitor;
-							bestUnusedCount = numMonitors;
-							bestUnusedAspectDiff = aspectDiff;
+							if (CheckSpanImageClip(monitors, envelope, imgSize))
+							{
+								bestUnusedStart = startMonitor;
+								bestUnusedCount = numMonitors;
+								bestUnusedAspectDiff = aspectDiff;
+							}
 						}
 					}
+
+					Log.WriteDebug("Monitor selection: aspect [{0}] aspectDiff [{1}]", aspect, aspectDiff);
 				}
 			}
 
@@ -1032,10 +1064,11 @@ namespace WallSwitch
 				if (displacementAllowed &&
 					bestUsedStart != -1 &&
 					bestUsedAspectDiff < bestUnusedAspectDiff &&
-					Math.Abs(bestUsedAspectDiff - bestUnusedAspectDiff) > k_aspectThreshold)
+					Math.Abs(bestUsedAspectDiff - bestUnusedAspectDiff) > k_aspectThreshold &&
+					bestUsedCount > 1)				// Only allow displacement when occupying more than 1 monitor.
 				{
 					// There's a better fit if we displace a previously selected image.
-					Log.Write(LogLevel.Debug, "Using monitor range start [{0}] count [{1}] (displaced previously picked images)", bestUsedStart, bestUsedCount);
+					Log.WriteDebug("Using monitor range start [{0}] count [{1}] (displaced previously picked images)", bestUsedStart, bestUsedCount);
 					var guid = Guid.NewGuid();
 					for (int i = bestUsedStart; i < bestUsedStart + bestUsedCount; i++)
 					{
@@ -1058,7 +1091,7 @@ namespace WallSwitch
 				else
 				{
 					// Use the unused range
-					Log.Write(LogLevel.Debug, "Using monitor range start [{0}] count [{1}] (unused range)", bestUnusedStart, bestUnusedCount);
+					Log.WriteDebug("Using monitor range start [{0}] count [{1}] (unused range)", bestUnusedStart, bestUnusedCount);
 					var guid = Guid.NewGuid();
 					for (int i = bestUnusedStart; i < bestUnusedStart + bestUnusedCount; i++)
 					{
@@ -1071,6 +1104,7 @@ namespace WallSwitch
 			}
 			else
 			{
+				Log.WriteDebug("Unable to find monitor range.");
 				return false;
 			}
 		}
@@ -1107,47 +1141,92 @@ namespace WallSwitch
 		}
 
 		/// <summary>
-		/// This function will attempt to fit an image to one or more monitors (depending if spanning is enabled).
+		/// When spanning an image across multiple monitors, ensure that it doesn't clip too much of the image.
 		/// </summary>
-		/// <param name="img">The image to fit</param>
-		/// <param name="allMonitorRects">The bounds of monitors the image should attempt to fit to.</param>
-		/// <returns>The number of monitors this image should be spanned across, or 0 if the image can't be loaded.</returns>
-		private int FitImageToMonitorRects(ImageRec img, Rectangle[] allMonitorRects)
+		private bool CheckSpanImageClip(MonitorSelection[] monitors, Rectangle envelope, Size imageSize)
 		{
-			if (!img.Retrieve())
+			if (monitors.Length == 1) return true;	// Don't check clipping for single-monitor display
+
+			var envelopeArea = envelope.Area();
+
+			var imageRectF = new RectangleF(0, 0, imageSize.Width, imageSize.Height);
+			imageRectF = WallpaperRenderer.FitFullScreenImage(imageRectF, envelope, imageSize, this);
+			var imageRect = imageRectF.ToRectangle();
+
+			int clipArea = 0;
+			foreach (var monitor in monitors)
 			{
-				Log.Write(LogLevel.Warning, "Failed to retrieve image [{0}]", img.Location);
-				return 0;
+				clipArea += monitor.Rect.IntersectArea(imageRect);
 			}
 
-			if (allMonitorRects.Length == 1)
+			var imageArea = imageRect.Area();
+
+			float areaDiff = ((float)clipArea / (float)imageArea) * 100.0f;
+			if (areaDiff >= 100.0f - _maxImageClip)
 			{
-				return 1;	// Don't need to check if the aspect matches for a single monitor.
+				Log.WriteDebug("Image clip check passed: areaDiff [{0}]% envelopeArea [{1}] clipArea [{2}] imageArea [{3}] imageRect [{4}] envelope [{5}]", areaDiff, envelopeArea, clipArea, imageArea, imageRect, envelope);
+				return true;
 			}
-
-			var imgSize = img.Image.Size;
-			var imageAspect = imgSize.GetAspect();
-
-			// Find the best fit
-			int bestNumMonitors = -1;
-			float bestAspectDiff = 0.0f;
-
-			for (var monitorCount = 1; monitorCount <= allMonitorRects.Length; monitorCount++)
+			else
 			{
-				// Get the aspect for this number of monitors, and check if it matches the aspect of the image.
-				var monitorEnvelope = allMonitorRects.Take(monitorCount).GetEnvelope();
-				var monitorAspect = monitorEnvelope.Size.GetAspect();
-				var aspectDiff = Math.Abs(monitorAspect - imageAspect);
-
-				if (bestNumMonitors == -1 || aspectDiff < bestAspectDiff)
-				{
-					bestAspectDiff = aspectDiff;
-					bestNumMonitors = monitorCount;
-				}
+				Log.WriteDebug("Image clip check failed: areaDiff [{0}]% envelopeArea [{1}] clipArea [{2}] imageArea [{3}] imageRect [{4}] envelope [{5}]", areaDiff, envelopeArea, clipArea, imageArea, imageRect, envelope);
+				return false;
 			}
-
-			return bestNumMonitors == -1 ? 1 : bestNumMonitors;
 		}
+
+		// TODO: remove
+		///// <summary>
+		///// This function will attempt to fit an image to one or more monitors (depending if spanning is enabled).
+		///// </summary>
+		///// <param name="img">The image to fit</param>
+		///// <param name="allMonitorRects">The bounds of monitors the image should attempt to fit to.</param>
+		///// <returns>The number of monitors this image should be spanned across, or 0 if the image can't be loaded.</returns>
+		//private int FitImageToMonitorRects(ImageRec img, Rectangle[] allMonitorRects)
+		//{
+		//	if (!img.Retrieve())
+		//	{
+		//		Log.Write(LogLevel.Warning, "Failed to retrieve image [{0}]", img.Location);
+		//		return 0;
+		//	}
+
+		//	if (allMonitorRects.Length == 1)
+		//	{
+		//		return 1;	// Don't need to check if the aspect matches for a single monitor.
+		//	}
+
+		//	var imgSize = img.Image.Size;
+		//	var imageAspect = imgSize.GetAspect();
+
+		//	// Find the best fit
+		//	int bestNumMonitors = -1;
+		//	float bestAspectDiff = 0.0f;
+
+		//	for (var monitorCount = 1; monitorCount <= allMonitorRects.Length; monitorCount++)
+		//	{
+		//		Log.WriteDebug("Testing monitor range: start [{0}] count [{1}]", monitorCount, 0);	// TODO
+
+		//		// Get the aspect for this number of monitors, and check if it matches the aspect of the image.
+		//		var monitorRects = allMonitorRects.Take(monitorCount).ToArray();
+		//		var monitorEnvelope = monitorRects.GetEnvelope();
+		//		var monitorAspect = monitorEnvelope.Size.GetAspect();
+		//		var aspectDiff = Math.Abs(monitorAspect - imageAspect);
+
+		//		if (bestNumMonitors == -1 || aspectDiff < bestAspectDiff)
+		//		{
+		//			var envelopeArea = monitorEnvelope.Area();
+		//			if (envelopeArea > 0)
+		//			{
+		//				var monitorArea = monitorRects.Sum(m => m.Area());
+		//				var areaDiff = monitorArea / envelopeArea;
+
+		//				bestAspectDiff = aspectDiff;
+		//				bestNumMonitors = monitorCount;
+		//			}
+		//		}
+		//	}
+
+		//	return bestNumMonitors == -1 ? 1 : bestNumMonitors;
+		//}
 
 		private bool ImageRecIsInHistory(ImageRec img)
 		{

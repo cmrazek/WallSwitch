@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="Data"
+    targetNamespace="WallSwitch.Data"
+    elementFormDefault="qualified"
+    xmlns="WallSwitch.Data"
+    xmlns:mstns="WallSwitch.Data"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+	<xs:element name="WallpaperImageFile" type="WallpaperImageFile"/>
+	
+	<xs:complexType name="WallpaperImageFile">
+		<xs:sequence>
+			<xs:element name="Name" type="xs:string"/>
+			<xs:element name="Size" type="Point"/>
+			<xs:element name="Offset" type="Point"/>
+			<xs:element name="Screen" type="Screen" minOccurs="1" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="Screen">
+		<xs:sequence>
+			<xs:element name="Primary" type="xs:boolean"/>
+			<xs:element name="Bounds" type="Rectangle"/>
+			<xs:element name="WorkingArea" type="Rectangle"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="Point">
+		<xs:sequence>
+			<xs:element name="X" type="xs:int"/>
+			<xs:element name="Y" type="xs:int"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="Rectangle">
+		<xs:sequence>
+			<xs:element name="Left" type="xs:int"/>
+			<xs:element name="Top" type="xs:int"/>
+			<xs:element name="Width" type="xs:int"/>
+			<xs:element name="Height" type="xs:int"/>
+		</xs:sequence>
+	</xs:complexType>
+	
+</xs:schema>

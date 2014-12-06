@@ -47,7 +47,7 @@ namespace WallSwitch
 			}
 		}
 
-		public Image WallpaperImage
+		public Bitmap WallpaperImage
 		{
 			get { return _bitmap; }
 		}
@@ -259,7 +259,7 @@ namespace WallSwitch
 
 					_g.SetClip(screenRect);
 
-					imgRect = FitFullScreenImage(imgRect, ref srcRect, spanRectF, _theme.ImageFit, img.Size);
+					imgRect = FitFullScreenImage(imgRect, spanRectF, img.Size, _theme);
 					imgToDraw = img;
 
 					if (_theme.ColorEffectFore == ColorEffect.None)
@@ -307,21 +307,21 @@ namespace WallSwitch
 			brush.Dispose();
 		}
 
-		private RectangleF FitFullScreenImage(RectangleF imgRect, ref RectangleF srcRect, RectangleF screenRect, ImageFit fit, SizeF imgSize)
+		public static RectangleF FitFullScreenImage(RectangleF imgRect, RectangleF screenRect, SizeF imgSize, Theme theme)
 		{
 			SizeF screenSize = screenRect.Size;
 			RectangleF origImgRect = imgRect;
 
-			switch (fit)
+			switch (theme.ImageFit)
 			{
 				case ImageFit.Original:
 					imgRect = imgRect.CenterInside(screenRect);
 					break;
 
 				case ImageFit.Stretch:
-					if (_theme.MaxImageScale > 0)
+					if (theme.MaxImageScale > 0)
 					{
-						var maxScale = (float)_theme.MaxImageScale / 100.0f;
+						var maxScale = (float)theme.MaxImageScale / 100.0f;
 						imgRect = new RectangleF(0.0f, 0.0f, imgSize.Width * maxScale, imgSize.Height * maxScale);
 						if (imgRect.Width > screenRect.Width) imgRect.Width = screenRect.Width;
 						if (imgRect.Height > screenRect.Height) imgRect.Height = screenRect.Height;
@@ -338,14 +338,14 @@ namespace WallSwitch
 					if (imgRect.Width != screenRect.Width) imgRect = imgRect.ScaleRectWidth(screenRect.Width);
 					if (imgRect.Height > screenRect.Height) imgRect = imgRect.ScaleRectHeight(screenRect.Height);
 					imgRect = imgRect.CenterInside(screenRect);
-					CheckImageRectSize(_theme, ref imgRect, imgSize);
+					CheckImageRectSize(theme, ref imgRect, imgSize);
 					break;
 
 				case ImageFit.Fill:
 					if (imgRect.Width < screenRect.Width) imgRect = imgRect.ScaleRectWidth(screenRect.Width);
 					if (imgRect.Height < screenRect.Height) imgRect = imgRect.ScaleRectHeight(screenRect.Height);
 					imgRect = imgRect.CenterInside(screenRect);
-					CheckImageRectSize(_theme, ref imgRect, imgSize);
+					CheckImageRectSize(theme, ref imgRect, imgSize);
 					break;
 
 				default:
@@ -474,7 +474,7 @@ namespace WallSwitch
 			}
 		}
 
-		private void CheckImageRectSize(Theme theme, ref RectangleF rect, SizeF imgSize)
+		private static void CheckImageRectSize(Theme theme, ref RectangleF rect, SizeF imgSize)
 		{
 			if (theme.MaxImageScale > 0)
 			{
