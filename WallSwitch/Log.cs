@@ -107,7 +107,14 @@ namespace WallSwitch
 		public static LogLevel Level
 		{
 			get { return _level; }
-			set { _level = value; }
+			set
+			{
+				if (_level != value)
+				{
+					_level = value;
+					Write(LogLevel.Info, "Logging level has been changed to '{0}'.", value);
+				}
+			}
 		}
 
 		private static void PurgeOldLogFiles()

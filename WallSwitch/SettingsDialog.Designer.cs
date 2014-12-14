@@ -29,107 +29,109 @@
 		private void InitializeComponent()
 		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsDialog));
-			this.lblStartUpDelay = new System.Windows.Forms.Label();
-			this.txtStartUpDelay = new System.Windows.Forms.TextBox();
-			this.lblStartUpDelayUnit = new System.Windows.Forms.Label();
-			this.btnOk = new System.Windows.Forms.Button();
-			this.btnCancel = new System.Windows.Forms.Button();
-			this.chkStartWithWindows = new System.Windows.Forms.CheckBox();
-			this.chkCheckForUpdates = new System.Windows.Forms.CheckBox();
-			this.btnCheckForUpdates = new System.Windows.Forms.Button();
+			this.c_startUpDelayLabel = new System.Windows.Forms.Label();
+			this.c_startUpDelayTextBox = new System.Windows.Forms.TextBox();
+			this.c_startUpDelayUnitsLabel = new System.Windows.Forms.Label();
+			this.c_okButton = new System.Windows.Forms.Button();
+			this.c_cancelButton = new System.Windows.Forms.Button();
+			this.c_startWithWindowsCheckBox = new System.Windows.Forms.CheckBox();
+			this.c_checkForUpdatesCheckBox = new System.Windows.Forms.CheckBox();
+			this.c_checkForUpdatesButton = new System.Windows.Forms.Button();
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.c_ignoreHiddenFilesCheckbox = new System.Windows.Forms.CheckBox();
+			this.c_logLevelLabel = new System.Windows.Forms.Label();
+			this.c_logLevelCombo = new System.Windows.Forms.ComboBox();
 			this.panel1.SuspendLayout();
 			this.SuspendLayout();
 			// 
-			// lblStartUpDelay
+			// c_startUpDelayLabel
 			// 
-			this.lblStartUpDelay.AutoSize = true;
-			this.lblStartUpDelay.Location = new System.Drawing.Point(10, 84);
-			this.lblStartUpDelay.Name = "lblStartUpDelay";
-			this.lblStartUpDelay.Size = new System.Drawing.Size(121, 13);
-			this.lblStartUpDelay.TabIndex = 4;
-			this.lblStartUpDelay.Text = "Start-up/Resume Delay:";
+			this.c_startUpDelayLabel.AutoSize = true;
+			this.c_startUpDelayLabel.Location = new System.Drawing.Point(10, 84);
+			this.c_startUpDelayLabel.Name = "c_startUpDelayLabel";
+			this.c_startUpDelayLabel.Size = new System.Drawing.Size(121, 13);
+			this.c_startUpDelayLabel.TabIndex = 5;
+			this.c_startUpDelayLabel.Text = "Start-up/Resume Delay:";
 			// 
-			// txtStartUpDelay
+			// c_startUpDelayTextBox
 			// 
-			this.txtStartUpDelay.Location = new System.Drawing.Point(137, 81);
-			this.txtStartUpDelay.Name = "txtStartUpDelay";
-			this.txtStartUpDelay.Size = new System.Drawing.Size(60, 20);
-			this.txtStartUpDelay.TabIndex = 5;
+			this.c_startUpDelayTextBox.Location = new System.Drawing.Point(137, 81);
+			this.c_startUpDelayTextBox.Name = "c_startUpDelayTextBox";
+			this.c_startUpDelayTextBox.Size = new System.Drawing.Size(60, 20);
+			this.c_startUpDelayTextBox.TabIndex = 6;
 			// 
-			// lblStartUpDelayUnit
+			// c_startUpDelayUnitsLabel
 			// 
-			this.lblStartUpDelayUnit.AutoSize = true;
-			this.lblStartUpDelayUnit.Location = new System.Drawing.Point(203, 84);
-			this.lblStartUpDelayUnit.Name = "lblStartUpDelayUnit";
-			this.lblStartUpDelayUnit.Size = new System.Drawing.Size(53, 13);
-			this.lblStartUpDelayUnit.TabIndex = 6;
-			this.lblStartUpDelayUnit.Text = "(seconds)";
+			this.c_startUpDelayUnitsLabel.AutoSize = true;
+			this.c_startUpDelayUnitsLabel.Location = new System.Drawing.Point(203, 84);
+			this.c_startUpDelayUnitsLabel.Name = "c_startUpDelayUnitsLabel";
+			this.c_startUpDelayUnitsLabel.Size = new System.Drawing.Size(53, 13);
+			this.c_startUpDelayUnitsLabel.TabIndex = 7;
+			this.c_startUpDelayUnitsLabel.Text = "(seconds)";
 			// 
-			// btnOk
+			// c_okButton
 			// 
-			this.btnOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnOk.Location = new System.Drawing.Point(128, 4);
-			this.btnOk.Name = "btnOk";
-			this.btnOk.Size = new System.Drawing.Size(75, 23);
-			this.btnOk.TabIndex = 3;
-			this.btnOk.Text = "&OK";
-			this.btnOk.UseVisualStyleBackColor = true;
-			this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
+			this.c_okButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.c_okButton.Location = new System.Drawing.Point(128, 4);
+			this.c_okButton.Name = "c_okButton";
+			this.c_okButton.Size = new System.Drawing.Size(75, 23);
+			this.c_okButton.TabIndex = 0;
+			this.c_okButton.Text = "&OK";
+			this.c_okButton.UseVisualStyleBackColor = true;
+			this.c_okButton.Click += new System.EventHandler(this.OkButton_Click);
 			// 
-			// btnCancel
+			// c_cancelButton
 			// 
-			this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.btnCancel.Location = new System.Drawing.Point(206, 4);
-			this.btnCancel.Name = "btnCancel";
-			this.btnCancel.Size = new System.Drawing.Size(75, 23);
-			this.btnCancel.TabIndex = 4;
-			this.btnCancel.Text = "&Cancel";
-			this.btnCancel.UseVisualStyleBackColor = true;
-			this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+			this.c_cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.c_cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+			this.c_cancelButton.Location = new System.Drawing.Point(206, 4);
+			this.c_cancelButton.Name = "c_cancelButton";
+			this.c_cancelButton.Size = new System.Drawing.Size(75, 23);
+			this.c_cancelButton.TabIndex = 1;
+			this.c_cancelButton.Text = "&Cancel";
+			this.c_cancelButton.UseVisualStyleBackColor = true;
+			this.c_cancelButton.Click += new System.EventHandler(this.CancelButton_Click);
 			// 
-			// chkStartWithWindows
+			// c_startWithWindowsCheckBox
 			// 
-			this.chkStartWithWindows.AutoSize = true;
-			this.chkStartWithWindows.Location = new System.Drawing.Point(13, 12);
-			this.chkStartWithWindows.Name = "chkStartWithWindows";
-			this.chkStartWithWindows.Size = new System.Drawing.Size(120, 17);
-			this.chkStartWithWindows.TabIndex = 0;
-			this.chkStartWithWindows.Text = "Start With Windows";
-			this.chkStartWithWindows.UseVisualStyleBackColor = true;
+			this.c_startWithWindowsCheckBox.AutoSize = true;
+			this.c_startWithWindowsCheckBox.Location = new System.Drawing.Point(13, 12);
+			this.c_startWithWindowsCheckBox.Name = "c_startWithWindowsCheckBox";
+			this.c_startWithWindowsCheckBox.Size = new System.Drawing.Size(120, 17);
+			this.c_startWithWindowsCheckBox.TabIndex = 1;
+			this.c_startWithWindowsCheckBox.Text = "Start With Windows";
+			this.c_startWithWindowsCheckBox.UseVisualStyleBackColor = true;
 			// 
-			// chkCheckForUpdates
+			// c_checkForUpdatesCheckBox
 			// 
-			this.chkCheckForUpdates.AutoSize = true;
-			this.chkCheckForUpdates.Location = new System.Drawing.Point(13, 35);
-			this.chkCheckForUpdates.Name = "chkCheckForUpdates";
-			this.chkCheckForUpdates.Size = new System.Drawing.Size(172, 17);
-			this.chkCheckForUpdates.TabIndex = 1;
-			this.chkCheckForUpdates.Text = "Check for Updates on Start Up";
-			this.chkCheckForUpdates.UseVisualStyleBackColor = true;
+			this.c_checkForUpdatesCheckBox.AutoSize = true;
+			this.c_checkForUpdatesCheckBox.Location = new System.Drawing.Point(13, 35);
+			this.c_checkForUpdatesCheckBox.Name = "c_checkForUpdatesCheckBox";
+			this.c_checkForUpdatesCheckBox.Size = new System.Drawing.Size(172, 17);
+			this.c_checkForUpdatesCheckBox.TabIndex = 2;
+			this.c_checkForUpdatesCheckBox.Text = "Check for Updates on Start Up";
+			this.c_checkForUpdatesCheckBox.UseVisualStyleBackColor = true;
 			// 
-			// btnCheckForUpdates
+			// c_checkForUpdatesButton
 			// 
-			this.btnCheckForUpdates.Location = new System.Drawing.Point(206, 31);
-			this.btnCheckForUpdates.Name = "btnCheckForUpdates";
-			this.btnCheckForUpdates.Size = new System.Drawing.Size(75, 23);
-			this.btnCheckForUpdates.TabIndex = 2;
-			this.btnCheckForUpdates.Text = "Check Now";
-			this.btnCheckForUpdates.UseVisualStyleBackColor = true;
-			this.btnCheckForUpdates.Click += new System.EventHandler(this.btnCheckForUpdates_Click);
+			this.c_checkForUpdatesButton.Location = new System.Drawing.Point(206, 31);
+			this.c_checkForUpdatesButton.Name = "c_checkForUpdatesButton";
+			this.c_checkForUpdatesButton.Size = new System.Drawing.Size(75, 23);
+			this.c_checkForUpdatesButton.TabIndex = 3;
+			this.c_checkForUpdatesButton.Text = "Check Now";
+			this.c_checkForUpdatesButton.UseVisualStyleBackColor = true;
+			this.c_checkForUpdatesButton.Click += new System.EventHandler(this.CheckForUpdatesButton_Click);
 			// 
 			// panel1
 			// 
 			this.panel1.BackColor = System.Drawing.SystemColors.Control;
-			this.panel1.Controls.Add(this.btnOk);
-			this.panel1.Controls.Add(this.btnCancel);
+			this.panel1.Controls.Add(this.c_okButton);
+			this.panel1.Controls.Add(this.c_cancelButton);
 			this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.panel1.Location = new System.Drawing.Point(0, 112);
+			this.panel1.Location = new System.Drawing.Point(0, 140);
 			this.panel1.Name = "panel1";
 			this.panel1.Size = new System.Drawing.Size(284, 30);
-			this.panel1.TabIndex = 8;
+			this.panel1.TabIndex = 0;
 			// 
 			// c_ignoreHiddenFilesCheckbox
 			// 
@@ -137,28 +139,49 @@
 			this.c_ignoreHiddenFilesCheckbox.Location = new System.Drawing.Point(13, 58);
 			this.c_ignoreHiddenFilesCheckbox.Name = "c_ignoreHiddenFilesCheckbox";
 			this.c_ignoreHiddenFilesCheckbox.Size = new System.Drawing.Size(175, 17);
-			this.c_ignoreHiddenFilesCheckbox.TabIndex = 3;
+			this.c_ignoreHiddenFilesCheckbox.TabIndex = 4;
 			this.c_ignoreHiddenFilesCheckbox.Text = "Ignore Hidden Files and Folders";
 			this.c_ignoreHiddenFilesCheckbox.UseVisualStyleBackColor = true;
 			// 
+			// c_logLevelLabel
+			// 
+			this.c_logLevelLabel.AutoSize = true;
+			this.c_logLevelLabel.Location = new System.Drawing.Point(12, 110);
+			this.c_logLevelLabel.Name = "c_logLevelLabel";
+			this.c_logLevelLabel.Size = new System.Drawing.Size(71, 13);
+			this.c_logLevelLabel.TabIndex = 8;
+			this.c_logLevelLabel.Text = "Loging Level:";
+			// 
+			// c_logLevelCombo
+			// 
+			this.c_logLevelCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.c_logLevelCombo.FormattingEnabled = true;
+			this.c_logLevelCombo.Location = new System.Drawing.Point(89, 107);
+			this.c_logLevelCombo.Name = "c_logLevelCombo";
+			this.c_logLevelCombo.Size = new System.Drawing.Size(108, 21);
+			this.c_logLevelCombo.TabIndex = 9;
+			// 
 			// SettingsDialog
 			// 
-			this.AcceptButton = this.btnOk;
+			this.AcceptButton = this.c_okButton;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.SystemColors.Window;
-			this.CancelButton = this.btnCancel;
-			this.ClientSize = new System.Drawing.Size(284, 142);
+			this.CancelButton = this.c_cancelButton;
+			this.ClientSize = new System.Drawing.Size(284, 170);
+			this.Controls.Add(this.c_logLevelCombo);
+			this.Controls.Add(this.c_logLevelLabel);
 			this.Controls.Add(this.c_ignoreHiddenFilesCheckbox);
 			this.Controls.Add(this.panel1);
-			this.Controls.Add(this.btnCheckForUpdates);
-			this.Controls.Add(this.chkCheckForUpdates);
-			this.Controls.Add(this.chkStartWithWindows);
-			this.Controls.Add(this.lblStartUpDelayUnit);
-			this.Controls.Add(this.txtStartUpDelay);
-			this.Controls.Add(this.lblStartUpDelay);
+			this.Controls.Add(this.c_checkForUpdatesButton);
+			this.Controls.Add(this.c_checkForUpdatesCheckBox);
+			this.Controls.Add(this.c_startWithWindowsCheckBox);
+			this.Controls.Add(this.c_startUpDelayUnitsLabel);
+			this.Controls.Add(this.c_startUpDelayTextBox);
+			this.Controls.Add(this.c_startUpDelayLabel);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-			this.MinimumSize = new System.Drawing.Size(300, 180);
+			this.MaximumSize = new System.Drawing.Size(300, 208);
+			this.MinimumSize = new System.Drawing.Size(300, 208);
 			this.Name = "SettingsDialog";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Settings";
@@ -171,15 +194,17 @@
 
 		#endregion
 
-		private System.Windows.Forms.Label lblStartUpDelay;
-		private System.Windows.Forms.TextBox txtStartUpDelay;
-		private System.Windows.Forms.Label lblStartUpDelayUnit;
-		private System.Windows.Forms.Button btnOk;
-		private System.Windows.Forms.Button btnCancel;
-		private System.Windows.Forms.CheckBox chkStartWithWindows;
-		private System.Windows.Forms.CheckBox chkCheckForUpdates;
-		private System.Windows.Forms.Button btnCheckForUpdates;
+		private System.Windows.Forms.Label c_startUpDelayLabel;
+		private System.Windows.Forms.TextBox c_startUpDelayTextBox;
+		private System.Windows.Forms.Label c_startUpDelayUnitsLabel;
+		private System.Windows.Forms.Button c_okButton;
+		private System.Windows.Forms.Button c_cancelButton;
+		private System.Windows.Forms.CheckBox c_startWithWindowsCheckBox;
+		private System.Windows.Forms.CheckBox c_checkForUpdatesCheckBox;
+		private System.Windows.Forms.Button c_checkForUpdatesButton;
 		private System.Windows.Forms.Panel panel1;
 		private System.Windows.Forms.CheckBox c_ignoreHiddenFilesCheckbox;
+		private System.Windows.Forms.Label c_logLevelLabel;
+		private System.Windows.Forms.ComboBox c_logLevelCombo;
 	}
 }

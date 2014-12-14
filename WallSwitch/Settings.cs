@@ -14,6 +14,11 @@ namespace WallSwitch
 		private const bool k_defaultCheckForUpdatesOnStartup = true;
 		private const int k_defaultStartUpDelay = 0;
 		private const bool k_defaultIgnoreHiddenFiles = true;
+#if DEBUG
+		private const LogLevel k_defaultLogLevel = LogLevel.Debug;
+#else
+		private const LogLevel k_defaultLogLevel = LogLevel.Info;
+#endif
 		#endregion
 
 		#region Variables
@@ -21,6 +26,7 @@ namespace WallSwitch
 		private static bool _checkForUpdatesOnStartup = k_defaultCheckForUpdatesOnStartup;
 		private static int _startUpDelay = k_defaultStartUpDelay;
 		private static bool _ignoreHiddenFiles = k_defaultIgnoreHiddenFiles;
+		private static LogLevel _logLevel = k_defaultLogLevel;
 		#endregion
 
 		/// <summary>
@@ -39,12 +45,12 @@ namespace WallSwitch
 			}
 		}
 
-		#region Save / Load
 		public static void Save(XmlWriter xml)
 		{
 			xml.WriteElementString("CheckForUpdates", _checkForUpdatesOnStartup.ToString());
 			xml.WriteElementString("StartUpDelay", _startUpDelay.ToString());
 			if (_ignoreHiddenFiles != k_defaultIgnoreHiddenFiles) xml.WriteElementString("IgnoreHiddenFiles", _ignoreHiddenFiles.ToString());
+			xml.WriteElementString("LogLevel", _logLevel.ToString());
 		}
 
 		public static void Load(XmlElement xmlSettings)
@@ -59,10 +65,13 @@ namespace WallSwitch
 			bool bValue;
 			xml = xmlSettings.SelectSingleNode("IgnoreHiddenFiles") as XmlElement;
 			if (xml != null && bool.TryParse(xml.InnerText, out bValue)) _ignoreHiddenFiles = bValue;
-		}
-		#endregion
 
-		#region Start With Windows
+			LogLevel logLevel;
+			xml = xmlSettings.SelectSingleNode("LogLevel") as XmlElement;
+			if (xml != null && Enum.TryParse<LogLevel>(xml.InnerText, true, out logLevel)) _logLevel = logLevel;
+			Log.Level = _logLevel;
+		}
+
 		private static void GetStartWithWindowsFromRegistry()
 		{
 			RegistryKey key = null;
@@ -141,7 +150,6 @@ namespace WallSwitch
 				return "\"" + Application.ExecutablePath + "\" -winstart";
 			}
 		}
-		#endregion
 
 		public static bool CheckForUpdatesOnStartup
 		{
@@ -161,5 +169,14 @@ namespace WallSwitch
 			set { _ignoreHiddenFiles = value; }
 		}
 
+		public static LogLevel LogLevel
+		{
+			get { return _logLevel; }
+			set
+			{
+				_logLevel = value;
+				Log.Level = value;
+			}
+		}
 	}
 }

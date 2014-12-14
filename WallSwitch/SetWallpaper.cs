@@ -1370,6 +1370,7 @@ namespace WallSwitch
 			try
 			{
 				var screenList = new ScreenList();
+				DumpScreenLayoutToDebugLog(screenList);
 				var screenRects = (from s in screenList select s.Bounds).ToArray();
 
 				// Keep track of which screens have been cleared.
@@ -1542,6 +1543,19 @@ namespace WallSwitch
 			return WrapImage(src, new Point(size.Width - offset.X, size.Height - offset.Y));
 		}
 
+		private bool IsImageWrappingRequired()
+		{
+			var ver = Environment.OSVersion.Version;
+
+			// Windows 8 and up properly spans the image across monitors.
+			if (ver.Major > 6 || (ver.Major == 6 && ver.Minor >= 2))
+			{
+				return false;
+			}
+
+			return true;
+		}
+
 		private void SaveWallpaperImage(string fileName, Bitmap image, ImageFormat format, ScreenList screens)
 		{
 			try
@@ -1554,14 +1568,22 @@ namespace WallSwitch
 					Screen = screens.ToData().ToArray()
 				};
 
-				var wrappedImage = WrapImage(image, screens.Offset);
-				wrappedImage.Save(fileName, format);
-				Xml.SerializeToFile(file, fileName + ".wall");
+				if (IsImageWrappingRequired())
+				{
+					var wrappedImage = WrapImage(image, screens.Offset);
+					wrappedImage.Save(fileName, format);
 
 #if DEBUG
 				var unwrappedFileName = Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + "_unwrapped" + Path.GetExtension(fileName));
 				image.Save(unwrappedFileName, ImageFormat.Png);
 #endif
+				}
+				else
+				{
+					image.Save(fileName, format);
+				}
+
+				Xml.SerializeToFile(file, fileName + ".wall");
 			}
 			catch (Exception ex)
 			{
@@ -1589,12 +1611,20 @@ namespace WallSwitch
 				{
 					if (desc.Screen[i].Primary != screens[i].Primary) return null;
 					if (desc.Screen[i].Bounds.ToRectangle() != screens[i].Bounds) return null;
-					if (desc.Screen[i].WorkingArea.ToRectangle() != screens[i].WorkingArea) return null;
+					//if (desc.Screen[i].WorkingArea.ToRectangle() != screens[i].WorkingArea) return null;
 				}
 
 				// Load the image
 				var img = LoadBitmapFromFile(fileName);
-				return UnwrapImage(img, screens.Offset);
+
+				if (IsImageWrappingRequired())
+				{
+					return UnwrapImage(img, screens.Offset);
+				}
+				else
+				{
+					return img;
+				}
 			}
 			catch (Exception ex)
 			{
@@ -1616,6 +1646,19 @@ namespace WallSwitch
 					Log.Write(LogLevel.Debug, "The file has no content.");
 					return null;
 				}
+			}
+		}
+
+		private void DumpScreenLayoutToDebugLog(ScreenList screens)
+		{
+			Log.WriteDebug("Screen Layout:");
+			var index = 0;
+			foreach (var screen in screens)
+			{
+				Log.WriteDebug("  Screen {0}:", index++);
+				Log.WriteDebug("    Primary: {0}", screen.Primary);
+				Log.WriteDebug("    Bounds: {0}", screen.Bounds);
+				Log.WriteDebug("    Working Area: {0}", screen.WorkingArea);
 			}
 		}
 	}

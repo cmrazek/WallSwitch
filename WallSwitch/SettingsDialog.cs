@@ -22,10 +22,11 @@ namespace WallSwitch
 		{
 			try
 			{
-				txtStartUpDelay.Text = Settings.StartUpDelay.ToString();
-				chkStartWithWindows.Checked = Settings.StartWithWindows;
-				chkCheckForUpdates.Checked = Settings.CheckForUpdatesOnStartup;
+				c_startUpDelayTextBox.Text = Settings.StartUpDelay.ToString();
+				c_startWithWindowsCheckBox.Checked = Settings.StartWithWindows;
+				c_checkForUpdatesCheckBox.Checked = Settings.CheckForUpdatesOnStartup;
 				c_ignoreHiddenFilesCheckbox.Checked = Settings.IgnoreHiddenFiles;
+				c_logLevelCombo.InitForEnum<LogLevel>(Settings.LogLevel);
 			}
 			catch (Exception ex)
 			{
@@ -36,7 +37,7 @@ namespace WallSwitch
 		private bool ValidateForm(bool showErrors, bool save)
 		{
 			int startUpDelay;
-			if (!int.TryParse(txtStartUpDelay.Text, out startUpDelay) || startUpDelay < 0)
+			if (!int.TryParse(c_startUpDelayTextBox.Text, out startUpDelay) || startUpDelay < 0)
 			{
 				if (showErrors)
 				{
@@ -48,15 +49,16 @@ namespace WallSwitch
 			if (save)
 			{
 				Settings.StartUpDelay = startUpDelay;
-				Settings.StartWithWindows = chkStartWithWindows.Checked;
-				Settings.CheckForUpdatesOnStartup = chkCheckForUpdates.Checked;
+				Settings.StartWithWindows = c_startWithWindowsCheckBox.Checked;
+				Settings.CheckForUpdatesOnStartup = c_checkForUpdatesCheckBox.Checked;
 				Settings.IgnoreHiddenFiles = c_ignoreHiddenFilesCheckbox.Checked;
+				Settings.LogLevel = c_logLevelCombo.GetEnumValue<LogLevel>();
 			}
 
 			return true;
 		}
 
-		private void btnOk_Click(object sender, EventArgs e)
+		private void OkButton_Click(object sender, EventArgs e)
 		{
 			try
 			{
@@ -72,7 +74,7 @@ namespace WallSwitch
 			}
 		}
 
-		private void btnCancel_Click(object sender, EventArgs e)
+		private void CancelButton_Click(object sender, EventArgs e)
 		{
 			try
 			{
@@ -85,18 +87,18 @@ namespace WallSwitch
 			}
 		}
 
-		private void btnCheckForUpdates_Click(object sender, EventArgs e)
+		private void CheckForUpdatesButton_Click(object sender, EventArgs e)
 		{
 			try
 			{
 				if (_updateChecker != null) return;
 
 				_updateChecker = new UpdateChecker();
-				_updateChecker.UpdateAvailable += new EventHandler<UpdateCheckEventArgs>(_updateChecker_UpdateAvailable);
-				_updateChecker.NoUpdateAvailable += new EventHandler<UpdateCheckEventArgs>(_updateChecker_NoUpdateAvailable);
-				_updateChecker.UpdateCheckFailed += new EventHandler<UpdateCheckEventArgs>(_updateChecker_UpdateCheckFailed);
+				_updateChecker.UpdateAvailable += new EventHandler<UpdateCheckEventArgs>(UpdateChecker_UpdateAvailable);
+				_updateChecker.NoUpdateAvailable += new EventHandler<UpdateCheckEventArgs>(UpdateChecker_NoUpdateAvailable);
+				_updateChecker.UpdateCheckFailed += new EventHandler<UpdateCheckEventArgs>(UpdateChecker_UpdateCheckFailed);
 				_updateChecker.Check();
-				btnCheckForUpdates.Enabled = false;
+				c_checkForUpdatesButton.Enabled = false;
 			}
 			catch (Exception ex)
 			{
@@ -104,13 +106,13 @@ namespace WallSwitch
 			}
 		}
 
-		void _updateChecker_UpdateAvailable(object sender, UpdateCheckEventArgs e)
+		void UpdateChecker_UpdateAvailable(object sender, UpdateCheckEventArgs e)
 		{
 			try
 			{
 				if (InvokeRequired)
 				{
-					Invoke(new Action(() => { _updateChecker_UpdateAvailable(sender, e); }));
+					Invoke(new Action(() => { UpdateChecker_UpdateAvailable(sender, e); }));
 					return;
 				}
 
@@ -129,13 +131,13 @@ namespace WallSwitch
 			}
 		}
 
-		void _updateChecker_NoUpdateAvailable(object sender, UpdateCheckEventArgs e)
+		void UpdateChecker_NoUpdateAvailable(object sender, UpdateCheckEventArgs e)
 		{
 			try
 			{
 				if (InvokeRequired)
 				{
-					Invoke(new Action(() => { _updateChecker_NoUpdateAvailable(sender, e); }));
+					Invoke(new Action(() => { UpdateChecker_NoUpdateAvailable(sender, e); }));
 					return;
 				}
 
@@ -149,13 +151,13 @@ namespace WallSwitch
 			}
 		}
 
-		void _updateChecker_UpdateCheckFailed(object sender, UpdateCheckEventArgs e)
+		void UpdateChecker_UpdateCheckFailed(object sender, UpdateCheckEventArgs e)
 		{
 			try
 			{
 				if (InvokeRequired)
 				{
-					Invoke(new Action(() => { _updateChecker_UpdateCheckFailed(sender, e); }));
+					Invoke(new Action(() => { UpdateChecker_UpdateCheckFailed(sender, e); }));
 					return;
 				}
 
@@ -172,7 +174,7 @@ namespace WallSwitch
 		private void UpdateCheckerFinished()
 		{
 			_updateChecker = null;
-			btnCheckForUpdates.Enabled = true;
+			c_checkForUpdatesButton.Enabled = true;
 		}
 	}
 }
