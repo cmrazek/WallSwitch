@@ -174,6 +174,9 @@
 			this.ciClearHistoryList = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.grpNavButtons = new System.Windows.Forms.GroupBox();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.panel1 = new System.Windows.Forms.Panel();
+			this.c_transparencyTrackBar = new System.Windows.Forms.TrackBar();
 			this.cmLocations.SuspendLayout();
 			this.grpTheme.SuspendLayout();
 			this.cmTheme.SuspendLayout();
@@ -211,6 +214,9 @@
 			this.tabHistory.SuspendLayout();
 			this.cmHistory.SuspendLayout();
 			this.grpNavButtons.SuspendLayout();
+			this.groupBox1.SuspendLayout();
+			this.panel1.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.c_transparencyTrackBar)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// lstLocations
@@ -330,7 +336,7 @@
 			this.cmbTheme.FormattingEnabled = true;
 			this.cmbTheme.Location = new System.Drawing.Point(6, 19);
 			this.cmbTheme.Name = "cmbTheme";
-			this.cmbTheme.Size = new System.Drawing.Size(377, 21);
+			this.cmbTheme.Size = new System.Drawing.Size(246, 21);
 			this.cmbTheme.Sorted = true;
 			this.cmbTheme.TabIndex = 0;
 			this.cmbTheme.SelectedIndexChanged += new System.EventHandler(this.cmbTheme_SelectedIndexChanged);
@@ -345,7 +351,7 @@
 			this.grpTheme.Controls.Add(this.btnActivate);
 			this.grpTheme.Location = new System.Drawing.Point(12, 27);
 			this.grpTheme.Name = "grpTheme";
-			this.grpTheme.Size = new System.Drawing.Size(581, 50);
+			this.grpTheme.Size = new System.Drawing.Size(450, 50);
 			this.grpTheme.TabIndex = 0;
 			this.grpTheme.TabStop = false;
 			this.grpTheme.Text = "Theme";
@@ -353,7 +359,7 @@
 			// btnSave
 			// 
 			this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnSave.Location = new System.Drawing.Point(419, 17);
+			this.btnSave.Location = new System.Drawing.Point(288, 17);
 			this.btnSave.Name = "btnSave";
 			this.btnSave.Size = new System.Drawing.Size(75, 23);
 			this.btnSave.TabIndex = 2;
@@ -365,7 +371,7 @@
 			// 
 			this.btnTheme.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.btnTheme.ContextMenuStrip = this.cmTheme;
-			this.btnTheme.Location = new System.Drawing.Point(389, 17);
+			this.btnTheme.Location = new System.Drawing.Point(258, 17);
 			this.btnTheme.Name = "btnTheme";
 			this.btnTheme.Size = new System.Drawing.Size(24, 23);
 			this.btnTheme.TabIndex = 1;
@@ -434,7 +440,7 @@
 			// btnActivate
 			// 
 			this.btnActivate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnActivate.Location = new System.Drawing.Point(500, 17);
+			this.btnActivate.Location = new System.Drawing.Point(369, 17);
 			this.btnActivate.Name = "btnActivate";
 			this.btnActivate.Size = new System.Drawing.Size(75, 23);
 			this.btnActivate.TabIndex = 3;
@@ -1743,17 +1749,48 @@
 			this.grpNavButtons.Controls.Add(this.btnSwitchNow);
 			this.grpNavButtons.Controls.Add(this.btnPause);
 			this.grpNavButtons.Controls.Add(this.btnPrevious);
-			this.grpNavButtons.Location = new System.Drawing.Point(599, 27);
+			this.grpNavButtons.Location = new System.Drawing.Point(468, 27);
 			this.grpNavButtons.Name = "grpNavButtons";
 			this.grpNavButtons.Size = new System.Drawing.Size(123, 50);
 			this.grpNavButtons.TabIndex = 11;
 			this.grpNavButtons.TabStop = false;
+			// 
+			// groupBox1
+			// 
+			this.groupBox1.Controls.Add(this.panel1);
+			this.groupBox1.Location = new System.Drawing.Point(597, 27);
+			this.groupBox1.Name = "groupBox1";
+			this.groupBox1.Size = new System.Drawing.Size(125, 50);
+			this.groupBox1.TabIndex = 12;
+			this.groupBox1.TabStop = false;
+			this.groupBox1.Text = "Transparency";
+			// 
+			// panel1
+			// 
+			this.panel1.Controls.Add(this.c_transparencyTrackBar);
+			this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.panel1.Location = new System.Drawing.Point(3, 16);
+			this.panel1.Name = "panel1";
+			this.panel1.Size = new System.Drawing.Size(119, 31);
+			this.panel1.TabIndex = 1;
+			// 
+			// c_transparencyTrackBar
+			// 
+			this.c_transparencyTrackBar.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.c_transparencyTrackBar.Location = new System.Drawing.Point(0, 0);
+			this.c_transparencyTrackBar.Minimum = 1;
+			this.c_transparencyTrackBar.Name = "c_transparencyTrackBar";
+			this.c_transparencyTrackBar.Size = new System.Drawing.Size(119, 31);
+			this.c_transparencyTrackBar.TabIndex = 0;
+			this.c_transparencyTrackBar.Value = 1;
+			this.c_transparencyTrackBar.Scroll += new System.EventHandler(this.TransparencyTrackBar_Scroll);
 			// 
 			// MainWindow
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(734, 512);
+			this.Controls.Add(this.groupBox1);
 			this.Controls.Add(this.c_themeTabControl);
 			this.Controls.Add(this.mainMenu);
 			this.Controls.Add(this.grpTheme);
@@ -1813,6 +1850,10 @@
 			this.tabHistory.ResumeLayout(false);
 			this.cmHistory.ResumeLayout(false);
 			this.grpNavButtons.ResumeLayout(false);
+			this.groupBox1.ResumeLayout(false);
+			this.panel1.ResumeLayout(false);
+			this.panel1.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.c_transparencyTrackBar)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -1964,6 +2005,9 @@
 		private System.Windows.Forms.Label c_maxClipLabel;
 		private System.Windows.Forms.Label c_maxClipPercent;
 		private System.Windows.Forms.TrackBar c_maxClipTrackBar;
+		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.TrackBar c_transparencyTrackBar;
+		private System.Windows.Forms.Panel panel1;
 
 	}
 }

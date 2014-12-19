@@ -19,6 +19,7 @@ namespace WallSwitch
 #else
 		private const LogLevel k_defaultLogLevel = LogLevel.Info;
 #endif
+		private const double k_defaultTransparency = 1.0;
 		#endregion
 
 		#region Variables
@@ -27,6 +28,7 @@ namespace WallSwitch
 		private static int _startUpDelay = k_defaultStartUpDelay;
 		private static bool _ignoreHiddenFiles = k_defaultIgnoreHiddenFiles;
 		private static LogLevel _logLevel = k_defaultLogLevel;
+		private static double _transparency = k_defaultTransparency;
 		#endregion
 
 		/// <summary>
@@ -51,6 +53,7 @@ namespace WallSwitch
 			xml.WriteElementString("StartUpDelay", _startUpDelay.ToString());
 			if (_ignoreHiddenFiles != k_defaultIgnoreHiddenFiles) xml.WriteElementString("IgnoreHiddenFiles", _ignoreHiddenFiles.ToString());
 			xml.WriteElementString("LogLevel", _logLevel.ToString());
+			if (_transparency != k_defaultTransparency) xml.WriteElementString("Transparency", _transparency.ToString());
 		}
 
 		public static void Load(XmlElement xmlSettings)
@@ -70,6 +73,10 @@ namespace WallSwitch
 			xml = xmlSettings.SelectSingleNode("LogLevel") as XmlElement;
 			if (xml != null && Enum.TryParse<LogLevel>(xml.InnerText, true, out logLevel)) _logLevel = logLevel;
 			Log.Level = _logLevel;
+
+			double dValue;
+			xml = xmlSettings.SelectSingleNode("Transparency") as XmlElement;
+			if (xml != null && double.TryParse(xml.InnerText, out dValue)) _transparency = dValue;
 		}
 
 		private static void GetStartWithWindowsFromRegistry()
@@ -177,6 +184,12 @@ namespace WallSwitch
 				_logLevel = value;
 				Log.Level = value;
 			}
+		}
+
+		public static double Transparency
+		{
+			get { return _transparency; }
+			set { _transparency = value; }
 		}
 	}
 }

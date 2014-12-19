@@ -67,6 +67,7 @@ namespace WallSwitch
 		private const int k_minUpdateSeconds = 15;
 
 		private const int k_groupBoxMargin = 8;
+		private const double k_minTransparency = 0.1;
 		#endregion
 
 		#region Window Management
@@ -122,6 +123,8 @@ namespace WallSwitch
 				trayIcon.Visible = true;
 				EnableControls();
 				Locations_Resize(this, null);
+
+				UpdateTransparency();
 
 				if (_winStart) HideToTray();
 
@@ -556,6 +559,8 @@ namespace WallSwitch
 			c_numCollageImages.Text = _currentTheme.NumCollageImages.ToString();
 
 			c_widgetLayout.LoadFromTheme(_currentTheme);
+
+			RefreshTransparency();
 
 			Dirty = false;
 
@@ -2385,7 +2390,7 @@ namespace WallSwitch
 			{
 				foreach (var img in (from i in e.Images select i.ImageRec).Distinct())
 				{
-					c_historyTab.AddHistory(img);
+					c_historyTab.AddHistory(new HistoryItem(img));
 				}
 			}
 			catch (Exception ex)
@@ -2460,7 +2465,7 @@ namespace WallSwitch
 		{
 			try
 			{
-				var fileName = e.ImageRec.LocationOnDisk;
+				var fileName = e.Item.LocationOnDisk;
 				if (string.IsNullOrWhiteSpace(fileName))
 				{
 					this.ShowError(Res.Error_ImageFileMissing);
@@ -2799,5 +2804,41 @@ namespace WallSwitch
 		{
 
 		}
+
+		#region Window Transparency
+		private void TransparencyTrackBar_Scroll(object sender, EventArgs e)
+		{
+			try
+			{
+				Settings.Transparency = (double)c_transparencyTrackBar.Value / (double)c_transparencyTrackBar.Maximum;
+				UpdateTransparency();
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		/// <summary>
+		/// Updates the Window's transparency
+		/// </summary>
+		private void UpdateTransparency()
+		{
+			if (Settings.Transparency < k_minTransparency) Settings.Transparency = k_minTransparency;
+			else if (Settings.Transparency > 1.0) Settings.Transparency = 1.0;
+			this.Opacity = Settings.Transparency;
+		}
+
+		/// <summary>
+		/// Refreshes the transparency controls on the form.
+		/// </summary>
+		private void RefreshTransparency()
+		{
+			var value = (int)Math.Round(Settings.Transparency * ((double)c_transparencyTrackBar.Maximum - (double)c_transparencyTrackBar.Minimum) + (double)c_transparencyTrackBar.Minimum);
+			if (value < c_transparencyTrackBar.Minimum) value = c_transparencyTrackBar.Minimum;
+			if (value > c_transparencyTrackBar.Maximum) value = c_transparencyTrackBar.Maximum;
+			c_transparencyTrackBar.Value = value;
+		}
+		#endregion
 	}
 }

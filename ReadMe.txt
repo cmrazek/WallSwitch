@@ -12,6 +12,10 @@ Contact:
 
 ChangeLog:
 
+Version 1.3.6 - (pending):
+- Added a slider to control window transparency.
+- Force .NET garbage collection after every wallpaper switch to free memory used during rendering.
+
 Version 1.3.5 - 2014-12-14:
 - Fixed issues with images not being displayed in the correct positions for multiple monitors under
   Windows 8 in some cases.

@@ -1362,6 +1362,39 @@ namespace WallSwitch
 			}
 		}
 
+		public void Set(Theme theme, SwitchDir dir)
+		{
+			// Get the list of images to display next.
+			IEnumerable<ImageLayout> images = null;
+			switch (dir)
+			{
+				case SwitchDir.Next:
+					{
+						var screenList = new ScreenList();
+						var monitorRects = (from s in screenList select s.Bounds).ToArray();
+						images = theme.GetNextImages(monitorRects);
+					}
+					break;
+
+				case SwitchDir.Prev:
+					images = theme.GetPrevImages();
+					break;
+
+				default:
+					images = new ImageLayout[0];
+					break;
+			}
+
+			// Display the images.
+			if (images != null)
+			{
+				foreach (var img in images) Log.Write(LogLevel.Debug, "  Image: {0}", img.ImageRec.Location);
+				if (images != null) Set(theme, images);
+
+				foreach (var img in images) img.ImageRec.Release();
+			}
+		}
+
 		public void Set(Theme theme, IEnumerable<ImageLayout> files)
 		{
 			if (theme == null) throw new ArgumentNullException("Theme is null.");
@@ -1427,6 +1460,8 @@ namespace WallSwitch
 						Log.Write(LogLevel.Error, "Couldn't initialize the wallpaper frame.");
 					}
 				}
+
+				GC.Collect();
 			}
 			catch (Exception ex)
 			{

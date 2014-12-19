@@ -286,35 +286,7 @@ namespace WallSwitch
 				SwitchEventHandler ev = Switching;
 				if (ev != null) ev(this, new EventArgs());
 
-				// Get the list of images to display next.
-				IEnumerable<ImageLayout> images = null;
-				switch (dir)
-				{
-					case SwitchDir.Next:
-						{
-							var screenList = new ScreenList();
-							var monitorRects = (from s in screenList select s.Bounds).ToArray();
-							images = _theme.GetNextImages(monitorRects);
-						}
-						break;
-
-					case SwitchDir.Prev:
-						images = _theme.GetPrevImages();
-						break;
-
-					default:
-						images = new ImageLayout[0];
-						break;
-				}
-
-				// Display the images.
-				if (images != null)
-				{
-					foreach (var img in images) Log.Write(LogLevel.Debug, "  Image: {0}", img.ImageRec.Location);
-					if (images != null) wallpaperSetter.Set(_theme, images);
-
-					foreach (var img in images) img.ImageRec.Release();
-				}
+				wallpaperSetter.Set(_theme, dir);
 
 				Log.Write(LogLevel.Debug, "Finished switching wallpaper.");
 			}
