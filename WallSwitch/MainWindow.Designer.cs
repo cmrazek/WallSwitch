@@ -113,6 +113,7 @@
 			this.c_themeOrder = new System.Windows.Forms.ComboBox();
 			this.c_limitScale = new System.Windows.Forms.CheckBox();
 			this.grpFrequency = new System.Windows.Forms.GroupBox();
+			this.c_activateOnExitCheckBox = new System.Windows.Forms.CheckBox();
 			this.chkFadeTransition = new System.Windows.Forms.CheckBox();
 			this.c_activateThemeLabel = new System.Windows.Forms.Label();
 			this.cmbThemePeriod = new System.Windows.Forms.ComboBox();
@@ -1037,6 +1038,7 @@
 			// 
 			// grpFrequency
 			// 
+			this.grpFrequency.Controls.Add(this.c_activateOnExitCheckBox);
 			this.grpFrequency.Controls.Add(this.chkFadeTransition);
 			this.grpFrequency.Controls.Add(this.c_activateThemeLabel);
 			this.grpFrequency.Controls.Add(this.cmbThemePeriod);
@@ -1045,10 +1047,23 @@
 			this.grpFrequency.Controls.Add(this.c_activateThemeHotKey);
 			this.grpFrequency.Location = new System.Drawing.Point(3, 143);
 			this.grpFrequency.Name = "grpFrequency";
-			this.grpFrequency.Size = new System.Drawing.Size(669, 76);
+			this.grpFrequency.Size = new System.Drawing.Size(669, 97);
 			this.grpFrequency.TabIndex = 1;
 			this.grpFrequency.TabStop = false;
 			this.grpFrequency.Text = "Change Frequency";
+			// 
+			// c_activateOnExitCheckBox
+			// 
+			this.c_activateOnExitCheckBox.AutoSize = true;
+			this.c_activateOnExitCheckBox.Location = new System.Drawing.Point(6, 68);
+			this.c_activateOnExitCheckBox.Name = "c_activateOnExitCheckBox";
+			this.c_activateOnExitCheckBox.Size = new System.Drawing.Size(206, 17);
+			this.c_activateOnExitCheckBox.TabIndex = 6;
+			this.c_activateOnExitCheckBox.Text = "Temporarily activate this theme on exit";
+			this.toolTip1.SetToolTip(this.c_activateOnExitCheckBox, "When WallSwitch is closing, this theme will be displayed until the next time Wall" +
+        "Switch starts up.");
+			this.c_activateOnExitCheckBox.UseVisualStyleBackColor = true;
+			this.c_activateOnExitCheckBox.CheckedChanged += new System.EventHandler(this.ActivateOnExitCheckBox_CheckedChanged);
 			// 
 			// chkFadeTransition
 			// 
@@ -1127,7 +1142,7 @@
 			this.grpBackgroundColor.Controls.Add(this.trkOpacity);
 			this.grpBackgroundColor.Controls.Add(this.lblOpacity);
 			this.grpBackgroundColor.Controls.Add(this.lblOpacityDisplay);
-			this.grpBackgroundColor.Location = new System.Drawing.Point(3, 225);
+			this.grpBackgroundColor.Location = new System.Drawing.Point(3, 246);
 			this.grpBackgroundColor.Name = "grpBackgroundColor";
 			this.grpBackgroundColor.Size = new System.Drawing.Size(669, 72);
 			this.grpBackgroundColor.TabIndex = 2;
@@ -1179,7 +1194,7 @@
 			this.grpCollageDisplay.Controls.Add(this.trkImageSize);
 			this.grpCollageDisplay.Controls.Add(this.lblImageSize);
 			this.grpCollageDisplay.Controls.Add(this.lblImageSizeDisplay);
-			this.grpCollageDisplay.Location = new System.Drawing.Point(3, 303);
+			this.grpCollageDisplay.Location = new System.Drawing.Point(3, 324);
 			this.grpCollageDisplay.Name = "grpCollageDisplay";
 			this.grpCollageDisplay.Size = new System.Drawing.Size(669, 216);
 			this.grpCollageDisplay.TabIndex = 3;
@@ -1376,7 +1391,7 @@
 			// 
 			this.grpImageEffects.Controls.Add(this.label1);
 			this.grpImageEffects.Controls.Add(this.cmbColorEffectFore);
-			this.grpImageEffects.Location = new System.Drawing.Point(3, 525);
+			this.grpImageEffects.Location = new System.Drawing.Point(3, 546);
 			this.grpImageEffects.Name = "grpImageEffects";
 			this.grpImageEffects.Size = new System.Drawing.Size(669, 50);
 			this.grpImageEffects.TabIndex = 4;
@@ -1415,7 +1430,7 @@
 			this.grpBackgroundColorEffects.Controls.Add(this.cmbColorEffectBack);
 			this.grpBackgroundColorEffects.Controls.Add(this.lblColorEffectCollageFadeRatioUnit);
 			this.grpBackgroundColorEffects.Controls.Add(this.trkColorEffectCollageFadeRatio);
-			this.grpBackgroundColorEffects.Location = new System.Drawing.Point(3, 581);
+			this.grpBackgroundColorEffects.Location = new System.Drawing.Point(3, 602);
 			this.grpBackgroundColorEffects.Name = "grpBackgroundColorEffects";
 			this.grpBackgroundColorEffects.Size = new System.Drawing.Size(669, 120);
 			this.grpBackgroundColorEffects.TabIndex = 5;
@@ -2008,6 +2023,7 @@
 		private System.Windows.Forms.GroupBox groupBox1;
 		private System.Windows.Forms.TrackBar c_transparencyTrackBar;
 		private System.Windows.Forms.Panel panel1;
+		private System.Windows.Forms.CheckBox c_activateOnExitCheckBox;
 
 	}
 }

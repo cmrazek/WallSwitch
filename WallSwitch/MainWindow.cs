@@ -150,6 +150,25 @@ namespace WallSwitch
 
 				SaveSettings();
 				UnregisterHotKeys();
+
+				// If the user has an 'exit theme' set, then switch to that theme.
+				if (Program.SwitchThread != null)
+				{
+					var exitTheme = _mainWindow.Themes.FirstOrDefault(t => t.ActivateOnExit);
+					if (exitTheme != null)
+					{
+						Log.Write(LogLevel.Info, "Switching to theme '{0}' on exit...", exitTheme.Name);
+						Program.SwitchThread.WallpaperSetter.Set(exitTheme, SwitchDir.Next, true);
+					}
+					else
+					{
+						Log.WriteDebug("No exit theme is set.");
+					}
+				}
+				else
+				{
+					Log.Write(LogLevel.Warning, "On application exit, the switch thread or main window is null.");
+				}
 			}
 			catch (Exception ex)
 			{
@@ -557,8 +576,8 @@ namespace WallSwitch
 			lblBackgroundBlurDistValue.Text = string.Format(Res.BackgroundBlurDist, trkBackgroundBlurDist.Value);
 
 			c_numCollageImages.Text = _currentTheme.NumCollageImages.ToString();
-
 			c_widgetLayout.LoadFromTheme(_currentTheme);
+			c_activateOnExitCheckBox.Checked = _currentTheme.ActivateOnExit;
 
 			RefreshTransparency();
 
@@ -761,6 +780,15 @@ namespace WallSwitch
 			_currentTheme.BackgroundBlurDist = trkBackgroundBlurDist.Value;
 
 			c_widgetLayout.SaveToTheme(_currentTheme);
+
+			// Only 1 theme should be set as 'activate on exit' at a time.
+			if (c_activateOnExitCheckBox.Checked)
+			{
+				foreach (var theme in _themes)
+				{
+					theme.ActivateOnExit = theme == _currentTheme;
+				}
+			}
 
 			Dirty = false;
 			EnableControls();
@@ -1112,6 +1140,18 @@ namespace WallSwitch
 		private void UpdateMaxClipPercent()
 		{
 			c_maxClipPercent.Text = String.Format(Res.MaxClipPercent, c_maxClipTrackBar.Value);
+		}
+
+		private void ActivateOnExitCheckBox_CheckedChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				ControlChanged(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
 		}
 		#endregion
 
@@ -1669,6 +1709,11 @@ namespace WallSwitch
 			{
 				this.ShowError(ex);
 			}
+		}
+
+		public IEnumerable<Theme> Themes
+		{
+			get { return _themes; }
 		}
 		#endregion
 

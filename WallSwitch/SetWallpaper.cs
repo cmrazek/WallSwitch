@@ -1362,7 +1362,7 @@ namespace WallSwitch
 			}
 		}
 
-		public void Set(Theme theme, SwitchDir dir)
+		public void Set(Theme theme, SwitchDir dir, bool forceQuick)
 		{
 			// Get the list of images to display next.
 			IEnumerable<ImageLayout> images = null;
@@ -1389,13 +1389,13 @@ namespace WallSwitch
 			if (images != null)
 			{
 				foreach (var img in images) Log.Write(LogLevel.Debug, "  Image: {0}", img.ImageRec.Location);
-				if (images != null) Set(theme, images);
+				if (images != null) Set(theme, images, forceQuick);
 
 				foreach (var img in images) img.ImageRec.Release();
 			}
 		}
 
-		public void Set(Theme theme, IEnumerable<ImageLayout> files)
+		public void Set(Theme theme, IEnumerable<ImageLayout> files, bool forceQuick)
 		{
 			if (theme == null) throw new ArgumentNullException("Theme is null.");
 			if (files == null) throw new ArgumentNullException("Files list is null.");
@@ -1452,7 +1452,7 @@ namespace WallSwitch
 						}
 
 						// Apply to desktop background.
-						if (theme.FadeTransition && OsUtil.Win7Available) ChangeWallpaperFade(theme, baseImage, displayImage, screenList);
+						if (!forceQuick && theme.FadeTransition && OsUtil.Win7Available) ChangeWallpaperFade(theme, baseImage, displayImage, screenList);
 						else ChangeWallpaper(theme, baseImage, displayImage, screenList);
 					}
 					else

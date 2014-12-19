@@ -14,6 +14,7 @@ ChangeLog:
 
 Version 1.3.6 - (pending):
 - Added a slider to control window transparency.
+- Added a theme setting to switch to that theme when exiting.
 - Force .NET garbage collection after every wallpaper switch to free memory used during rendering.
 
 Version 1.3.5 - 2014-12-14:

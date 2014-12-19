@@ -50,7 +50,7 @@ namespace WallSwitch
 		private const int k_defaultMaxImageClip = 15;
 		#endregion
 
-		#region Variables
+		#region Member Variables
 		private Guid _id;
 		private List<Location> _locations = new List<Location>();
 		private string _name = string.Empty;
@@ -78,6 +78,7 @@ namespace WallSwitch
 		private bool _allowSpanning = k_defaultAllowSpanning;
 		private int _maxImageClip = k_defaultMaxImageClip;
 		private string _lastImage = null;
+		private bool _activateOnExit = false;
 
 		private ColorEffect _colorEffectFore = ColorEffect.None;
 		private ColorEffect _colorEffectBack = ColorEffect.None;
@@ -264,6 +265,12 @@ namespace WallSwitch
 			get { return _numCollageImages; }
 			set { _numCollageImages = value; }
 		}
+
+		public bool ActivateOnExit
+		{
+			get { return _activateOnExit; }
+			set { _activateOnExit = value; }
+		}
 		#endregion
 
 		#region Save/Load
@@ -314,6 +321,8 @@ namespace WallSwitch
 			if (_backgroundBlurDist != k_defaultBackgroundBlurDist) xml.WriteAttributeString("BackgroundBlurDist", _backgroundBlurDist.ToString());
 
 			if (!string.IsNullOrEmpty(_lastImage)) xml.WriteAttributeString("LastImage", _lastImage);
+
+			if (_activateOnExit) xml.WriteAttributeString("ActivateOnExit", _activateOnExit.ToString());
 
 			_hotKey.SaveXml(xml);
 
@@ -415,6 +424,8 @@ namespace WallSwitch
 			_backgroundBlurDist = Util.ParseInt(xmlTheme, "BackgroundBlurDist", k_defaultBackgroundBlurDist);
 
 			_lastImage = xmlTheme.GetAttribute("LastImage");
+
+			_activateOnExit = Util.ParseBool(xmlTheme, "ActivateOnExit", false);
 
 			foreach (var xmlHotKey in xmlTheme.SelectNodes(HotKey.XmlElementName).Cast<XmlElement>())
 			{

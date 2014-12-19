@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Windows.Forms;
+using System.Linq;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace WallSwitch
 {
@@ -10,8 +11,9 @@ namespace WallSwitch
 	{
 		private const string k_guid = "57FF779B-63F3-430A-B420-AD436F2D2AEB";
 
-		private static WallSwitchServiceManager _serviceMgr = null;
-		private static SwitchThread _switchThread = null;
+		private static WallSwitchServiceManager _serviceMgr;
+		private static SwitchThread _switchThread;
+		private static MainWindow _mainWindow;
 
 		/// <summary>
 		/// The main entry point for the application.
@@ -48,12 +50,18 @@ namespace WallSwitch
 
 						Application.EnableVisualStyles();
 						Application.SetCompatibleTextRenderingDefault(false);
-						Application.Run(new MainWindow(winStart));
+
+						_mainWindow = new MainWindow(winStart);
+						Application.Run(_mainWindow);
 					}
 					finally
 					{
+						Log.WriteDebug("Main thread is terminating.");
+
+						// Shutdown the WCF service
 						try
 						{
+							Log.WriteDebug("Shutting down WCF service.");
 							if (_serviceMgr != null)
 							{
 								_serviceMgr.Dispose();
@@ -65,8 +73,10 @@ namespace WallSwitch
 							Log.Write(ex);
 						}
 
+						// Terminal the switch thread
 						try
 						{
+							Log.WriteDebug("Shutting down switch thread.");
 							if (_switchThread != null && _switchThread.IsAlive)
 							{
 								_switchThread.Kill();
@@ -78,7 +88,15 @@ namespace WallSwitch
 							Log.Write(ex);
 						}
 
-						Log.Close();
+						// Close the log file
+						try
+						{
+							Log.Close();
+						}
+						catch (Exception ex)
+						{
+							Log.Write(ex);	// Probably futile
+						}
 					}
 				}
 				else if (!winStart)

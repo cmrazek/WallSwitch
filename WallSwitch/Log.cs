@@ -164,7 +164,9 @@ namespace WallSwitch
 					_sb.Clear();
 					_sb.Append("[");
 					_sb.Append(TimeStamp);
-					_sb.Append("] ");
+					_sb.Append("] (");
+					_sb.Append(level.ToString());
+					_sb.Append(") ");
 					_sb.Append(line);
 
 					var logEntry = _sb.ToString();
@@ -207,7 +209,7 @@ namespace WallSwitch
 					_sb.Clear();
 					_sb.Append("[");
 					_sb.Append(TimeStamp);
-					_sb.Append("] ");
+					_sb.Append("] (Error) ");
 					_sb.Append(comment);
 
 					var logEntry = _sb.ToString();

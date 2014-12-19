@@ -258,7 +258,7 @@ namespace WallSwitch
 		#endregion
 
 		#region Wallpaper Switch
-		SetWallpaper wallpaperSetter = new SetWallpaper();
+		private SetWallpaper _wallpaperSetter = new SetWallpaper();
 		public delegate void SwitchEventHandler(object sender, EventArgs e);
 		public event SwitchEventHandler Switching;
 		public event SwitchEventHandler Switched;
@@ -286,7 +286,7 @@ namespace WallSwitch
 				SwitchEventHandler ev = Switching;
 				if (ev != null) ev(this, new EventArgs());
 
-				wallpaperSetter.Set(_theme, dir);
+				_wallpaperSetter.Set(_theme, dir, forceQuick: false);
 
 				Log.Write(LogLevel.Debug, "Finished switching wallpaper.");
 			}
@@ -313,6 +313,11 @@ namespace WallSwitch
 		{
 			get { return _paused; }
 			set { _paused = value; }
+		}
+
+		public SetWallpaper WallpaperSetter
+		{
+			get { return _wallpaperSetter; }
 		}
 		#endregion
 	}
