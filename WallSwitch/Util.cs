@@ -544,30 +544,6 @@ namespace WallSwitch
 		}
 	}
 
-	public static class OsUtil
-	{
-		private static Version _win7Version = null;
-		private static bool? _win7Available = null;
-
-		public static Version Win7Version
-		{
-			get
-			{
-				if (_win7Version == null) _win7Version = new Version(6, 1);
-				return _win7Version;
-			}
-		}
-
-		public static bool Win7Available
-		{
-			get
-			{
-				if (!_win7Available.HasValue) _win7Available = Environment.OSVersion.Version >= Win7Version;
-				return _win7Available.Value;
-			}
-		}
-	}
-
 	public static class VersionUtil
 	{
 		public static string ToAppFormat(this Version ver)

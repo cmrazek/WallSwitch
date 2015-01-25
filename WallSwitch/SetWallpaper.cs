@@ -1452,7 +1452,7 @@ namespace WallSwitch
 						}
 
 						// Apply to desktop background.
-						if (!forceQuick && theme.FadeTransition && OsUtil.Win7Available) ChangeWallpaperFade(theme, baseImage, displayImage, screenList);
+						if (!forceQuick && theme.FadeTransition && Program.OsVersion >= OsVersion.Windows7) ChangeWallpaperFade(theme, baseImage, displayImage, screenList);
 						else ChangeWallpaper(theme, baseImage, displayImage, screenList);
 					}
 					else
@@ -1580,15 +1580,8 @@ namespace WallSwitch
 
 		private bool IsImageWrappingRequired()
 		{
-			var ver = Environment.OSVersion.Version;
-
 			// Windows 8 and up properly spans the image across monitors.
-			if (ver.Major > 6 || (ver.Major == 6 && ver.Minor >= 2))
-			{
-				return false;
-			}
-
-			return true;
+			return Program.OsVersion < OsVersion.Windows8;
 		}
 
 		private void SaveWallpaperImage(string fileName, Bitmap image, ImageFormat format, ScreenList screens)

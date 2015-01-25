@@ -43,6 +43,7 @@
 			// pnlIcon
 			// 
 			this.pnlIcon.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("pnlIcon.BackgroundImage")));
+			this.pnlIcon.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
 			this.pnlIcon.Location = new System.Drawing.Point(12, 12);
 			this.pnlIcon.Name = "pnlIcon";
 			this.pnlIcon.Size = new System.Drawing.Size(64, 64);

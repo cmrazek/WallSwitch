@@ -155,7 +155,7 @@ namespace WallSwitch
 				if (Program.SwitchThread != null)
 				{
 					var exitTheme = _mainWindow.Themes.FirstOrDefault(t => t.ActivateOnExit);
-					if (exitTheme != null)
+					if (exitTheme != null && exitTheme != _currentTheme)
 					{
 						Log.Write(LogLevel.Info, "Switching to theme '{0}' on exit...", exitTheme.Name);
 						Program.SwitchThread.WallpaperSetter.Set(exitTheme, SwitchDir.Next, true);
@@ -789,6 +789,10 @@ namespace WallSwitch
 					theme.ActivateOnExit = theme == _currentTheme;
 				}
 			}
+			else
+			{
+				_currentTheme.ActivateOnExit = false;
+			}
 
 			Dirty = false;
 			EnableControls();
@@ -860,7 +864,7 @@ namespace WallSwitch
 			c_maxScale.Enabled = c_limitScale.Checked;
 
 			// Change Frequency Group
-			chkFadeTransition.Visible = OsUtil.Win7Available;
+			chkFadeTransition.Visible = Program.OsVersion >= OsVersion.Windows7;
 
 			// Background Color Group
 
@@ -2543,25 +2547,39 @@ namespace WallSwitch
 			try
 			{
 				var item = c_historyTab.SelectedItem;
-				if (item != null)
-				{
-					var fileName = item.LocationOnDisk;
-					if (string.IsNullOrWhiteSpace(fileName))
-					{
-						this.ShowError(Res.Error_ImageFileMissing);
-					}
-					else if (MessageBox.Show(this, Res.Confirm_DeleteHistoryFile, Res.Confirm_DeleteHistoryFile_Caption,
-						MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)
-						== DialogResult.Yes)
-					{
-						FileUtil.RecycleFile(fileName);
-						c_historyTab.RemoveItem(item);
-					}
-				}
+				if (item != null) DeleteHistoryItem(item);
 			}
 			catch (Exception ex)
 			{
 				this.ShowError(ex);
+			}
+		}
+
+		private void HistoryTab_DeleteItemRequested(object sender, HistoryList.DeleteItemRequestedEventArgs e)
+		{
+			try
+			{
+				DeleteHistoryItem(e.Item);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void DeleteHistoryItem(HistoryItem item)
+		{
+			var fileName = item.LocationOnDisk;
+			if (string.IsNullOrWhiteSpace(fileName))
+			{
+				this.ShowError(Res.Error_ImageFileMissing);
+			}
+			else if (MessageBox.Show(this, Res.Confirm_DeleteHistoryFile, Res.Confirm_DeleteHistoryFile_Caption,
+				MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)
+				== DialogResult.Yes)
+			{
+				FileUtil.RecycleFile(fileName);
+				c_historyTab.RemoveItem(item);
 			}
 		}
 		#endregion

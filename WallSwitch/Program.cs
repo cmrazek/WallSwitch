@@ -14,6 +14,7 @@ namespace WallSwitch
 		private static WallSwitchServiceManager _serviceMgr;
 		private static SwitchThread _switchThread;
 		private static MainWindow _mainWindow;
+		private static OsVersion? _osVersion;
 
 		/// <summary>
 		/// The main entry point for the application.
@@ -121,5 +122,47 @@ namespace WallSwitch
 			get { return _serviceMgr; }
 			set { _serviceMgr = value; }
 		}
+
+		public static OsVersion OsVersion
+		{
+			get
+			{
+				if (!_osVersion.HasValue)
+				{
+					var ver = Environment.OSVersion.Version;
+
+					if (ver.Major < 6)
+					{
+						_osVersion = OsVersion.Legacy;
+					}
+					else if (ver.Major == 6)
+					{
+						if (ver.Minor == 0) _osVersion = OsVersion.Vista;
+						else if (ver.Minor == 1) _osVersion = OsVersion.Windows7;
+						else if (ver.Minor == 2) _osVersion = OsVersion.Windows8;
+						else if (ver.Minor == 3) _osVersion = OsVersion.Windows81;
+						else _osVersion = OsVersion.Future;
+					}
+					else
+					{
+						_osVersion = OsVersion.Future;
+					}
+
+					Log.WriteDebug("OS Version: {0} ({1})", ver, _osVersion.Value);
+				}
+
+				return _osVersion.Value;
+			}
+		}
+	}
+
+	enum OsVersion
+	{
+		Legacy,
+		Vista,
+		Windows7,
+		Windows8,
+		Windows81,
+		Future
 	}
 }

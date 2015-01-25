@@ -45,6 +45,7 @@ namespace WallSwitch
 			foreach (var type in asm.GetExportedTypes())
 			{
 				if (!typeof(IWidget).IsAssignableFrom(type)) continue;
+				if (type.IsAbstract) continue;
 
 				Log.Write(LogLevel.Debug, "Found widget type: {0}", type.FullName);
 				_types.Add(new WidgetType(type));

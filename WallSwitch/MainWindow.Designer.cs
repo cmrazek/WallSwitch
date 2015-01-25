@@ -159,11 +159,13 @@
 			this.c_widgetTypes = new System.Windows.Forms.ComboBox();
 			this.c_widgetTypesLabel = new System.Windows.Forms.Label();
 			this.c_widgetPanelPropSplitter = new System.Windows.Forms.SplitContainer();
-			this.c_widgetDeleteButton = new System.Windows.Forms.Button();
-			this.c_widgetMoveDownButton = new System.Windows.Forms.Button();
-			this.c_widgetMoveUpButton = new System.Windows.Forms.Button();
 			this.c_widgetList = new System.Windows.Forms.ListView();
 			this.c_widgetColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.c_widgetControlRightPanel = new System.Windows.Forms.Panel();
+			this.panel2 = new System.Windows.Forms.Panel();
+			this.c_widgetDeleteButton = new System.Windows.Forms.Button();
+			this.c_widgetMoveUpButton = new System.Windows.Forms.Button();
+			this.c_widgetMoveDownButton = new System.Windows.Forms.Button();
 			this.c_widgetPropertyGrid = new System.Windows.Forms.PropertyGrid();
 			this.tabHistory = new System.Windows.Forms.TabPage();
 			this.c_historyTab = new WallSwitch.HistoryList();
@@ -212,6 +214,8 @@
 			this.c_widgetPanelPropSplitter.Panel1.SuspendLayout();
 			this.c_widgetPanelPropSplitter.Panel2.SuspendLayout();
 			this.c_widgetPanelPropSplitter.SuspendLayout();
+			this.c_widgetControlRightPanel.SuspendLayout();
+			this.panel2.SuspendLayout();
 			this.tabHistory.SuspendLayout();
 			this.cmHistory.SuspendLayout();
 			this.grpNavButtons.SuspendLayout();
@@ -1615,63 +1619,26 @@
 			// 
 			// c_widgetPanelPropSplitter.Panel1
 			// 
-			this.c_widgetPanelPropSplitter.Panel1.Controls.Add(this.c_widgetDeleteButton);
-			this.c_widgetPanelPropSplitter.Panel1.Controls.Add(this.c_widgetMoveDownButton);
-			this.c_widgetPanelPropSplitter.Panel1.Controls.Add(this.c_widgetMoveUpButton);
 			this.c_widgetPanelPropSplitter.Panel1.Controls.Add(this.c_widgetList);
+			this.c_widgetPanelPropSplitter.Panel1.Controls.Add(this.c_widgetControlRightPanel);
 			// 
 			// c_widgetPanelPropSplitter.Panel2
 			// 
 			this.c_widgetPanelPropSplitter.Panel2.Controls.Add(this.c_widgetPropertyGrid);
 			this.c_widgetPanelPropSplitter.Size = new System.Drawing.Size(205, 385);
-			this.c_widgetPanelPropSplitter.SplitterDistance = 110;
+			this.c_widgetPanelPropSplitter.SplitterDistance = 130;
 			this.c_widgetPanelPropSplitter.TabIndex = 0;
-			// 
-			// c_widgetDeleteButton
-			// 
-			this.c_widgetDeleteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.c_widgetDeleteButton.Image = global::WallSwitch.Res.Delete;
-			this.c_widgetDeleteButton.Location = new System.Drawing.Point(179, 84);
-			this.c_widgetDeleteButton.Name = "c_widgetDeleteButton";
-			this.c_widgetDeleteButton.Size = new System.Drawing.Size(23, 23);
-			this.c_widgetDeleteButton.TabIndex = 3;
-			this.c_widgetDeleteButton.UseVisualStyleBackColor = true;
-			this.c_widgetDeleteButton.Click += new System.EventHandler(this.c_widgetDeleteButton_Click);
-			// 
-			// c_widgetMoveDownButton
-			// 
-			this.c_widgetMoveDownButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.c_widgetMoveDownButton.Image = global::WallSwitch.Res.MoveDown;
-			this.c_widgetMoveDownButton.Location = new System.Drawing.Point(179, 32);
-			this.c_widgetMoveDownButton.Name = "c_widgetMoveDownButton";
-			this.c_widgetMoveDownButton.Size = new System.Drawing.Size(23, 23);
-			this.c_widgetMoveDownButton.TabIndex = 2;
-			this.c_widgetMoveDownButton.UseVisualStyleBackColor = true;
-			this.c_widgetMoveDownButton.Click += new System.EventHandler(this.c_widgetMoveDownButton_Click);
-			// 
-			// c_widgetMoveUpButton
-			// 
-			this.c_widgetMoveUpButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.c_widgetMoveUpButton.Image = global::WallSwitch.Res.MoveUp;
-			this.c_widgetMoveUpButton.Location = new System.Drawing.Point(179, 3);
-			this.c_widgetMoveUpButton.Name = "c_widgetMoveUpButton";
-			this.c_widgetMoveUpButton.Size = new System.Drawing.Size(23, 23);
-			this.c_widgetMoveUpButton.TabIndex = 1;
-			this.c_widgetMoveUpButton.UseVisualStyleBackColor = true;
-			this.c_widgetMoveUpButton.Click += new System.EventHandler(this.c_widgetMoveUpButton_Click);
 			// 
 			// c_widgetList
 			// 
-			this.c_widgetList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
 			this.c_widgetList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.c_widgetColumn});
+			this.c_widgetList.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.c_widgetList.HideSelection = false;
 			this.c_widgetList.Location = new System.Drawing.Point(0, 0);
 			this.c_widgetList.MultiSelect = false;
 			this.c_widgetList.Name = "c_widgetList";
-			this.c_widgetList.Size = new System.Drawing.Size(173, 108);
+			this.c_widgetList.Size = new System.Drawing.Size(180, 130);
 			this.c_widgetList.TabIndex = 0;
 			this.c_widgetList.UseCompatibleStateImageBehavior = false;
 			this.c_widgetList.View = System.Windows.Forms.View.Details;
@@ -1682,12 +1649,62 @@
 			this.c_widgetColumn.Text = "Widgets";
 			this.c_widgetColumn.Width = 140;
 			// 
+			// c_widgetControlRightPanel
+			// 
+			this.c_widgetControlRightPanel.Controls.Add(this.panel2);
+			this.c_widgetControlRightPanel.Controls.Add(this.c_widgetMoveUpButton);
+			this.c_widgetControlRightPanel.Controls.Add(this.c_widgetMoveDownButton);
+			this.c_widgetControlRightPanel.Dock = System.Windows.Forms.DockStyle.Right;
+			this.c_widgetControlRightPanel.Location = new System.Drawing.Point(180, 0);
+			this.c_widgetControlRightPanel.Name = "c_widgetControlRightPanel";
+			this.c_widgetControlRightPanel.Size = new System.Drawing.Size(25, 130);
+			this.c_widgetControlRightPanel.TabIndex = 4;
+			// 
+			// panel2
+			// 
+			this.panel2.Controls.Add(this.c_widgetDeleteButton);
+			this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this.panel2.Location = new System.Drawing.Point(0, 107);
+			this.panel2.Name = "panel2";
+			this.panel2.Size = new System.Drawing.Size(25, 23);
+			this.panel2.TabIndex = 4;
+			// 
+			// c_widgetDeleteButton
+			// 
+			this.c_widgetDeleteButton.Image = global::WallSwitch.Res.Delete;
+			this.c_widgetDeleteButton.Location = new System.Drawing.Point(2, 0);
+			this.c_widgetDeleteButton.Name = "c_widgetDeleteButton";
+			this.c_widgetDeleteButton.Size = new System.Drawing.Size(23, 23);
+			this.c_widgetDeleteButton.TabIndex = 3;
+			this.c_widgetDeleteButton.UseVisualStyleBackColor = true;
+			this.c_widgetDeleteButton.Click += new System.EventHandler(this.c_widgetDeleteButton_Click);
+			// 
+			// c_widgetMoveUpButton
+			// 
+			this.c_widgetMoveUpButton.Image = global::WallSwitch.Res.MoveUp;
+			this.c_widgetMoveUpButton.Location = new System.Drawing.Point(2, 0);
+			this.c_widgetMoveUpButton.Name = "c_widgetMoveUpButton";
+			this.c_widgetMoveUpButton.Size = new System.Drawing.Size(23, 23);
+			this.c_widgetMoveUpButton.TabIndex = 1;
+			this.c_widgetMoveUpButton.UseVisualStyleBackColor = true;
+			this.c_widgetMoveUpButton.Click += new System.EventHandler(this.c_widgetMoveUpButton_Click);
+			// 
+			// c_widgetMoveDownButton
+			// 
+			this.c_widgetMoveDownButton.Image = global::WallSwitch.Res.MoveDown;
+			this.c_widgetMoveDownButton.Location = new System.Drawing.Point(2, 29);
+			this.c_widgetMoveDownButton.Name = "c_widgetMoveDownButton";
+			this.c_widgetMoveDownButton.Size = new System.Drawing.Size(23, 23);
+			this.c_widgetMoveDownButton.TabIndex = 2;
+			this.c_widgetMoveDownButton.UseVisualStyleBackColor = true;
+			this.c_widgetMoveDownButton.Click += new System.EventHandler(this.c_widgetMoveDownButton_Click);
+			// 
 			// c_widgetPropertyGrid
 			// 
 			this.c_widgetPropertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.c_widgetPropertyGrid.Location = new System.Drawing.Point(0, 0);
 			this.c_widgetPropertyGrid.Name = "c_widgetPropertyGrid";
-			this.c_widgetPropertyGrid.Size = new System.Drawing.Size(205, 271);
+			this.c_widgetPropertyGrid.Size = new System.Drawing.Size(205, 251);
 			this.c_widgetPropertyGrid.TabIndex = 0;
 			this.c_widgetPropertyGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.c_widgetPropertyGrid_PropertyValueChanged);
 			// 
@@ -1713,6 +1730,7 @@
 			this.c_historyTab.TabIndex = 0;
 			this.c_historyTab.SelectionChanged += new System.EventHandler(this.lstHistory_SelectionChanged);
 			this.c_historyTab.ItemActivated += new System.EventHandler<WallSwitch.HistoryList.ItemActivatedEventArgs>(this.lstHistory_ItemActivated);
+			this.c_historyTab.DeleteItemRequested += new System.EventHandler<WallSwitch.HistoryList.DeleteItemRequestedEventArgs>(this.HistoryTab_DeleteItemRequested);
 			// 
 			// cmHistory
 			// 
@@ -1772,6 +1790,7 @@
 			// 
 			// groupBox1
 			// 
+			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.groupBox1.Controls.Add(this.panel1);
 			this.groupBox1.Location = new System.Drawing.Point(597, 27);
 			this.groupBox1.Name = "groupBox1";
@@ -1862,6 +1881,8 @@
 			this.c_widgetPanelPropSplitter.Panel2.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.c_widgetPanelPropSplitter)).EndInit();
 			this.c_widgetPanelPropSplitter.ResumeLayout(false);
+			this.c_widgetControlRightPanel.ResumeLayout(false);
+			this.panel2.ResumeLayout(false);
 			this.tabHistory.ResumeLayout(false);
 			this.cmHistory.ResumeLayout(false);
 			this.grpNavButtons.ResumeLayout(false);
@@ -2024,6 +2045,8 @@
 		private System.Windows.Forms.TrackBar c_transparencyTrackBar;
 		private System.Windows.Forms.Panel panel1;
 		private System.Windows.Forms.CheckBox c_activateOnExitCheckBox;
+		private System.Windows.Forms.Panel c_widgetControlRightPanel;
+		private System.Windows.Forms.Panel panel2;
 
 	}
 }

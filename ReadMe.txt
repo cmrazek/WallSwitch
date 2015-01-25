@@ -1,7 +1,7 @@
 WallSwitch
 Switches desktop wallpapers from a variety of sources.
 http://wallswitch.codeplex.com/
-Current Version: 1.3.5
+Current Version: 1.3.7
 
 Requirements:
 	.NET Framework 4:  http://www.microsoft.com/download/en/details.aspx?id=17718
@@ -12,7 +12,13 @@ Contact:
 
 ChangeLog:
 
-Version 1.3.6 - (pending):
+Version 1.3.7 - 2015-01-25:
+- Added support for high DPI under Windows 8.1.
+- Fixed transparency slider not scaling with window properly.
+- Removed invalid widget 'IWidget' from the list of available widgets.
+- Added keyboard shortcut for delete key in history list.
+
+Version 1.3.6 - 2014-12-24:
 - Added a slider to control window transparency.
 - Added a theme setting to switch to that theme when exiting.
 - Force .NET garbage collection after every wallpaper switch to free memory used during rendering.

@@ -12,8 +12,8 @@ namespace WallSwitch
 	partial class HistoryList : UserControl
 	{
 		#region Constants
-		public const int k_imageWidth = 100;
-		public const int k_imageHeight = 100;
+		public const int k_unscaledImageWidth = 120;
+		public const int k_unscaledImageHeight = 120;
 		private const int k_itemSpacer = 4;
 		private const int k_itemMargin = 1;
 		private const float k_mouseWheelScale = .4f;
@@ -28,6 +28,9 @@ namespace WallSwitch
 		private HistoryItem _selectedItem = null;
 		private int _maxHistory = k_maxHistory;
 		private ToolTip _imageToolTip = null;
+
+		private static int _imageWidth = k_unscaledImageWidth;
+		private static int _imageHeight = k_unscaledImageHeight;
 		#endregion
 
 		#region Construction
@@ -148,8 +151,17 @@ namespace WallSwitch
 			int currentX = k_itemSpacer;
 			int currentY = k_itemSpacer;
 
-			int widthRequired = k_imageWidth + k_itemSpacer + k_itemMargin * 2;
-			int heightRequired = k_imageHeight + k_itemSpacer + k_itemMargin * 2;
+			float xScale, yScale;
+			using (var g = this.CreateGraphics())
+			{
+				xScale = g.DpiX / 96.0f;
+				yScale = g.DpiY / 96.0f;
+				_imageWidth = (int)Math.Round(k_unscaledImageWidth * xScale);
+				_imageHeight = (int)Math.Round(k_unscaledImageHeight * yScale);
+			}
+
+			int widthRequired = _imageWidth + k_itemSpacer + k_itemMargin * 2;
+			int heightRequired = _imageHeight + k_itemSpacer + k_itemMargin * 2;
 
 			foreach (var item in _items)
 			{
@@ -160,7 +172,7 @@ namespace WallSwitch
 				}
 
 				item.Bounds = new Rectangle(currentX - k_itemMargin, currentY - k_itemMargin,
-					k_imageWidth + (k_itemMargin * 2), k_imageHeight + (k_itemMargin * 2));
+					_imageWidth + (k_itemMargin * 2), _imageHeight + (k_itemMargin * 2));
 
 				currentX += widthRequired;
 			}
@@ -181,7 +193,7 @@ namespace WallSwitch
 			{
 				if (vScroll.Value > _maxScroll) vScroll.Value = _maxScroll;
 				vScroll.Maximum = _maxScroll + clientSize.Height;
-				vScroll.SmallChange = k_imageHeight / 2;
+				vScroll.SmallChange = _imageHeight / 2;
 				vScroll.LargeChange = clientSize.Height > 0 ? clientSize.Height : 0;
 				vScroll.Enabled = true;
 			}
@@ -218,7 +230,7 @@ namespace WallSwitch
 				if (image != null && image.Width > 0 && image.Height > 0)
 				{
 					var imageRect = new Rectangle(item.Bounds.X + k_itemMargin, item.Bounds.Y + k_itemMargin, item.ThumbnailSize.Width, item.ThumbnailSize.Height);
-					imageRect.Offset((k_imageWidth - imageRect.Width) / 2, (k_imageHeight - imageRect.Height) / 2);
+					imageRect.Offset((_imageWidth - imageRect.Width) / 2, (_imageHeight - imageRect.Height) / 2);
 					imageRect.Offset(0, -_scroll);
 
 					lock (image)
@@ -482,7 +494,7 @@ namespace WallSwitch
 						else
 						{
 							var pt = _selectedItem.Bounds.Center();
-							pt.Y -= k_imageHeight + k_itemSpacer + k_itemMargin * 2;
+							pt.Y -= _imageHeight + k_itemSpacer + k_itemMargin * 2;
 
 							var found = false;
 							foreach (var item in _items)
@@ -509,7 +521,7 @@ namespace WallSwitch
 						else
 						{
 							var pt = _selectedItem.Bounds.Center();
-							pt.Y += k_imageHeight + k_itemSpacer + k_itemMargin * 2;
+							pt.Y += _imageHeight + k_itemSpacer + k_itemMargin * 2;
 
 							var found = false;
 							foreach (var item in _items)
@@ -534,6 +546,13 @@ namespace WallSwitch
 								}
 								if (selItem != null) SelectItem(selItem);
 							}
+						}
+						break;
+
+					case Keys.Delete:
+						if (_selectedItem != null)
+						{
+							FireDeleteItemRequested(_selectedItem);
 						}
 						break;
 				}
@@ -573,16 +592,34 @@ namespace WallSwitch
 				ev(this, new ItemActivatedEventArgs(item));
 			}
 		}
+
+		public event EventHandler<DeleteItemRequestedEventArgs> DeleteItemRequested;
+
+		public class DeleteItemRequestedEventArgs : EventArgs
+		{
+			public HistoryItem Item { get; private set; }
+
+			public DeleteItemRequestedEventArgs(HistoryItem item)
+			{
+				Item = item;
+			}
+		}
+
+		public void FireDeleteItemRequested(HistoryItem item)
+		{
+			var ev = DeleteItemRequested;
+			if (ev != null) ev(this, new DeleteItemRequestedEventArgs(item));
+		}
 		#endregion
 
 		public static int ThumbnailWidth
 		{
-			get { return k_imageWidth; }
+			get { return _imageWidth; }
 		}
 
 		public static int ThumbnailHeight
 		{
-			get { return k_imageHeight; }
+			get { return _imageHeight; }
 		}
 	}
 
