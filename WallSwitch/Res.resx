@@ -523,4 +523,7 @@ Click 'yes' to be taken to the download page.</value>
     <value>{0}%</value>
     <comment>{0} = Percentage 0 -&gt;100</comment>
   </data>
+  <data name="Error_InvalidRandomGroupCount" xml:space="preserve">
+    <value>Invalid number of images.</value>
+  </data>
 </root>

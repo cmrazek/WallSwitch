@@ -104,6 +104,9 @@
 			this.c_settingsTab = new System.Windows.Forms.TabPage();
 			this.flowDisplay = new System.Windows.Forms.FlowLayoutPanel();
 			this.grpDisplayMode = new System.Windows.Forms.GroupBox();
+			this.c_randomGroupCountLabel = new System.Windows.Forms.Label();
+			this.c_randomGroupCount = new System.Windows.Forms.TextBox();
+			this.c_randomGroup = new System.Windows.Forms.CheckBox();
 			this.c_maxClipLabel = new System.Windows.Forms.Label();
 			this.c_maxScalePct = new System.Windows.Forms.Label();
 			this.c_maxScale = new System.Windows.Forms.TextBox();
@@ -119,14 +122,10 @@
 			this.cmbThemePeriod = new System.Windows.Forms.ComboBox();
 			this.lblFrequency = new System.Windows.Forms.Label();
 			this.txtThemeFreq = new System.Windows.Forms.TextBox();
-			this.c_activateThemeHotKey = new WallSwitch.HotKeyTextBox();
 			this.grpBackgroundColor = new System.Windows.Forms.GroupBox();
-			this.clrBackTop = new WallSwitch.ColorSample();
-			this.clrBackBottom = new WallSwitch.ColorSample();
 			this.grpCollageDisplay = new System.Windows.Forms.GroupBox();
 			this.c_numCollageImagesLabel = new System.Windows.Forms.Label();
 			this.c_numCollageImages = new System.Windows.Forms.TextBox();
-			this.c_borderColor = new WallSwitch.ColorSample();
 			this.c_borderColorLabel = new System.Windows.Forms.Label();
 			this.c_edgeMode = new System.Windows.Forms.ComboBox();
 			this.trkDropShadowFeatherDist = new System.Windows.Forms.TrackBar();
@@ -153,7 +152,6 @@
 			this.trkColorEffectCollageFadeRatio = new System.Windows.Forms.TrackBar();
 			this.c_widgetsTab = new System.Windows.Forms.TabPage();
 			this.c_widgetPanelSplitter = new System.Windows.Forms.SplitContainer();
-			this.c_widgetLayout = new WallSwitch.WidgetLayoutControl();
 			this.c_widgetTopPanel = new System.Windows.Forms.Panel();
 			this.c_addWidgetButton = new System.Windows.Forms.Button();
 			this.c_widgetTypes = new System.Windows.Forms.ComboBox();
@@ -168,7 +166,6 @@
 			this.c_widgetMoveDownButton = new System.Windows.Forms.Button();
 			this.c_widgetPropertyGrid = new System.Windows.Forms.PropertyGrid();
 			this.tabHistory = new System.Windows.Forms.TabPage();
-			this.c_historyTab = new WallSwitch.HistoryList();
 			this.cmHistory = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.ciOpenHistoryFile = new System.Windows.Forms.ToolStripMenuItem();
 			this.ciExploreHistoryFile = new System.Windows.Forms.ToolStripMenuItem();
@@ -180,6 +177,12 @@
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.c_transparencyTrackBar = new System.Windows.Forms.TrackBar();
+			this.c_activateThemeHotKey = new WallSwitch.HotKeyTextBox();
+			this.clrBackTop = new WallSwitch.ColorSample();
+			this.clrBackBottom = new WallSwitch.ColorSample();
+			this.c_borderColor = new WallSwitch.ColorSample();
+			this.c_widgetLayout = new WallSwitch.WidgetLayoutControl();
+			this.c_historyTab = new WallSwitch.HistoryList();
 			this.cmLocations.SuspendLayout();
 			this.grpTheme.SuspendLayout();
 			this.cmTheme.SuspendLayout();
@@ -233,9 +236,10 @@
             this.colNextUpdate});
 			this.lstLocations.ContextMenuStrip = this.cmLocations;
 			this.lstLocations.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.lstLocations.Location = new System.Drawing.Point(3, 3);
+			this.lstLocations.Location = new System.Drawing.Point(4, 4);
+			this.lstLocations.Margin = new System.Windows.Forms.Padding(4);
 			this.lstLocations.Name = "lstLocations";
-			this.lstLocations.Size = new System.Drawing.Size(696, 385);
+			this.lstLocations.Size = new System.Drawing.Size(931, 476);
 			this.lstLocations.TabIndex = 0;
 			this.toolTip1.SetToolTip(this.lstLocations, "Locations where images are retrieved");
 			this.lstLocations.UseCompatibleStateImageBehavior = false;
@@ -259,6 +263,7 @@
 			// 
 			// cmLocations
 			// 
+			this.cmLocations.ImageScalingSize = new System.Drawing.Size(20, 20);
 			this.cmLocations.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ciAddFolder,
             this.miAddRssFeed,
@@ -270,66 +275,66 @@
             this.ciDeleteLocation,
             this.ciLocationProperties});
 			this.cmLocations.Name = "locationsMenu";
-			this.cmLocations.Size = new System.Drawing.Size(141, 170);
+			this.cmLocations.Size = new System.Drawing.Size(169, 198);
 			this.cmLocations.Opening += new System.ComponentModel.CancelEventHandler(this.Locations_Opening);
 			// 
 			// ciAddFolder
 			// 
 			this.ciAddFolder.Name = "ciAddFolder";
-			this.ciAddFolder.Size = new System.Drawing.Size(140, 22);
+			this.ciAddFolder.Size = new System.Drawing.Size(168, 26);
 			this.ciAddFolder.Text = "Add &Folder";
 			this.ciAddFolder.Click += new System.EventHandler(this.ciAddFolder_Click);
 			// 
 			// miAddRssFeed
 			// 
 			this.miAddRssFeed.Name = "miAddRssFeed";
-			this.miAddRssFeed.Size = new System.Drawing.Size(140, 22);
+			this.miAddRssFeed.Size = new System.Drawing.Size(168, 26);
 			this.miAddRssFeed.Text = "&Add Feed";
 			this.miAddRssFeed.Click += new System.EventHandler(this.btnAddFeed_Click);
 			// 
 			// ciAddImage
 			// 
 			this.ciAddImage.Name = "ciAddImage";
-			this.ciAddImage.Size = new System.Drawing.Size(140, 22);
+			this.ciAddImage.Size = new System.Drawing.Size(168, 26);
 			this.ciAddImage.Text = "Add &Image";
 			this.ciAddImage.Click += new System.EventHandler(this.ciAddImage_Click);
 			// 
 			// ciLocationExplore
 			// 
 			this.ciLocationExplore.Name = "ciLocationExplore";
-			this.ciLocationExplore.Size = new System.Drawing.Size(140, 22);
+			this.ciLocationExplore.Size = new System.Drawing.Size(168, 26);
 			this.ciLocationExplore.Text = "&Explore";
 			this.ciLocationExplore.Click += new System.EventHandler(this.ciLocationExplore_Click);
 			// 
 			// toolStripMenuItem6
 			// 
 			this.toolStripMenuItem6.Name = "toolStripMenuItem6";
-			this.toolStripMenuItem6.Size = new System.Drawing.Size(137, 6);
+			this.toolStripMenuItem6.Size = new System.Drawing.Size(165, 6);
 			// 
 			// ciUpdateLocationNow
 			// 
 			this.ciUpdateLocationNow.Name = "ciUpdateLocationNow";
-			this.ciUpdateLocationNow.Size = new System.Drawing.Size(140, 22);
+			this.ciUpdateLocationNow.Size = new System.Drawing.Size(168, 26);
 			this.ciUpdateLocationNow.Text = "&Update Now";
 			this.ciUpdateLocationNow.Click += new System.EventHandler(this.ciUpdateLocationNow_Click);
 			// 
 			// toolStripMenuItem5
 			// 
 			this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-			this.toolStripMenuItem5.Size = new System.Drawing.Size(137, 6);
+			this.toolStripMenuItem5.Size = new System.Drawing.Size(165, 6);
 			// 
 			// ciDeleteLocation
 			// 
 			this.ciDeleteLocation.Name = "ciDeleteLocation";
 			this.ciDeleteLocation.ShortcutKeys = System.Windows.Forms.Keys.Delete;
-			this.ciDeleteLocation.Size = new System.Drawing.Size(140, 22);
+			this.ciDeleteLocation.Size = new System.Drawing.Size(168, 26);
 			this.ciDeleteLocation.Text = "&Delete";
 			this.ciDeleteLocation.Click += new System.EventHandler(this.ciDeleteLocation_Click);
 			// 
 			// ciLocationProperties
 			// 
 			this.ciLocationProperties.Name = "ciLocationProperties";
-			this.ciLocationProperties.Size = new System.Drawing.Size(140, 22);
+			this.ciLocationProperties.Size = new System.Drawing.Size(168, 26);
 			this.ciLocationProperties.Text = "&Properties";
 			this.ciLocationProperties.Click += new System.EventHandler(this.ciLocationProperties_Click);
 			// 
@@ -339,9 +344,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.cmbTheme.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmbTheme.FormattingEnabled = true;
-			this.cmbTheme.Location = new System.Drawing.Point(6, 19);
+			this.cmbTheme.Location = new System.Drawing.Point(8, 23);
+			this.cmbTheme.Margin = new System.Windows.Forms.Padding(4);
 			this.cmbTheme.Name = "cmbTheme";
-			this.cmbTheme.Size = new System.Drawing.Size(246, 21);
+			this.cmbTheme.Size = new System.Drawing.Size(327, 24);
 			this.cmbTheme.Sorted = true;
 			this.cmbTheme.TabIndex = 0;
 			this.cmbTheme.SelectedIndexChanged += new System.EventHandler(this.cmbTheme_SelectedIndexChanged);
@@ -354,9 +360,11 @@
 			this.grpTheme.Controls.Add(this.btnTheme);
 			this.grpTheme.Controls.Add(this.cmbTheme);
 			this.grpTheme.Controls.Add(this.btnActivate);
-			this.grpTheme.Location = new System.Drawing.Point(12, 27);
+			this.grpTheme.Location = new System.Drawing.Point(16, 33);
+			this.grpTheme.Margin = new System.Windows.Forms.Padding(4);
 			this.grpTheme.Name = "grpTheme";
-			this.grpTheme.Size = new System.Drawing.Size(450, 50);
+			this.grpTheme.Padding = new System.Windows.Forms.Padding(4);
+			this.grpTheme.Size = new System.Drawing.Size(600, 62);
 			this.grpTheme.TabIndex = 0;
 			this.grpTheme.TabStop = false;
 			this.grpTheme.Text = "Theme";
@@ -364,9 +372,10 @@
 			// btnSave
 			// 
 			this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnSave.Location = new System.Drawing.Point(288, 17);
+			this.btnSave.Location = new System.Drawing.Point(384, 21);
+			this.btnSave.Margin = new System.Windows.Forms.Padding(4);
 			this.btnSave.Name = "btnSave";
-			this.btnSave.Size = new System.Drawing.Size(75, 23);
+			this.btnSave.Size = new System.Drawing.Size(100, 28);
 			this.btnSave.TabIndex = 2;
 			this.btnSave.Text = "&Save";
 			this.btnSave.UseVisualStyleBackColor = true;
@@ -376,9 +385,10 @@
 			// 
 			this.btnTheme.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.btnTheme.ContextMenuStrip = this.cmTheme;
-			this.btnTheme.Location = new System.Drawing.Point(258, 17);
+			this.btnTheme.Location = new System.Drawing.Point(344, 21);
+			this.btnTheme.Margin = new System.Windows.Forms.Padding(4);
 			this.btnTheme.Name = "btnTheme";
-			this.btnTheme.Size = new System.Drawing.Size(24, 23);
+			this.btnTheme.Size = new System.Drawing.Size(32, 28);
 			this.btnTheme.TabIndex = 1;
 			this.btnTheme.Text = "...";
 			this.btnTheme.UseVisualStyleBackColor = true;
@@ -386,6 +396,7 @@
 			// 
 			// cmTheme
 			// 
+			this.cmTheme.ImageScalingSize = new System.Drawing.Size(20, 20);
 			this.cmTheme.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ciNewTheme,
             this.ciRenameTheme,
@@ -395,59 +406,60 @@
             this.toolStripMenuItem10,
             this.ciDeleteTheme});
 			this.cmTheme.Name = "c_themeMenu";
-			this.cmTheme.Size = new System.Drawing.Size(125, 126);
+			this.cmTheme.Size = new System.Drawing.Size(149, 146);
 			// 
 			// ciNewTheme
 			// 
 			this.ciNewTheme.Name = "ciNewTheme";
-			this.ciNewTheme.Size = new System.Drawing.Size(124, 22);
+			this.ciNewTheme.Size = new System.Drawing.Size(148, 26);
 			this.ciNewTheme.Text = "&New";
 			this.ciNewTheme.Click += new System.EventHandler(this.btnNewTheme_Click);
 			// 
 			// ciRenameTheme
 			// 
 			this.ciRenameTheme.Name = "ciRenameTheme";
-			this.ciRenameTheme.Size = new System.Drawing.Size(124, 22);
+			this.ciRenameTheme.Size = new System.Drawing.Size(148, 26);
 			this.ciRenameTheme.Text = "&Rename";
 			this.ciRenameTheme.Click += new System.EventHandler(this.btnRenameTheme_Click);
 			// 
 			// ciDuplicateTheme
 			// 
 			this.ciDuplicateTheme.Name = "ciDuplicateTheme";
-			this.ciDuplicateTheme.Size = new System.Drawing.Size(124, 22);
+			this.ciDuplicateTheme.Size = new System.Drawing.Size(148, 26);
 			this.ciDuplicateTheme.Text = "D&uplicate";
 			this.ciDuplicateTheme.Click += new System.EventHandler(this.miDuplicateTheme_Click);
 			// 
 			// toolStripMenuItem9
 			// 
 			this.toolStripMenuItem9.Name = "toolStripMenuItem9";
-			this.toolStripMenuItem9.Size = new System.Drawing.Size(121, 6);
+			this.toolStripMenuItem9.Size = new System.Drawing.Size(145, 6);
 			// 
 			// ciSaveTheme
 			// 
 			this.ciSaveTheme.Name = "ciSaveTheme";
-			this.ciSaveTheme.Size = new System.Drawing.Size(124, 22);
+			this.ciSaveTheme.Size = new System.Drawing.Size(148, 26);
 			this.ciSaveTheme.Text = "&Save";
 			this.ciSaveTheme.Click += new System.EventHandler(this.FileSave_Click);
 			// 
 			// toolStripMenuItem10
 			// 
 			this.toolStripMenuItem10.Name = "toolStripMenuItem10";
-			this.toolStripMenuItem10.Size = new System.Drawing.Size(121, 6);
+			this.toolStripMenuItem10.Size = new System.Drawing.Size(145, 6);
 			// 
 			// ciDeleteTheme
 			// 
 			this.ciDeleteTheme.Name = "ciDeleteTheme";
-			this.ciDeleteTheme.Size = new System.Drawing.Size(124, 22);
+			this.ciDeleteTheme.Size = new System.Drawing.Size(148, 26);
 			this.ciDeleteTheme.Text = "&Delete";
 			this.ciDeleteTheme.Click += new System.EventHandler(this.btnDeleteTheme_Click);
 			// 
 			// btnActivate
 			// 
 			this.btnActivate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnActivate.Location = new System.Drawing.Point(369, 17);
+			this.btnActivate.Location = new System.Drawing.Point(492, 21);
+			this.btnActivate.Margin = new System.Windows.Forms.Padding(4);
 			this.btnActivate.Name = "btnActivate";
-			this.btnActivate.Size = new System.Drawing.Size(75, 23);
+			this.btnActivate.Size = new System.Drawing.Size(100, 28);
 			this.btnActivate.TabIndex = 3;
 			this.btnActivate.Text = "&Activate";
 			this.toolTip1.SetToolTip(this.btnActivate, "Activate this theme");
@@ -458,9 +470,10 @@
 			// 
 			this.btnSwitchNow.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.btnSwitchNow.Image = global::WallSwitch.Res.NextIcon;
-			this.btnSwitchNow.Location = new System.Drawing.Point(83, 17);
+			this.btnSwitchNow.Location = new System.Drawing.Point(111, 21);
+			this.btnSwitchNow.Margin = new System.Windows.Forms.Padding(4);
 			this.btnSwitchNow.Name = "btnSwitchNow";
-			this.btnSwitchNow.Size = new System.Drawing.Size(30, 23);
+			this.btnSwitchNow.Size = new System.Drawing.Size(40, 28);
 			this.btnSwitchNow.TabIndex = 2;
 			this.toolTip1.SetToolTip(this.btnSwitchNow, "Go to the next image");
 			this.btnSwitchNow.UseVisualStyleBackColor = true;
@@ -470,9 +483,10 @@
 			// 
 			this.btnPause.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.btnPause.Image = global::WallSwitch.Res.PauseIcon;
-			this.btnPause.Location = new System.Drawing.Point(47, 17);
+			this.btnPause.Location = new System.Drawing.Point(63, 21);
+			this.btnPause.Margin = new System.Windows.Forms.Padding(4);
 			this.btnPause.Name = "btnPause";
-			this.btnPause.Size = new System.Drawing.Size(30, 23);
+			this.btnPause.Size = new System.Drawing.Size(40, 28);
 			this.btnPause.TabIndex = 1;
 			this.btnPause.UseVisualStyleBackColor = true;
 			this.btnPause.Click += new System.EventHandler(this.btnPause_Click);
@@ -481,9 +495,10 @@
 			// 
 			this.btnPrevious.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.btnPrevious.Image = global::WallSwitch.Res.PrevIcon;
-			this.btnPrevious.Location = new System.Drawing.Point(11, 17);
+			this.btnPrevious.Location = new System.Drawing.Point(15, 21);
+			this.btnPrevious.Margin = new System.Windows.Forms.Padding(4);
 			this.btnPrevious.Name = "btnPrevious";
-			this.btnPrevious.Size = new System.Drawing.Size(30, 23);
+			this.btnPrevious.Size = new System.Drawing.Size(40, 28);
 			this.btnPrevious.TabIndex = 0;
 			this.toolTip1.SetToolTip(this.btnPrevious, "Go back to the previous image");
 			this.btnPrevious.UseVisualStyleBackColor = true;
@@ -498,9 +513,10 @@
             "Stretch",
             "Fit",
             "Fill"});
-			this.c_imageFit.Location = new System.Drawing.Point(300, 19);
+			this.c_imageFit.Location = new System.Drawing.Point(400, 23);
+			this.c_imageFit.Margin = new System.Windows.Forms.Padding(4);
 			this.c_imageFit.Name = "c_imageFit";
-			this.c_imageFit.Size = new System.Drawing.Size(141, 21);
+			this.c_imageFit.Size = new System.Drawing.Size(187, 24);
 			this.c_imageFit.TabIndex = 2;
 			this.toolTip1.SetToolTip(this.c_imageFit, "Image sizing method");
 			this.c_imageFit.SelectedIndexChanged += new System.EventHandler(this.ControlChanged);
@@ -508,9 +524,10 @@
 			// lblOpacityDisplay
 			// 
 			this.lblOpacityDisplay.AutoSize = true;
-			this.lblOpacityDisplay.Location = new System.Drawing.Point(471, 19);
+			this.lblOpacityDisplay.Location = new System.Drawing.Point(628, 23);
+			this.lblOpacityDisplay.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.lblOpacityDisplay.Name = "lblOpacityDisplay";
-			this.lblOpacityDisplay.Size = new System.Drawing.Size(15, 13);
+			this.lblOpacityDisplay.Size = new System.Drawing.Size(20, 17);
 			this.lblOpacityDisplay.TabIndex = 5;
 			this.lblOpacityDisplay.Text = "%";
 			this.toolTip1.SetToolTip(this.lblOpacityDisplay, "Opacity of background used to fade out previous images");
@@ -519,10 +536,11 @@
 			// 
 			this.trkOpacity.BackColor = System.Drawing.SystemColors.Window;
 			this.trkOpacity.LargeChange = 20;
-			this.trkOpacity.Location = new System.Drawing.Point(325, 19);
+			this.trkOpacity.Location = new System.Drawing.Point(433, 23);
+			this.trkOpacity.Margin = new System.Windows.Forms.Padding(4);
 			this.trkOpacity.Maximum = 100;
 			this.trkOpacity.Name = "trkOpacity";
-			this.trkOpacity.Size = new System.Drawing.Size(140, 45);
+			this.trkOpacity.Size = new System.Drawing.Size(187, 56);
 			this.trkOpacity.SmallChange = 10;
 			this.trkOpacity.TabIndex = 4;
 			this.trkOpacity.TickFrequency = 10;
@@ -533,9 +551,10 @@
 			// lblOpacity
 			// 
 			this.lblOpacity.AutoSize = true;
-			this.lblOpacity.Location = new System.Drawing.Point(212, 19);
+			this.lblOpacity.Location = new System.Drawing.Point(283, 23);
+			this.lblOpacity.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.lblOpacity.Name = "lblOpacity";
-			this.lblOpacity.Size = new System.Drawing.Size(107, 13);
+			this.lblOpacity.Size = new System.Drawing.Size(140, 17);
 			this.lblOpacity.TabIndex = 3;
 			this.lblOpacity.Text = "Background Opacity:";
 			this.toolTip1.SetToolTip(this.lblOpacity, "Opacity of background used to fade out previous images");
@@ -545,9 +564,10 @@
 			this.c_separateMonitors.AutoSize = true;
 			this.c_separateMonitors.Checked = true;
 			this.c_separateMonitors.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.c_separateMonitors.Location = new System.Drawing.Point(6, 50);
+			this.c_separateMonitors.Location = new System.Drawing.Point(8, 62);
+			this.c_separateMonitors.Margin = new System.Windows.Forms.Padding(4);
 			this.c_separateMonitors.Name = "c_separateMonitors";
-			this.c_separateMonitors.Size = new System.Drawing.Size(179, 17);
+			this.c_separateMonitors.Size = new System.Drawing.Size(237, 21);
 			this.c_separateMonitors.TabIndex = 3;
 			this.c_separateMonitors.Text = "Separate image for each monitor";
 			this.toolTip1.SetToolTip(this.c_separateMonitors, "Display a separate image on each monitor");
@@ -557,9 +577,10 @@
 			// lblImageSizeDisplay
 			// 
 			this.lblImageSizeDisplay.AutoSize = true;
-			this.lblImageSizeDisplay.Location = new System.Drawing.Point(265, 19);
+			this.lblImageSizeDisplay.Location = new System.Drawing.Point(353, 23);
+			this.lblImageSizeDisplay.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.lblImageSizeDisplay.Name = "lblImageSizeDisplay";
-			this.lblImageSizeDisplay.Size = new System.Drawing.Size(15, 13);
+			this.lblImageSizeDisplay.Size = new System.Drawing.Size(20, 17);
 			this.lblImageSizeDisplay.TabIndex = 2;
 			this.lblImageSizeDisplay.Text = "%";
 			this.toolTip1.SetToolTip(this.lblImageSizeDisplay, "Image size in relation to the screen");
@@ -567,9 +588,10 @@
 			// lblImageSize
 			// 
 			this.lblImageSize.AutoSize = true;
-			this.lblImageSize.Location = new System.Drawing.Point(6, 19);
+			this.lblImageSize.Location = new System.Drawing.Point(8, 23);
+			this.lblImageSize.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.lblImageSize.Name = "lblImageSize";
-			this.lblImageSize.Size = new System.Drawing.Size(62, 13);
+			this.lblImageSize.Size = new System.Drawing.Size(81, 17);
 			this.lblImageSize.TabIndex = 0;
 			this.lblImageSize.Text = "Image Size:";
 			this.toolTip1.SetToolTip(this.lblImageSize, "Image size in relation to the screen");
@@ -578,11 +600,12 @@
 			// 
 			this.trkImageSize.BackColor = System.Drawing.SystemColors.Window;
 			this.trkImageSize.LargeChange = 20;
-			this.trkImageSize.Location = new System.Drawing.Point(119, 19);
+			this.trkImageSize.Location = new System.Drawing.Point(159, 23);
+			this.trkImageSize.Margin = new System.Windows.Forms.Padding(4);
 			this.trkImageSize.Maximum = 100;
 			this.trkImageSize.Minimum = 1;
 			this.trkImageSize.Name = "trkImageSize";
-			this.trkImageSize.Size = new System.Drawing.Size(140, 45);
+			this.trkImageSize.Size = new System.Drawing.Size(187, 56);
 			this.trkImageSize.SmallChange = 10;
 			this.trkImageSize.TabIndex = 1;
 			this.trkImageSize.TickFrequency = 10;
@@ -593,9 +616,10 @@
 			// lblBackBottom
 			// 
 			this.lblBackBottom.AutoSize = true;
-			this.lblBackBottom.Location = new System.Drawing.Point(6, 43);
+			this.lblBackBottom.Location = new System.Drawing.Point(8, 53);
+			this.lblBackBottom.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.lblBackBottom.Name = "lblBackBottom";
-			this.lblBackBottom.Size = new System.Drawing.Size(113, 13);
+			this.lblBackBottom.Size = new System.Drawing.Size(152, 17);
 			this.lblBackBottom.TabIndex = 2;
 			this.lblBackBottom.Text = "Bottom Gradient Color:";
 			this.toolTip1.SetToolTip(this.lblBackBottom, "Bottom color of background gradient");
@@ -603,9 +627,10 @@
 			// lblBackTop
 			// 
 			this.lblBackTop.AutoSize = true;
-			this.lblBackTop.Location = new System.Drawing.Point(6, 19);
+			this.lblBackTop.Location = new System.Drawing.Point(8, 23);
+			this.lblBackTop.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.lblBackTop.Name = "lblBackTop";
-			this.lblBackTop.Size = new System.Drawing.Size(99, 13);
+			this.lblBackTop.Size = new System.Drawing.Size(133, 17);
 			this.lblBackTop.TabIndex = 0;
 			this.lblBackTop.Text = "Top Gradient Color:";
 			this.toolTip1.SetToolTip(this.lblBackTop, "Top color of background gradient");
@@ -613,9 +638,10 @@
 			// btnAddImage
 			// 
 			this.btnAddImage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnAddImage.Location = new System.Drawing.Point(830, 35);
+			this.btnAddImage.Location = new System.Drawing.Point(1107, 43);
+			this.btnAddImage.Margin = new System.Windows.Forms.Padding(4);
 			this.btnAddImage.Name = "btnAddImage";
-			this.btnAddImage.Size = new System.Drawing.Size(120, 23);
+			this.btnAddImage.Size = new System.Drawing.Size(160, 28);
 			this.btnAddImage.TabIndex = 2;
 			this.btnAddImage.Text = "Add &Image";
 			this.toolTip1.SetToolTip(this.btnAddImage, "Add a single image file to the list");
@@ -629,9 +655,10 @@
 			this.c_themeMode.Items.AddRange(new object[] {
             "Full Screen",
             "Collage"});
-			this.c_themeMode.Location = new System.Drawing.Point(6, 19);
+			this.c_themeMode.Location = new System.Drawing.Point(8, 23);
+			this.c_themeMode.Margin = new System.Windows.Forms.Padding(4);
 			this.c_themeMode.Name = "c_themeMode";
-			this.c_themeMode.Size = new System.Drawing.Size(141, 21);
+			this.c_themeMode.Size = new System.Drawing.Size(187, 24);
 			this.c_themeMode.TabIndex = 0;
 			this.toolTip1.SetToolTip(this.c_themeMode, "Display mode");
 			this.c_themeMode.SelectedIndexChanged += new System.EventHandler(this.ControlChanged);
@@ -639,9 +666,10 @@
 			// btnAddFolder
 			// 
 			this.btnAddFolder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnAddFolder.Location = new System.Drawing.Point(830, 6);
+			this.btnAddFolder.Location = new System.Drawing.Point(1107, 7);
+			this.btnAddFolder.Margin = new System.Windows.Forms.Padding(4);
 			this.btnAddFolder.Name = "btnAddFolder";
-			this.btnAddFolder.Size = new System.Drawing.Size(120, 23);
+			this.btnAddFolder.Size = new System.Drawing.Size(160, 28);
 			this.btnAddFolder.TabIndex = 1;
 			this.btnAddFolder.Text = "&Add Folder";
 			this.toolTip1.SetToolTip(this.btnAddFolder, "Add a folder containing multiple images to the list");
@@ -658,6 +686,7 @@
 			// 
 			// cmTray
 			// 
+			this.cmTray.ImageScalingSize = new System.Drawing.Size(20, 20);
 			this.cmTray.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.cmShowMainWindow,
             this.ciTheme,
@@ -667,63 +696,65 @@
             this.toolStripMenuItem1,
             this.cmExit});
 			this.cmTray.Name = "trayMenu";
-			this.cmTray.Size = new System.Drawing.Size(176, 126);
+			this.cmTray.Size = new System.Drawing.Size(212, 146);
 			this.cmTray.Opening += new System.ComponentModel.CancelEventHandler(this.TrayMenu_Opening);
 			// 
 			// cmShowMainWindow
 			// 
 			this.cmShowMainWindow.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.cmShowMainWindow.Name = "cmShowMainWindow";
-			this.cmShowMainWindow.Size = new System.Drawing.Size(175, 22);
+			this.cmShowMainWindow.Size = new System.Drawing.Size(211, 26);
 			this.cmShowMainWindow.Text = "&Show";
 			this.cmShowMainWindow.Click += new System.EventHandler(this.cmShowMainWindow_Click);
 			// 
 			// ciTheme
 			// 
 			this.ciTheme.Name = "ciTheme";
-			this.ciTheme.Size = new System.Drawing.Size(175, 22);
+			this.ciTheme.Size = new System.Drawing.Size(211, 26);
 			this.ciTheme.Text = "&Theme";
 			// 
 			// toolStripSeparator1
 			// 
 			this.toolStripSeparator1.Name = "toolStripSeparator1";
-			this.toolStripSeparator1.Size = new System.Drawing.Size(172, 6);
+			this.toolStripSeparator1.Size = new System.Drawing.Size(208, 6);
 			// 
 			// cmSwitchNow
 			// 
 			this.cmSwitchNow.Name = "cmSwitchNow";
-			this.cmSwitchNow.Size = new System.Drawing.Size(175, 22);
+			this.cmSwitchNow.Size = new System.Drawing.Size(211, 26);
 			this.cmSwitchNow.Text = "&Next Wallpaper";
 			this.cmSwitchNow.Click += new System.EventHandler(this.ciSwitchNow_Click);
 			// 
 			// ciSwitchPrev
 			// 
 			this.ciSwitchPrev.Name = "ciSwitchPrev";
-			this.ciSwitchPrev.Size = new System.Drawing.Size(175, 22);
+			this.ciSwitchPrev.Size = new System.Drawing.Size(211, 26);
 			this.ciSwitchPrev.Text = "&Previous Wallpaper";
 			this.ciSwitchPrev.Click += new System.EventHandler(this.ciSwitchPrev_Click);
 			// 
 			// toolStripMenuItem1
 			// 
 			this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-			this.toolStripMenuItem1.Size = new System.Drawing.Size(172, 6);
+			this.toolStripMenuItem1.Size = new System.Drawing.Size(208, 6);
 			// 
 			// cmExit
 			// 
 			this.cmExit.Name = "cmExit";
-			this.cmExit.Size = new System.Drawing.Size(175, 22);
+			this.cmExit.Size = new System.Drawing.Size(211, 26);
 			this.cmExit.Text = "E&xit";
 			this.cmExit.Click += new System.EventHandler(this.cmExit_Click);
 			// 
 			// mainMenu
 			// 
+			this.mainMenu.ImageScalingSize = new System.Drawing.Size(20, 20);
 			this.mainMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.menuFile,
             this.menuTools,
             this.menuHelp});
 			this.mainMenu.Location = new System.Drawing.Point(0, 0);
 			this.mainMenu.Name = "mainMenu";
-			this.mainMenu.Size = new System.Drawing.Size(734, 24);
+			this.mainMenu.Padding = new System.Windows.Forms.Padding(8, 2, 0, 2);
+			this.mainMenu.Size = new System.Drawing.Size(979, 28);
 			this.mainMenu.TabIndex = 8;
 			this.mainMenu.Text = "menuStrip1";
 			// 
@@ -739,14 +770,14 @@
             this.toolStripMenuItem2,
             this.miFileExit});
 			this.menuFile.Name = "menuFile";
-			this.menuFile.Size = new System.Drawing.Size(37, 20);
+			this.menuFile.Size = new System.Drawing.Size(44, 24);
 			this.menuFile.Text = "&File";
 			// 
 			// miFileNewTheme
 			// 
 			this.miFileNewTheme.Name = "miFileNewTheme";
 			this.miFileNewTheme.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-			this.miFileNewTheme.Size = new System.Drawing.Size(198, 22);
+			this.miFileNewTheme.Size = new System.Drawing.Size(238, 26);
 			this.miFileNewTheme.Text = "&New Theme";
 			this.miFileNewTheme.Click += new System.EventHandler(this.miFileNewTheme_Click);
 			// 
@@ -754,47 +785,47 @@
 			// 
 			this.miFileRenameTheme.Name = "miFileRenameTheme";
 			this.miFileRenameTheme.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
-			this.miFileRenameTheme.Size = new System.Drawing.Size(198, 22);
+			this.miFileRenameTheme.Size = new System.Drawing.Size(238, 26);
 			this.miFileRenameTheme.Text = "&Rename Theme";
 			this.miFileRenameTheme.Click += new System.EventHandler(this.miFileRenameTheme_Click);
 			// 
 			// miDuplicateTheme
 			// 
 			this.miDuplicateTheme.Name = "miDuplicateTheme";
-			this.miDuplicateTheme.Size = new System.Drawing.Size(198, 22);
+			this.miDuplicateTheme.Size = new System.Drawing.Size(238, 26);
 			this.miDuplicateTheme.Text = "D&uplicate Theme";
 			this.miDuplicateTheme.Click += new System.EventHandler(this.miDuplicateTheme_Click);
 			// 
 			// miFileDeleteTheme
 			// 
 			this.miFileDeleteTheme.Name = "miFileDeleteTheme";
-			this.miFileDeleteTheme.Size = new System.Drawing.Size(198, 22);
+			this.miFileDeleteTheme.Size = new System.Drawing.Size(238, 26);
 			this.miFileDeleteTheme.Text = "&Delete Theme";
 			this.miFileDeleteTheme.Click += new System.EventHandler(this.miFileDeleteTheme_Click);
 			// 
 			// toolStripMenuItem3
 			// 
 			this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-			this.toolStripMenuItem3.Size = new System.Drawing.Size(195, 6);
+			this.toolStripMenuItem3.Size = new System.Drawing.Size(235, 6);
 			// 
 			// miFileSave
 			// 
 			this.miFileSave.Name = "miFileSave";
 			this.miFileSave.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-			this.miFileSave.Size = new System.Drawing.Size(198, 22);
+			this.miFileSave.Size = new System.Drawing.Size(238, 26);
 			this.miFileSave.Text = "&Save";
 			this.miFileSave.Click += new System.EventHandler(this.FileSave_Click);
 			// 
 			// toolStripMenuItem2
 			// 
 			this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-			this.toolStripMenuItem2.Size = new System.Drawing.Size(195, 6);
+			this.toolStripMenuItem2.Size = new System.Drawing.Size(235, 6);
 			// 
 			// miFileExit
 			// 
 			this.miFileExit.Name = "miFileExit";
 			this.miFileExit.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.X)));
-			this.miFileExit.Size = new System.Drawing.Size(198, 22);
+			this.miFileExit.Size = new System.Drawing.Size(238, 26);
 			this.miFileExit.Text = "E&xit";
 			this.miFileExit.Click += new System.EventHandler(this.miFileExit_Click);
 			// 
@@ -806,32 +837,32 @@
             this.miHotKeys,
             this.settingsToolStripMenuItem});
 			this.menuTools.Name = "menuTools";
-			this.menuTools.Size = new System.Drawing.Size(48, 20);
+			this.menuTools.Size = new System.Drawing.Size(56, 24);
 			this.menuTools.Text = "&Tools";
 			// 
 			// miClearHistory
 			// 
 			this.miClearHistory.Name = "miClearHistory";
-			this.miClearHistory.Size = new System.Drawing.Size(142, 22);
+			this.miClearHistory.Size = new System.Drawing.Size(169, 26);
 			this.miClearHistory.Text = "&Clear History";
 			this.miClearHistory.Click += new System.EventHandler(this.miClearHistory_Click);
 			// 
 			// toolStripMenuItem11
 			// 
 			this.toolStripMenuItem11.Name = "toolStripMenuItem11";
-			this.toolStripMenuItem11.Size = new System.Drawing.Size(139, 6);
+			this.toolStripMenuItem11.Size = new System.Drawing.Size(166, 6);
 			// 
 			// miHotKeys
 			// 
 			this.miHotKeys.Name = "miHotKeys";
-			this.miHotKeys.Size = new System.Drawing.Size(142, 22);
+			this.miHotKeys.Size = new System.Drawing.Size(169, 26);
 			this.miHotKeys.Text = "&Hot Keys";
 			this.miHotKeys.Click += new System.EventHandler(this.miHotKeys_Click);
 			// 
 			// settingsToolStripMenuItem
 			// 
 			this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-			this.settingsToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+			this.settingsToolStripMenuItem.Size = new System.Drawing.Size(169, 26);
 			this.settingsToolStripMenuItem.Text = "&Settings";
 			this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
 			// 
@@ -840,13 +871,13 @@
 			this.menuHelp.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.miHelpAbout});
 			this.menuHelp.Name = "menuHelp";
-			this.menuHelp.Size = new System.Drawing.Size(44, 20);
+			this.menuHelp.Size = new System.Drawing.Size(53, 24);
 			this.menuHelp.Text = "&Help";
 			// 
 			// miHelpAbout
 			// 
 			this.miHelpAbout.Name = "miHelpAbout";
-			this.miHelpAbout.Size = new System.Drawing.Size(107, 22);
+			this.miHelpAbout.Size = new System.Drawing.Size(125, 26);
 			this.miHelpAbout.Text = "&About";
 			this.miHelpAbout.Click += new System.EventHandler(this.miHelpAbout_Click);
 			// 
@@ -859,10 +890,11 @@
 			this.c_themeTabControl.Controls.Add(this.c_settingsTab);
 			this.c_themeTabControl.Controls.Add(this.c_widgetsTab);
 			this.c_themeTabControl.Controls.Add(this.tabHistory);
-			this.c_themeTabControl.Location = new System.Drawing.Point(12, 83);
+			this.c_themeTabControl.Location = new System.Drawing.Point(16, 102);
+			this.c_themeTabControl.Margin = new System.Windows.Forms.Padding(4);
 			this.c_themeTabControl.Name = "c_themeTabControl";
 			this.c_themeTabControl.SelectedIndex = 0;
-			this.c_themeTabControl.Size = new System.Drawing.Size(710, 417);
+			this.c_themeTabControl.Size = new System.Drawing.Size(947, 513);
 			this.c_themeTabControl.TabIndex = 10;
 			// 
 			// c_locationsTab
@@ -871,10 +903,11 @@
 			this.c_locationsTab.Controls.Add(this.lstLocations);
 			this.c_locationsTab.Controls.Add(this.btnAddFolder);
 			this.c_locationsTab.Controls.Add(this.btnAddImage);
-			this.c_locationsTab.Location = new System.Drawing.Point(4, 22);
+			this.c_locationsTab.Location = new System.Drawing.Point(4, 25);
+			this.c_locationsTab.Margin = new System.Windows.Forms.Padding(4);
 			this.c_locationsTab.Name = "c_locationsTab";
-			this.c_locationsTab.Padding = new System.Windows.Forms.Padding(3);
-			this.c_locationsTab.Size = new System.Drawing.Size(702, 391);
+			this.c_locationsTab.Padding = new System.Windows.Forms.Padding(4);
+			this.c_locationsTab.Size = new System.Drawing.Size(939, 484);
 			this.c_locationsTab.TabIndex = 0;
 			this.c_locationsTab.Text = "Images";
 			this.c_locationsTab.UseVisualStyleBackColor = true;
@@ -882,9 +915,10 @@
 			// btnAddFeed
 			// 
 			this.btnAddFeed.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnAddFeed.Location = new System.Drawing.Point(829, 64);
+			this.btnAddFeed.Location = new System.Drawing.Point(1105, 79);
+			this.btnAddFeed.Margin = new System.Windows.Forms.Padding(4);
 			this.btnAddFeed.Name = "btnAddFeed";
-			this.btnAddFeed.Size = new System.Drawing.Size(120, 23);
+			this.btnAddFeed.Size = new System.Drawing.Size(160, 28);
 			this.btnAddFeed.TabIndex = 3;
 			this.btnAddFeed.Text = "Add &Feed";
 			this.toolTip1.SetToolTip(this.btnAddFeed, "Add a RSS/ATOM feed to the list");
@@ -894,10 +928,11 @@
 			// c_settingsTab
 			// 
 			this.c_settingsTab.Controls.Add(this.flowDisplay);
-			this.c_settingsTab.Location = new System.Drawing.Point(4, 22);
+			this.c_settingsTab.Location = new System.Drawing.Point(4, 25);
+			this.c_settingsTab.Margin = new System.Windows.Forms.Padding(4);
 			this.c_settingsTab.Name = "c_settingsTab";
-			this.c_settingsTab.Padding = new System.Windows.Forms.Padding(3);
-			this.c_settingsTab.Size = new System.Drawing.Size(702, 391);
+			this.c_settingsTab.Padding = new System.Windows.Forms.Padding(4);
+			this.c_settingsTab.Size = new System.Drawing.Size(939, 484);
 			this.c_settingsTab.TabIndex = 1;
 			this.c_settingsTab.Text = "Settings";
 			this.c_settingsTab.UseVisualStyleBackColor = true;
@@ -914,14 +949,18 @@
 			this.flowDisplay.Controls.Add(this.grpImageEffects);
 			this.flowDisplay.Controls.Add(this.grpBackgroundColorEffects);
 			this.flowDisplay.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-			this.flowDisplay.Location = new System.Drawing.Point(3, 3);
+			this.flowDisplay.Location = new System.Drawing.Point(4, 4);
+			this.flowDisplay.Margin = new System.Windows.Forms.Padding(4);
 			this.flowDisplay.Name = "flowDisplay";
-			this.flowDisplay.Size = new System.Drawing.Size(696, 385);
+			this.flowDisplay.Size = new System.Drawing.Size(928, 474);
 			this.flowDisplay.TabIndex = 14;
 			this.flowDisplay.WrapContents = false;
 			// 
 			// grpDisplayMode
 			// 
+			this.grpDisplayMode.Controls.Add(this.c_randomGroupCountLabel);
+			this.grpDisplayMode.Controls.Add(this.c_randomGroupCount);
+			this.grpDisplayMode.Controls.Add(this.c_randomGroup);
 			this.grpDisplayMode.Controls.Add(this.c_maxClipLabel);
 			this.grpDisplayMode.Controls.Add(this.c_maxScalePct);
 			this.grpDisplayMode.Controls.Add(this.c_maxScale);
@@ -933,19 +972,54 @@
 			this.grpDisplayMode.Controls.Add(this.c_imageFit);
 			this.grpDisplayMode.Controls.Add(this.c_limitScale);
 			this.grpDisplayMode.Controls.Add(this.c_separateMonitors);
-			this.grpDisplayMode.Location = new System.Drawing.Point(3, 3);
+			this.grpDisplayMode.Location = new System.Drawing.Point(4, 4);
+			this.grpDisplayMode.Margin = new System.Windows.Forms.Padding(4);
 			this.grpDisplayMode.Name = "grpDisplayMode";
-			this.grpDisplayMode.Size = new System.Drawing.Size(669, 134);
+			this.grpDisplayMode.Padding = new System.Windows.Forms.Padding(4);
+			this.grpDisplayMode.Size = new System.Drawing.Size(892, 184);
 			this.grpDisplayMode.TabIndex = 0;
 			this.grpDisplayMode.TabStop = false;
 			this.grpDisplayMode.Text = "Display Mode";
 			// 
+			// c_randomGroupCountLabel
+			// 
+			this.c_randomGroupCountLabel.AutoSize = true;
+			this.c_randomGroupCountLabel.Location = new System.Drawing.Point(279, 150);
+			this.c_randomGroupCountLabel.Name = "c_randomGroupCountLabel";
+			this.c_randomGroupCountLabel.Size = new System.Drawing.Size(119, 17);
+			this.c_randomGroupCountLabel.TabIndex = 13;
+			this.c_randomGroupCountLabel.Text = "images per group";
+			this.toolTip1.SetToolTip(this.c_randomGroupCountLabel, "The number of sequential images chosen between random selections.");
+			// 
+			// c_randomGroupCount
+			// 
+			this.c_randomGroupCount.Location = new System.Drawing.Point(204, 147);
+			this.c_randomGroupCount.Name = "c_randomGroupCount";
+			this.c_randomGroupCount.Size = new System.Drawing.Size(65, 22);
+			this.c_randomGroupCount.TabIndex = 12;
+			this.toolTip1.SetToolTip(this.c_randomGroupCount, "The number of sequential images chosen between random selections.");
+			this.c_randomGroupCount.TextChanged += new System.EventHandler(this.ControlChanged);
+			// 
+			// c_randomGroup
+			// 
+			this.c_randomGroup.AutoSize = true;
+			this.c_randomGroup.Location = new System.Drawing.Point(8, 149);
+			this.c_randomGroup.Name = "c_randomGroup";
+			this.c_randomGroup.Size = new System.Drawing.Size(156, 21);
+			this.c_randomGroup.TabIndex = 11;
+			this.c_randomGroup.Text = "Sequential Groups?";
+			this.toolTip1.SetToolTip(this.c_randomGroup, "Enable groups of sequential images to be displayed before selecting the next rand" +
+        "om image?");
+			this.c_randomGroup.UseVisualStyleBackColor = true;
+			this.c_randomGroup.CheckedChanged += new System.EventHandler(this.ControlChanged);
+			// 
 			// c_maxClipLabel
 			// 
 			this.c_maxClipLabel.AutoSize = true;
-			this.c_maxClipLabel.Location = new System.Drawing.Point(216, 74);
+			this.c_maxClipLabel.Location = new System.Drawing.Point(288, 91);
+			this.c_maxClipLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.c_maxClipLabel.Name = "c_maxClipLabel";
-			this.c_maxClipLabel.Size = new System.Drawing.Size(103, 13);
+			this.c_maxClipLabel.Size = new System.Drawing.Size(135, 17);
 			this.c_maxClipLabel.TabIndex = 5;
 			this.c_maxClipLabel.Text = "Maximum Image Clip";
 			this.toolTip1.SetToolTip(this.c_maxClipLabel, "When spanning across monitors that don\'t make a perfect rectangle, part of the im" +
@@ -955,18 +1029,20 @@
 			// c_maxScalePct
 			// 
 			this.c_maxScalePct.AutoSize = true;
-			this.c_maxScalePct.Location = new System.Drawing.Point(209, 99);
+			this.c_maxScalePct.Location = new System.Drawing.Point(279, 122);
+			this.c_maxScalePct.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.c_maxScalePct.Name = "c_maxScalePct";
-			this.c_maxScalePct.Size = new System.Drawing.Size(15, 13);
+			this.c_maxScalePct.Size = new System.Drawing.Size(20, 17);
 			this.c_maxScalePct.TabIndex = 10;
 			this.c_maxScalePct.Text = "%";
 			this.toolTip1.SetToolTip(this.c_maxScalePct, "Maximum amount of magnification (in percent)");
 			// 
 			// c_maxScale
 			// 
-			this.c_maxScale.Location = new System.Drawing.Point(153, 96);
+			this.c_maxScale.Location = new System.Drawing.Point(204, 118);
+			this.c_maxScale.Margin = new System.Windows.Forms.Padding(4);
 			this.c_maxScale.Name = "c_maxScale";
-			this.c_maxScale.Size = new System.Drawing.Size(50, 20);
+			this.c_maxScale.Size = new System.Drawing.Size(65, 22);
 			this.c_maxScale.TabIndex = 9;
 			this.toolTip1.SetToolTip(this.c_maxScale, "Maximum amount of magnification (in percent)");
 			this.c_maxScale.TextChanged += new System.EventHandler(this.ControlChanged);
@@ -974,9 +1050,10 @@
 			// c_maxClipPercent
 			// 
 			this.c_maxClipPercent.AutoSize = true;
-			this.c_maxClipPercent.Location = new System.Drawing.Point(460, 74);
+			this.c_maxClipPercent.Location = new System.Drawing.Point(613, 91);
+			this.c_maxClipPercent.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.c_maxClipPercent.Name = "c_maxClipPercent";
-			this.c_maxClipPercent.Size = new System.Drawing.Size(15, 13);
+			this.c_maxClipPercent.Size = new System.Drawing.Size(20, 17);
 			this.c_maxClipPercent.TabIndex = 7;
 			this.c_maxClipPercent.Text = "%";
 			this.toolTip1.SetToolTip(this.c_maxClipPercent, "When spanning across monitors that don\'t make a perfect rectangle, part of the im" +
@@ -987,10 +1064,11 @@
 			// 
 			this.c_maxClipTrackBar.BackColor = System.Drawing.SystemColors.Window;
 			this.c_maxClipTrackBar.LargeChange = 20;
-			this.c_maxClipTrackBar.Location = new System.Drawing.Point(325, 67);
+			this.c_maxClipTrackBar.Location = new System.Drawing.Point(433, 82);
+			this.c_maxClipTrackBar.Margin = new System.Windows.Forms.Padding(4);
 			this.c_maxClipTrackBar.Maximum = 100;
 			this.c_maxClipTrackBar.Name = "c_maxClipTrackBar";
-			this.c_maxClipTrackBar.Size = new System.Drawing.Size(140, 45);
+			this.c_maxClipTrackBar.Size = new System.Drawing.Size(187, 56);
 			this.c_maxClipTrackBar.SmallChange = 10;
 			this.c_maxClipTrackBar.TabIndex = 6;
 			this.c_maxClipTrackBar.TickFrequency = 10;
@@ -1005,9 +1083,10 @@
 			this.c_allowSpanning.AutoSize = true;
 			this.c_allowSpanning.Checked = true;
 			this.c_allowSpanning.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.c_allowSpanning.Location = new System.Drawing.Point(6, 73);
+			this.c_allowSpanning.Location = new System.Drawing.Point(8, 90);
+			this.c_allowSpanning.Margin = new System.Windows.Forms.Padding(4);
 			this.c_allowSpanning.Name = "c_allowSpanning";
-			this.c_allowSpanning.Size = new System.Drawing.Size(173, 17);
+			this.c_allowSpanning.Size = new System.Drawing.Size(228, 21);
 			this.c_allowSpanning.TabIndex = 4;
 			this.c_allowSpanning.Text = "Allow spanning across monitors";
 			this.toolTip1.SetToolTip(this.c_allowSpanning, "If an image is the correct aspect ratio, span it across multiple monitors.");
@@ -1021,9 +1100,10 @@
 			this.c_themeOrder.Items.AddRange(new object[] {
             "Sequential",
             "Random"});
-			this.c_themeOrder.Location = new System.Drawing.Point(153, 19);
+			this.c_themeOrder.Location = new System.Drawing.Point(204, 23);
+			this.c_themeOrder.Margin = new System.Windows.Forms.Padding(4);
 			this.c_themeOrder.Name = "c_themeOrder";
-			this.c_themeOrder.Size = new System.Drawing.Size(141, 21);
+			this.c_themeOrder.Size = new System.Drawing.Size(187, 24);
 			this.c_themeOrder.TabIndex = 1;
 			this.toolTip1.SetToolTip(this.c_themeOrder, "Display order");
 			this.c_themeOrder.SelectedIndexChanged += new System.EventHandler(this.ControlChanged);
@@ -1031,9 +1111,10 @@
 			// c_limitScale
 			// 
 			this.c_limitScale.AutoSize = true;
-			this.c_limitScale.Location = new System.Drawing.Point(6, 98);
+			this.c_limitScale.Location = new System.Drawing.Point(8, 121);
+			this.c_limitScale.Margin = new System.Windows.Forms.Padding(4);
 			this.c_limitScale.Name = "c_limitScale";
-			this.c_limitScale.Size = new System.Drawing.Size(126, 17);
+			this.c_limitScale.Size = new System.Drawing.Size(165, 21);
 			this.c_limitScale.TabIndex = 8;
 			this.c_limitScale.Text = "Limit image scaling to";
 			this.toolTip1.SetToolTip(this.c_limitScale, "Limit the magnification of images?");
@@ -1049,9 +1130,11 @@
 			this.grpFrequency.Controls.Add(this.lblFrequency);
 			this.grpFrequency.Controls.Add(this.txtThemeFreq);
 			this.grpFrequency.Controls.Add(this.c_activateThemeHotKey);
-			this.grpFrequency.Location = new System.Drawing.Point(3, 143);
+			this.grpFrequency.Location = new System.Drawing.Point(4, 196);
+			this.grpFrequency.Margin = new System.Windows.Forms.Padding(4);
 			this.grpFrequency.Name = "grpFrequency";
-			this.grpFrequency.Size = new System.Drawing.Size(669, 97);
+			this.grpFrequency.Padding = new System.Windows.Forms.Padding(4);
+			this.grpFrequency.Size = new System.Drawing.Size(892, 119);
 			this.grpFrequency.TabIndex = 1;
 			this.grpFrequency.TabStop = false;
 			this.grpFrequency.Text = "Change Frequency";
@@ -1059,9 +1142,10 @@
 			// c_activateOnExitCheckBox
 			// 
 			this.c_activateOnExitCheckBox.AutoSize = true;
-			this.c_activateOnExitCheckBox.Location = new System.Drawing.Point(6, 68);
+			this.c_activateOnExitCheckBox.Location = new System.Drawing.Point(8, 84);
+			this.c_activateOnExitCheckBox.Margin = new System.Windows.Forms.Padding(4);
 			this.c_activateOnExitCheckBox.Name = "c_activateOnExitCheckBox";
-			this.c_activateOnExitCheckBox.Size = new System.Drawing.Size(206, 17);
+			this.c_activateOnExitCheckBox.Size = new System.Drawing.Size(272, 21);
 			this.c_activateOnExitCheckBox.TabIndex = 6;
 			this.c_activateOnExitCheckBox.Text = "Temporarily activate this theme on exit";
 			this.toolTip1.SetToolTip(this.c_activateOnExitCheckBox, "When WallSwitch is closing, this theme will be displayed until the next time Wall" +
@@ -1072,9 +1156,10 @@
 			// chkFadeTransition
 			// 
 			this.chkFadeTransition.AutoSize = true;
-			this.chkFadeTransition.Location = new System.Drawing.Point(325, 21);
+			this.chkFadeTransition.Location = new System.Drawing.Point(433, 26);
+			this.chkFadeTransition.Margin = new System.Windows.Forms.Padding(4);
 			this.chkFadeTransition.Name = "chkFadeTransition";
-			this.chkFadeTransition.Size = new System.Drawing.Size(133, 17);
+			this.chkFadeTransition.Size = new System.Drawing.Size(177, 21);
 			this.chkFadeTransition.TabIndex = 3;
 			this.chkFadeTransition.Text = "Cross-Fade Transitions";
 			this.toolTip1.SetToolTip(this.chkFadeTransition, "Use smooth cross-fading between wallpapers (Windows 7 or higher)");
@@ -1084,9 +1169,10 @@
 			// c_activateThemeLabel
 			// 
 			this.c_activateThemeLabel.AutoSize = true;
-			this.c_activateThemeLabel.Location = new System.Drawing.Point(6, 48);
+			this.c_activateThemeLabel.Location = new System.Drawing.Point(8, 59);
+			this.c_activateThemeLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.c_activateThemeLabel.Name = "c_activateThemeLabel";
-			this.c_activateThemeLabel.Size = new System.Drawing.Size(48, 13);
+			this.c_activateThemeLabel.Size = new System.Drawing.Size(62, 17);
 			this.c_activateThemeLabel.TabIndex = 4;
 			this.c_activateThemeLabel.Text = "Hot Key:";
 			// 
@@ -1099,9 +1185,10 @@
             "Minutes",
             "Hours",
             "Days"});
-			this.cmbThemePeriod.Location = new System.Drawing.Point(219, 19);
+			this.cmbThemePeriod.Location = new System.Drawing.Point(292, 23);
+			this.cmbThemePeriod.Margin = new System.Windows.Forms.Padding(4);
 			this.cmbThemePeriod.Name = "cmbThemePeriod";
-			this.cmbThemePeriod.Size = new System.Drawing.Size(75, 21);
+			this.cmbThemePeriod.Size = new System.Drawing.Size(99, 24);
 			this.cmbThemePeriod.TabIndex = 2;
 			this.toolTip1.SetToolTip(this.cmbThemePeriod, "Wallpaper change interval");
 			this.cmbThemePeriod.TextChanged += new System.EventHandler(this.ControlChanged);
@@ -1109,33 +1196,23 @@
 			// lblFrequency
 			// 
 			this.lblFrequency.AutoSize = true;
-			this.lblFrequency.Location = new System.Drawing.Point(6, 22);
+			this.lblFrequency.Location = new System.Drawing.Point(8, 27);
+			this.lblFrequency.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.lblFrequency.Name = "lblFrequency";
-			this.lblFrequency.Size = new System.Drawing.Size(104, 13);
+			this.lblFrequency.Size = new System.Drawing.Size(138, 17);
 			this.lblFrequency.TabIndex = 0;
 			this.lblFrequency.Text = "Change image every";
 			// 
 			// txtThemeFreq
 			// 
-			this.txtThemeFreq.Location = new System.Drawing.Point(153, 19);
+			this.txtThemeFreq.Location = new System.Drawing.Point(204, 23);
+			this.txtThemeFreq.Margin = new System.Windows.Forms.Padding(4);
 			this.txtThemeFreq.MaxLength = 5;
 			this.txtThemeFreq.Name = "txtThemeFreq";
-			this.txtThemeFreq.Size = new System.Drawing.Size(60, 20);
+			this.txtThemeFreq.Size = new System.Drawing.Size(79, 22);
 			this.txtThemeFreq.TabIndex = 1;
 			this.toolTip1.SetToolTip(this.txtThemeFreq, "Wallpaper change interval");
 			this.txtThemeFreq.TextChanged += new System.EventHandler(this.ControlChanged);
-			// 
-			// c_activateThemeHotKey
-			// 
-			this.c_activateThemeHotKey.BackColor = System.Drawing.SystemColors.Window;
-			this.c_activateThemeHotKey.HotKey = null;
-			this.c_activateThemeHotKey.Location = new System.Drawing.Point(153, 45);
-			this.c_activateThemeHotKey.Name = "c_activateThemeHotKey";
-			this.c_activateThemeHotKey.ReadOnly = true;
-			this.c_activateThemeHotKey.Size = new System.Drawing.Size(141, 20);
-			this.c_activateThemeHotKey.TabIndex = 5;
-			this.toolTip1.SetToolTip(this.c_activateThemeHotKey, "Hot key to change to this theme");
-			this.c_activateThemeHotKey.HotKeyChanged += new System.EventHandler(this.ControlChanged);
 			// 
 			// grpBackgroundColor
 			// 
@@ -1146,36 +1223,14 @@
 			this.grpBackgroundColor.Controls.Add(this.trkOpacity);
 			this.grpBackgroundColor.Controls.Add(this.lblOpacity);
 			this.grpBackgroundColor.Controls.Add(this.lblOpacityDisplay);
-			this.grpBackgroundColor.Location = new System.Drawing.Point(3, 246);
+			this.grpBackgroundColor.Location = new System.Drawing.Point(4, 323);
+			this.grpBackgroundColor.Margin = new System.Windows.Forms.Padding(4);
 			this.grpBackgroundColor.Name = "grpBackgroundColor";
-			this.grpBackgroundColor.Size = new System.Drawing.Size(669, 72);
+			this.grpBackgroundColor.Padding = new System.Windows.Forms.Padding(4);
+			this.grpBackgroundColor.Size = new System.Drawing.Size(892, 89);
 			this.grpBackgroundColor.TabIndex = 2;
 			this.grpBackgroundColor.TabStop = false;
 			this.grpBackgroundColor.Text = "Background Color";
-			// 
-			// clrBackTop
-			// 
-			this.clrBackTop.BackColor = System.Drawing.Color.Black;
-			this.clrBackTop.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.clrBackTop.Color = System.Drawing.Color.Black;
-			this.clrBackTop.Location = new System.Drawing.Point(153, 19);
-			this.clrBackTop.Name = "clrBackTop";
-			this.clrBackTop.Size = new System.Drawing.Size(30, 18);
-			this.clrBackTop.TabIndex = 1;
-			this.toolTip1.SetToolTip(this.clrBackTop, "Top color of background gradient");
-			this.clrBackTop.ColorChanged += new WallSwitch.ColorSample.ColorChangedEventHandler(this.BackTop_ColorChanged);
-			// 
-			// clrBackBottom
-			// 
-			this.clrBackBottom.BackColor = System.Drawing.Color.Black;
-			this.clrBackBottom.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.clrBackBottom.Color = System.Drawing.Color.Black;
-			this.clrBackBottom.Location = new System.Drawing.Point(153, 43);
-			this.clrBackBottom.Name = "clrBackBottom";
-			this.clrBackBottom.Size = new System.Drawing.Size(30, 18);
-			this.clrBackBottom.TabIndex = 3;
-			this.toolTip1.SetToolTip(this.clrBackBottom, "Bottom color of background gradient");
-			this.clrBackBottom.ColorChanged += new WallSwitch.ColorSample.ColorChangedEventHandler(this.BackBottom_ColorChanged);
 			// 
 			// grpCollageDisplay
 			// 
@@ -1198,9 +1253,11 @@
 			this.grpCollageDisplay.Controls.Add(this.trkImageSize);
 			this.grpCollageDisplay.Controls.Add(this.lblImageSize);
 			this.grpCollageDisplay.Controls.Add(this.lblImageSizeDisplay);
-			this.grpCollageDisplay.Location = new System.Drawing.Point(3, 324);
+			this.grpCollageDisplay.Location = new System.Drawing.Point(4, 420);
+			this.grpCollageDisplay.Margin = new System.Windows.Forms.Padding(4);
 			this.grpCollageDisplay.Name = "grpCollageDisplay";
-			this.grpCollageDisplay.Size = new System.Drawing.Size(669, 216);
+			this.grpCollageDisplay.Padding = new System.Windows.Forms.Padding(4);
+			this.grpCollageDisplay.Size = new System.Drawing.Size(892, 266);
 			this.grpCollageDisplay.TabIndex = 3;
 			this.grpCollageDisplay.TabStop = false;
 			this.grpCollageDisplay.Text = "Collage Display";
@@ -1208,40 +1265,31 @@
 			// c_numCollageImagesLabel
 			// 
 			this.c_numCollageImagesLabel.AutoSize = true;
-			this.c_numCollageImagesLabel.Location = new System.Drawing.Point(373, 19);
+			this.c_numCollageImagesLabel.Location = new System.Drawing.Point(497, 23);
+			this.c_numCollageImagesLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.c_numCollageImagesLabel.Name = "c_numCollageImagesLabel";
-			this.c_numCollageImagesLabel.Size = new System.Drawing.Size(97, 13);
+			this.c_numCollageImagesLabel.Size = new System.Drawing.Size(130, 17);
 			this.c_numCollageImagesLabel.TabIndex = 4;
 			this.c_numCollageImagesLabel.Text = "image(s) per switch";
 			this.toolTip1.SetToolTip(this.c_numCollageImagesLabel, "Number of images to draw each time the wallpaper changes");
 			// 
 			// c_numCollageImages
 			// 
-			this.c_numCollageImages.Location = new System.Drawing.Point(327, 16);
+			this.c_numCollageImages.Location = new System.Drawing.Point(436, 20);
+			this.c_numCollageImages.Margin = new System.Windows.Forms.Padding(4);
 			this.c_numCollageImages.Name = "c_numCollageImages";
-			this.c_numCollageImages.Size = new System.Drawing.Size(40, 20);
+			this.c_numCollageImages.Size = new System.Drawing.Size(52, 22);
 			this.c_numCollageImages.TabIndex = 3;
 			this.toolTip1.SetToolTip(this.c_numCollageImages, "Number of images to draw each time the wallpaper changes");
 			this.c_numCollageImages.TextChanged += new System.EventHandler(this.ControlChanged);
 			// 
-			// c_borderColor
-			// 
-			this.c_borderColor.BackColor = System.Drawing.Color.Transparent;
-			this.c_borderColor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.c_borderColor.Color = System.Drawing.Color.Transparent;
-			this.c_borderColor.Location = new System.Drawing.Point(364, 54);
-			this.c_borderColor.Name = "c_borderColor";
-			this.c_borderColor.Size = new System.Drawing.Size(30, 18);
-			this.c_borderColor.TabIndex = 9;
-			this.toolTip1.SetToolTip(this.c_borderColor, "Border color");
-			this.c_borderColor.ColorChanged += new WallSwitch.ColorSample.ColorChangedEventHandler(this.BorderColor_ColorChanged);
-			// 
 			// c_borderColorLabel
 			// 
 			this.c_borderColorLabel.AutoSize = true;
-			this.c_borderColorLabel.Location = new System.Drawing.Point(324, 57);
+			this.c_borderColorLabel.Location = new System.Drawing.Point(432, 70);
+			this.c_borderColorLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.c_borderColorLabel.Name = "c_borderColorLabel";
-			this.c_borderColorLabel.Size = new System.Drawing.Size(34, 13);
+			this.c_borderColorLabel.Size = new System.Drawing.Size(45, 17);
 			this.c_borderColorLabel.TabIndex = 8;
 			this.c_borderColorLabel.Text = "Color:";
 			this.toolTip1.SetToolTip(this.c_borderColorLabel, "Border color");
@@ -1250,9 +1298,10 @@
 			// 
 			this.c_edgeMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.c_edgeMode.FormattingEnabled = true;
-			this.c_edgeMode.Location = new System.Drawing.Point(6, 54);
+			this.c_edgeMode.Location = new System.Drawing.Point(8, 66);
+			this.c_edgeMode.Margin = new System.Windows.Forms.Padding(4);
 			this.c_edgeMode.Name = "c_edgeMode";
-			this.c_edgeMode.Size = new System.Drawing.Size(113, 21);
+			this.c_edgeMode.Size = new System.Drawing.Size(149, 24);
 			this.c_edgeMode.TabIndex = 5;
 			this.toolTip1.SetToolTip(this.c_edgeMode, "Decoration on edge of image");
 			this.c_edgeMode.SelectedIndexChanged += new System.EventHandler(this.EdgeMode_SelectedIndexChanged);
@@ -1261,10 +1310,11 @@
 			// 
 			this.trkDropShadowFeatherDist.BackColor = System.Drawing.SystemColors.Window;
 			this.trkDropShadowFeatherDist.LargeChange = 20;
-			this.trkDropShadowFeatherDist.Location = new System.Drawing.Point(119, 167);
+			this.trkDropShadowFeatherDist.Location = new System.Drawing.Point(159, 206);
+			this.trkDropShadowFeatherDist.Margin = new System.Windows.Forms.Padding(4);
 			this.trkDropShadowFeatherDist.Maximum = 100;
 			this.trkDropShadowFeatherDist.Name = "trkDropShadowFeatherDist";
-			this.trkDropShadowFeatherDist.Size = new System.Drawing.Size(140, 45);
+			this.trkDropShadowFeatherDist.Size = new System.Drawing.Size(187, 56);
 			this.trkDropShadowFeatherDist.SmallChange = 10;
 			this.trkDropShadowFeatherDist.TabIndex = 17;
 			this.trkDropShadowFeatherDist.TickFrequency = 10;
@@ -1276,10 +1326,11 @@
 			// 
 			this.trkDropShadowOpacity.BackColor = System.Drawing.SystemColors.Window;
 			this.trkDropShadowOpacity.LargeChange = 20;
-			this.trkDropShadowOpacity.Location = new System.Drawing.Point(119, 130);
+			this.trkDropShadowOpacity.Location = new System.Drawing.Point(159, 160);
+			this.trkDropShadowOpacity.Margin = new System.Windows.Forms.Padding(4);
 			this.trkDropShadowOpacity.Maximum = 100;
 			this.trkDropShadowOpacity.Name = "trkDropShadowOpacity";
-			this.trkDropShadowOpacity.Size = new System.Drawing.Size(140, 45);
+			this.trkDropShadowOpacity.Size = new System.Drawing.Size(187, 56);
 			this.trkDropShadowOpacity.SmallChange = 10;
 			this.trkDropShadowOpacity.TabIndex = 14;
 			this.trkDropShadowOpacity.TickFrequency = 10;
@@ -1290,9 +1341,10 @@
 			// lblDropShadowOpacity
 			// 
 			this.lblDropShadowOpacity.AutoSize = true;
-			this.lblDropShadowOpacity.Location = new System.Drawing.Point(6, 132);
+			this.lblDropShadowOpacity.Location = new System.Drawing.Point(8, 162);
+			this.lblDropShadowOpacity.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.lblDropShadowOpacity.Name = "lblDropShadowOpacity";
-			this.lblDropShadowOpacity.Size = new System.Drawing.Size(88, 13);
+			this.lblDropShadowOpacity.Size = new System.Drawing.Size(114, 17);
 			this.lblDropShadowOpacity.TabIndex = 13;
 			this.lblDropShadowOpacity.Text = "Shadow Opacity:";
 			this.toolTip1.SetToolTip(this.lblDropShadowOpacity, "Opacity of the shadow (0% = solid black, 100% = completely transparent)");
@@ -1300,9 +1352,10 @@
 			// lblDropShadowOpacityValue
 			// 
 			this.lblDropShadowOpacityValue.AutoSize = true;
-			this.lblDropShadowOpacityValue.Location = new System.Drawing.Point(265, 132);
+			this.lblDropShadowOpacityValue.Location = new System.Drawing.Point(353, 162);
+			this.lblDropShadowOpacityValue.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.lblDropShadowOpacityValue.Name = "lblDropShadowOpacityValue";
-			this.lblDropShadowOpacityValue.Size = new System.Drawing.Size(15, 13);
+			this.lblDropShadowOpacityValue.Size = new System.Drawing.Size(20, 17);
 			this.lblDropShadowOpacityValue.TabIndex = 15;
 			this.lblDropShadowOpacityValue.Text = "%";
 			this.toolTip1.SetToolTip(this.lblDropShadowOpacityValue, "Opacity of the shadow (0% = solid black, 100% = completely transparent)");
@@ -1310,9 +1363,10 @@
 			// lblDropShadowFeatherDist
 			// 
 			this.lblDropShadowFeatherDist.AutoSize = true;
-			this.lblDropShadowFeatherDist.Location = new System.Drawing.Point(265, 168);
+			this.lblDropShadowFeatherDist.Location = new System.Drawing.Point(353, 207);
+			this.lblDropShadowFeatherDist.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.lblDropShadowFeatherDist.Name = "lblDropShadowFeatherDist";
-			this.lblDropShadowFeatherDist.Size = new System.Drawing.Size(33, 13);
+			this.lblDropShadowFeatherDist.Size = new System.Drawing.Size(43, 17);
 			this.lblDropShadowFeatherDist.TabIndex = 18;
 			this.lblDropShadowFeatherDist.Text = "pixels";
 			this.toolTip1.SetToolTip(this.lblDropShadowFeatherDist, "Width of feathering at the edges of shadows");
@@ -1320,9 +1374,10 @@
 			// chkDropShadowFeather
 			// 
 			this.chkDropShadowFeather.AutoSize = true;
-			this.chkDropShadowFeather.Location = new System.Drawing.Point(6, 167);
+			this.chkDropShadowFeather.Location = new System.Drawing.Point(8, 206);
+			this.chkDropShadowFeather.Margin = new System.Windows.Forms.Padding(4);
 			this.chkDropShadowFeather.Name = "chkDropShadowFeather";
-			this.chkDropShadowFeather.Size = new System.Drawing.Size(104, 17);
+			this.chkDropShadowFeather.Size = new System.Drawing.Size(133, 21);
 			this.chkDropShadowFeather.TabIndex = 16;
 			this.chkDropShadowFeather.Text = "Feather Shadow";
 			this.toolTip1.SetToolTip(this.chkDropShadowFeather, "Enable feathering on shadows?");
@@ -1332,9 +1387,10 @@
 			// chkDropShadow
 			// 
 			this.chkDropShadow.AutoSize = true;
-			this.chkDropShadow.Location = new System.Drawing.Point(6, 93);
+			this.chkDropShadow.Location = new System.Drawing.Point(8, 114);
+			this.chkDropShadow.Margin = new System.Windows.Forms.Padding(4);
 			this.chkDropShadow.Name = "chkDropShadow";
-			this.chkDropShadow.Size = new System.Drawing.Size(91, 17);
+			this.chkDropShadow.Size = new System.Drawing.Size(115, 21);
 			this.chkDropShadow.TabIndex = 10;
 			this.chkDropShadow.Text = "Drop Shadow";
 			this.toolTip1.SetToolTip(this.chkDropShadow, "Enable drop shadows?");
@@ -1344,9 +1400,10 @@
 			// lblDropShadowUnit
 			// 
 			this.lblDropShadowUnit.AutoSize = true;
-			this.lblDropShadowUnit.Location = new System.Drawing.Point(265, 94);
+			this.lblDropShadowUnit.Location = new System.Drawing.Point(353, 116);
+			this.lblDropShadowUnit.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.lblDropShadowUnit.Name = "lblDropShadowUnit";
-			this.lblDropShadowUnit.Size = new System.Drawing.Size(33, 13);
+			this.lblDropShadowUnit.Size = new System.Drawing.Size(43, 17);
 			this.lblDropShadowUnit.TabIndex = 12;
 			this.lblDropShadowUnit.Text = "pixels";
 			this.toolTip1.SetToolTip(this.lblDropShadowUnit, "Offset of drop shadow");
@@ -1355,10 +1412,11 @@
 			// 
 			this.trkDropShadow.BackColor = System.Drawing.SystemColors.Window;
 			this.trkDropShadow.LargeChange = 20;
-			this.trkDropShadow.Location = new System.Drawing.Point(119, 93);
+			this.trkDropShadow.Location = new System.Drawing.Point(159, 114);
+			this.trkDropShadow.Margin = new System.Windows.Forms.Padding(4);
 			this.trkDropShadow.Maximum = 100;
 			this.trkDropShadow.Name = "trkDropShadow";
-			this.trkDropShadow.Size = new System.Drawing.Size(140, 45);
+			this.trkDropShadow.Size = new System.Drawing.Size(187, 56);
 			this.trkDropShadow.SmallChange = 10;
 			this.trkDropShadow.TabIndex = 11;
 			this.trkDropShadow.TickFrequency = 10;
@@ -1369,9 +1427,10 @@
 			// c_edgeDistLabel
 			// 
 			this.c_edgeDistLabel.AutoSize = true;
-			this.c_edgeDistLabel.Location = new System.Drawing.Point(265, 57);
+			this.c_edgeDistLabel.Location = new System.Drawing.Point(353, 70);
+			this.c_edgeDistLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.c_edgeDistLabel.Name = "c_edgeDistLabel";
-			this.c_edgeDistLabel.Size = new System.Drawing.Size(33, 13);
+			this.c_edgeDistLabel.Size = new System.Drawing.Size(43, 17);
 			this.c_edgeDistLabel.TabIndex = 7;
 			this.c_edgeDistLabel.Text = "pixels";
 			this.toolTip1.SetToolTip(this.c_edgeDistLabel, "Width of feathering at the edges of images");
@@ -1380,10 +1439,11 @@
 			// 
 			this.c_edgeDist.BackColor = System.Drawing.SystemColors.Window;
 			this.c_edgeDist.LargeChange = 20;
-			this.c_edgeDist.Location = new System.Drawing.Point(119, 56);
+			this.c_edgeDist.Location = new System.Drawing.Point(159, 69);
+			this.c_edgeDist.Margin = new System.Windows.Forms.Padding(4);
 			this.c_edgeDist.Maximum = 100;
 			this.c_edgeDist.Name = "c_edgeDist";
-			this.c_edgeDist.Size = new System.Drawing.Size(140, 45);
+			this.c_edgeDist.Size = new System.Drawing.Size(187, 56);
 			this.c_edgeDist.SmallChange = 10;
 			this.c_edgeDist.TabIndex = 6;
 			this.c_edgeDist.TickFrequency = 10;
@@ -1395,9 +1455,11 @@
 			// 
 			this.grpImageEffects.Controls.Add(this.label1);
 			this.grpImageEffects.Controls.Add(this.cmbColorEffectFore);
-			this.grpImageEffects.Location = new System.Drawing.Point(3, 546);
+			this.grpImageEffects.Location = new System.Drawing.Point(4, 694);
+			this.grpImageEffects.Margin = new System.Windows.Forms.Padding(4);
 			this.grpImageEffects.Name = "grpImageEffects";
-			this.grpImageEffects.Size = new System.Drawing.Size(669, 50);
+			this.grpImageEffects.Padding = new System.Windows.Forms.Padding(4);
+			this.grpImageEffects.Size = new System.Drawing.Size(892, 62);
 			this.grpImageEffects.TabIndex = 4;
 			this.grpImageEffects.TabStop = false;
 			this.grpImageEffects.Text = "Image Effects";
@@ -1405,9 +1467,10 @@
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(6, 22);
+			this.label1.Location = new System.Drawing.Point(8, 27);
+			this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(65, 13);
+			this.label1.Size = new System.Drawing.Size(85, 17);
 			this.label1.TabIndex = 1;
 			this.label1.Text = "Color Effect:";
 			this.toolTip1.SetToolTip(this.label1, "Color effect to be applied to image being displayed.");
@@ -1418,9 +1481,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.cmbColorEffectFore.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmbColorEffectFore.FormattingEnabled = true;
-			this.cmbColorEffectFore.Location = new System.Drawing.Point(119, 19);
+			this.cmbColorEffectFore.Location = new System.Drawing.Point(159, 23);
+			this.cmbColorEffectFore.Margin = new System.Windows.Forms.Padding(4);
 			this.cmbColorEffectFore.Name = "cmbColorEffectFore";
-			this.cmbColorEffectFore.Size = new System.Drawing.Size(288, 21);
+			this.cmbColorEffectFore.Size = new System.Drawing.Size(383, 24);
 			this.cmbColorEffectFore.TabIndex = 0;
 			this.toolTip1.SetToolTip(this.cmbColorEffectFore, "Color effect to be applied to image being displayed.");
 			this.cmbColorEffectFore.SelectedIndexChanged += new System.EventHandler(this.ControlChanged);
@@ -1434,9 +1498,11 @@
 			this.grpBackgroundColorEffects.Controls.Add(this.cmbColorEffectBack);
 			this.grpBackgroundColorEffects.Controls.Add(this.lblColorEffectCollageFadeRatioUnit);
 			this.grpBackgroundColorEffects.Controls.Add(this.trkColorEffectCollageFadeRatio);
-			this.grpBackgroundColorEffects.Location = new System.Drawing.Point(3, 602);
+			this.grpBackgroundColorEffects.Location = new System.Drawing.Point(4, 764);
+			this.grpBackgroundColorEffects.Margin = new System.Windows.Forms.Padding(4);
 			this.grpBackgroundColorEffects.Name = "grpBackgroundColorEffects";
-			this.grpBackgroundColorEffects.Size = new System.Drawing.Size(669, 120);
+			this.grpBackgroundColorEffects.Padding = new System.Windows.Forms.Padding(4);
+			this.grpBackgroundColorEffects.Size = new System.Drawing.Size(892, 148);
 			this.grpBackgroundColorEffects.TabIndex = 5;
 			this.grpBackgroundColorEffects.TabStop = false;
 			this.grpBackgroundColorEffects.Text = "Background Image Effects";
@@ -1444,9 +1510,10 @@
 			// lblBackgroundBlurDistValue
 			// 
 			this.lblBackgroundBlurDistValue.AutoSize = true;
-			this.lblBackgroundBlurDistValue.Location = new System.Drawing.Point(265, 56);
+			this.lblBackgroundBlurDistValue.Location = new System.Drawing.Point(353, 69);
+			this.lblBackgroundBlurDistValue.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.lblBackgroundBlurDistValue.Name = "lblBackgroundBlurDistValue";
-			this.lblBackgroundBlurDistValue.Size = new System.Drawing.Size(33, 13);
+			this.lblBackgroundBlurDistValue.Size = new System.Drawing.Size(43, 17);
 			this.lblBackgroundBlurDistValue.TabIndex = 6;
 			this.lblBackgroundBlurDistValue.Text = "pixels";
 			this.toolTip1.SetToolTip(this.lblBackgroundBlurDistValue, "Amount of blur to apply to background");
@@ -1455,10 +1522,11 @@
 			// 
 			this.trkBackgroundBlurDist.BackColor = System.Drawing.SystemColors.Window;
 			this.trkBackgroundBlurDist.LargeChange = 20;
-			this.trkBackgroundBlurDist.Location = new System.Drawing.Point(119, 52);
+			this.trkBackgroundBlurDist.Location = new System.Drawing.Point(159, 64);
+			this.trkBackgroundBlurDist.Margin = new System.Windows.Forms.Padding(4);
 			this.trkBackgroundBlurDist.Maximum = 20;
 			this.trkBackgroundBlurDist.Name = "trkBackgroundBlurDist";
-			this.trkBackgroundBlurDist.Size = new System.Drawing.Size(140, 45);
+			this.trkBackgroundBlurDist.Size = new System.Drawing.Size(187, 56);
 			this.trkBackgroundBlurDist.SmallChange = 10;
 			this.trkBackgroundBlurDist.TabIndex = 5;
 			this.trkBackgroundBlurDist.TickFrequency = 2;
@@ -1469,9 +1537,10 @@
 			// chkBackgroundBlur
 			// 
 			this.chkBackgroundBlur.AutoSize = true;
-			this.chkBackgroundBlur.Location = new System.Drawing.Point(6, 52);
+			this.chkBackgroundBlur.Location = new System.Drawing.Point(8, 64);
+			this.chkBackgroundBlur.Margin = new System.Windows.Forms.Padding(4);
 			this.chkBackgroundBlur.Name = "chkBackgroundBlur";
-			this.chkBackgroundBlur.Size = new System.Drawing.Size(44, 17);
+			this.chkBackgroundBlur.Size = new System.Drawing.Size(55, 21);
 			this.chkBackgroundBlur.TabIndex = 4;
 			this.chkBackgroundBlur.Text = "Blur";
 			this.toolTip1.SetToolTip(this.chkBackgroundBlur, "Blur the background?");
@@ -1481,9 +1550,10 @@
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(6, 22);
+			this.label2.Location = new System.Drawing.Point(8, 27);
+			this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(65, 13);
+			this.label2.Size = new System.Drawing.Size(85, 17);
 			this.label2.TabIndex = 3;
 			this.label2.Text = "Color Effect:";
 			this.toolTip1.SetToolTip(this.label2, "Color effect to be applied to background images.");
@@ -1492,9 +1562,10 @@
 			// 
 			this.cmbColorEffectBack.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmbColorEffectBack.FormattingEnabled = true;
-			this.cmbColorEffectBack.Location = new System.Drawing.Point(119, 19);
+			this.cmbColorEffectBack.Location = new System.Drawing.Point(159, 23);
+			this.cmbColorEffectBack.Margin = new System.Windows.Forms.Padding(4);
 			this.cmbColorEffectBack.Name = "cmbColorEffectBack";
-			this.cmbColorEffectBack.Size = new System.Drawing.Size(139, 21);
+			this.cmbColorEffectBack.Size = new System.Drawing.Size(184, 24);
 			this.cmbColorEffectBack.TabIndex = 0;
 			this.toolTip1.SetToolTip(this.cmbColorEffectBack, "Color effect to be applied to background images.");
 			this.cmbColorEffectBack.SelectedIndexChanged += new System.EventHandler(this.ControlChanged);
@@ -1502,9 +1573,10 @@
 			// lblColorEffectCollageFadeRatioUnit
 			// 
 			this.lblColorEffectCollageFadeRatioUnit.AutoSize = true;
-			this.lblColorEffectCollageFadeRatioUnit.Location = new System.Drawing.Point(410, 22);
+			this.lblColorEffectCollageFadeRatioUnit.Location = new System.Drawing.Point(547, 27);
+			this.lblColorEffectCollageFadeRatioUnit.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.lblColorEffectCollageFadeRatioUnit.Name = "lblColorEffectCollageFadeRatioUnit";
-			this.lblColorEffectCollageFadeRatioUnit.Size = new System.Drawing.Size(15, 13);
+			this.lblColorEffectCollageFadeRatioUnit.Size = new System.Drawing.Size(20, 17);
 			this.lblColorEffectCollageFadeRatioUnit.TabIndex = 2;
 			this.lblColorEffectCollageFadeRatioUnit.Text = "%";
 			this.toolTip1.SetToolTip(this.lblColorEffectCollageFadeRatioUnit, "Amount of color effect to apply to background images");
@@ -1513,10 +1585,11 @@
 			// 
 			this.trkColorEffectCollageFadeRatio.BackColor = System.Drawing.SystemColors.Window;
 			this.trkColorEffectCollageFadeRatio.LargeChange = 20;
-			this.trkColorEffectCollageFadeRatio.Location = new System.Drawing.Point(264, 19);
+			this.trkColorEffectCollageFadeRatio.Location = new System.Drawing.Point(352, 23);
+			this.trkColorEffectCollageFadeRatio.Margin = new System.Windows.Forms.Padding(4);
 			this.trkColorEffectCollageFadeRatio.Maximum = 100;
 			this.trkColorEffectCollageFadeRatio.Name = "trkColorEffectCollageFadeRatio";
-			this.trkColorEffectCollageFadeRatio.Size = new System.Drawing.Size(140, 45);
+			this.trkColorEffectCollageFadeRatio.Size = new System.Drawing.Size(187, 56);
 			this.trkColorEffectCollageFadeRatio.SmallChange = 10;
 			this.trkColorEffectCollageFadeRatio.TabIndex = 1;
 			this.trkColorEffectCollageFadeRatio.TickFrequency = 10;
@@ -1527,10 +1600,11 @@
 			// c_widgetsTab
 			// 
 			this.c_widgetsTab.Controls.Add(this.c_widgetPanelSplitter);
-			this.c_widgetsTab.Location = new System.Drawing.Point(4, 22);
+			this.c_widgetsTab.Location = new System.Drawing.Point(4, 25);
+			this.c_widgetsTab.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetsTab.Name = "c_widgetsTab";
-			this.c_widgetsTab.Padding = new System.Windows.Forms.Padding(3);
-			this.c_widgetsTab.Size = new System.Drawing.Size(702, 391);
+			this.c_widgetsTab.Padding = new System.Windows.Forms.Padding(4);
+			this.c_widgetsTab.Size = new System.Drawing.Size(939, 484);
 			this.c_widgetsTab.TabIndex = 4;
 			this.c_widgetsTab.Text = "Widgets";
 			this.c_widgetsTab.UseVisualStyleBackColor = true;
@@ -1539,7 +1613,8 @@
 			// 
 			this.c_widgetPanelSplitter.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.c_widgetPanelSplitter.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
-			this.c_widgetPanelSplitter.Location = new System.Drawing.Point(3, 3);
+			this.c_widgetPanelSplitter.Location = new System.Drawing.Point(4, 4);
+			this.c_widgetPanelSplitter.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetPanelSplitter.Name = "c_widgetPanelSplitter";
 			// 
 			// c_widgetPanelSplitter.Panel1
@@ -1550,22 +1625,10 @@
 			// c_widgetPanelSplitter.Panel2
 			// 
 			this.c_widgetPanelSplitter.Panel2.Controls.Add(this.c_widgetPanelPropSplitter);
-			this.c_widgetPanelSplitter.Size = new System.Drawing.Size(696, 385);
-			this.c_widgetPanelSplitter.SplitterDistance = 487;
+			this.c_widgetPanelSplitter.Size = new System.Drawing.Size(931, 476);
+			this.c_widgetPanelSplitter.SplitterDistance = 719;
+			this.c_widgetPanelSplitter.SplitterWidth = 5;
 			this.c_widgetPanelSplitter.TabIndex = 2;
-			// 
-			// c_widgetLayout
-			// 
-			this.c_widgetLayout.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.c_widgetLayout.Location = new System.Drawing.Point(0, 33);
-			this.c_widgetLayout.Name = "c_widgetLayout";
-			this.c_widgetLayout.Size = new System.Drawing.Size(487, 352);
-			this.c_widgetLayout.TabIndex = 0;
-			this.c_widgetLayout.WidgetsChanged += new System.EventHandler(this.c_widgetLayout_WidgetsChanged);
-			this.c_widgetLayout.SelectedWidgetChanged += new System.EventHandler<WallSwitch.WidgetLayoutControl.WidgetEventArgs>(this.c_widgetLayout_SelectedWidgetChanged);
-			this.c_widgetLayout.WidgetAdded += new System.EventHandler<WallSwitch.WidgetLayoutControl.WidgetEventArgs>(this.c_widgetLayout_WidgetAdded);
-			this.c_widgetLayout.WidgetDeleted += new System.EventHandler<WallSwitch.WidgetLayoutControl.WidgetEventArgs>(this.c_widgetLayout_WidgetDeleted);
-			this.c_widgetLayout.WidgetOrderChanged += new System.EventHandler(this.c_widgetLayout_WidgetOrderChanged);
 			// 
 			// c_widgetTopPanel
 			// 
@@ -1574,16 +1637,18 @@
 			this.c_widgetTopPanel.Controls.Add(this.c_widgetTypesLabel);
 			this.c_widgetTopPanel.Dock = System.Windows.Forms.DockStyle.Top;
 			this.c_widgetTopPanel.Location = new System.Drawing.Point(0, 0);
+			this.c_widgetTopPanel.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetTopPanel.Name = "c_widgetTopPanel";
-			this.c_widgetTopPanel.Size = new System.Drawing.Size(487, 33);
+			this.c_widgetTopPanel.Size = new System.Drawing.Size(719, 41);
 			this.c_widgetTopPanel.TabIndex = 1;
 			// 
 			// c_addWidgetButton
 			// 
 			this.c_addWidgetButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.c_addWidgetButton.Location = new System.Drawing.Point(424, 4);
+			this.c_addWidgetButton.Location = new System.Drawing.Point(635, 5);
+			this.c_addWidgetButton.Margin = new System.Windows.Forms.Padding(4);
 			this.c_addWidgetButton.Name = "c_addWidgetButton";
-			this.c_addWidgetButton.Size = new System.Drawing.Size(60, 23);
+			this.c_addWidgetButton.Size = new System.Drawing.Size(80, 28);
 			this.c_addWidgetButton.TabIndex = 2;
 			this.c_addWidgetButton.Text = "Add";
 			this.c_addWidgetButton.UseVisualStyleBackColor = true;
@@ -1595,18 +1660,20 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.c_widgetTypes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.c_widgetTypes.FormattingEnabled = true;
-			this.c_widgetTypes.Location = new System.Drawing.Point(53, 5);
+			this.c_widgetTypes.Location = new System.Drawing.Point(71, 6);
+			this.c_widgetTypes.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetTypes.Name = "c_widgetTypes";
-			this.c_widgetTypes.Size = new System.Drawing.Size(365, 21);
+			this.c_widgetTypes.Size = new System.Drawing.Size(555, 24);
 			this.c_widgetTypes.TabIndex = 1;
 			this.c_widgetTypes.SelectedIndexChanged += new System.EventHandler(this.c_widgetTypes_SelectedIndexChanged);
 			// 
 			// c_widgetTypesLabel
 			// 
 			this.c_widgetTypesLabel.AutoSize = true;
-			this.c_widgetTypesLabel.Location = new System.Drawing.Point(3, 8);
+			this.c_widgetTypesLabel.Location = new System.Drawing.Point(4, 10);
+			this.c_widgetTypesLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.c_widgetTypesLabel.Name = "c_widgetTypesLabel";
-			this.c_widgetTypesLabel.Size = new System.Drawing.Size(44, 13);
+			this.c_widgetTypesLabel.Size = new System.Drawing.Size(56, 17);
 			this.c_widgetTypesLabel.TabIndex = 0;
 			this.c_widgetTypesLabel.Text = "Widget:";
 			// 
@@ -1614,6 +1681,7 @@
 			// 
 			this.c_widgetPanelPropSplitter.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.c_widgetPanelPropSplitter.Location = new System.Drawing.Point(0, 0);
+			this.c_widgetPanelPropSplitter.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetPanelPropSplitter.Name = "c_widgetPanelPropSplitter";
 			this.c_widgetPanelPropSplitter.Orientation = System.Windows.Forms.Orientation.Horizontal;
 			// 
@@ -1625,8 +1693,9 @@
 			// c_widgetPanelPropSplitter.Panel2
 			// 
 			this.c_widgetPanelPropSplitter.Panel2.Controls.Add(this.c_widgetPropertyGrid);
-			this.c_widgetPanelPropSplitter.Size = new System.Drawing.Size(205, 385);
-			this.c_widgetPanelPropSplitter.SplitterDistance = 130;
+			this.c_widgetPanelPropSplitter.Size = new System.Drawing.Size(207, 476);
+			this.c_widgetPanelPropSplitter.SplitterDistance = 160;
+			this.c_widgetPanelPropSplitter.SplitterWidth = 5;
 			this.c_widgetPanelPropSplitter.TabIndex = 0;
 			// 
 			// c_widgetList
@@ -1636,9 +1705,10 @@
 			this.c_widgetList.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.c_widgetList.HideSelection = false;
 			this.c_widgetList.Location = new System.Drawing.Point(0, 0);
+			this.c_widgetList.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetList.MultiSelect = false;
 			this.c_widgetList.Name = "c_widgetList";
-			this.c_widgetList.Size = new System.Drawing.Size(180, 130);
+			this.c_widgetList.Size = new System.Drawing.Size(174, 160);
 			this.c_widgetList.TabIndex = 0;
 			this.c_widgetList.UseCompatibleStateImageBehavior = false;
 			this.c_widgetList.View = System.Windows.Forms.View.Details;
@@ -1655,26 +1725,29 @@
 			this.c_widgetControlRightPanel.Controls.Add(this.c_widgetMoveUpButton);
 			this.c_widgetControlRightPanel.Controls.Add(this.c_widgetMoveDownButton);
 			this.c_widgetControlRightPanel.Dock = System.Windows.Forms.DockStyle.Right;
-			this.c_widgetControlRightPanel.Location = new System.Drawing.Point(180, 0);
+			this.c_widgetControlRightPanel.Location = new System.Drawing.Point(174, 0);
+			this.c_widgetControlRightPanel.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetControlRightPanel.Name = "c_widgetControlRightPanel";
-			this.c_widgetControlRightPanel.Size = new System.Drawing.Size(25, 130);
+			this.c_widgetControlRightPanel.Size = new System.Drawing.Size(33, 160);
 			this.c_widgetControlRightPanel.TabIndex = 4;
 			// 
 			// panel2
 			// 
 			this.panel2.Controls.Add(this.c_widgetDeleteButton);
 			this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.panel2.Location = new System.Drawing.Point(0, 107);
+			this.panel2.Location = new System.Drawing.Point(0, 132);
+			this.panel2.Margin = new System.Windows.Forms.Padding(4);
 			this.panel2.Name = "panel2";
-			this.panel2.Size = new System.Drawing.Size(25, 23);
+			this.panel2.Size = new System.Drawing.Size(33, 28);
 			this.panel2.TabIndex = 4;
 			// 
 			// c_widgetDeleteButton
 			// 
 			this.c_widgetDeleteButton.Image = global::WallSwitch.Res.Delete;
-			this.c_widgetDeleteButton.Location = new System.Drawing.Point(2, 0);
+			this.c_widgetDeleteButton.Location = new System.Drawing.Point(3, 0);
+			this.c_widgetDeleteButton.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetDeleteButton.Name = "c_widgetDeleteButton";
-			this.c_widgetDeleteButton.Size = new System.Drawing.Size(23, 23);
+			this.c_widgetDeleteButton.Size = new System.Drawing.Size(31, 28);
 			this.c_widgetDeleteButton.TabIndex = 3;
 			this.c_widgetDeleteButton.UseVisualStyleBackColor = true;
 			this.c_widgetDeleteButton.Click += new System.EventHandler(this.c_widgetDeleteButton_Click);
@@ -1682,9 +1755,10 @@
 			// c_widgetMoveUpButton
 			// 
 			this.c_widgetMoveUpButton.Image = global::WallSwitch.Res.MoveUp;
-			this.c_widgetMoveUpButton.Location = new System.Drawing.Point(2, 0);
+			this.c_widgetMoveUpButton.Location = new System.Drawing.Point(3, 0);
+			this.c_widgetMoveUpButton.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetMoveUpButton.Name = "c_widgetMoveUpButton";
-			this.c_widgetMoveUpButton.Size = new System.Drawing.Size(23, 23);
+			this.c_widgetMoveUpButton.Size = new System.Drawing.Size(31, 28);
 			this.c_widgetMoveUpButton.TabIndex = 1;
 			this.c_widgetMoveUpButton.UseVisualStyleBackColor = true;
 			this.c_widgetMoveUpButton.Click += new System.EventHandler(this.c_widgetMoveUpButton_Click);
@@ -1692,48 +1766,40 @@
 			// c_widgetMoveDownButton
 			// 
 			this.c_widgetMoveDownButton.Image = global::WallSwitch.Res.MoveDown;
-			this.c_widgetMoveDownButton.Location = new System.Drawing.Point(2, 29);
+			this.c_widgetMoveDownButton.Location = new System.Drawing.Point(3, 36);
+			this.c_widgetMoveDownButton.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetMoveDownButton.Name = "c_widgetMoveDownButton";
-			this.c_widgetMoveDownButton.Size = new System.Drawing.Size(23, 23);
+			this.c_widgetMoveDownButton.Size = new System.Drawing.Size(31, 28);
 			this.c_widgetMoveDownButton.TabIndex = 2;
 			this.c_widgetMoveDownButton.UseVisualStyleBackColor = true;
 			this.c_widgetMoveDownButton.Click += new System.EventHandler(this.c_widgetMoveDownButton_Click);
 			// 
 			// c_widgetPropertyGrid
 			// 
+			this.c_widgetPropertyGrid.CategoryForeColor = System.Drawing.SystemColors.InactiveCaptionText;
 			this.c_widgetPropertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.c_widgetPropertyGrid.Location = new System.Drawing.Point(0, 0);
+			this.c_widgetPropertyGrid.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetPropertyGrid.Name = "c_widgetPropertyGrid";
-			this.c_widgetPropertyGrid.Size = new System.Drawing.Size(205, 251);
+			this.c_widgetPropertyGrid.Size = new System.Drawing.Size(207, 311);
 			this.c_widgetPropertyGrid.TabIndex = 0;
 			this.c_widgetPropertyGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.c_widgetPropertyGrid_PropertyValueChanged);
 			// 
 			// tabHistory
 			// 
 			this.tabHistory.Controls.Add(this.c_historyTab);
-			this.tabHistory.Location = new System.Drawing.Point(4, 22);
+			this.tabHistory.Location = new System.Drawing.Point(4, 25);
+			this.tabHistory.Margin = new System.Windows.Forms.Padding(4);
 			this.tabHistory.Name = "tabHistory";
-			this.tabHistory.Padding = new System.Windows.Forms.Padding(3);
-			this.tabHistory.Size = new System.Drawing.Size(702, 391);
+			this.tabHistory.Padding = new System.Windows.Forms.Padding(4);
+			this.tabHistory.Size = new System.Drawing.Size(939, 484);
 			this.tabHistory.TabIndex = 3;
 			this.tabHistory.Text = "History";
 			this.tabHistory.UseVisualStyleBackColor = true;
 			// 
-			// c_historyTab
-			// 
-			this.c_historyTab.ContextMenuStrip = this.cmHistory;
-			this.c_historyTab.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.c_historyTab.ImageToolTip = this.toolTip1;
-			this.c_historyTab.Location = new System.Drawing.Point(3, 3);
-			this.c_historyTab.Name = "c_historyTab";
-			this.c_historyTab.Size = new System.Drawing.Size(696, 385);
-			this.c_historyTab.TabIndex = 0;
-			this.c_historyTab.SelectionChanged += new System.EventHandler(this.lstHistory_SelectionChanged);
-			this.c_historyTab.ItemActivated += new System.EventHandler<WallSwitch.HistoryList.ItemActivatedEventArgs>(this.lstHistory_ItemActivated);
-			this.c_historyTab.DeleteItemRequested += new System.EventHandler<WallSwitch.HistoryList.DeleteItemRequestedEventArgs>(this.HistoryTab_DeleteItemRequested);
-			// 
 			// cmHistory
 			// 
+			this.cmHistory.ImageScalingSize = new System.Drawing.Size(20, 20);
 			this.cmHistory.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ciOpenHistoryFile,
             this.ciExploreHistoryFile,
@@ -1741,38 +1807,38 @@
             this.toolStripMenuItem4,
             this.ciClearHistoryList});
 			this.cmHistory.Name = "cmHistory";
-			this.cmHistory.Size = new System.Drawing.Size(143, 98);
+			this.cmHistory.Size = new System.Drawing.Size(170, 114);
 			// 
 			// ciOpenHistoryFile
 			// 
 			this.ciOpenHistoryFile.Name = "ciOpenHistoryFile";
-			this.ciOpenHistoryFile.Size = new System.Drawing.Size(142, 22);
+			this.ciOpenHistoryFile.Size = new System.Drawing.Size(169, 26);
 			this.ciOpenHistoryFile.Text = "&Open File";
 			this.ciOpenHistoryFile.Click += new System.EventHandler(this.ciOpenHistoryFile_Click);
 			// 
 			// ciExploreHistoryFile
 			// 
 			this.ciExploreHistoryFile.Name = "ciExploreHistoryFile";
-			this.ciExploreHistoryFile.Size = new System.Drawing.Size(142, 22);
+			this.ciExploreHistoryFile.Size = new System.Drawing.Size(169, 26);
 			this.ciExploreHistoryFile.Text = "&Explore File";
 			this.ciExploreHistoryFile.Click += new System.EventHandler(this.ciExploreHistoryFile_Click);
 			// 
 			// ciDeleteHistoryFile
 			// 
 			this.ciDeleteHistoryFile.Name = "ciDeleteHistoryFile";
-			this.ciDeleteHistoryFile.Size = new System.Drawing.Size(142, 22);
+			this.ciDeleteHistoryFile.Size = new System.Drawing.Size(169, 26);
 			this.ciDeleteHistoryFile.Text = "&Delete File";
 			this.ciDeleteHistoryFile.Click += new System.EventHandler(this.ciDeleteHistoryFile_Click);
 			// 
 			// toolStripMenuItem4
 			// 
 			this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-			this.toolStripMenuItem4.Size = new System.Drawing.Size(139, 6);
+			this.toolStripMenuItem4.Size = new System.Drawing.Size(166, 6);
 			// 
 			// ciClearHistoryList
 			// 
 			this.ciClearHistoryList.Name = "ciClearHistoryList";
-			this.ciClearHistoryList.Size = new System.Drawing.Size(142, 22);
+			this.ciClearHistoryList.Size = new System.Drawing.Size(169, 26);
 			this.ciClearHistoryList.Text = "&Clear History";
 			this.ciClearHistoryList.Click += new System.EventHandler(this.ciClearHistoryList_Click);
 			// 
@@ -1782,9 +1848,11 @@
 			this.grpNavButtons.Controls.Add(this.btnSwitchNow);
 			this.grpNavButtons.Controls.Add(this.btnPause);
 			this.grpNavButtons.Controls.Add(this.btnPrevious);
-			this.grpNavButtons.Location = new System.Drawing.Point(468, 27);
+			this.grpNavButtons.Location = new System.Drawing.Point(624, 33);
+			this.grpNavButtons.Margin = new System.Windows.Forms.Padding(4);
 			this.grpNavButtons.Name = "grpNavButtons";
-			this.grpNavButtons.Size = new System.Drawing.Size(123, 50);
+			this.grpNavButtons.Padding = new System.Windows.Forms.Padding(4);
+			this.grpNavButtons.Size = new System.Drawing.Size(164, 62);
 			this.grpNavButtons.TabIndex = 11;
 			this.grpNavButtons.TabStop = false;
 			// 
@@ -1792,9 +1860,11 @@
 			// 
 			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.groupBox1.Controls.Add(this.panel1);
-			this.groupBox1.Location = new System.Drawing.Point(597, 27);
+			this.groupBox1.Location = new System.Drawing.Point(796, 33);
+			this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(125, 50);
+			this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
+			this.groupBox1.Size = new System.Drawing.Size(167, 62);
 			this.groupBox1.TabIndex = 12;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Transparency";
@@ -1803,27 +1873,109 @@
 			// 
 			this.panel1.Controls.Add(this.c_transparencyTrackBar);
 			this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.panel1.Location = new System.Drawing.Point(3, 16);
+			this.panel1.Location = new System.Drawing.Point(4, 19);
+			this.panel1.Margin = new System.Windows.Forms.Padding(4);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(119, 31);
+			this.panel1.Size = new System.Drawing.Size(159, 39);
 			this.panel1.TabIndex = 1;
 			// 
 			// c_transparencyTrackBar
 			// 
 			this.c_transparencyTrackBar.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.c_transparencyTrackBar.Location = new System.Drawing.Point(0, 0);
+			this.c_transparencyTrackBar.Margin = new System.Windows.Forms.Padding(4);
 			this.c_transparencyTrackBar.Minimum = 1;
 			this.c_transparencyTrackBar.Name = "c_transparencyTrackBar";
-			this.c_transparencyTrackBar.Size = new System.Drawing.Size(119, 31);
+			this.c_transparencyTrackBar.Size = new System.Drawing.Size(159, 56);
 			this.c_transparencyTrackBar.TabIndex = 0;
 			this.c_transparencyTrackBar.Value = 1;
 			this.c_transparencyTrackBar.Scroll += new System.EventHandler(this.TransparencyTrackBar_Scroll);
 			// 
+			// c_activateThemeHotKey
+			// 
+			this.c_activateThemeHotKey.BackColor = System.Drawing.SystemColors.Window;
+			this.c_activateThemeHotKey.HotKey = null;
+			this.c_activateThemeHotKey.Location = new System.Drawing.Point(204, 55);
+			this.c_activateThemeHotKey.Margin = new System.Windows.Forms.Padding(4);
+			this.c_activateThemeHotKey.Name = "c_activateThemeHotKey";
+			this.c_activateThemeHotKey.ReadOnly = true;
+			this.c_activateThemeHotKey.Size = new System.Drawing.Size(187, 22);
+			this.c_activateThemeHotKey.TabIndex = 5;
+			this.toolTip1.SetToolTip(this.c_activateThemeHotKey, "Hot key to change to this theme");
+			this.c_activateThemeHotKey.HotKeyChanged += new System.EventHandler(this.ControlChanged);
+			// 
+			// clrBackTop
+			// 
+			this.clrBackTop.BackColor = System.Drawing.Color.Black;
+			this.clrBackTop.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.clrBackTop.Color = System.Drawing.Color.Black;
+			this.clrBackTop.Location = new System.Drawing.Point(204, 23);
+			this.clrBackTop.Margin = new System.Windows.Forms.Padding(5);
+			this.clrBackTop.Name = "clrBackTop";
+			this.clrBackTop.Size = new System.Drawing.Size(39, 22);
+			this.clrBackTop.TabIndex = 1;
+			this.toolTip1.SetToolTip(this.clrBackTop, "Top color of background gradient");
+			this.clrBackTop.ColorChanged += new WallSwitch.ColorSample.ColorChangedEventHandler(this.BackTop_ColorChanged);
+			// 
+			// clrBackBottom
+			// 
+			this.clrBackBottom.BackColor = System.Drawing.Color.Black;
+			this.clrBackBottom.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.clrBackBottom.Color = System.Drawing.Color.Black;
+			this.clrBackBottom.Location = new System.Drawing.Point(204, 53);
+			this.clrBackBottom.Margin = new System.Windows.Forms.Padding(5);
+			this.clrBackBottom.Name = "clrBackBottom";
+			this.clrBackBottom.Size = new System.Drawing.Size(39, 22);
+			this.clrBackBottom.TabIndex = 3;
+			this.toolTip1.SetToolTip(this.clrBackBottom, "Bottom color of background gradient");
+			this.clrBackBottom.ColorChanged += new WallSwitch.ColorSample.ColorChangedEventHandler(this.BackBottom_ColorChanged);
+			// 
+			// c_borderColor
+			// 
+			this.c_borderColor.BackColor = System.Drawing.Color.Transparent;
+			this.c_borderColor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.c_borderColor.Color = System.Drawing.Color.Transparent;
+			this.c_borderColor.Location = new System.Drawing.Point(485, 66);
+			this.c_borderColor.Margin = new System.Windows.Forms.Padding(5);
+			this.c_borderColor.Name = "c_borderColor";
+			this.c_borderColor.Size = new System.Drawing.Size(39, 22);
+			this.c_borderColor.TabIndex = 9;
+			this.toolTip1.SetToolTip(this.c_borderColor, "Border color");
+			this.c_borderColor.ColorChanged += new WallSwitch.ColorSample.ColorChangedEventHandler(this.BorderColor_ColorChanged);
+			// 
+			// c_widgetLayout
+			// 
+			this.c_widgetLayout.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.c_widgetLayout.Location = new System.Drawing.Point(0, 41);
+			this.c_widgetLayout.Margin = new System.Windows.Forms.Padding(5);
+			this.c_widgetLayout.Name = "c_widgetLayout";
+			this.c_widgetLayout.Size = new System.Drawing.Size(719, 435);
+			this.c_widgetLayout.TabIndex = 0;
+			this.c_widgetLayout.WidgetsChanged += new System.EventHandler(this.c_widgetLayout_WidgetsChanged);
+			this.c_widgetLayout.SelectedWidgetChanged += new System.EventHandler<WallSwitch.WidgetLayoutControl.WidgetEventArgs>(this.c_widgetLayout_SelectedWidgetChanged);
+			this.c_widgetLayout.WidgetAdded += new System.EventHandler<WallSwitch.WidgetLayoutControl.WidgetEventArgs>(this.c_widgetLayout_WidgetAdded);
+			this.c_widgetLayout.WidgetDeleted += new System.EventHandler<WallSwitch.WidgetLayoutControl.WidgetEventArgs>(this.c_widgetLayout_WidgetDeleted);
+			this.c_widgetLayout.WidgetOrderChanged += new System.EventHandler(this.c_widgetLayout_WidgetOrderChanged);
+			// 
+			// c_historyTab
+			// 
+			this.c_historyTab.ContextMenuStrip = this.cmHistory;
+			this.c_historyTab.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.c_historyTab.ImageToolTip = this.toolTip1;
+			this.c_historyTab.Location = new System.Drawing.Point(4, 4);
+			this.c_historyTab.Margin = new System.Windows.Forms.Padding(5);
+			this.c_historyTab.Name = "c_historyTab";
+			this.c_historyTab.Size = new System.Drawing.Size(931, 476);
+			this.c_historyTab.TabIndex = 0;
+			this.c_historyTab.SelectionChanged += new System.EventHandler(this.lstHistory_SelectionChanged);
+			this.c_historyTab.ItemActivated += new System.EventHandler<WallSwitch.HistoryList.ItemActivatedEventArgs>(this.lstHistory_ItemActivated);
+			this.c_historyTab.DeleteItemRequested += new System.EventHandler<WallSwitch.HistoryList.DeleteItemRequestedEventArgs>(this.HistoryTab_DeleteItemRequested);
+			// 
 			// MainWindow
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(734, 512);
+			this.ClientSize = new System.Drawing.Size(979, 630);
 			this.Controls.Add(this.groupBox1);
 			this.Controls.Add(this.c_themeTabControl);
 			this.Controls.Add(this.mainMenu);
@@ -1831,7 +1983,8 @@
 			this.Controls.Add(this.grpNavButtons);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MainMenuStrip = this.mainMenu;
-			this.MinimumSize = new System.Drawing.Size(600, 470);
+			this.Margin = new System.Windows.Forms.Padding(4);
+			this.MinimumSize = new System.Drawing.Size(794, 568);
 			this.Name = "MainWindow";
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
 			this.Text = "WallSwitch";
@@ -2047,7 +2200,9 @@
 		private System.Windows.Forms.CheckBox c_activateOnExitCheckBox;
 		private System.Windows.Forms.Panel c_widgetControlRightPanel;
 		private System.Windows.Forms.Panel panel2;
-
+		private System.Windows.Forms.Label c_randomGroupCountLabel;
+		private System.Windows.Forms.TextBox c_randomGroupCount;
+		private System.Windows.Forms.CheckBox c_randomGroup;
 	}
 }
 

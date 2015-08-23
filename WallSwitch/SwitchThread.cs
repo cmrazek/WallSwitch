@@ -16,6 +16,7 @@ namespace WallSwitch
 		private Thread _thread = null;
 		private List<string> _files = new List<string>();
 		private Random _rand = new Random();
+		private int _randomGroupCounter = 0;
 
 		private volatile bool _kill = false;
 		private volatile SwitchDir _switchNow = SwitchDir.None;
@@ -83,7 +84,13 @@ namespace WallSwitch
 			{
 				lock(_themeLock)
 				{
-					_theme = value;
+					if (_theme != value)
+					{
+						Log.WriteDebug("Theme is switching from '{0}' to '{1}'.",
+							_theme != null ? _theme.Name : "(null)", value != null ? value.Name : "(null)");
+						_theme = value;
+						_randomGroupCounter = 0;
+					}
 				}
 			}
 		}
@@ -286,7 +293,7 @@ namespace WallSwitch
 				SwitchEventHandler ev = Switching;
 				if (ev != null) ev(this, new EventArgs());
 
-				_wallpaperSetter.Set(_theme, dir, forceQuick: false);
+				_wallpaperSetter.Set(_theme, dir, false, ref _randomGroupCounter);
 
 				Log.Write(LogLevel.Debug, "Finished switching wallpaper.");
 			}
@@ -318,6 +325,11 @@ namespace WallSwitch
 		public SetWallpaper WallpaperSetter
 		{
 			get { return _wallpaperSetter; }
+		}
+
+		public int RandomGroupCounter
+		{
+			get { return _randomGroupCounter; }
 		}
 		#endregion
 	}

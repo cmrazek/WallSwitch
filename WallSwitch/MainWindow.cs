@@ -158,7 +158,8 @@ namespace WallSwitch
 					if (exitTheme != null && exitTheme != _currentTheme)
 					{
 						Log.Write(LogLevel.Info, "Switching to theme '{0}' on exit...", exitTheme.Name);
-						Program.SwitchThread.WallpaperSetter.Set(exitTheme, SwitchDir.Next, true);
+						int randomGroupCounter = Program.SwitchThread.RandomGroupCounter;
+						Program.SwitchThread.WallpaperSetter.Set(exitTheme, SwitchDir.Next, true, ref randomGroupCounter);
 					}
 					else
 					{
@@ -579,6 +580,17 @@ namespace WallSwitch
 			c_widgetLayout.LoadFromTheme(_currentTheme);
 			c_activateOnExitCheckBox.Checked = _currentTheme.ActivateOnExit;
 
+			if (_currentTheme.RandomGroupCount > 1)
+			{
+				c_randomGroup.Checked = true;
+				c_randomGroupCount.Text = _currentTheme.RandomGroupCount.ToString();
+			}
+			else
+			{
+				c_randomGroup.Checked = false;
+				c_randomGroupCount.Text = "1";
+			}
+
 			RefreshTransparency();
 
 			Dirty = false;
@@ -726,6 +738,25 @@ namespace WallSwitch
 				return false;
 			}
 
+			int randomGroupCount;
+			if (c_randomGroup.Checked)
+			{
+				if (!int.TryParse(c_randomGroupCount.Text, out randomGroupCount) || randomGroupCount < 1)
+				{
+					if (showErrors)
+					{
+						c_themeTabControl.SelectedTab = c_settingsTab;
+						c_randomGroupCount.Focus();
+						this.ShowError(Res.Error_InvalidRandomGroupCount);
+					}
+					return false;
+				}
+			}
+			else
+			{
+				randomGroupCount = 1;
+			}
+
 			_currentTheme.Frequency = freq;
 			_currentTheme.Period = period;
 			_currentTheme.Mode = mode;
@@ -778,6 +809,8 @@ namespace WallSwitch
 
 			_currentTheme.BackgroundBlur = chkBackgroundBlur.Checked;
 			_currentTheme.BackgroundBlurDist = trkBackgroundBlurDist.Value;
+
+			_currentTheme.RandomGroupCount = randomGroupCount;
 
 			c_widgetLayout.SaveToTheme(_currentTheme);
 
@@ -903,6 +936,19 @@ namespace WallSwitch
 			}
 
 			c_numCollageImages.Visible = c_numCollageImagesLabel.Visible = c_themeMode.SelectedIndex == k_modeCollage;
+
+			if (c_themeOrder.SelectedIndex == k_orderRandom)
+			{
+				c_randomGroup.Visible = true;
+				c_randomGroupCount.Visible = c_randomGroup.Checked;
+				c_randomGroupCountLabel.Visible = c_randomGroup.Checked;
+			}
+			else
+			{
+				c_randomGroup.Visible = false;
+				c_randomGroupCount.Visible = false;
+				c_randomGroupCountLabel.Visible = false;
+			}
 
 			EnableLocationsContextMenu();
 			EnableWidgetControls();

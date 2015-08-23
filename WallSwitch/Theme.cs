@@ -79,6 +79,7 @@ namespace WallSwitch
 		private int _maxImageClip = k_defaultMaxImageClip;
 		private string _lastImage = null;
 		private bool _activateOnExit = false;
+		private int _randomGroupCount = 1;
 
 		private ColorEffect _colorEffectFore = ColorEffect.None;
 		private ColorEffect _colorEffectBack = ColorEffect.None;
@@ -271,6 +272,12 @@ namespace WallSwitch
 			get { return _activateOnExit; }
 			set { _activateOnExit = value; }
 		}
+
+		public int RandomGroupCount
+		{
+			get { return _randomGroupCount; }
+			set { _randomGroupCount = value; }
+		}
 		#endregion
 
 		#region Save/Load
@@ -323,6 +330,8 @@ namespace WallSwitch
 			if (!string.IsNullOrEmpty(_lastImage)) xml.WriteAttributeString("LastImage", _lastImage);
 
 			if (_activateOnExit) xml.WriteAttributeString("ActivateOnExit", _activateOnExit.ToString());
+
+			if (_randomGroupCount > 1) xml.WriteAttributeString("RandomGroupCount", _randomGroupCount.ToString());
 
 			_hotKey.SaveXml(xml);
 
@@ -426,6 +435,8 @@ namespace WallSwitch
 			_lastImage = xmlTheme.GetAttribute("LastImage");
 
 			_activateOnExit = Util.ParseBool(xmlTheme, "ActivateOnExit", false);
+
+			_randomGroupCount = Util.ParseInt(xmlTheme, "RandomGroupCount", 1);
 
 			foreach (var xmlHotKey in xmlTheme.SelectNodes(HotKey.XmlElementName).Cast<XmlElement>())
 			{
@@ -707,7 +718,7 @@ namespace WallSwitch
 		#endregion
 
 		#region ImageSelection
-		public IEnumerable<ImageLayout> GetNextImages(Rectangle[] monitorRects)
+		public IEnumerable<ImageLayout> GetNextImages(Rectangle[] monitorRects, ref int randomGroupCounter)
 		{
 			IEnumerable<ImageLayout> ret = null;
 
@@ -743,7 +754,7 @@ namespace WallSwitch
 			if (allFiles.Count > 0)
 			{
 				allFiles.Sort();
-				ret = PickImages(allFiles, monitorRects);
+				ret = PickImages(allFiles, monitorRects, ref randomGroupCounter);
 			}
 
 			if (ret != null)
@@ -772,7 +783,7 @@ namespace WallSwitch
 		/// <param name="allFiles">A list of all available image files</param>
 		/// <param name="monitorRects">A list of all monitor rectangles</param>
 		/// <returns>A list of images to be rendered</returns>
-		private List<ImageLayout> PickImages(List<ImageRec> allFiles, Rectangle[] monitorRects)
+		private List<ImageLayout> PickImages(List<ImageRec> allFiles, Rectangle[] monitorRects, ref int randomGroupCounter)
 		{
 			if (_mode == ThemeMode.Collage)
 			{
@@ -783,7 +794,7 @@ namespace WallSwitch
 				{
 					for (int imageIndex = 0; imageIndex < _numCollageImages; imageIndex++)
 					{
-						var img = PickRandomOrSequentialImage(allFiles, pickedFiles);
+						var img = PickRandomOrSequentialImage(allFiles, pickedFiles, ref randomGroupCounter);
 						if (img == null) break;
 						img.Retrieve();
 
@@ -812,7 +823,7 @@ namespace WallSwitch
 
 				while (monitorSelections.Any(m => m.ImageRec == null) && retries <= k_maxRetrievalRetries)
 				{
-					var img = PickRandomOrSequentialImage(allFiles, pickedFiles);
+					var img = PickRandomOrSequentialImage(allFiles, pickedFiles, ref randomGroupCounter);
 					if (img == null) break;
 					img.Retrieve();
 
@@ -901,12 +912,30 @@ namespace WallSwitch
 			}
 		}
 
-		private ImageRec PickRandomOrSequentialImage(List<ImageRec> allFiles, List<ImageLayout> filesPickedThisTime)
+		private ImageRec PickRandomOrSequentialImage(List<ImageRec> allFiles, List<ImageLayout> filesPickedThisTime, ref int randomGroupCounter)
 		{
 			ImageRec img;
 			if (_order == ThemeOrder.Random)
 			{
-				img = PickRandomImage(allFiles, filesPickedThisTime);
+				if (_randomGroupCount <= 1)
+				{
+					img = PickRandomImage(allFiles, filesPickedThisTime);
+				}
+				else
+				{
+					if (randomGroupCounter == 0)
+					{
+						Log.WriteDebug("Picking random image because random group counter is {0}", randomGroupCounter);
+						img = PickRandomImage(allFiles, filesPickedThisTime);
+					}
+					else
+					{
+						Log.WriteDebug("Picking sequential image because random group counter is {0}", randomGroupCounter);
+						img = PickSequentialImage(allFiles, filesPickedThisTime);
+					}
+
+					if (++randomGroupCounter >= _randomGroupCount) randomGroupCounter = 0;
+				}
 			}
 			else // sequential
 			{
