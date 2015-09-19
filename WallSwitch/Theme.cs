@@ -80,6 +80,7 @@ namespace WallSwitch
 		private string _lastImage = null;
 		private bool _activateOnExit = false;
 		private int _randomGroupCount = 1;
+		private bool _clearBetweenRandomGroups = false;
 
 		private ColorEffect _colorEffectFore = ColorEffect.None;
 		private ColorEffect _colorEffectBack = ColorEffect.None;
@@ -278,6 +279,12 @@ namespace WallSwitch
 			get { return _randomGroupCount; }
 			set { _randomGroupCount = value; }
 		}
+
+		public bool ClearBetweenRandomGroups
+		{
+			get { return _clearBetweenRandomGroups; }
+			set { _clearBetweenRandomGroups = value; }
+		}
 		#endregion
 
 		#region Save/Load
@@ -331,7 +338,11 @@ namespace WallSwitch
 
 			if (_activateOnExit) xml.WriteAttributeString("ActivateOnExit", _activateOnExit.ToString());
 
-			if (_randomGroupCount > 1) xml.WriteAttributeString("RandomGroupCount", _randomGroupCount.ToString());
+			if (_randomGroupCount > 1)
+			{
+				xml.WriteAttributeString("RandomGroupCount", _randomGroupCount.ToString());
+				xml.WriteAttributeString("ClearBetweenRandomGroups", _clearBetweenRandomGroups.ToString());
+			}
 
 			_hotKey.SaveXml(xml);
 
@@ -437,6 +448,7 @@ namespace WallSwitch
 			_activateOnExit = Util.ParseBool(xmlTheme, "ActivateOnExit", false);
 
 			_randomGroupCount = Util.ParseInt(xmlTheme, "RandomGroupCount", 1);
+			_clearBetweenRandomGroups = Util.ParseBool(xmlTheme, "ClearBetweenRandomGroups", false);
 
 			foreach (var xmlHotKey in xmlTheme.SelectNodes(HotKey.XmlElementName).Cast<XmlElement>())
 			{
@@ -718,7 +730,7 @@ namespace WallSwitch
 		#endregion
 
 		#region ImageSelection
-		public IEnumerable<ImageLayout> GetNextImages(Rectangle[] monitorRects, ref int randomGroupCounter)
+		public IEnumerable<ImageLayout> GetNextImages(Rectangle[] monitorRects, ref int randomGroupCounter, ref bool randomGroupClear)
 		{
 			IEnumerable<ImageLayout> ret = null;
 
@@ -754,7 +766,7 @@ namespace WallSwitch
 			if (allFiles.Count > 0)
 			{
 				allFiles.Sort();
-				ret = PickImages(allFiles, monitorRects, ref randomGroupCounter);
+				ret = PickImages(allFiles, monitorRects, ref randomGroupCounter, ref randomGroupClear);
 			}
 
 			if (ret != null)
@@ -783,18 +795,19 @@ namespace WallSwitch
 		/// <param name="allFiles">A list of all available image files</param>
 		/// <param name="monitorRects">A list of all monitor rectangles</param>
 		/// <returns>A list of images to be rendered</returns>
-		private List<ImageLayout> PickImages(List<ImageRec> allFiles, Rectangle[] monitorRects, ref int randomGroupCounter)
+		private List<ImageLayout> PickImages(List<ImageRec> allFiles, Rectangle[] monitorRects, ref int randomGroupCounter, ref bool randomGroupClear)
 		{
 			if (_mode == ThemeMode.Collage)
 			{
 				var pickedFiles = new List<ImageLayout>();
 				var numMonitors = _separateMonitors ? monitorRects.Length : 1;
+				var sequenceNumber = 0;
 
 				for (int monitorIndex = 0; monitorIndex < numMonitors; monitorIndex++)
 				{
 					for (int imageIndex = 0; imageIndex < _numCollageImages; imageIndex++)
 					{
-						var img = PickRandomOrSequentialImage(allFiles, pickedFiles, ref randomGroupCounter);
+						var img = PickRandomOrSequentialImage(allFiles, pickedFiles, sequenceNumber, ref randomGroupCounter, ref randomGroupClear);
 						if (img == null) break;
 						img.Retrieve();
 
@@ -810,6 +823,8 @@ namespace WallSwitch
 								pickedFiles.Add(new ImageLayout(img, new int[] { layoutMonitor }));
 							}
 						}
+
+						sequenceNumber++;
 					}
 				}
 
@@ -820,10 +835,11 @@ namespace WallSwitch
 				var monitorSelections = (from m in monitorRects select new MonitorSelection { Rect = m, ImageRec = null }).ToArray();
 				var retries = 0;
 				var pickedFiles = new List<ImageLayout>();
+				var sequenceNumber = 0;
 
 				while (monitorSelections.Any(m => m.ImageRec == null) && retries <= k_maxRetrievalRetries)
 				{
-					var img = PickRandomOrSequentialImage(allFiles, pickedFiles, ref randomGroupCounter);
+					var img = PickRandomOrSequentialImage(allFiles, pickedFiles, sequenceNumber, ref randomGroupCounter, ref randomGroupClear);
 					if (img == null) break;
 					img.Retrieve();
 
@@ -878,6 +894,8 @@ namespace WallSwitch
 					else retries++;
 
 					GenerateImageLayoutsFromMonitorSelections(monitorSelections, pickedFiles);
+
+					sequenceNumber++;
 				}
 
 				return pickedFiles;
@@ -912,9 +930,10 @@ namespace WallSwitch
 			}
 		}
 
-		private ImageRec PickRandomOrSequentialImage(List<ImageRec> allFiles, List<ImageLayout> filesPickedThisTime, ref int randomGroupCounter)
+		private ImageRec PickRandomOrSequentialImage(List<ImageRec> allFiles, List<ImageLayout> filesPickedThisTime, int sequenceNumber,
+			ref int randomGroupCounter, ref bool randomGroupClear)
 		{
-			ImageRec img;
+			ImageRec img = null;
 			if (_order == ThemeOrder.Random)
 			{
 				if (_randomGroupCount <= 1)
@@ -923,18 +942,25 @@ namespace WallSwitch
 				}
 				else
 				{
+					if (randomGroupCounter >= _randomGroupCount && sequenceNumber == 0) randomGroupCounter = 0;
+
 					if (randomGroupCounter == 0)
 					{
 						Log.WriteDebug("Picking random image because random group counter is {0}", randomGroupCounter);
 						img = PickRandomImage(allFiles, filesPickedThisTime);
+						randomGroupCounter++;
+						if (_clearBetweenRandomGroups) randomGroupClear = true;
 					}
-					else
+					else if (randomGroupCounter < _randomGroupCount)
 					{
 						Log.WriteDebug("Picking sequential image because random group counter is {0}", randomGroupCounter);
 						img = PickSequentialImage(allFiles, filesPickedThisTime);
+						randomGroupCounter++;
 					}
-
-					if (++randomGroupCounter >= _randomGroupCount) randomGroupCounter = 0;
+					else
+					{
+						Log.WriteDebug("Picking no image because random group counter {0} has exceeded limit {1}", randomGroupCounter, _randomGroupCount);
+					}
 				}
 			}
 			else // sequential
@@ -942,7 +968,7 @@ namespace WallSwitch
 				img = PickSequentialImage(allFiles, filesPickedThisTime);
 			}
 
-			_lastImage = img.Location;
+			if (img != null) _lastImage = img.Location;
 			return img;
 		}
 

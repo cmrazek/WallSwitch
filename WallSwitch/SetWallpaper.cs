@@ -1366,13 +1366,14 @@ namespace WallSwitch
 		{
 			// Get the list of images to display next.
 			IEnumerable<ImageLayout> images = null;
+			bool randomGroupClear = false;
 			switch (dir)
 			{
 				case SwitchDir.Next:
 					{
 						var screenList = new ScreenList();
 						var monitorRects = (from s in screenList select s.Bounds).ToArray();
-						images = theme.GetNextImages(monitorRects, ref randomGroupCounter);
+						images = theme.GetNextImages(monitorRects, ref randomGroupCounter, ref randomGroupClear);
 					}
 					break;
 
@@ -1389,13 +1390,13 @@ namespace WallSwitch
 			if (images != null)
 			{
 				foreach (var img in images) Log.Write(LogLevel.Debug, "  Image: {0}", img.ImageRec.Location);
-				if (images != null) Set(theme, images, forceQuick);
+				if (images != null) Set(theme, images, forceQuick, randomGroupClear);
 
 				foreach (var img in images) img.ImageRec.Release();
 			}
 		}
 
-		public void Set(Theme theme, IEnumerable<ImageLayout> files, bool forceQuick)
+		public void Set(Theme theme, IEnumerable<ImageLayout> files, bool forceQuick, bool clear)
 		{
 			if (theme == null) throw new ArgumentNullException("Theme is null.");
 			if (files == null) throw new ArgumentNullException("Files list is null.");
@@ -1413,7 +1414,7 @@ namespace WallSwitch
 				using (_renderer = new WallpaperRenderer())
 				{
 					Bitmap lastImage = null;
-					if (theme.Mode == ThemeMode.Collage) lastImage = LoadLastWallpaper(theme, screenList);
+					if (theme.Mode == ThemeMode.Collage && !clear) lastImage = LoadLastWallpaper(theme, screenList);
 					if (_renderer.InitFrame(screenRects, theme, lastImage))
 					{
 						foreach (var imgLayout in files)

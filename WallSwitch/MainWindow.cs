@@ -584,11 +584,13 @@ namespace WallSwitch
 			{
 				c_randomGroup.Checked = true;
 				c_randomGroupCount.Text = _currentTheme.RandomGroupCount.ToString();
+				c_clearBetweenRandomGroups.Checked = _currentTheme.ClearBetweenRandomGroups;
 			}
 			else
 			{
 				c_randomGroup.Checked = false;
 				c_randomGroupCount.Text = "1";
+				c_clearBetweenRandomGroups.Checked = false;
 			}
 
 			RefreshTransparency();
@@ -739,6 +741,7 @@ namespace WallSwitch
 			}
 
 			int randomGroupCount;
+			bool clearBetweenRandomGroups;
 			if (c_randomGroup.Checked)
 			{
 				if (!int.TryParse(c_randomGroupCount.Text, out randomGroupCount) || randomGroupCount < 1)
@@ -751,10 +754,13 @@ namespace WallSwitch
 					}
 					return false;
 				}
+
+				clearBetweenRandomGroups = c_clearBetweenRandomGroups.Checked;
 			}
 			else
 			{
 				randomGroupCount = 1;
+				clearBetweenRandomGroups = false;
 			}
 
 			_currentTheme.Frequency = freq;
@@ -811,6 +817,7 @@ namespace WallSwitch
 			_currentTheme.BackgroundBlurDist = trkBackgroundBlurDist.Value;
 
 			_currentTheme.RandomGroupCount = randomGroupCount;
+			_currentTheme.ClearBetweenRandomGroups = clearBetweenRandomGroups;
 
 			c_widgetLayout.SaveToTheme(_currentTheme);
 
@@ -942,12 +949,24 @@ namespace WallSwitch
 				c_randomGroup.Visible = true;
 				c_randomGroupCount.Visible = c_randomGroup.Checked;
 				c_randomGroupCountLabel.Visible = c_randomGroup.Checked;
+
+				int randomGroupCount;
+				if (c_themeMode.SelectedIndex == k_modeCollage && c_randomGroup.Checked &&
+					int.TryParse(c_randomGroupCount.Text, out randomGroupCount) && randomGroupCount > 1)
+				{
+					c_clearBetweenRandomGroups.Visible = true;
+				}
+				else
+				{
+					c_clearBetweenRandomGroups.Visible = false;
+				}
 			}
 			else
 			{
 				c_randomGroup.Visible = false;
 				c_randomGroupCount.Visible = false;
 				c_randomGroupCountLabel.Visible = false;
+				c_clearBetweenRandomGroups.Visible = false;
 			}
 
 			EnableLocationsContextMenu();
