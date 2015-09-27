@@ -1600,16 +1600,16 @@ namespace WallSwitch
 				if (IsImageWrappingRequired())
 				{
 					var wrappedImage = WrapImage(image, screens.Offset);
-					wrappedImage.Save(fileName, format);
+					WriteImageHardened(fileName, wrappedImage, format);
 
 #if DEBUG
-				var unwrappedFileName = Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + "_unwrapped" + Path.GetExtension(fileName));
-				image.Save(unwrappedFileName, ImageFormat.Png);
+					var unwrappedFileName = Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + "_unwrapped" + Path.GetExtension(fileName));
+					WriteImageHardened(unwrappedFileName, image, ImageFormat.Png);
 #endif
 				}
 				else
 				{
-					image.Save(fileName, format);
+					WriteImageHardened(fileName, image, format);
 				}
 
 				Xml.SerializeToFile(file, fileName + ".wall");
@@ -1617,6 +1617,46 @@ namespace WallSwitch
 			catch (Exception ex)
 			{
 				Log.Write(ex);
+			}
+		}
+
+		private void WriteImageHardened(string fileName, Image img, ImageFormat format)
+		{
+			byte[] bytes;
+
+			using (var memStream = new MemoryStream())
+			{
+				img.Save(memStream, format);
+				bytes = memStream.ToArray();
+			}
+
+			var attempts = 3;
+			while (attempts > 0)
+			{
+				try
+				{
+					if (File.Exists(fileName))
+					{
+						File.SetAttributes(fileName, FileAttributes.Normal);
+						File.Delete(fileName);
+					}
+					File.WriteAllBytes(fileName, bytes);
+					break;
+				}
+				catch (Exception ex)
+				{
+					if (--attempts > 0)
+					{
+						Log.Write(LogLevel.Warning, "Error when attempting to save image file '{0}', will retry {1} more time(s):\r\n{2}",
+							fileName, attempts, ex.ToString());
+						Thread.Sleep(1000);
+					}
+					else
+					{
+						Log.Write(ex, "Error when attempting to save image file '{0}'. Maximum number of retries exceeded.",
+							fileName);
+					}
+				}
 			}
 		}
 
