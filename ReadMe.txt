@@ -12,6 +12,19 @@ Contact:
 
 ChangeLog:
 
+Version 1.3.11 - TBD:
+- Fix problem with the settings view not scaling with the window.
+- Add extra error handling to the image loading process.
+
+Version 1.3.10 - 2015-09-27:
+- Add extra error handling and retries to the image saving process.
+
+Version 1.3.9 - 2015-09-19:
+- Added option to clear between random groups when in collage mode.
+
+Version 1.3.8 - 2015-08-23:
+- Added support for groups of sequential images between random ones.
+
 Version 1.3.7 - 2015-01-25:
 - Added support for high DPI under Windows 8.1.
 - Fixed transparency slider not scaling with window properly.

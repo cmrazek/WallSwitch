@@ -1706,15 +1706,10 @@ namespace WallSwitch
 		{
 			// Need to load through a stream so we can force it to close.
 			// Image.FromFile leaves the file open for a while.
-			using (FileStream stream = new FileStream(fileName, FileMode.Open))
+			var bytes = File.ReadAllBytes(fileName);
+			using (var memStream = new MemoryStream(bytes))
 			{
-				long len = stream.Length;
-				if (len > 0) return new Bitmap(Bitmap.FromStream(stream));
-				else
-				{
-					Log.Write(LogLevel.Debug, "The file has no content.");
-					return null;
-				}
+				return new Bitmap(Bitmap.FromStream(memStream));
 			}
 		}
 
