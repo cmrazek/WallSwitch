@@ -674,26 +674,30 @@ namespace WallSwitch
 
 		public void ClearHistory()
 		{
+            Log.Debug("Clearing history for theme '{0}' ({1})...", _id, _name);
+
 			_history.Clear();
 			_historyIndex = -1;
 
-			var fileName = GetBaseWallpaperFileName(ImageFormat.Bmp);
-			if (File.Exists(fileName)) File.Delete(fileName);
+            foreach (var fileName in Directory.GetFiles(Util.AppDataDir, string.Format("{0}*", _id)))
+            {
+                try
+                {
+                    Log.Debug("Deleting file '{0}' for history clear.", fileName);
 
-			fileName = GetBaseWallpaperFileName(ImageFormat.Jpeg);
-			if (File.Exists(fileName)) File.Delete(fileName);
-
-			fileName = GetBaseWallpaperFileName(ImageFormat.Png);
-			if (File.Exists(fileName)) File.Delete(fileName);
-
-			fileName = GetDisplayWallpaperFileName(ImageFormat.Bmp);
-			if (File.Exists(fileName)) File.Delete(fileName);
-
-			fileName = GetDisplayWallpaperFileName(ImageFormat.Jpeg);
-			if (File.Exists(fileName)) File.Delete(fileName);
-
-			fileName = GetDisplayWallpaperFileName(ImageFormat.Png);
-			if (File.Exists(fileName)) File.Delete(fileName);
+                    var attribs = File.GetAttributes(fileName);
+                    if ((attribs & FileAttributes.ReadOnly) != 0)
+                    {
+                        attribs &= ~FileAttributes.ReadOnly;
+                        File.SetAttributes(fileName, attribs);
+                    }
+                    File.Delete(fileName);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning("Failed to delete file '{1}' when clearing history: {0}", ex, fileName);
+                }
+            }
 
 			_imageRectHistory.Clear();
 
@@ -946,20 +950,20 @@ namespace WallSwitch
 
 					if (randomGroupCounter == 0)
 					{
-						Log.WriteDebug("Picking random image because random group counter is {0}", randomGroupCounter);
+						Log.Debug("Picking random image because random group counter is {0}", randomGroupCounter);
 						img = PickRandomImage(allFiles, filesPickedThisTime);
 						randomGroupCounter++;
 						if (_clearBetweenRandomGroups) randomGroupClear = true;
 					}
 					else if (randomGroupCounter < _randomGroupCount)
 					{
-						Log.WriteDebug("Picking sequential image because random group counter is {0}", randomGroupCounter);
+						Log.Debug("Picking sequential image because random group counter is {0}", randomGroupCounter);
 						img = PickSequentialImage(allFiles, filesPickedThisTime);
 						randomGroupCounter++;
 					}
 					else
 					{
-						Log.WriteDebug("Picking no image because random group counter {0} has exceeded limit {1}", randomGroupCounter, _randomGroupCount);
+						Log.Debug("Picking no image because random group counter {0} has exceeded limit {1}", randomGroupCounter, _randomGroupCount);
 					}
 				}
 			}
@@ -1075,11 +1079,11 @@ namespace WallSwitch
 			{
 				for (var numMonitors = 1; numMonitors <= monitorSelections.Length - startMonitor; numMonitors++)
 				{
-					Log.WriteDebug("Testing monitor selection: start [{0}] count [{1}]", startMonitor, numMonitors);
+					Log.Debug("Testing monitor selection: start [{0}] count [{1}]", startMonitor, numMonitors);
 
 					if (!MonitorsAreAdjascent(monitorSelections, startMonitor, numMonitors))
 					{
-						Log.WriteDebug("Discarding monitor selection because monitors are not adjascent.");
+						Log.Debug("Discarding monitor selection because monitors are not adjascent.");
 						continue;
 					}
 
@@ -1119,7 +1123,7 @@ namespace WallSwitch
 						}
 					}
 
-					Log.WriteDebug("Monitor selection: aspect [{0}] aspectDiff [{1}]", aspect, aspectDiff);
+					Log.Debug("Monitor selection: aspect [{0}] aspectDiff [{1}]", aspect, aspectDiff);
 				}
 			}
 
@@ -1134,7 +1138,7 @@ namespace WallSwitch
 					bestUsedCount > 1)				// Only allow displacement when occupying more than 1 monitor.
 				{
 					// There's a better fit if we displace a previously selected image.
-					Log.WriteDebug("Using monitor range start [{0}] count [{1}] (displaced previously picked images)", bestUsedStart, bestUsedCount);
+					Log.Debug("Using monitor range start [{0}] count [{1}] (displaced previously picked images)", bestUsedStart, bestUsedCount);
 					var guid = Guid.NewGuid();
 					for (int i = bestUsedStart; i < bestUsedStart + bestUsedCount; i++)
 					{
@@ -1157,7 +1161,7 @@ namespace WallSwitch
 				else
 				{
 					// Use the unused range
-					Log.WriteDebug("Using monitor range start [{0}] count [{1}] (unused range)", bestUnusedStart, bestUnusedCount);
+					Log.Debug("Using monitor range start [{0}] count [{1}] (unused range)", bestUnusedStart, bestUnusedCount);
 					var guid = Guid.NewGuid();
 					for (int i = bestUnusedStart; i < bestUnusedStart + bestUnusedCount; i++)
 					{
@@ -1170,7 +1174,7 @@ namespace WallSwitch
 			}
 			else
 			{
-				Log.WriteDebug("Unable to find monitor range.");
+				Log.Debug("Unable to find monitor range.");
 				return false;
 			}
 		}
@@ -1230,69 +1234,15 @@ namespace WallSwitch
 			float areaDiff = ((float)clipArea / (float)imageArea) * 100.0f;
 			if (areaDiff >= 100.0f - _maxImageClip)
 			{
-				Log.WriteDebug("Image clip check passed: areaDiff [{0}]% envelopeArea [{1}] clipArea [{2}] imageArea [{3}] imageRect [{4}] envelope [{5}]", areaDiff, envelopeArea, clipArea, imageArea, imageRect, envelope);
+				Log.Debug("Image clip check passed: areaDiff [{0}]% envelopeArea [{1}] clipArea [{2}] imageArea [{3}] imageRect [{4}] envelope [{5}]", areaDiff, envelopeArea, clipArea, imageArea, imageRect, envelope);
 				return true;
 			}
 			else
 			{
-				Log.WriteDebug("Image clip check failed: areaDiff [{0}]% envelopeArea [{1}] clipArea [{2}] imageArea [{3}] imageRect [{4}] envelope [{5}]", areaDiff, envelopeArea, clipArea, imageArea, imageRect, envelope);
+				Log.Debug("Image clip check failed: areaDiff [{0}]% envelopeArea [{1}] clipArea [{2}] imageArea [{3}] imageRect [{4}] envelope [{5}]", areaDiff, envelopeArea, clipArea, imageArea, imageRect, envelope);
 				return false;
 			}
 		}
-
-		// TODO: remove
-		///// <summary>
-		///// This function will attempt to fit an image to one or more monitors (depending if spanning is enabled).
-		///// </summary>
-		///// <param name="img">The image to fit</param>
-		///// <param name="allMonitorRects">The bounds of monitors the image should attempt to fit to.</param>
-		///// <returns>The number of monitors this image should be spanned across, or 0 if the image can't be loaded.</returns>
-		//private int FitImageToMonitorRects(ImageRec img, Rectangle[] allMonitorRects)
-		//{
-		//	if (!img.Retrieve())
-		//	{
-		//		Log.Write(LogLevel.Warning, "Failed to retrieve image [{0}]", img.Location);
-		//		return 0;
-		//	}
-
-		//	if (allMonitorRects.Length == 1)
-		//	{
-		//		return 1;	// Don't need to check if the aspect matches for a single monitor.
-		//	}
-
-		//	var imgSize = img.Image.Size;
-		//	var imageAspect = imgSize.GetAspect();
-
-		//	// Find the best fit
-		//	int bestNumMonitors = -1;
-		//	float bestAspectDiff = 0.0f;
-
-		//	for (var monitorCount = 1; monitorCount <= allMonitorRects.Length; monitorCount++)
-		//	{
-		//		Log.WriteDebug("Testing monitor range: start [{0}] count [{1}]", monitorCount, 0);	// TODO
-
-		//		// Get the aspect for this number of monitors, and check if it matches the aspect of the image.
-		//		var monitorRects = allMonitorRects.Take(monitorCount).ToArray();
-		//		var monitorEnvelope = monitorRects.GetEnvelope();
-		//		var monitorAspect = monitorEnvelope.Size.GetAspect();
-		//		var aspectDiff = Math.Abs(monitorAspect - imageAspect);
-
-		//		if (bestNumMonitors == -1 || aspectDiff < bestAspectDiff)
-		//		{
-		//			var envelopeArea = monitorEnvelope.Area();
-		//			if (envelopeArea > 0)
-		//			{
-		//				var monitorArea = monitorRects.Sum(m => m.Area());
-		//				var areaDiff = monitorArea / envelopeArea;
-
-		//				bestAspectDiff = aspectDiff;
-		//				bestNumMonitors = monitorCount;
-		//			}
-		//		}
-		//	}
-
-		//	return bestNumMonitors == -1 ? 1 : bestNumMonitors;
-		//}
 
 		private bool ImageRecIsInHistory(ImageRec img)
 		{
@@ -1326,17 +1276,75 @@ namespace WallSwitch
 		{
 		}
 
-		public string GetBaseWallpaperFileName(ImageFormat format)
+		public string GetBaseWallpaperFileName(ImageFormat format, DateTime timeStamp)
 		{
-			var fileName = string.Concat(_id.ToString(), ImageFormatDesc.ImageFormatToExtension(format));
+            var fileName = string.Format("{0}_{2:yyyyMMddHHmmss}_base{1}", _id, ImageFormatDesc.ImageFormatToExtension(format), timeStamp);
 			return Path.Combine(Util.AppDataDir, fileName);
 		}
 
-		public string GetDisplayWallpaperFileName(ImageFormat format)
+		public string GetDisplayWallpaperFileName(ImageFormat format, DateTime timeStamp)
 		{
-			var fileName = string.Concat(_id.ToString(), "_display", ImageFormatDesc.ImageFormatToExtension(format));
+            var fileName = string.Format("{0}_{2:yyyyMMddHHmmss}{1}", _id, ImageFormatDesc.ImageFormatToExtension(format), timeStamp);
 			return Path.Combine(Util.AppDataDir, fileName);
 		}
+
+        public string FindLastWallpaperFileName()
+        {
+            Log.Debug("Finding last wallpaper file name...");
+
+            foreach (var fileName in Directory.GetFiles(Util.AppDataDir, string.Format("{0}*", _id)).OrderByDescending(x => x.ToLower()))
+            {
+                if (ImageFormatDesc.FileNameToImageFormat(fileName) != null)
+                {
+                    Log.Debug("  File name appears to be supported: {0}", fileName);
+                    return fileName;
+                }
+                else
+                {
+                    Log.Debug("  File name is not a supported image: {0}", fileName);
+                }
+            }
+
+            return null;
+        }
+
+        public void PurgeOldWallpaperFiles(IEnumerable<string> currentFileNames)
+        {
+            foreach (var fileName in Directory.GetFiles(Util.AppDataDir, string.Format("{0}*", _id)))
+            {
+                // Check that this is not the current image.
+                var keep = false;
+                foreach (var curFileName in currentFileNames)
+                {
+                    if (fileName.Length >= curFileName.Length &&
+                        string.Equals(fileName.Substring(0, curFileName.Length), curFileName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        keep = true;
+                        break;
+                    }
+                }
+
+                if (!keep)
+                {
+                    try
+                    {
+                        Log.Debug("Purging old wallpaper file: {0}", fileName);
+
+                        var attribs = File.GetAttributes(fileName);
+                        if ((attribs & FileAttributes.ReadOnly) != 0)
+                        {
+                            attribs &= ~FileAttributes.ReadOnly;
+                            File.SetAttributes(fileName, attribs);
+                        }
+                        File.Delete(fileName);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warning("Error when purging old wallpaper file '{0}': {1}", fileName, ex);
+                    }
+                }
+            }
+        }
 		#endregion
 
 		#region Events

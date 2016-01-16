@@ -1,7 +1,7 @@
 WallSwitch
 Switches desktop wallpapers from a variety of sources.
 http://wallswitch.codeplex.com/
-Current Version: 1.3.7
+Current Version: 1.3.11
 
 Requirements:
 	.NET Framework 4:  http://www.microsoft.com/download/en/details.aspx?id=17718
@@ -13,8 +13,8 @@ Contact:
 ChangeLog:
 
 Version 1.3.11 - TBD:
+- Wallpaper images are now saved using unique filenames to try to avoid file locking from other processes.
 - Fix problem with the settings view not scaling with the window.
-- Add extra error handling to the image loading process.
 
 Version 1.3.10 - 2015-09-27:
 - Add extra error handling and retries to the image saving process.

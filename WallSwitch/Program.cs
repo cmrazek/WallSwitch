@@ -57,12 +57,12 @@ namespace WallSwitch
 					}
 					finally
 					{
-						Log.WriteDebug("Main thread is terminating.");
+						Log.Debug("Main thread is terminating.");
 
 						// Shutdown the WCF service
 						try
 						{
-							Log.WriteDebug("Shutting down WCF service.");
+							Log.Debug("Shutting down WCF service.");
 							if (_serviceMgr != null)
 							{
 								_serviceMgr.Dispose();
@@ -77,7 +77,7 @@ namespace WallSwitch
 						// Terminal the switch thread
 						try
 						{
-							Log.WriteDebug("Shutting down switch thread.");
+							Log.Debug("Shutting down switch thread.");
 							if (_switchThread != null && _switchThread.IsAlive)
 							{
 								_switchThread.Kill();
@@ -148,7 +148,7 @@ namespace WallSwitch
 						_osVersion = OsVersion.Future;
 					}
 
-					Log.WriteDebug("OS Version: {0} ({1})", ver, _osVersion.Value);
+					Log.Debug("OS Version: {0} ({1})", ver, _osVersion.Value);
 				}
 
 				return _osVersion.Value;

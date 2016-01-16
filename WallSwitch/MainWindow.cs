@@ -163,7 +163,7 @@ namespace WallSwitch
 					}
 					else
 					{
-						Log.WriteDebug("No exit theme is set.");
+						Log.Debug("No exit theme is set.");
 					}
 				}
 				else
@@ -2224,6 +2224,7 @@ namespace WallSwitch
 
 		private void ClearHistory()
 		{
+            Log.Info("Clearing history...");
 			foreach (var theme in _themes) theme.ClearHistory();
 			c_historyTab.Clear();
 			ClearExpiredCache();

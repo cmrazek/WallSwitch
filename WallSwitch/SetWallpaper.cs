@@ -1280,16 +1280,19 @@ namespace WallSwitch
 			ChangeWallpaperCommon(theme, ref baseImage, ref displayImage, screens);
 
 			string baseFileName = null;
-			var displayFileName = theme.GetDisplayWallpaperFileName(ImageFormat.Bmp);
+            var now = DateTime.Now;
+            var currentFileNames = new List<string>();
+
+			var displayFileName = theme.GetDisplayWallpaperFileName(ImageFormat.Bmp, now);
+            currentFileNames.Add(displayFileName);
 			if (baseImage != null)
 			{
-				baseFileName = theme.GetBaseWallpaperFileName(ImageFormat.Png);
+				baseFileName = theme.GetBaseWallpaperFileName(ImageFormat.Png, now);
 				SaveWallpaperImage(baseFileName, baseImage, ImageFormat.Png, screens);
-				//baseImage.Save(baseFileName, ImageFormat.Png);
+				currentFileNames.Add(baseFileName);
 			}
 
 			SaveWallpaperImage(displayFileName, displayImage, ImageFormat.Bmp, screens);
-			//displayImage.Save(displayFileName, ImageFormat.Bmp);
 
 			RegistryKey key = Registry.CurrentUser.OpenSubKey("Control Panel\\Desktop", true);
 			try 
@@ -1310,6 +1313,7 @@ namespace WallSwitch
 			}
 
 			theme.LastWallpaperFile = baseImage != null ? baseFileName : displayFileName;
+            theme.PurgeOldWallpaperFiles(currentFileNames);
 		}
 
 		private void ChangeWallpaperFade(Theme theme, Bitmap baseImage, Bitmap displayImage, ScreenList screens)
@@ -1321,16 +1325,19 @@ namespace WallSwitch
 				ChangeWallpaperCommon(theme, ref baseImage, ref displayImage, screens);
 
 				string baseFileName = null;
-				var displayFileName = theme.GetDisplayWallpaperFileName(ImageFormat.Png);
+                var now = DateTime.Now;
+                var currentFileNames = new List<string>();
+
+				var displayFileName = theme.GetDisplayWallpaperFileName(ImageFormat.Png, now);
+                currentFileNames.Add(displayFileName);
 				if (baseImage != null)
 				{
-					baseFileName = theme.GetBaseWallpaperFileName(ImageFormat.Png);
+					baseFileName = theme.GetBaseWallpaperFileName(ImageFormat.Png, now);
 					SaveWallpaperImage(baseFileName, baseImage, ImageFormat.Png, screens);
-					//baseImage.Save(baseFileName, ImageFormat.Png);
+					currentFileNames.Add(baseFileName);
 				}
 
 				SaveWallpaperImage(displayFileName, displayImage, ImageFormat.Png, screens);
-				//displayImage.Save(displayFileName, ImageFormat.Png);
 
 				var hwnd = FindWindow("Progman", null);
 				if (hwnd == null) throw new Exception(string.Format("Couldn't find Progman window (GetLastError = 0x{0:X8})", Marshal.GetLastWin32Error()));
@@ -1354,6 +1361,7 @@ namespace WallSwitch
 					throw new Exception(string.Format("IActiveDesktop.ApplyChanges failed with HRESULT 0x{0:X8}", result));
 
 				theme.LastWallpaperFile = baseImage != null ? baseFileName : displayFileName;
+                theme.PurgeOldWallpaperFiles(currentFileNames);
 			}
 			catch (Exception ex)
 			{
@@ -1476,13 +1484,19 @@ namespace WallSwitch
 			{
 				Bitmap img;
 
-				if ((img = LoadWallpaperImage(theme.LastWallpaperFile, screens)) != null) return img;
-				if ((img = LoadWallpaperImage(theme.GetBaseWallpaperFileName(ImageFormat.Png), screens)) != null) return img;
-				if ((img = LoadWallpaperImage(theme.GetBaseWallpaperFileName(ImageFormat.Jpeg), screens)) != null) return img;
-				if ((img = LoadWallpaperImage(theme.GetBaseWallpaperFileName(ImageFormat.Bmp), screens)) != null) return img;
-				if ((img = LoadWallpaperImage(theme.GetDisplayWallpaperFileName(ImageFormat.Png), screens)) != null) return img;
-				if ((img = LoadWallpaperImage(theme.GetDisplayWallpaperFileName(ImageFormat.Jpeg), screens)) != null) return img;
-				if ((img = LoadWallpaperImage(theme.GetDisplayWallpaperFileName(ImageFormat.Bmp), screens)) != null) return img;
+				if ((img = LoadWallpaperImage(theme.LastWallpaperFile, screens)) != null)
+                {
+                    Log.Debug("Used last wallpaper image from theme settings: {0}", theme.LastWallpaperFile);
+                    return img;
+                }
+
+                var fileName = theme.FindLastWallpaperFileName();
+                if (!string.IsNullOrEmpty(fileName))
+                {
+                    Log.Debug("Found last wallpaper filename: {0}", fileName);
+                    return LoadWallpaperImage(fileName, screens);
+                }
+
 				return null;
 			}
 			catch (Exception ex)
@@ -1715,14 +1729,14 @@ namespace WallSwitch
 
 		private void DumpScreenLayoutToDebugLog(ScreenList screens)
 		{
-			Log.WriteDebug("Screen Layout:");
+			Log.Debug("Screen Layout:");
 			var index = 0;
 			foreach (var screen in screens)
 			{
-				Log.WriteDebug("  Screen {0}:", index++);
-				Log.WriteDebug("    Primary: {0}", screen.Primary);
-				Log.WriteDebug("    Bounds: {0}", screen.Bounds);
-				Log.WriteDebug("    Working Area: {0}", screen.WorkingArea);
+				Log.Debug("  Screen {0}:", index++);
+				Log.Debug("    Primary: {0}", screen.Primary);
+				Log.Debug("    Bounds: {0}", screen.Bounds);
+				Log.Debug("    Working Area: {0}", screen.WorkingArea);
 			}
 		}
 	}

@@ -55,8 +55,8 @@ namespace WallSwitch
 #if DEBUG
 			catch (Exception ex)
 			{
-				Debug.WriteLine("Error when opening log file:");
-				Debug.WriteLine(ex.ToString());
+                System.Diagnostics.Debug.WriteLine("Error when opening log file:");
+                System.Diagnostics.Debug.WriteLine(ex.ToString());
 			}
 #else
 			catch (Exception)
@@ -81,8 +81,8 @@ namespace WallSwitch
 #if DEBUG
 			catch (Exception ex)
 			{
-				Debug.WriteLine("Error when closing log file:");
-				Debug.WriteLine(ex.ToString());
+                System.Diagnostics.Debug.WriteLine("Error when closing log file:");
+                System.Diagnostics.Debug.WriteLine(ex.ToString());
 				_file = null;
 			}
 #else
@@ -176,7 +176,7 @@ namespace WallSwitch
 						_file.Flush();
 					}
 #if DEBUG
-					Debug.WriteLine(logEntry);
+                    System.Diagnostics.Debug.WriteLine(logEntry);
 #endif
 				}
 			}
@@ -221,8 +221,8 @@ namespace WallSwitch
 					}
 
 #if DEBUG
-					Debug.WriteLine(logEntry);
-					Debug.WriteLine(ex.ToString());
+                    System.Diagnostics.Debug.WriteLine(logEntry);
+                    System.Diagnostics.Debug.WriteLine(ex.ToString());
 #endif
 				}
 			}
@@ -248,14 +248,44 @@ namespace WallSwitch
 			Write(ex, "");
 		}
 
-		public static void WriteDebug(string message)
+		public static void Debug(string message)
 		{
 			Write(LogLevel.Debug, message);
 		}
 
-		public static void WriteDebug(string format, params object[] args)
+		public static void Debug(string format, params object[] args)
 		{
 			Write(LogLevel.Debug, format, args);
+		}
+
+        public static void Info(string message)
+		{
+			Write(LogLevel.Info, message);
+		}
+
+		public static void Info(string format, params object[] args)
+		{
+			Write(LogLevel.Info, format, args);
+		}
+
+        public static void Warning(string message)
+        {
+            Write(LogLevel.Warning, message);
+        }
+
+        public static void Warning(string format, params object[] args)
+		{
+			Write(LogLevel.Warning, format, args);
+		}
+
+        public static void Error(string message)
+        {
+            Write(LogLevel.Error, message);
+        }
+
+        public static void Error(string format, params object[] args)
+		{
+			Write(LogLevel.Error, format, args);
 		}
 
 		public static void Flush()

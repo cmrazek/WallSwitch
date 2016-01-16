@@ -86,7 +86,7 @@ namespace WallSwitch
 				{
 					if (_theme != value)
 					{
-						Log.WriteDebug("Theme is switching from '{0}' to '{1}'.",
+						Log.Debug("Theme is switching from '{0}' to '{1}'.",
 							_theme != null ? _theme.Name : "(null)", value != null ? value.Name : "(null)");
 						_theme = value;
 						_randomGroupCounter = 0;
