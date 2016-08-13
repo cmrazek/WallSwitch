@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -38,6 +39,8 @@ namespace WallSwitch
 		private const bool k_defaultFadeTransition = true;
 		public const int k_defaultMaxImageScale = 200;
 		public const int k_defaultNumCollageImages = 1;
+		public const ColorEffect k_defaultColorEffectFore = ColorEffect.None;
+		public const ColorEffect k_defaultColorEffectBack = ColorEffect.None;
 		public const int k_defaultColorEffectBackRatio = 25;
 		private const bool k_defaultDropShadow = false;
 		private const int k_defaultDropShadowDist = 15;
@@ -51,7 +54,7 @@ namespace WallSwitch
 		#endregion
 
 		#region Member Variables
-		private Guid _id;
+		private long _rowid;
 		private List<Location> _locations = new List<Location>();
 		private string _name = string.Empty;
 		private int _freq = k_defaultFreq;
@@ -67,10 +70,10 @@ namespace WallSwitch
 		private Color _backColorBottom = k_defaultBackColor;
 		private int _backOpacity = k_defaultBackOpacity;
 		private ImageFit _imageFit = k_defaultImageFit;
-		private List<IEnumerable<ImageLayout>> _history = new List<IEnumerable<ImageLayout>>();
 		private List<RectangleF> _imageRectHistory = new List<RectangleF>();
-		private int _historyIndex = -1;
-		private Random _rand = null;
+		private string _historyGuid;
+		private string _historyLatestGuid;
+		private bool _historyCanGoPrev = false;
 		private bool _fadeTransition = k_defaultFadeTransition;
 		private string _lastWallpaperFile = string.Empty;
 		private int _maxImageScale = k_defaultMaxImageScale;
@@ -82,8 +85,8 @@ namespace WallSwitch
 		private int _randomGroupCount = 1;
 		private bool _clearBetweenRandomGroups = false;
 
-		private ColorEffect _colorEffectFore = ColorEffect.None;
-		private ColorEffect _colorEffectBack = ColorEffect.None;
+		private ColorEffect _colorEffectFore = k_defaultColorEffectFore;
+		private ColorEffect _colorEffectBack = k_defaultColorEffectBack;
 		private int _colorEffectBackRatio = k_defaultColorEffectBackRatio;
 
 		private EdgeMode _edgeMode = k_defaultEdgeMode;
@@ -100,13 +103,15 @@ namespace WallSwitch
 		private int _backgroundBlurDist = k_defaultBackgroundBlurDist;
 
 		private List<WidgetInstance> _widgets = new List<WidgetInstance>();
+
+		private static Random _rand = null;
 		#endregion
 
 		#region Construction
-		public Theme(Guid id)
+		public Theme()
 		{
-			_id = id;
-			_rand = RandomUtil.FromGuidAndTime(_id);
+			if (_rand == null) _rand = new Random((int)(DateTime.Now.Ticks & 0x7fffffffL));
+
 			CalcInterval();
 
 			_hotKey.HotKeyPressed += new EventHandler(_hotKey_HotKeyPressed);
@@ -128,7 +133,7 @@ namespace WallSwitch
 		{
 			// Don't clone active, hotkey, history, historyIndex, rand, lastWallpaperFile
 
-			return new Theme(Guid.NewGuid())
+			return new Theme()
 			{
 				_locations = (from l in _locations select l.Clone()).ToList(),
 				_name = _name,
@@ -160,15 +165,15 @@ namespace WallSwitch
 		#endregion
 
 		#region Properties
-		public Guid ID
-		{
-			get { return _id; }
-		}
-
 		public string Name
 		{
 			get { return _name; }
 			set { _name = value; }
+		}
+
+		public long RowId
+		{
+			get { return _rowid; }
 		}
 
 		public ThemeMode Mode
@@ -288,82 +293,192 @@ namespace WallSwitch
 		#endregion
 
 		#region Save/Load
-		public void Save(XmlWriter xml)
+		public void Save()
 		{
-			xml.WriteAttributeString("Name", _name);
-			if (_active) xml.WriteAttributeString("Active", Boolean.TrueString);
-			xml.WriteAttributeString("Frequency", _freq.ToString());
-			xml.WriteAttributeString("Period", _period.ToString());
-			xml.WriteAttributeString("Mode", _mode.ToString());
-			xml.WriteAttributeString("Order", _order.ToString());
-			xml.WriteAttributeString("ImageSize", _imageSize.ToString());
-			xml.WriteAttributeString("BackColorTop", ColorUtil.ColorToString(_backColorTop));
-			xml.WriteAttributeString("BackColorBottom", ColorUtil.ColorToString(_backColorBottom));
-			if (_separateMonitors != k_defaultSeparateMonitors) xml.WriteAttributeString("SeparateMonitors", _separateMonitors.ToString());
-			if (_allowSpanning != k_defaultAllowSpanning) xml.WriteAttributeString("AllowSpanning", _allowSpanning.ToString());
-			if (_maxImageClip != k_defaultMaxImageClip) xml.WriteAttributeString("MaxImageClip", _maxImageClip.ToString());
-
-			if (_mode == ThemeMode.Collage)
+			var cols = new object[]
 			{
-				xml.WriteAttributeString("BackOpacity", _backOpacity.ToString());
+				"name", _name,
+				"active", _active,
+				"freq", _freq,
+				"period", _period.ToString(),
+				"mode", _mode.ToString(),
+				"order_", _order.ToString(),
+				"image_size", _imageSize,
+				"back_color_top", ColorUtil.ColorToString(_backColorTop),
+				"back_color_bottom", ColorUtil.ColorToString(_backColorBottom),
+				"separate_monitors", _separateMonitors ? 1 : 0,
+				"allow_spanning", _allowSpanning ? 1 : 0,
+				"max_image_clip", _maxImageClip,
+				"back_opacity", _backOpacity,
+				"image_fit", _imageFit.ToString(),
+				"edge_mode", _edgeMode.ToString(),
+				"edge_dist", _edgeDist,
+				"border_color", ColorUtil.ColorToString(_borderColor),
+				"fade_transition", _fadeTransition ? 1 : 0,
+				"last_wallpaper_file", _lastWallpaperFile,
+				"max_image_scale", _maxImageScale,
+				"num_collage_images", _numCollageImages,
+				"color_effect_fore", _colorEffectFore.ToString(),
+				"color_effect_back", _colorEffectBack.ToString(),
+				"color_effect_back_ratio", _colorEffectBackRatio,
+				"drop_shadow", _dropShadow ? 1 : 0,
+				"drop_shadow_dist", _dropShadowDist,
+				"drop_shadow_feather", _dropShadowFeather ? 1 : 0,
+				"drop_shadow_feather_dist", _dropShadowFeatherDist,
+				"drop_shadow_opacity", _dropShadowOpacity,
+				"background_blur", _backgroundBlur ? 1 : 0,
+				"background_blur_dist", _backgroundBlurDist,
+				"last_image", _lastImage,
+				"activate_on_exit", _activateOnExit ? 1 : 0,
+				"random_group_count", _randomGroupCount,
+				"clear_between_random_groups", _clearBetweenRandomGroups ? 1 : 0,
+				"hot_key", _hotKey.ToSaveString(),
+				"history_guid", _historyGuid,
+				"latest_guid", _historyLatestGuid
+			};
+
+			var newRecord = false;
+			if (_rowid == 0L)
+			{
+				_rowid = Database.Insert("theme", cols.ToArray());
+				newRecord = true;
 			}
 			else
 			{
-				xml.WriteAttributeString("ImageFit", _imageFit.ToString());
+				Database.Update("theme", "rowid = @rowid", cols, new object [] { "@rowid", _rowid });
 			}
 
-			if (_fadeTransition != k_defaultFadeTransition) xml.WriteAttributeString("FadeTransition", _fadeTransition.ToString());
-			if (!string.IsNullOrEmpty(_lastWallpaperFile)) xml.WriteAttributeString("LastWallpaperFile", _lastWallpaperFile);
-			if (_maxImageScale != k_defaultMaxImageScale) xml.WriteAttributeString("MaxImageScale", _maxImageScale.ToString());
-			if (_numCollageImages != k_defaultNumCollageImages) xml.WriteAttributeString("NumCollageImages", _numCollageImages.ToString());
-
-			if (_colorEffectFore != ColorEffect.None) xml.WriteAttributeString("ColorEffectFore", _colorEffectFore.ToString());
-			if (_colorEffectBack != ColorEffect.None) xml.WriteAttributeString("ColorEffectBack", _colorEffectBack.ToString());
-			if (_colorEffectBack != ColorEffect.None) xml.WriteAttributeString("ColorEffectCollageFadeRatio", _colorEffectBackRatio.ToString());
-
-			if (_edgeMode != k_defaultEdgeMode) xml.WriteAttributeString("EdgeMode", _edgeMode.ToString());
-			if (_edgeDist != k_defaultEdgeDist) xml.WriteAttributeString("EdgeDist", _edgeDist.ToString());
-			if (_borderColor != k_defaultBorderColor) xml.WriteAttributeString("BorderColor", ColorUtil.ColorToString(_borderColor));
-
-			if (_dropShadow != k_defaultDropShadow) xml.WriteAttributeString("DropShadow", _dropShadow.ToString());
-			if (_dropShadowDist != k_defaultDropShadowDist) xml.WriteAttributeString("DropShadowDist", _dropShadowDist.ToString());
-			if (_dropShadowFeather != k_defaultDropShadowFeather) xml.WriteAttributeString("DropShadowFeather", _dropShadowFeather.ToString());
-			if (_dropShadowFeatherDist != k_defaultDropShadowFeatherDist) xml.WriteAttributeString("DropShadowFeatherDist", _dropShadowFeatherDist.ToString());
-			if (_dropShadowOpacity != k_defaultDropShadowOpacity) xml.WriteAttributeString("DropShadowOpacity", _dropShadowOpacity.ToString());
-
-			if (_backgroundBlur != k_defaultBackgroundBlur) xml.WriteAttributeString("BackgroundBlur", _backgroundBlur.ToString());
-			if (_backgroundBlurDist != k_defaultBackgroundBlurDist) xml.WriteAttributeString("BackgroundBlurDist", _backgroundBlurDist.ToString());
-
-			if (!string.IsNullOrEmpty(_lastImage)) xml.WriteAttributeString("LastImage", _lastImage);
-
-			if (_activateOnExit) xml.WriteAttributeString("ActivateOnExit", _activateOnExit.ToString());
-
-			if (_randomGroupCount > 1)
-			{
-				xml.WriteAttributeString("RandomGroupCount", _randomGroupCount.ToString());
-				xml.WriteAttributeString("ClearBetweenRandomGroups", _clearBetweenRandomGroups.ToString());
-			}
-
-			_hotKey.SaveXml(xml);
-
+			// Save locations
+			var locRowIds = new List<long>();
 			foreach (var loc in _locations)
 			{
-				xml.WriteStartElement("Location");
-				loc.Save(xml);
-				xml.WriteEndElement();	// Location
+				loc.Save(_rowid);
+				locRowIds.Add(loc.RowId);
+			}
+
+			if (!newRecord)
+			{
+				// Purge removed locations
+				foreach (var id in Database.SelectLongList("select rowid from location where theme_id = @theme_id", "@theme_id", _rowid))
+				{
+					if (!_locations.Any(l => l.RowId == id))
+					{
+						Database.ExecuteNonQuery("delete from location where rowid = @rowid", "@rowid", _rowid);
+					}
+				}
 			}
 
 			foreach (var widget in _widgets)
 			{
-				widget.Save(xml);
+				widget.Save(_rowid);
 			}
 
-			SaveHistory(xml);
+			if (!newRecord)
+			{
+				// Purge removed widgets
+				foreach (var id in Database.SelectLongList("select rowid from widget where theme_id = @theme_id", "@theme_id", _rowid))
+				{
+					if (!_widgets.Any(w => w.RowId == id))
+					{
+						WidgetInstance.PurgeFromDatabase(id);
+					}
+				}
+			}
+
+			SaveHistory();
+		}
+
+		public void Load(System.Data.DataRow row)
+		{
+			_rowid = row.GetLong("rowid");
+
+			_name = row.GetString("name", Res.UnnamedTheme);
+			_active = row.GetBoolean("active", false);
+			_freq = row.GetInt("freq", k_defaultFreq);
+			_period = row.GetEnum<Period>("period", k_defaultPeriod);
+			CalcInterval();
+
+			_mode = row.GetEnum<ThemeMode>("mode", k_defaultMode);
+			_order = row.GetEnum<ThemeOrder>("order_", k_defaultOrder);
+
+			_imageSize = row.GetInt("image_size", k_defaultImageSize);
+			_backColorTop = ColorUtil.ParseColor(row.GetString("back_color_top"), k_defaultBackColor);
+			_backColorBottom = ColorUtil.ParseColor(row.GetString("back_color_bottom"), k_defaultBackColor);
+			_separateMonitors = row.GetBoolean("separate_monitors", k_defaultSeparateMonitors);
+			_allowSpanning = row.GetBoolean("allow_spanning", k_defaultAllowSpanning);
+
+			_maxImageClip = row.GetInt("max_image_clip", k_defaultMaxImageClip);
+			if (_maxImageClip < 0) _maxImageClip = 0;
+			else if (_maxImageClip > 100) _maxImageClip = 100;
+
+			_backOpacity = row.GetInt("back_opacity", k_defaultBackOpacity);
+			_imageFit = row.GetEnum("image_fit", k_defaultImageFit);
+			_edgeMode = row.GetEnum("edge_mode", k_defaultEdgeMode);
+			_edgeDist = row.GetInt("edge_dist", k_defaultEdgeDist);
+			_borderColor = ColorUtil.ParseColor(row.GetString("border_color"), k_defaultBorderColor);
+			_fadeTransition = row.GetBoolean("fade_transition", k_defaultFadeTransition);
+			_lastWallpaperFile = row.GetString("last_wallpaper_file", string.Empty);
+			_maxImageScale = row.GetInt("max_image_scale", k_defaultMaxImageScale);
+			_numCollageImages = row.GetInt("num_collage_images", k_defaultNumCollageImages);
+
+			_colorEffectFore = row.GetEnum("color_effect_fore", k_defaultColorEffectFore);
+			_colorEffectBack = row.GetEnum("color_effect_back", k_defaultColorEffectBack);
+			_colorEffectBackRatio = row.GetInt("color_effect_back_ratio", k_defaultColorEffectBackRatio);
+
+			_dropShadow = row.GetBoolean("drop_shadow", k_defaultDropShadow);
+			_dropShadowDist = row.GetInt("drop_shadow_dist", k_defaultDropShadowDist);
+			_dropShadowFeather = row.GetBoolean("drop_shadow_feather", k_defaultDropShadowFeather);
+			_dropShadowFeatherDist = row.GetInt("drop_shadow_feather_dist", k_defaultDropShadowFeatherDist);
+			_dropShadowOpacity = row.GetInt("drop_shadow_opacity", k_defaultDropShadowOpacity);
+
+			_backgroundBlur = row.GetBoolean("background_blur", k_defaultBackgroundBlur);
+			_backgroundBlurDist = row.GetInt("background_blur_dist", k_defaultBackgroundBlurDist);
+
+			_lastImage = row.GetString("last_image");
+			_activateOnExit = row.GetBoolean("activate_on_exit", false);
+			_randomGroupCount = row.GetInt("random_group_count", 1);
+			_clearBetweenRandomGroups = row.GetBoolean("clear_between_random_groups", false);
+
+			_hotKey.LoadFromSaveString(row.GetString("hot_key"));
+
+			_historyGuid = row.GetString("history_guid");
+			_historyLatestGuid = row.GetString("latest_guid");
+
+			foreach (DataRow locRow in Database.SelectDataTable("select rowid, * from location where theme_id = @theme_id", "@theme_id", _rowid).Rows)
+			{
+				try
+				{
+					var loc = new Location(locRow);
+					_locations.Add(loc);
+					AttachLocations(new Location[] { loc });
+				}
+				catch (Exception ex)
+				{
+					Log.Write(ex, "Error when loading location from settings.");
+				}
+			}
+
+			foreach (DataRow wRow in Database.SelectDataTable("select rowid, * from widget where theme_id = @theme_id", "@theme_id", _rowid).Rows)
+			{
+				try
+				{
+					var widget = WidgetInstance.Load(wRow);
+					_widgets.Add(widget);
+				}
+				catch (Exception ex)
+				{
+					Log.Write(ex, "Error when loading widget from settings.");
+				}
+			}
+
+			_historyCanGoPrev = Database.SelectInt("select count(*) from history where theme_id = @theme_id", "@theme_id", _rowid) > 0;
+
+			LoadHistory();
 		}
 
 		public void Load(XmlElement xmlTheme)
 		{
-			_name = Util.ParseString(xmlTheme, "Name", _id.ToString());
+			_name = Util.ParseString(xmlTheme, "Name", Res.UnnamedTheme);
 
 			_active = Util.ParseBool(xmlTheme, "Active", false);
 			_freq = Util.ParseInt(xmlTheme, "Frequency", k_defaultFreq);
@@ -460,7 +575,7 @@ namespace WallSwitch
 				try
 				{
 					var loc = new Location(xmlLoc);
-					loc.Load(xmlLoc);
+					//loc.Load(xmlLoc);	// TODO: remove
 					_locations.Add(loc);
 					AttachLocations(new Location[] { loc });
 				}
@@ -605,56 +720,62 @@ namespace WallSwitch
 		#region History
 		public bool CanGoPrev
 		{
-			get { return _historyIndex > 0; }
+			get { return _historyCanGoPrev; }
 		}
 
-		private void SaveHistory(XmlWriter xml)
+		private void SaveHistory()
 		{
-			int index = 0;
-			foreach (var images in _history)
-			{
-				xml.WriteStartElement("History");
-				if (index++ == _historyIndex) xml.WriteAttributeString("Current", Boolean.TrueString);
-				foreach (var image in images)
-				{
-					xml.WriteStartElement("Image");
-					image.Save(xml);
-					xml.WriteEndElement();	// Image
-				}
-				xml.WriteEndElement();	// History
-			}
+			if (_rowid == 0L) throw new InvalidOperationException("Cannot save theme history when rowid is zero.");
 
+			Database.ExecuteNonQuery("delete from rhistory where theme_id = @rowid", "@rowid", _rowid);
+
+			var counter = 0;
 			foreach (var rect in _imageRectHistory)
 			{
-				xml.WriteStartElement("ImageRectHistory");
-				xml.WriteAttributeString("X", rect.X.ToString());
-				xml.WriteAttributeString("Y", rect.Y.ToString());
-				xml.WriteAttributeString("Width", rect.Width.ToString());
-				xml.WriteAttributeString("Height", rect.Height.ToString());
-				xml.WriteEndElement();	// ImageRectHistory
+				Database.Insert("rhistory", new object[]
+					{
+						"theme_id", _rowid,
+						"counter", counter,
+						"left", rect.X,
+						"top", rect.Y,
+						"width", rect.Width,
+						"height", rect.Height
+					});
+				counter++;
+			}
+		}
+
+		private void LoadHistory()
+		{
+			// Image rect history
+			_imageRectHistory.Clear();
+			foreach (DataRow row in Database.SelectDataTable("select * from rhistory where theme_id = @id order by counter", "@id", _rowid).Rows)
+			{
+				_imageRectHistory.Add(new RectangleF(row.GetInt("left"), row.GetInt("top"), row.GetInt("width"), row.GetInt("height")));
 			}
 		}
 
 		private void LoadHistory(XmlElement xmlTheme)
 		{
-			foreach (XmlElement xmlHistory in xmlTheme.SelectNodes("History"))
-			{
-				bool current = false;
-				if (xmlHistory.HasAttribute("Current")) Boolean.TryParse(xmlHistory.GetAttribute("Current"), out current);
+			// TODO: remove
+			//foreach (XmlElement xmlHistory in xmlTheme.SelectNodes("History"))
+			//{
+			//	bool current = false;
+			//	if (xmlHistory.HasAttribute("Current")) Boolean.TryParse(xmlHistory.GetAttribute("Current"), out current);
 
-				var images = new List<ImageLayout>();
-				foreach (XmlElement xmlImage in xmlHistory.SelectNodes("Image"))
-				{
-					var image = ImageLayout.FromXml(xmlImage);
-					if (image != null) images.Add(image);
-				}
+			//	var images = new List<ImageLayout>();
+			//	foreach (XmlElement xmlImage in xmlHistory.SelectNodes("Image"))
+			//	{
+			//		var image = ImageLayout.FromXml(xmlImage);
+			//		if (image != null) images.Add(image);
+			//	}
 
-				if (images.Count > 0)
-				{
-					if (current) _historyIndex = _history.Count;
-					_history.Add(images);
-				}
-			}
+			//	if (images.Count > 0)
+			//	{
+			//		if (current) _historyIndex = _history.Count;
+			//		_history.Add(images);
+			//	}
+			//}
 
 			_imageRectHistory.Clear();
 			foreach (XmlElement xmlRect in xmlTheme.SelectNodes("ImageRectHistory"))
@@ -674,12 +795,12 @@ namespace WallSwitch
 
 		public void ClearHistory()
 		{
-            Log.Debug("Clearing history for theme '{0}' ({1})...", _id, _name);
+            Log.Debug("Clearing history for theme '{0}'", _name);
 
-			_history.Clear();
-			_historyIndex = -1;
+			Database.ExecuteNonQuery("delete from history where theme_id = @theme_id", "@theme_id", _rowid);
+			_historyGuid = null;
 
-            foreach (var fileName in Directory.GetFiles(Util.AppDataDir, string.Format("{0}*", _id)))
+            foreach (var fileName in Directory.GetFiles(Util.AppDataDir, string.Format("{0}_*", _rowid)))
             {
                 try
                 {
@@ -704,10 +825,11 @@ namespace WallSwitch
 			_lastImage = null;
 		}
 
-		public IEnumerable<IEnumerable<ImageLayout>> History
-		{
-			get { return _history; }
-		}
+		// TODO: remove
+		//public IEnumerable<IEnumerable<ImageLayout>> History
+		//{
+		//	get { return _history; }
+		//}
 
 		public IEnumerable<RectangleF> ImageRectHistory
 		{
@@ -740,55 +862,35 @@ namespace WallSwitch
 
 			Log.Write(LogLevel.Debug, "Finding next images...");
 
-			// If we're not at the end of the history (previously hit the back button),
-			// then go forward to the next images, and increment the counter.
-			if (_historyIndex < _history.Count - 1)
+			if (!string.IsNullOrEmpty(_historyGuid) && _historyGuid != _historyLatestGuid)
 			{
-				Log.Write(LogLevel.Debug, "Previously selected images found.");
-				var imageSet = _history[++_historyIndex];
-				var allFound = true;
-
-				foreach (var image in imageSet)
+				var lastHistoryTable = Database.SelectDataTable("select * from history where theme_id = @theme_id and guid = @guid",
+					"@theme_id", _rowid, "@guid", _historyGuid);
+				if (lastHistoryTable.Rows.Count > 0)
 				{
-					if (!image.ImageRec.Retrieve())
+					var lastHistoryTime = lastHistoryTable.Rows[0].GetDateTime("display_date");
+					var nextTable = Database.SelectDataTable("select * from history where theme_id = @theme_id and display_date > @date order by display_date",
+						"@theme_id", _rowid, "date", lastHistoryTime);
+					if (nextTable.Rows.Count > 0)
 					{
-						allFound = false;
-						break;
+						// Select the images that share the same guid as the first found
+						var nextGuid = nextTable.Rows[0].GetString("guid");
+						var nextImages = (from i in nextTable.Rows.Cast<DataRow>()
+										  where i.GetString("guid") == nextGuid
+										  select ImageLayout.FromDataRow(i)).ToArray();
+						_historyGuid = nextGuid;
+						_historyCanGoPrev = true;
+						return nextImages;
 					}
 				}
-				if (allFound) return imageSet;
+
+				// Reached the end of the history, so resume selecting new images
+				_historyGuid = _historyLatestGuid;
 			}
 
-			// Go through each location and find files.
-			var allFiles = new List<ImageRec>();
-			foreach (Location loc in (from l in _locations
-									  where !l.Disabled
-									  select l)) allFiles.AddRange(loc.Files);
-
-			Log.Write(LogLevel.Debug, allFiles.Count.ToString() + " files found.");
-
-			if (allFiles.Count > 0)
-			{
-				allFiles.Sort();
-				ret = PickImages(allFiles, monitorRects, ref randomGroupCounter, ref randomGroupClear);
-			}
-
-			if (ret != null)
-			{
-				// Add history
-				_history.Add(ret);
-				_historyIndex = _history.Count - 1;
-
-				FireHistoryAdded(ret);
-
-				// Trim off the beginning of the history if we've exceeded the max length.
-				while (_history.Count > k_maxHistory)
-				{
-					_history.RemoveAt(0);
-					_historyIndex--;
-				}
-			}
-
+			foreach (var loc in _locations) loc.UpdateIfRequired(this);
+			ret = PickImages(monitorRects, ref randomGroupCounter, ref randomGroupClear);
+			AddHistoryImages(ret);
 			return ret;
 		}
 
@@ -799,19 +901,20 @@ namespace WallSwitch
 		/// <param name="allFiles">A list of all available image files</param>
 		/// <param name="monitorRects">A list of all monitor rectangles</param>
 		/// <returns>A list of images to be rendered</returns>
-		private List<ImageLayout> PickImages(List<ImageRec> allFiles, Rectangle[] monitorRects, ref int randomGroupCounter, ref bool randomGroupClear)
+		private List<ImageLayout> PickImages(Rectangle[] monitorRects, ref int randomGroupCounter, ref bool randomGroupClear)
 		{
 			if (_mode == ThemeMode.Collage)
 			{
 				var pickedFiles = new List<ImageLayout>();
 				var numMonitors = _separateMonitors ? monitorRects.Length : 1;
 				var sequenceNumber = 0;
+				var maxCount = -1;
 
 				for (int monitorIndex = 0; monitorIndex < numMonitors; monitorIndex++)
 				{
 					for (int imageIndex = 0; imageIndex < _numCollageImages; imageIndex++)
 					{
-						var img = PickRandomOrSequentialImage(allFiles, pickedFiles, sequenceNumber, ref randomGroupCounter, ref randomGroupClear);
+						var img = PickRandomOrSequentialImage(pickedFiles, sequenceNumber, ref randomGroupCounter, ref randomGroupClear, ref maxCount);
 						if (img == null) break;
 						img.Retrieve();
 
@@ -840,10 +943,11 @@ namespace WallSwitch
 				var retries = 0;
 				var pickedFiles = new List<ImageLayout>();
 				var sequenceNumber = 0;
+				var maxCount = -1;
 
 				while (monitorSelections.Any(m => m.ImageRec == null) && retries <= k_maxRetrievalRetries)
 				{
-					var img = PickRandomOrSequentialImage(allFiles, pickedFiles, sequenceNumber, ref randomGroupCounter, ref randomGroupClear);
+					var img = PickRandomOrSequentialImage(pickedFiles, sequenceNumber, ref randomGroupCounter, ref randomGroupClear, ref maxCount);
 					if (img == null) break;
 					img.Retrieve();
 
@@ -934,15 +1038,15 @@ namespace WallSwitch
 			}
 		}
 
-		private ImageRec PickRandomOrSequentialImage(List<ImageRec> allFiles, List<ImageLayout> filesPickedThisTime, int sequenceNumber,
-			ref int randomGroupCounter, ref bool randomGroupClear)
+		private ImageRec PickRandomOrSequentialImage(List<ImageLayout> filesPickedThisTime, int sequenceNumber,
+			ref int randomGroupCounter, ref bool randomGroupClear, ref int maxCount)
 		{
 			ImageRec img = null;
 			if (_order == ThemeOrder.Random)
 			{
 				if (_randomGroupCount <= 1)
 				{
-					img = PickRandomImage(allFiles, filesPickedThisTime);
+					img = PickRandomImage(ref maxCount, filesPickedThisTime);
 				}
 				else
 				{
@@ -951,14 +1055,14 @@ namespace WallSwitch
 					if (randomGroupCounter == 0)
 					{
 						Log.Debug("Picking random image because random group counter is {0}", randomGroupCounter);
-						img = PickRandomImage(allFiles, filesPickedThisTime);
+						img = PickRandomImage(ref maxCount, filesPickedThisTime);
 						randomGroupCounter++;
 						if (_clearBetweenRandomGroups) randomGroupClear = true;
 					}
 					else if (randomGroupCounter < _randomGroupCount)
 					{
 						Log.Debug("Picking sequential image because random group counter is {0}", randomGroupCounter);
-						img = PickSequentialImage(allFiles, filesPickedThisTime);
+						img = PickSequentialImage(filesPickedThisTime);
 						randomGroupCounter++;
 					}
 					else
@@ -969,42 +1073,53 @@ namespace WallSwitch
 			}
 			else // sequential
 			{
-				img = PickSequentialImage(allFiles, filesPickedThisTime);
+				img = PickSequentialImage(filesPickedThisTime);
 			}
 
 			if (img != null) _lastImage = img.Location;
 			return img;
 		}
 
-		private ImageRec PickRandomImage(List<ImageRec> allFiles, List<ImageLayout> filesPickedThisTime)
+		private ImageRec PickRandomImage(ref int maxCount, List<ImageLayout> filesPickedThisTime)
 		{
 			var repeatNowRetries = 0;
 			var repeatHistoryRetries = 0;
 			var loadRetries = 0;
 
+			if (maxCount < 0)
+			{
+				maxCount = Database.SelectInt("select count(*) from img where theme_id = @id", "@id", _rowid);
+				Log.Debug("Number of images in database: {0}", maxCount);
+			}
+
 			while (true)
 			{
-				var index = _rand.Next(allFiles.Count);
-				var img = allFiles[index];
+				var index = _rand.Next(maxCount);
+				Log.Debug("Selecting image index {0} of {1}", index, maxCount);
 
-				if (filesPickedThisTime.Any(i => i.ImageRec == img))
+				var table = Database.SelectDataTable("select rowid, * from img where theme_id = @id limit 1 offset @num",
+					"@id", _rowid, "@num", index);
+				if (table.Rows.Count > 0)
 				{
-					repeatNowRetries++;
-					if (repeatNowRetries <= k_maxRepeatNowRetries) continue;
-				}
-				repeatNowRetries = 0;
+					var img = ImageRec.FromDataRow(table.Rows[0]);
 
-				if (ImageRecIsInHistory(img))
-				{
-					repeatHistoryRetries++;
-					if (repeatHistoryRetries <= k_maxRepeatHistoryRetries) continue;
-				}
-				repeatHistoryRetries = 0;
+					if (filesPickedThisTime.Any(i => i.ImageRec == img))
+					{
+						repeatNowRetries++;
+						if (repeatNowRetries <= k_maxRepeatNowRetries) continue;
+					}
+					repeatNowRetries = 0;
 
-				if (img.Retrieve())
-				{
-					return img;
+					if (ImageRecIsInHistory(img))
+					{
+						repeatHistoryRetries++;
+						if (repeatHistoryRetries <= k_maxRepeatHistoryRetries) continue;
+					}
+					repeatHistoryRetries = 0;
+
+					if (img.Retrieve()) return img;
 				}
+				else return null;
 
 				loadRetries++;
 				if (loadRetries > k_maxRetrievalRetries) break;
@@ -1013,45 +1128,53 @@ namespace WallSwitch
 			return null;
 		}
 
-		private ImageRec PickSequentialImage(List<ImageRec> allFiles, List<ImageLayout> filesPickedThisTime)
+		private ImageRec PickSequentialImage(List<ImageLayout> filesPickedThisTime)
 		{
 			Log.Write(LogLevel.Debug, "Picking sequential image (last image = [{0}])", _lastImage);
 
-			if (allFiles.Count == 0)
-			{
-				Log.Write(LogLevel.Debug, "There are no images to choose from; returning null.");
-				return null;
-			}
+			DataTable table;
+
 			if (string.IsNullOrEmpty(_lastImage))
 			{
-				Log.Write(LogLevel.Debug, "No 'last image' was saved, so returning the first image in the list [{0}]", allFiles[0].Location);
-				return allFiles[0];
+				table = Database.SelectDataTable("select rowid, * from img where theme_id = @id order by path limit 1", "@id", _rowid);
+				if (table.Rows.Count > 0)
+				{
+					var img = ImageRec.FromDataRow(table.Rows[0]);
+					Log.Debug("No 'last image' was saved, so returning the first image in the database: {0}", img.Location);
+					return img;
+				}
+				else
+				{
+					Log.Debug("No 'last image' was saved, and there are no images in the database.");
+					return null;
+				}
 			}
 
 			// Find the first image that is greater than the last file.
-			var lastImage = _lastImage;
-			while (true)
+			table = Database.SelectDataTable("select rowid, * from img where theme_id = @id and path > @path order by path limit 1",
+				"@id", _rowid, "@path", _lastImage);
+			if (table.Rows.Count > 0)
 			{
-				var img = allFiles.FirstOrDefault(i => string.Compare(i.Location, lastImage, StringComparison.OrdinalIgnoreCase) > 0);
-				if (img != null)
-				{
-					Log.Write(LogLevel.Debug, "Next sequential image is [{0}]", img.Location);
-					if (img.Retrieve())
-					{
-						return img;
-					}
-					else
-					{
-						lastImage = img.Location;
-						continue;
-					}
-				}
-
-				break;
+				var img = ImageRec.FromDataRow(table.Rows[0]);
+				Log.Write(LogLevel.Debug, "Next sequential image is [{0}]", img.Location);
+				return img;
 			}
-
-			Log.Write(LogLevel.Debug, "No images greater than last image; returning first image [{0}]", allFiles[0].Location);
-			return allFiles[0];
+			else
+			{
+				// This is the last image for this theme. Select the first one in the database.
+				table = Database.SelectDataTable("select rowid, * from img where theme_id = @id order by path limit 1", "@id", _rowid);
+				if (table.Rows.Count > 0)
+				{
+					var img = ImageRec.FromDataRow(table.Rows[0]);
+					Log.Debug("No next sequential image, so wrapping around to beginning: {0}", img.Location);
+					return img;
+				}
+				else
+				{
+					Log.Debug("No next sequential image, and nothing left in the database.");
+					return null;
+				}
+			}
 		}
 
 		private class MonitorSelection
@@ -1246,28 +1369,90 @@ namespace WallSwitch
 
 		private bool ImageRecIsInHistory(ImageRec img)
 		{
-			foreach (var h in _history)
-			{
-				if (h == null) continue;
-				foreach (var i in h)
-				{
-					if (i.Equals(img)) return true;
-				}
-			}
-
-			return false;
+			return Database.SelectInt("select count(*) from history where theme_id = @theme_id and path = @path",
+				"@theme_id", _rowid, "@path", img.Location) > 0;
 		}
 
 		public IEnumerable<ImageLayout> GetPrevImages()
 		{
 			Log.Write(LogLevel.Debug, "Going back to previous images.");
-			if (_historyIndex > 0)
+			if (!string.IsNullOrEmpty(_historyGuid))
 			{
-				var imageSet = _history[--_historyIndex];
-				foreach (var image in imageSet) image.ImageRec.Retrieve();
-				return imageSet;
+				var lastHistoryTable = Database.SelectDataTable("select * from history where theme_id = @theme_id and guid = @guid",
+					"@theme_id", _rowid, "@guid", _historyGuid);
+				if (lastHistoryTable.Rows.Count > 0)
+				{
+					var lastHistoryTime = lastHistoryTable.Rows[0].GetDateTime("display_date");
+					var nextTable = Database.SelectDataTable("select * from history where theme_id = @theme_id and display_date < @date order by display_date desc",
+						"@theme_id", _rowid, "date", lastHistoryTime);
+					if (nextTable.Rows.Count > 0)
+					{
+						// Select the images that share the same guid as the first found
+						var nextGuid = nextTable.Rows[0].GetString("guid");
+						var nextImages = (from i in nextTable.Rows.Cast<DataRow>()
+										  where i.GetString("guid") == nextGuid
+										  select ImageLayout.FromDataRow(i)).ToArray();
+						_historyGuid = nextGuid;
+						_historyCanGoPrev = Database.SelectInt("select count(*) from history where theme_id = @theme_id and display_date < @date",
+							"@theme_id", _rowid, "@date", nextTable.Rows[0].GetDateTime("display_date")) > 0;
+						return nextImages;
+					}
+				}
+
+				_historyCanGoPrev = false;
+				return null;
 			}
-			return null;
+			else
+			{
+				// Currently in 'new' mode, go to the last images displayed
+				var lastGuid = Database.SelectString("select guid from history where theme_id = @theme_id order by display_date desc limit 1", "@theme_id", _rowid);
+				if (!string.IsNullOrEmpty(lastGuid))
+				{
+					var lastTable = Database.SelectDataTable("select * from history where theme_id = @theme_id and guid = @guid", "@theme_id", _rowid, "@guid", lastGuid);
+					_historyCanGoPrev = Database.SelectStringList("select distinct guid from history where theme_id = @theme_id", "@theme_id", _rowid).Count > 1;
+					_historyGuid = lastGuid;
+					return (from i in lastTable.Rows.Cast<DataRow>() select ImageLayout.FromDataRow(i)).ToArray();
+				}
+
+				// No history in the database
+				_historyCanGoPrev = false;
+				return null;
+			}
+		}
+
+		private void AddHistoryImages(IEnumerable<ImageLayout> images)
+		{
+			var guid = Guid.NewGuid().ToString();
+			var now = DateTime.Now;
+
+			foreach (var imgLayout in images)
+			{
+				Database.Insert("history", new object[]
+					{
+						"theme_id", _rowid,
+						"display_date", now,
+						"guid", guid,
+						"monitors", imgLayout.GetMonitorsSaveString(),
+						"type", imgLayout.ImageRec.Type.ToString(),
+						"path", imgLayout.ImageRec.Location,
+						"pub_date", imgLayout.ImageRec.PubDate.HasValue ? (object)imgLayout.ImageRec.PubDate.Value : null
+					});
+			}
+
+			var allGuids = Database.SelectStringList("select distinct guid from history where theme_id = @theme_id order by display_date",
+				"@theme_id", _rowid);
+			while (allGuids.Count > k_maxHistory)
+			{
+				Database.ExecuteNonQuery("delete from history where theme_id = @theme_id and guid = @guid",
+					"@theme_id", _rowid, "@guid", allGuids[0]);
+				allGuids.RemoveAt(allGuids.Count - 1);
+			}
+
+			_historyCanGoPrev = true;
+			_historyLatestGuid = guid;
+			_historyGuid = guid;
+
+			FireHistoryAdded(images);
 		}
 		#endregion
 
@@ -1278,13 +1463,13 @@ namespace WallSwitch
 
 		public string GetBaseWallpaperFileName(ImageFormat format, DateTime timeStamp)
 		{
-            var fileName = string.Format("{0}_{2:yyyyMMddHHmmss}_base{1}", _id, ImageFormatDesc.ImageFormatToExtension(format), timeStamp);
+            var fileName = string.Format("{0}_{2:yyyyMMddHHmmss}_base{1}", _rowid, ImageFormatDesc.ImageFormatToExtension(format), timeStamp);
 			return Path.Combine(Util.AppDataDir, fileName);
 		}
 
 		public string GetDisplayWallpaperFileName(ImageFormat format, DateTime timeStamp)
 		{
-            var fileName = string.Format("{0}_{2:yyyyMMddHHmmss}{1}", _id, ImageFormatDesc.ImageFormatToExtension(format), timeStamp);
+            var fileName = string.Format("{0}_{2:yyyyMMddHHmmss}{1}", _rowid, ImageFormatDesc.ImageFormatToExtension(format), timeStamp);
 			return Path.Combine(Util.AppDataDir, fileName);
 		}
 
@@ -1292,7 +1477,7 @@ namespace WallSwitch
         {
             Log.Debug("Finding last wallpaper file name...");
 
-            foreach (var fileName in Directory.GetFiles(Util.AppDataDir, string.Format("{0}*", _id)).OrderByDescending(x => x.ToLower()))
+            foreach (var fileName in Directory.GetFiles(Util.AppDataDir, string.Format("{0}_*", _rowid)).OrderByDescending(x => x.ToLower()))
             {
                 if (ImageFormatDesc.FileNameToImageFormat(fileName) != null)
                 {
@@ -1310,7 +1495,7 @@ namespace WallSwitch
 
         public void PurgeOldWallpaperFiles(IEnumerable<string> currentFileNames)
         {
-            foreach (var fileName in Directory.GetFiles(Util.AppDataDir, string.Format("{0}*", _id)))
+            foreach (var fileName in Directory.GetFiles(Util.AppDataDir, string.Format("{0}_*", _rowid)))
             {
                 // Check that this is not the current image.
                 var keep = false;

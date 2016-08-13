@@ -89,7 +89,7 @@ namespace WallSwitch
 				Theme activeTheme;
 				if (_themes.Count == 0)
 				{
-					_currentTheme = new Theme(Guid.NewGuid());
+					_currentTheme = new Theme();
 					_themes.Add(_currentTheme);
 					activeTheme = _currentTheme;
 					_currentTheme.IsActive = true;
@@ -1229,50 +1229,70 @@ namespace WallSwitch
 		{
 			try
 			{
-				var fileName = ConfigFileName;
-				if (File.Exists(fileName))
+				if (!Database.IsNew)
 				{
-					XmlDocument xmlDoc = new XmlDocument();
-					xmlDoc.Load(fileName);
+					Settings.Load();
+					LoadHotKeys();
 
-					XmlElement xmlSettings = (XmlElement)xmlDoc.SelectSingleNode("Settings");
-					if (xmlSettings != null)
+					foreach (DataRow themeRow in Database.SelectDataTable("select rowid, * from theme").Rows)
 					{
-						Settings.Load(xmlSettings);
-						ImageCache.LoadSettings(xmlSettings);
-
-						foreach (XmlElement xmlHotKeys in xmlSettings.SelectNodes("HotKeys"))
+						try
 						{
-							LoadHotKeys(xmlHotKeys);
+							var theme = new Theme();
+							theme.Load(themeRow);
+							_themes.Add(theme);
+							AttachTheme(theme);
 						}
-
-						foreach (XmlElement xmlTheme in xmlSettings.SelectNodes("Theme"))
+						catch (Exception ex)
 						{
-							try
-							{
-								Guid id = Guid.Empty;
-								if (xmlTheme.HasAttribute("ID"))
-								{
-									id = Guid.Parse(xmlTheme.GetAttribute("ID"));
-								}
-
-								Theme theme = new Theme(id);
-								theme.Load(xmlTheme);
-								_themes.Add(theme);
-								AttachTheme(theme);
-							}
-							catch (Exception ex)
-							{
-								this.ShowError(ex, Res.Error_LoadTheme);
-							}
+							this.ShowError(ex, Res.Error_LoadTheme);
 						}
 					}
 				}
 				else
 				{
-					var theme = new Theme(Guid.NewGuid());
-					theme.Name = Res.DefaultTheme;
-					_themes.Add(theme);
+					var xmlFileName = ConfigFileName;
+					if (File.Exists(xmlFileName))
+					{
+						XmlDocument xmlDoc = new XmlDocument();
+						xmlDoc.Load(xmlFileName);
+
+						XmlElement xmlSettings = (XmlElement)xmlDoc.SelectSingleNode("Settings");
+						if (xmlSettings != null)
+						{
+							Settings.Load(xmlSettings);
+
+							foreach (XmlElement xmlHotKeys in xmlSettings.SelectNodes("HotKeys"))
+							{
+								LoadHotKeys(xmlHotKeys);
+							}
+
+							foreach (XmlElement xmlTheme in xmlSettings.SelectNodes("Theme"))
+							{
+								try
+								{
+									var theme = new Theme();
+									theme.Load(xmlTheme);
+									_themes.Add(theme);
+									AttachTheme(theme);
+								}
+								catch (Exception ex)
+								{
+									this.ShowError(ex, Res.Error_LoadTheme);
+								}
+							}
+						}
+
+						SaveSettings();
+
+						// TODO: Delete the old XML file
+					}
+					else
+					{
+						var theme = new Theme();
+						theme.Name = Res.DefaultTheme;
+						_themes.Add(theme);
+					}
 				}
 			}
 			catch (Exception ex)
@@ -1286,40 +1306,13 @@ namespace WallSwitch
 		{
 			try
 			{
-				// Write to a buffer in memory before overwriting the actual file.
-				var memStream = new MemoryStream();
-				var xmlSettings = new XmlWriterSettings();
-				xmlSettings.Indent = true;
-				xmlSettings.Encoding = Encoding.UTF8;
-				using (var xml = XmlWriter.Create(memStream, xmlSettings))
+				Settings.Save();
+				SaveHotKeys();
+
+				foreach (var theme in _themes)
 				{
-					xml.WriteStartDocument();
-					xml.WriteStartElement("Settings");
-					Settings.Save(xml);
-
-					xml.WriteStartElement("HotKeys");
-					SaveHotKeys(xml);
-					xml.WriteEndElement();	// HotKeys
-
-					foreach (Theme theme in _themes)
-					{
-						xml.WriteStartElement("Theme");
-						xml.WriteAttributeString("ID", theme.ID.ToString());
-						theme.Save(xml);
-						xml.WriteEndElement();	// Theme
-					}
-
-					ImageCache.SaveSettings(xml);
-
-					xml.WriteEndElement();	// Settings
-					xml.WriteEndDocument();
+					theme.Save();
 				}
-
-				// Save buffer to the file.
-				var data = new byte[memStream.Length];
-				memStream.Seek(0, SeekOrigin.Begin);
-				memStream.Read(data, 0, (int)memStream.Length);
-				File.WriteAllBytes(ConfigFileName, data);
 
 				// As good time as any to flush the log.
 				Log.Flush();
@@ -1379,7 +1372,7 @@ namespace WallSwitch
 				{
 					string name = dlg.String;
 
-					Theme theme = new Theme(Guid.NewGuid());
+					Theme theme = new Theme();
 					theme.Name = name;
 					AttachTheme(theme);
 
@@ -2251,16 +2244,7 @@ namespace WallSwitch
 			// Create a list of all images currently in the history.
 			// These are the files that we don't want to delete.
 			var keepLocations = new List<string>();
-			foreach (var theme in _themes)
-			{
-				foreach (var historyItem in theme.History)
-				{
-					foreach (var loc in historyItem)
-					{
-						keepLocations.Add(loc.ImageRec.Location);
-					}
-				}
-			}
+			keepLocations.AddRange(Database.SelectStringList("select history.path from history inner join theme on theme.rowid = history.theme_id"));
 
 			keepLocations.AddRange(from h in c_historyTab.History select h.Location);
 
@@ -2316,11 +2300,11 @@ namespace WallSwitch
 		private HotKey _clearHistoryHotKey = new HotKey();
 		private HotKey _showWindowHotKey = new HotKey();
 
-		private const string k_nextImageHotKey = "NextImage";
-		private const string k_prevImageHotKey = "PrevImage";
-		private const string k_pauseHotKey = "Pause";
-		private const string k_clearHistoryHotKey = "ClearHistory";
-		private const string k_showWindowHotKey = "ShowWindow";
+		private const string k_nextImageHotKey = "NextImageHotKey";
+		private const string k_prevImageHotKey = "PrevImageHotKey";
+		private const string k_pauseHotKey = "PauseHotKey";
+		private const string k_clearHistoryHotKey = "ClearHistoryHotKey";
+		private const string k_showWindowHotKey = "ShowWindowHotKey";
 
 		private void RegisterHotKeys()
 		{
@@ -2364,13 +2348,23 @@ namespace WallSwitch
 			_showWindowHotKey.Reregister();
 		}
 
-		private void SaveHotKeys(XmlWriter xml)
+		private void SaveHotKeys()
 		{
-			_nextImageHotKey.SaveXml(xml, k_nextImageHotKey);
-			_prevImageHotKey.SaveXml(xml, k_prevImageHotKey);
-			_pauseHotKey.SaveXml(xml, k_pauseHotKey);
-			_clearHistoryHotKey.SaveXml(xml, k_clearHistoryHotKey);
-			_showWindowHotKey.SaveXml(xml, k_showWindowHotKey);
+			Database.WriteSetting(k_nextImageHotKey, _nextImageHotKey.ToSaveString());
+			Database.WriteSetting(k_prevImageHotKey, _prevImageHotKey.ToSaveString());
+			Database.WriteSetting(k_pauseHotKey, _pauseHotKey.ToSaveString());
+			Database.WriteSetting(k_clearHistoryHotKey, _clearHistoryHotKey.ToSaveString());
+			Database.WriteSetting(k_showWindowHotKey, _showWindowHotKey.ToSaveString());
+		}
+
+		private void LoadHotKeys()
+		{
+			string str;
+			if (!string.IsNullOrEmpty(str = Database.LoadSetting(k_nextImageHotKey))) _nextImageHotKey.LoadFromSaveString(str);
+			if (!string.IsNullOrEmpty(str = Database.LoadSetting(k_prevImageHotKey))) _prevImageHotKey.LoadFromSaveString(str);
+			if (!string.IsNullOrEmpty(str = Database.LoadSetting(k_pauseHotKey))) _pauseHotKey.LoadFromSaveString(str);
+			if (!string.IsNullOrEmpty(str = Database.LoadSetting(k_clearHistoryHotKey))) _clearHistoryHotKey.LoadFromSaveString(str);
+			if (!string.IsNullOrEmpty(str = Database.LoadSetting(k_showWindowHotKey))) _showWindowHotKey.LoadFromSaveString(str);
 		}
 
 		private void LoadHotKeys(XmlElement xmlRoot)
@@ -2379,19 +2373,19 @@ namespace WallSwitch
 			{
 				switch (element.GetAttribute(HotKey.XmlNameAttribute))
 				{
-					case k_nextImageHotKey:
+					case "NextImage":
 						_nextImageHotKey.LoadXml(element);
 						break;
-					case k_prevImageHotKey:
+					case "PrevImage":
 						_prevImageHotKey.LoadXml(element);
 						break;
-					case k_pauseHotKey:
+					case "Pause":
 						_pauseHotKey.LoadXml(element);
 						break;
-					case k_clearHistoryHotKey:
+					case "ClearHistory":
 						_clearHistoryHotKey.LoadXml(element);
 						break;
-					case k_showWindowHotKey:
+					case "ShowWindow":
 						_showWindowHotKey.LoadXml(element);
 						break;
 				}

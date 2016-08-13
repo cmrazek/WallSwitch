@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Data;
 using System.Drawing;
-using System.Net;
-using System.IO;
-using System.Xml;
 using System.Drawing.Imaging;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Xml;
 
 namespace WallSwitch
 {
@@ -57,6 +58,18 @@ namespace WallSwitch
 			loc._location = url;
 			loc._type = ImageLocationType.Url;
 			loc._pubDate = pubDate;
+			loc._hashCode = loc._location.ToLower().GetHashCode();
+			return loc;
+		}
+
+		public static ImageRec FromDataRow(DataRow row)
+		{
+			var type = row.GetEnum<ImageLocationType>("type");
+			var path = row.GetString("path");
+
+			var loc = new ImageRec();
+			loc._location = path;
+			loc._type = type;
 			loc._hashCode = loc._location.ToLower().GetHashCode();
 			return loc;
 		}

@@ -260,6 +260,15 @@ namespace WallSwitch {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Settings.sqlite.
+        /// </summary>
+        internal static string DatabaseFileName {
+            get {
+                return ResourceManager.GetString("DatabaseFileName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Default.
         /// </summary>
         internal static string DefaultTheme {
@@ -1129,6 +1138,15 @@ namespace WallSwitch {
         internal static string SettingsUpdateNotAvailable {
             get {
                 return ResourceManager.GetString("SettingsUpdateNotAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to (unnamed).
+        /// </summary>
+        internal static string UnnamedTheme {
+            get {
+                return ResourceManager.GetString("UnnamedTheme", resourceCulture);
             }
         }
         

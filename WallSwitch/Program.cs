@@ -45,7 +45,7 @@ namespace WallSwitch
 #else
 						Log.Level = LogLevel.Info;
 #endif
-
+						Database.Initialize();
 						Settings.Initialize();
 						WidgetManager.SearchForWidgets();
 
@@ -83,6 +83,15 @@ namespace WallSwitch
 								_switchThread.Kill();
 								_switchThread = null;
 							}
+						}
+						catch (Exception ex)
+						{
+							Log.Write(ex);
+						}
+
+						try
+						{
+							Database.Shutdown();
 						}
 						catch (Exception ex)
 						{

@@ -1,27 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Xml;
+using System.Data;
 using System.Drawing;
+using System.Linq;
+using System.IO;
+using System.Text;
+using System.Xml;
 
 namespace WallSwitch
 {
-	public enum LocationType
+	internal enum LocationType
 	{
 		File,
 		Directory,
 		Feed
 	}
 
-	public class Location
+	internal class Location
 	{
 		private const int k_defaultUpdateInterval = 1;
 		private const Period k_defaultUpdatePeriod = Period.Hours;
 
+		private long _rowid;
 		private string _path;
-		private List<ImageRec> _files = new List<ImageRec>();
 		private LocationType _type;
 		private DateTime _lastUpdate = DateTime.MinValue;
 		private Period _updatePeriod = k_defaultUpdatePeriod;
@@ -39,6 +40,11 @@ namespace WallSwitch
 		public Location(XmlElement topElement)
 		{
 			Load(topElement);
+		}
+
+		public Location(System.Data.DataRow row)
+		{
+			Load(row);
 		}
 
 		public Location Clone()
@@ -65,7 +71,7 @@ namespace WallSwitch
 					_path = value;
 
 					// Since the path has changed, the file list is now obsolete.
-					_files.Clear();
+					//_files.Clear();		TODO: remove
 					_lastUpdate = DateTime.MinValue;
 					FireUpdated();
 				}
@@ -77,50 +83,124 @@ namespace WallSwitch
 			return _path.Equals(path, StringComparison.OrdinalIgnoreCase);
 		}
 
-		public IEnumerable<ImageRec> Files
-		{
-			get
-			{
-				try
-				{
+		// TODO: remove
+		//public IEnumerable<ImageRec> Files
+		//{
+		//	get
+		//	{
+		//		try
+		//		{
 					
 
-					switch (_type)
+		//			switch (_type)
+		//			{
+		//				case LocationType.File:
+		//					return new ImageRec[] { ImageRec.FromFile(_path) };
+
+		//				case LocationType.Directory:
+		//					UpdateIfRequired();
+		//					return _files;
+
+		//				case LocationType.Feed:
+		//					UpdateIfRequired();
+		//					return _files;
+
+		//				default:
+		//					throw new InvalidOperationException("Invalid location type.");
+		//			}
+		//		}
+		//		catch (Exception ex)
+		//		{
+		//			Log.Write(ex, "Exception when getting files list.");
+		//			return new ImageRec[0];
+		//		}
+		//	}
+		//}
+
+		private void SyncDatabaseToImageRecList(IEnumerable<ImageRec> files, Theme theme)
+		{
+			var table = Database.SelectDataTable("select rowid, * from img where location_id = @id", "@id", _rowid);
+
+			// Find files in the database that don't exist on disk
+			var filesToRemove = new List<long>();
+			foreach (DataRow row in table.Rows)
+			{
+				var path = (string)row["path"];
+				var found = false;
+				foreach (var file in files)
+				{
+					if (string.Equals(file.Location, path, StringComparison.OrdinalIgnoreCase))
 					{
-						case LocationType.File:
-							return new ImageRec[] { ImageRec.FromFile(_path) };
-
-						case LocationType.Directory:
-							UpdateIfRequired();
-							return _files;
-
-						case LocationType.Feed:
-							UpdateIfRequired();
-							return _files;
-
-						default:
-							throw new InvalidOperationException("Invalid location type.");
+						found = true;
+						break;
 					}
 				}
-				catch (Exception ex)
+				if (!found) filesToRemove.Add((long)row["rowid"]);
+			}
+
+			if (filesToRemove.Count > 0)
+			{
+				using (var cmd = Database.CreateCommand("delete from img where rowid = @rowid"))
 				{
-					Log.Write(ex, "Exception when getting files list.");
-					return new ImageRec[0];
+					foreach (var rowid in filesToRemove)
+					{
+						cmd.Parameters.Clear();
+						cmd.Parameters.AddWithValue("@rowid", rowid);
+
+						cmd.ExecuteNonQuery();
+					}
+				}
+			}
+
+			// Find files on disk that don't exist in the database
+			var filesToAdd = new List<ImageRec>();
+			foreach (var file in files)
+			{
+				var found = false;
+				foreach (DataRow row in table.Rows)
+				{
+					if (string.Equals(file.Location, (string)row["path"], StringComparison.OrdinalIgnoreCase))
+					{
+						found = true;
+						break;
+					}
+				}
+				if (!found) filesToAdd.Add(file);
+			}
+
+			if (filesToAdd.Count > 0)
+			{
+				using (var cmd = Database.CreateCommand("insert into img (theme_id, location_id, type, path, pub_date)"
+					+ " values (@theme_id, @location_id, @type, @path, @pub_date)"))
+				{
+					foreach (var img in filesToAdd)
+					{
+						cmd.Parameters.Clear();
+						cmd.Parameters.AddWithValue("@theme_id", theme.RowId);
+						cmd.Parameters.AddWithValue("@location_id", _rowid);
+						cmd.Parameters.AddWithValue("@type", img.Type.ToString());
+						cmd.Parameters.AddWithValue("@path", img.Location);
+						cmd.Parameters.AddWithValue("@pub_date", img.PubDate.HasValue ? (object)img.PubDate.Value : null);
+
+						cmd.ExecuteNonQuery();
+					}
 				}
 			}
 		}
 
-		private void SearchDir(string dir)
+		private IEnumerable<ImageRec> SearchDir(string dir)
 		{
 			try
 			{
+				var files = new List<ImageRec>();
+
 				// Search for image files in this directory.
 				string[] imageFiles = Directory.GetFiles(dir);
 				foreach (string file in imageFiles)
 				{
 					if (Settings.IgnoreHiddenFiles == false || (File.GetAttributes(file) & FileAttributes.Hidden) == 0)
 					{
-						if (ImageFormatDesc.FileNameToImageFormat(file) != null) _files.Add(ImageRec.FromFile(file));
+						if (ImageFormatDesc.FileNameToImageFormat(file) != null) files.Add(ImageRec.FromFile(file));
 					}
 				}
 
@@ -130,24 +210,65 @@ namespace WallSwitch
 				{
 					if (Settings.IgnoreHiddenFiles == false || (File.GetAttributes(subDir) & FileAttributes.Hidden) == 0)
 					{
-						SearchDir(subDir);
+						files.AddRange(SearchDir(subDir));
 					}
 				}
+
+				return files;
 			}
 			catch (Exception ex)
 			{
 				Log.Write(ex, "Exception when searching directory '{0}'.", dir);
+				return new ImageRec[0];
 			}
 		}
 
-		public void Save(XmlWriter xml)
+		public void Save(long themeId)
 		{
-			xml.WriteAttributeString("Type", _type.ToString());
-			xml.WriteAttributeString("UpdateFreq", _updateFreq.ToString());
-			xml.WriteAttributeString("UpdatePeriod", _updatePeriod.ToString());
-			if (_disabled) xml.WriteAttributeString("Disabled", _disabled.ToString());
+			if (_rowid == 0L)
+			{
+				_rowid = Database.Insert("location", new object[]
+					{
+						"theme_id", themeId,
+						"path", _path,
+						"type", _type.ToString(),
+						"update_freq", _updateFreq,
+						"update_period", _updatePeriod.ToString(),
+						"disabled", _disabled ? 1 : 0,
+						"last_update", _lastUpdate != DateTime.MinValue ? (object)_lastUpdate : null
+					});
+			}
+			else
+			{
+				Database.Update("location", "rowid = @rowid", new object[]
+					{
+						"theme_id", themeId,
+						"path", _path,
+						"type", _type.ToString(),
+						"update_freq", _updateFreq,
+						"update_period", _updatePeriod.ToString(),
+						"disabled", _disabled ? 1 : 0,
+						"last_update", _lastUpdate != DateTime.MinValue ? (object)_lastUpdate : null
+					},
+					new object[] { "@rowid", _rowid });
+			}
+		}
 
-			xml.WriteString(_path);
+		private void Load(System.Data.DataRow row)
+		{
+			_rowid = row.GetLong("rowid");
+
+			_path = row.GetString("path");
+			if (string.IsNullOrWhiteSpace(_path)) throw new SettingsException("No location specified.");
+
+			_type = row.GetEnum<LocationType>("type", LocationType.Directory);
+			_updateFreq = row.GetInt("update_freq", k_defaultUpdateInterval);
+			_updatePeriod = row.GetEnum<Period>("update_period", k_defaultUpdatePeriod);
+			_updateInterval = TimeSpanUtil.CalcInterval(_updateFreq, _updatePeriod);
+
+			_disabled = row.GetBoolean("disabled", false);
+
+			_lastUpdate = row.GetDateTime("last_update", DateTime.MinValue);
 		}
 
 		public void Load(XmlElement topElement)
@@ -191,6 +312,11 @@ namespace WallSwitch
 			_updateInterval = TimeSpanUtil.CalcInterval(_updateFreq, _updatePeriod);
 		}
 
+		public long RowId
+		{
+			get { return _rowid; }
+		}
+
 		public Icon GetIcon()
 		{
 			if (_type == LocationType.Feed) return Res.RSS;
@@ -199,7 +325,7 @@ namespace WallSwitch
 			return ir.GetFileIcon(_path);
 		}
 
-		public void UpdateIfRequired()
+		public void UpdateIfRequired(Theme theme)
 		{
 			try
 			{
@@ -213,8 +339,11 @@ namespace WallSwitch
 
 					case LocationType.Directory:
 						Log.Write(LogLevel.Debug, "Scanning directory: {0}", _path);
-						_files.Clear();
-						SearchDir(_path);
+						var files = SearchDir(_path);
+						if (files.Any())
+						{
+							SyncDatabaseToImageRecList(files, theme);
+						}
 						break;
 
 					case LocationType.Feed:
@@ -222,8 +351,7 @@ namespace WallSwitch
 							var loader = new FeedLoader();
 							if (loader.LoadUrl(_path))
 							{
-								_files.Clear();
-								foreach (var image in loader.Images) _files.Add(image);
+								SyncDatabaseToImageRecList(loader.Images, theme);
 							}
 						}
 						break;

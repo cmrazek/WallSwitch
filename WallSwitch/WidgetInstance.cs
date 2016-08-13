@@ -11,6 +11,7 @@ namespace WallSwitch
 {
 	internal class WidgetInstance
 	{
+		private long _rowid;
 		private IWidget _widget;
 		private WidgetType _wtype;
 		private Rectangle _bounds;
@@ -49,7 +50,7 @@ namespace WallSwitch
 			xml.WriteAttributeString("Top", _bounds.Top.ToString());
 			xml.WriteAttributeString("Width", _bounds.Width.ToString());
 			xml.WriteAttributeString("Height", _bounds.Height.ToString());
-			xml.WriteEndElement();	// Bounds
+			xml.WriteEndElement();  // Bounds
 
 			var settings = new WidgetConfig();
 			_widget.Save(settings);
@@ -58,10 +59,126 @@ namespace WallSwitch
 				xml.WriteStartElement("Config");
 				xml.WriteAttributeString("Name", setting.Name);
 				if (setting.Value != null) xml.WriteAttributeString("Value", setting.Value);
-				xml.WriteEndElement();	// Setting
+				xml.WriteEndElement();  // Setting
 			}
 
-			xml.WriteEndElement();	// Widget
+			xml.WriteEndElement();  // Widget
+		}
+
+		public void Save(long themeId)
+		{
+			var newRecord = false;
+			if (_rowid == 0L)
+			{
+				_rowid = Database.Insert("widget", new object[]
+					{
+						"theme_id", themeId,
+						"name", _wtype.FullName,
+						"bounds_left", _bounds.Left,
+						"bounds_top", _bounds.Top,
+						"bounds_width", _bounds.Width,
+						"bounds_height", _bounds.Height,
+					});
+				newRecord = true;
+			}
+			else
+			{
+				Database.Update("widget", "rowid = @rowid", new object[]
+					{
+						"theme_id", themeId,
+						"name", _wtype.FullName,
+						"bounds_left", _bounds.Left,
+						"bounds_top", _bounds.Top,
+						"bounds_width", _bounds.Width,
+						"bounds_height", _bounds.Height,
+					},
+					new object[] { "@rowid", _rowid });
+			}
+
+			// Get a list of the existing config items
+			var dbConfigs = new List<WidgetConfigDb>();
+			if (!newRecord)
+			{
+				using (var cmd = Database.CreateCommand("select rowid, name, value from widget_config where widget_id = @widget_id"))
+				{
+					cmd.Parameters.AddWithValue("@widget_id", _rowid);
+					using (var rdr = cmd.ExecuteReader())
+					{
+						while (rdr.Read())
+						{
+							dbConfigs.Add(new WidgetConfigDb { id = rdr.GetInt32(0), name = rdr.GetString(1), value = rdr.GetString(2) });
+						}
+					}
+				}
+			}
+
+			// Update the changed config items
+			var settings = new WidgetConfig();
+			_widget.Save(settings);
+			foreach (var setting in settings)
+			{
+				if (string.IsNullOrWhiteSpace(setting.Name)) continue;
+
+				var dbConfig = (from c in dbConfigs where c.name == setting.Name select c).FirstOrDefault();
+				if (dbConfig == null)
+				{
+					Database.ExecuteNonQuery("insert into widget_config (name, value) values (@name, @value)",
+						"@name", setting.Name,
+						"@value", setting.Value);
+				}
+				else
+				{
+					Database.ExecuteNonQuery("update widget_config set name = @name, value = @value where rowid = @rowid",
+						"@name", setting.Name,
+						"@value", setting.Value);
+				}
+			}
+
+			// Purge deleted items
+			var idsToPurge = (from d in dbConfigs where !settings.Names.Contains(d.name) select d.id).ToArray();
+			if (idsToPurge.Any())
+			{
+				foreach (var rowid in idsToPurge)
+				{
+					Database.ExecuteNonQuery("delete from widget_config where rowid = @rowid", "@rowid", rowid);
+				}
+			}
+		}
+
+		public static void PurgeFromDatabase(long id)
+		{
+			Database.ExecuteNonQuery("delete from widget_config where widget_id = @id", "@id", id);
+			Database.ExecuteNonQuery("delete from widget where rowid = @id", "@id", id);
+		}
+
+		private class WidgetConfigDb
+		{
+			public int id;
+			public string name;
+			public string value;
+		}
+
+		public static WidgetInstance Load(System.Data.DataRow row)
+		{
+			var rowid = row.GetLong("rowid");
+			var fullName = row.GetString("name");
+
+			var type = WidgetManager.GetTypeFromFullName(fullName);
+			if (type == null) throw new WidgetLoadException(string.Format("A widget with the name '{0}' cannot be found.", fullName));
+
+			var bounds = new Rectangle(row.GetInt("bounds_left"), row.GetInt("bounds_top"),
+				row.GetInt("bounds_width"), row.GetInt("bounds_height"));
+
+			var settings = new WidgetConfig();
+			foreach (System.Data.DataRow settingRow in Database.SelectDataTable("select name, value from widget_config where widget_id = @id", "@id", rowid).Rows)
+			{
+				var name = settingRow.GetString("name");
+				if (string.IsNullOrEmpty(name)) continue;
+
+				settings.Add(new WidgetConfigItem(name, settingRow.GetString("value")));
+			}
+
+			return new WidgetInstance(type, bounds, settings);
 		}
 
 		public static WidgetInstance Load(XmlElement element)
@@ -89,6 +206,11 @@ namespace WallSwitch
 			}
 
 			return new WidgetInstance(type, bounds, settings);
+		}
+
+		public long RowId
+		{
+			get { return _rowid; }
 		}
 
 		public Rectangle GetPreferredBounds()

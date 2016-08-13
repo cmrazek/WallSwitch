@@ -1397,7 +1397,11 @@ namespace WallSwitch
 			// Display the images.
 			if (images != null)
 			{
-				foreach (var img in images) Log.Write(LogLevel.Debug, "  Image: {0}", img.ImageRec.Location);
+				foreach (var img in images)
+				{
+					Log.Write(LogLevel.Debug, "  Image: {0}", img.ImageRec.Location);
+					img.ImageRec.Retrieve();
+				}
 				if (images != null) Set(theme, images, forceQuick, randomGroupClear);
 
 				foreach (var img in images) img.ImageRec.Release();

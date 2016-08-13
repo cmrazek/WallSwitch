@@ -217,7 +217,7 @@ namespace WallSwitch
 					{
 						_file.WriteLine(logEntry);
 						_file.WriteLine(ex.ToString());
-						_file.Flush();
+						//_file.Flush();
 					}
 
 #if DEBUG

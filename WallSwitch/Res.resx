@@ -526,4 +526,10 @@ Click 'yes' to be taken to the download page.</value>
   <data name="Error_InvalidRandomGroupCount" xml:space="preserve">
     <value>Invalid number of images.</value>
   </data>
+  <data name="DatabaseFileName" xml:space="preserve">
+    <value>Settings.sqlite</value>
+  </data>
+  <data name="UnnamedTheme" xml:space="preserve">
+    <value>(unnamed)</value>
+  </data>
 </root>

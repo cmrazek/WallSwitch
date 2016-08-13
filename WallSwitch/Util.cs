@@ -368,19 +368,22 @@ namespace WallSwitch
 			try
 			{
 				if (!xml.HasAttribute(attribute)) return def;
-
-				string attrib = xml.GetAttribute(attribute);
-				Match match = _colorRx.Match(attrib);
-				if (match.Success)
-				{
-					return Color.FromArgb(Int32.Parse(match.Groups[1].Value), Int32.Parse(match.Groups[2].Value), Int32.Parse(match.Groups[3].Value));
-				}
-				return def;
+				return ParseColor(xml.GetAttribute(attribute), def);
 			}
 			catch (Exception)
 			{
 				return def;
 			}
+		}
+
+		public static Color ParseColor(string str, Color defaultValue)
+		{
+			Match match = _colorRx.Match(str);
+			if (match.Success)
+			{
+				return Color.FromArgb(Int32.Parse(match.Groups[1].Value), Int32.Parse(match.Groups[2].Value), Int32.Parse(match.Groups[3].Value));
+			}
+			return defaultValue;
 		}
 	}
 

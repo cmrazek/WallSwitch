@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
 using System.Runtime.InteropServices;
@@ -428,6 +429,47 @@ namespace WallSwitch
 		{
 			HotKey hk;
 			if (_reg.TryGetValue(id, out hk)) hk.FireHotKeyPressed();
+		}
+
+		public string ToSaveString()
+		{
+			var sb = new StringBuilder();
+
+			if (_control) sb.Append("Ctrl");
+			if (_shift)
+			{
+				if (sb.Length > 0) sb.Append('+');
+				sb.Append("Shift");
+			}
+			if (_alt)
+			{
+				if (sb.Length > 0) sb.Append('+');
+				sb.Append("Alt");
+			}
+			if (sb.Length > 0) sb.Append('+');
+			sb.Append(_key.ToString());
+
+			return sb.ToString();
+		}
+
+		private static Regex _rxSaveString = new Regex(@"^(Ctrl)?\+?(Shift)?\+?(Alt)?\+?(\w+)?$");
+
+		public void LoadFromSaveString(string str)
+		{
+			if (string.IsNullOrEmpty(str)) return;
+
+			var match = _rxSaveString.Match(str);
+			if (match.Success)
+			{
+				if (match.Groups[1].Value == "Ctrl") _control = true;
+				if (match.Groups[2].Value == "Shift") _shift = true;
+				if (match.Groups[3].Value == "Alt") _alt = true;
+				if (!string.IsNullOrEmpty(match.Groups[4].Value))
+				{
+					Keys key;
+					if (Enum.TryParse<Keys>(match.Groups[4].Value, true, out key)) _key = key;
+				}
+			}
 		}
 	}
 }

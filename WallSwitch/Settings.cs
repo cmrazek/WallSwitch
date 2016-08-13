@@ -56,6 +56,33 @@ namespace WallSwitch
 			if (_transparency != k_defaultTransparency) xml.WriteElementString("Transparency", _transparency.ToString());
 		}
 
+		public static void Save()
+		{
+			Database.WriteSetting("CheckForUpdates", _checkForUpdatesOnStartup.ToString());
+			Database.WriteSetting("StartUpDelay", _startUpDelay.ToString());
+			Database.WriteSetting("IgnoreHiddenFiles", _ignoreHiddenFiles.ToString());
+			Database.WriteSetting("LogLevel", _logLevel.ToString());
+			Database.WriteSetting("Transparency", _transparency.ToString());
+		}
+
+		public static void Load()
+		{
+			bool bValue;
+			if (bool.TryParse(Database.LoadSetting("CheckForUpdates"), out bValue)) _checkForUpdatesOnStartup = bValue;
+
+			int iValue;
+			if (int.TryParse(Database.LoadSetting("StartUpDelay"), out iValue)) _startUpDelay = iValue;
+
+			if (bool.TryParse(Database.LoadSetting("IgnoreHiddenFiles"), out bValue)) _ignoreHiddenFiles = bValue;
+
+			LogLevel logLevel;
+			if (Enum.TryParse<LogLevel>(Database.LoadSetting("LogLevel"), out logLevel)) _logLevel = logLevel;
+			Log.Level = _logLevel;
+
+			double dValue;
+			if (double.TryParse(Database.LoadSetting("Transparency"), out dValue)) _transparency = dValue;
+		}
+
 		public static void Load(XmlElement xmlSettings)
 		{
 			var xml = xmlSettings.SelectSingleNode("CheckForUpdates") as XmlElement;
