@@ -1285,7 +1285,14 @@ namespace WallSwitch
 
 						SaveSettings();
 
-						// TODO: Delete the old XML file
+						try
+						{
+							File.Delete(xmlFileName);
+						}
+						catch (Exception ex)
+						{
+							Log.Write(ex, "Failed to delete old settings file.");
+						}
 					}
 					else
 					{

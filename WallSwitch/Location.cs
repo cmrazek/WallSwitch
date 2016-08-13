@@ -71,7 +71,6 @@ namespace WallSwitch
 					_path = value;
 
 					// Since the path has changed, the file list is now obsolete.
-					//_files.Clear();		TODO: remove
 					_lastUpdate = DateTime.MinValue;
 					FireUpdated();
 				}
@@ -82,40 +81,6 @@ namespace WallSwitch
 		{
 			return _path.Equals(path, StringComparison.OrdinalIgnoreCase);
 		}
-
-		// TODO: remove
-		//public IEnumerable<ImageRec> Files
-		//{
-		//	get
-		//	{
-		//		try
-		//		{
-					
-
-		//			switch (_type)
-		//			{
-		//				case LocationType.File:
-		//					return new ImageRec[] { ImageRec.FromFile(_path) };
-
-		//				case LocationType.Directory:
-		//					UpdateIfRequired();
-		//					return _files;
-
-		//				case LocationType.Feed:
-		//					UpdateIfRequired();
-		//					return _files;
-
-		//				default:
-		//					throw new InvalidOperationException("Invalid location type.");
-		//			}
-		//		}
-		//		catch (Exception ex)
-		//		{
-		//			Log.Write(ex, "Exception when getting files list.");
-		//			return new ImageRec[0];
-		//		}
-		//	}
-		//}
 
 		private void SyncDatabaseToImageRecList(IEnumerable<ImageRec> files, Theme theme)
 		{

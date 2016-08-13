@@ -112,12 +112,12 @@ pub_date		datetime
 @"create index history_ix_theme on history (theme_id)",
 
 @"create table rhistory (
-theme_id	integer not null,
-counter		int not null,
-left		int not null,
-top			int not null,
-width		int not null,
-height		int not null
+theme_id		integer not null,
+display_date	datetime not null,
+left			int not null,
+top				int not null,
+width			int not null,
+height			int not null
 )",
 @"create index rhistory_ix_theme on rhistory (theme_id)",
 

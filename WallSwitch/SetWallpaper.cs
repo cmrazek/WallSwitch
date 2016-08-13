@@ -1270,9 +1270,6 @@ namespace WallSwitch
 				Log.Write(ex, "Failed to set offset registry keys.");
 				key.Close();
 			}
-
-			//if (baseImage != null) baseImage = WrapImage(baseImage, screens.Offset);				TODO: remove
-			//if (displayImage != null) displayImage = WrapImage(displayImage, screens.Offset);
 		}
 
 		private void ChangeWallpaper(Theme theme, Bitmap baseImage, Bitmap displayImage, ScreenList screens)

@@ -384,8 +384,6 @@ namespace WallSwitch
 					}
 				}
 			}
-
-			SaveHistory();
 		}
 
 		public void Load(System.Data.DataRow row)
@@ -473,7 +471,12 @@ namespace WallSwitch
 
 			_historyCanGoPrev = Database.SelectInt("select count(*) from history where theme_id = @theme_id", "@theme_id", _rowid) > 0;
 
-			LoadHistory();
+			// Image rect history
+			_imageRectHistory.Clear();
+			foreach (DataRow rRow in Database.SelectDataTable("select * from rhistory where theme_id = @id order by display_date", "@id", _rowid).Rows)
+			{
+				_imageRectHistory.Add(new RectangleF(rRow.GetInt("left"), rRow.GetInt("top"), rRow.GetInt("width"), rRow.GetInt("height")));
+			}
 		}
 
 		public void Load(XmlElement xmlTheme)
@@ -575,7 +578,6 @@ namespace WallSwitch
 				try
 				{
 					var loc = new Location(xmlLoc);
-					//loc.Load(xmlLoc);	// TODO: remove
 					_locations.Add(loc);
 					AttachLocations(new Location[] { loc });
 				}
@@ -723,60 +725,8 @@ namespace WallSwitch
 			get { return _historyCanGoPrev; }
 		}
 
-		private void SaveHistory()
-		{
-			if (_rowid == 0L) throw new InvalidOperationException("Cannot save theme history when rowid is zero.");
-
-			Database.ExecuteNonQuery("delete from rhistory where theme_id = @rowid", "@rowid", _rowid);
-
-			var counter = 0;
-			foreach (var rect in _imageRectHistory)
-			{
-				Database.Insert("rhistory", new object[]
-					{
-						"theme_id", _rowid,
-						"counter", counter,
-						"left", rect.X,
-						"top", rect.Y,
-						"width", rect.Width,
-						"height", rect.Height
-					});
-				counter++;
-			}
-		}
-
-		private void LoadHistory()
-		{
-			// Image rect history
-			_imageRectHistory.Clear();
-			foreach (DataRow row in Database.SelectDataTable("select * from rhistory where theme_id = @id order by counter", "@id", _rowid).Rows)
-			{
-				_imageRectHistory.Add(new RectangleF(row.GetInt("left"), row.GetInt("top"), row.GetInt("width"), row.GetInt("height")));
-			}
-		}
-
 		private void LoadHistory(XmlElement xmlTheme)
 		{
-			// TODO: remove
-			//foreach (XmlElement xmlHistory in xmlTheme.SelectNodes("History"))
-			//{
-			//	bool current = false;
-			//	if (xmlHistory.HasAttribute("Current")) Boolean.TryParse(xmlHistory.GetAttribute("Current"), out current);
-
-			//	var images = new List<ImageLayout>();
-			//	foreach (XmlElement xmlImage in xmlHistory.SelectNodes("Image"))
-			//	{
-			//		var image = ImageLayout.FromXml(xmlImage);
-			//		if (image != null) images.Add(image);
-			//	}
-
-			//	if (images.Count > 0)
-			//	{
-			//		if (current) _historyIndex = _history.Count;
-			//		_history.Add(images);
-			//	}
-			//}
-
 			_imageRectHistory.Clear();
 			foreach (XmlElement xmlRect in xmlTheme.SelectNodes("ImageRectHistory"))
 			{
@@ -825,12 +775,6 @@ namespace WallSwitch
 			_lastImage = null;
 		}
 
-		// TODO: remove
-		//public IEnumerable<IEnumerable<ImageLayout>> History
-		//{
-		//	get { return _history; }
-		//}
-
 		public IEnumerable<RectangleF> ImageRectHistory
 		{
 			get { return _imageRectHistory; }
@@ -840,12 +784,29 @@ namespace WallSwitch
 		{
 			_imageRectHistory.Add(rect);
 
+			Database.Insert("rhistory", new object[]
+				{
+					"theme_id", _rowid,
+					"display_date", DateTime.Now,
+					"left", (int)rect.X,
+					"top", (int)rect.Y,
+					"width", (int)rect.Width,
+					"height", (int)rect.Height
+				});
+
 			var maxHistory = k_maxImageRectHistory * numMonitors;
 			if (_mode == ThemeMode.Collage) maxHistory *= _numCollageImages;
 
 			while (_imageRectHistory.Count > maxHistory)
 			{
 				_imageRectHistory.RemoveAt(0);
+			}
+
+			var rowids = Database.SelectLongList("select rowid from rhistory where theme_id = @theme_id order by display_date", "@theme_id", _rowid);
+			while (rowids.Count > maxHistory)
+			{
+				Database.ExecuteNonQuery("delete from rhistory where rowid = @rowid", "@rowid", rowids[0]);
+				rowids.RemoveAt(0);
 			}
 		}
 
