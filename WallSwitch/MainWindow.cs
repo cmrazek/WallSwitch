@@ -1856,22 +1856,10 @@ namespace WallSwitch
 		{
 			try
 			{
-				FolderBrowserDialog dlg = new FolderBrowserDialog();
-				if (dlg.ShowDialog() == DialogResult.OK)
+				var dlg = new FeedDialog(new Location(LocationType.Directory, ""));
+				if (dlg.ShowDialog(this) == DialogResult.OK)
 				{
-					string path = dlg.SelectedPath;
-					string pathLower = path.ToLower();
-
-					foreach (ListViewItem existingLvi in lstLocations.Items)
-					{
-						if (existingLvi.Text.ToLower() == pathLower)
-						{
-							this.ShowError(Res.Error_DuplicateFolder);
-							return;
-						}
-					}
-
-					AddLocationItem(new Location(LocationType.Directory, path));
+					AddLocationItem(dlg.Feed);
 					Dirty = true;
 				}
 			}
