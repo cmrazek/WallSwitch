@@ -52,6 +52,18 @@ namespace WallSwitch
 
 			_kill = false;
 
+			_lastSwitch = DateTime.MinValue;
+			var str = Database.LoadSetting("LastSwitch");
+			if (!string.IsNullOrEmpty(str))
+			{
+				DateTime dt;
+				if (DateTime.TryParse(str, out dt))
+				{
+					_lastSwitch = dt;
+					Log.Debug("Last switch time was: {0}", _lastSwitch);
+				}
+			}
+
 			_thread = new Thread(new ThreadStart(ThreadProc));
 			_thread.Name = "Switch Thread";
 			_thread.SetApartmentState(ApartmentState.STA);
@@ -122,6 +134,7 @@ namespace WallSwitch
 						}
 
 						_lastSwitch = DateTime.Now;
+						Database.WriteSetting("LastSwitch", _lastSwitch.ToString("s"));
 						lock (_themeLock)
 						{
 							Log.Write(LogLevel.Info, "Next wallpaper switch is in {0} seconds", _theme.Interval.TotalSeconds);
