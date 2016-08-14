@@ -266,7 +266,7 @@
 			// 
 			// colFrequency
 			// 
-			this.colFrequency.Text = "Frequency";
+			this.colFrequency.Text = "Refresh";
 			this.colFrequency.Width = 100;
 			// 
 			// cmLocations
@@ -414,50 +414,50 @@
             this.toolStripMenuItem10,
             this.ciDeleteTheme});
 			this.cmTheme.Name = "c_themeMenu";
-			this.cmTheme.Size = new System.Drawing.Size(143, 136);
+			this.cmTheme.Size = new System.Drawing.Size(149, 146);
 			// 
 			// ciNewTheme
 			// 
 			this.ciNewTheme.Name = "ciNewTheme";
-			this.ciNewTheme.Size = new System.Drawing.Size(142, 24);
+			this.ciNewTheme.Size = new System.Drawing.Size(148, 26);
 			this.ciNewTheme.Text = "&New";
 			this.ciNewTheme.Click += new System.EventHandler(this.btnNewTheme_Click);
 			// 
 			// ciRenameTheme
 			// 
 			this.ciRenameTheme.Name = "ciRenameTheme";
-			this.ciRenameTheme.Size = new System.Drawing.Size(142, 24);
+			this.ciRenameTheme.Size = new System.Drawing.Size(148, 26);
 			this.ciRenameTheme.Text = "&Rename";
 			this.ciRenameTheme.Click += new System.EventHandler(this.btnRenameTheme_Click);
 			// 
 			// ciDuplicateTheme
 			// 
 			this.ciDuplicateTheme.Name = "ciDuplicateTheme";
-			this.ciDuplicateTheme.Size = new System.Drawing.Size(142, 24);
+			this.ciDuplicateTheme.Size = new System.Drawing.Size(148, 26);
 			this.ciDuplicateTheme.Text = "D&uplicate";
 			this.ciDuplicateTheme.Click += new System.EventHandler(this.miDuplicateTheme_Click);
 			// 
 			// toolStripMenuItem9
 			// 
 			this.toolStripMenuItem9.Name = "toolStripMenuItem9";
-			this.toolStripMenuItem9.Size = new System.Drawing.Size(139, 6);
+			this.toolStripMenuItem9.Size = new System.Drawing.Size(145, 6);
 			// 
 			// ciSaveTheme
 			// 
 			this.ciSaveTheme.Name = "ciSaveTheme";
-			this.ciSaveTheme.Size = new System.Drawing.Size(142, 24);
+			this.ciSaveTheme.Size = new System.Drawing.Size(148, 26);
 			this.ciSaveTheme.Text = "&Save";
 			this.ciSaveTheme.Click += new System.EventHandler(this.FileSave_Click);
 			// 
 			// toolStripMenuItem10
 			// 
 			this.toolStripMenuItem10.Name = "toolStripMenuItem10";
-			this.toolStripMenuItem10.Size = new System.Drawing.Size(139, 6);
+			this.toolStripMenuItem10.Size = new System.Drawing.Size(145, 6);
 			// 
 			// ciDeleteTheme
 			// 
 			this.ciDeleteTheme.Name = "ciDeleteTheme";
-			this.ciDeleteTheme.Size = new System.Drawing.Size(142, 24);
+			this.ciDeleteTheme.Size = new System.Drawing.Size(148, 26);
 			this.ciDeleteTheme.Text = "&Delete";
 			this.ciDeleteTheme.Click += new System.EventHandler(this.btnDeleteTheme_Click);
 			// 
@@ -1699,7 +1699,7 @@
 			// 
 			this.c_widgetPanelSplitter.Panel2.Controls.Add(this.c_widgetPanelPropSplitter);
 			this.c_widgetPanelSplitter.Size = new System.Drawing.Size(931, 476);
-			this.c_widgetPanelSplitter.SplitterDistance = 714;
+			this.c_widgetPanelSplitter.SplitterDistance = 713;
 			this.c_widgetPanelSplitter.SplitterWidth = 5;
 			this.c_widgetPanelSplitter.TabIndex = 2;
 			// 
@@ -1709,7 +1709,7 @@
 			this.c_widgetLayout.Location = new System.Drawing.Point(0, 41);
 			this.c_widgetLayout.Margin = new System.Windows.Forms.Padding(5);
 			this.c_widgetLayout.Name = "c_widgetLayout";
-			this.c_widgetLayout.Size = new System.Drawing.Size(714, 435);
+			this.c_widgetLayout.Size = new System.Drawing.Size(713, 435);
 			this.c_widgetLayout.TabIndex = 0;
 			this.c_widgetLayout.WidgetsChanged += new System.EventHandler(this.c_widgetLayout_WidgetsChanged);
 			this.c_widgetLayout.SelectedWidgetChanged += new System.EventHandler<WallSwitch.WidgetLayoutControl.WidgetEventArgs>(this.c_widgetLayout_SelectedWidgetChanged);
@@ -1726,13 +1726,13 @@
 			this.c_widgetTopPanel.Location = new System.Drawing.Point(0, 0);
 			this.c_widgetTopPanel.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetTopPanel.Name = "c_widgetTopPanel";
-			this.c_widgetTopPanel.Size = new System.Drawing.Size(714, 41);
+			this.c_widgetTopPanel.Size = new System.Drawing.Size(713, 41);
 			this.c_widgetTopPanel.TabIndex = 1;
 			// 
 			// c_addWidgetButton
 			// 
 			this.c_addWidgetButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.c_addWidgetButton.Location = new System.Drawing.Point(630, 5);
+			this.c_addWidgetButton.Location = new System.Drawing.Point(629, 5);
 			this.c_addWidgetButton.Margin = new System.Windows.Forms.Padding(4);
 			this.c_addWidgetButton.Name = "c_addWidgetButton";
 			this.c_addWidgetButton.Size = new System.Drawing.Size(80, 28);
@@ -1750,7 +1750,7 @@
 			this.c_widgetTypes.Location = new System.Drawing.Point(71, 6);
 			this.c_widgetTypes.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetTypes.Name = "c_widgetTypes";
-			this.c_widgetTypes.Size = new System.Drawing.Size(550, 24);
+			this.c_widgetTypes.Size = new System.Drawing.Size(549, 24);
 			this.c_widgetTypes.TabIndex = 1;
 			this.c_widgetTypes.SelectedIndexChanged += new System.EventHandler(this.c_widgetTypes_SelectedIndexChanged);
 			// 
@@ -1780,7 +1780,7 @@
 			// c_widgetPanelPropSplitter.Panel2
 			// 
 			this.c_widgetPanelPropSplitter.Panel2.Controls.Add(this.c_widgetPropertyGrid);
-			this.c_widgetPanelPropSplitter.Size = new System.Drawing.Size(212, 476);
+			this.c_widgetPanelPropSplitter.Size = new System.Drawing.Size(213, 476);
 			this.c_widgetPanelPropSplitter.SplitterDistance = 160;
 			this.c_widgetPanelPropSplitter.SplitterWidth = 5;
 			this.c_widgetPanelPropSplitter.TabIndex = 0;
@@ -1795,7 +1795,7 @@
 			this.c_widgetList.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetList.MultiSelect = false;
 			this.c_widgetList.Name = "c_widgetList";
-			this.c_widgetList.Size = new System.Drawing.Size(179, 160);
+			this.c_widgetList.Size = new System.Drawing.Size(180, 160);
 			this.c_widgetList.TabIndex = 0;
 			this.c_widgetList.UseCompatibleStateImageBehavior = false;
 			this.c_widgetList.View = System.Windows.Forms.View.Details;
@@ -1812,7 +1812,7 @@
 			this.c_widgetControlRightPanel.Controls.Add(this.c_widgetMoveUpButton);
 			this.c_widgetControlRightPanel.Controls.Add(this.c_widgetMoveDownButton);
 			this.c_widgetControlRightPanel.Dock = System.Windows.Forms.DockStyle.Right;
-			this.c_widgetControlRightPanel.Location = new System.Drawing.Point(179, 0);
+			this.c_widgetControlRightPanel.Location = new System.Drawing.Point(180, 0);
 			this.c_widgetControlRightPanel.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetControlRightPanel.Name = "c_widgetControlRightPanel";
 			this.c_widgetControlRightPanel.Size = new System.Drawing.Size(33, 160);
@@ -1868,7 +1868,7 @@
 			this.c_widgetPropertyGrid.Location = new System.Drawing.Point(0, 0);
 			this.c_widgetPropertyGrid.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetPropertyGrid.Name = "c_widgetPropertyGrid";
-			this.c_widgetPropertyGrid.Size = new System.Drawing.Size(212, 311);
+			this.c_widgetPropertyGrid.Size = new System.Drawing.Size(213, 311);
 			this.c_widgetPropertyGrid.TabIndex = 0;
 			this.c_widgetPropertyGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.c_widgetPropertyGrid_PropertyValueChanged);
 			// 

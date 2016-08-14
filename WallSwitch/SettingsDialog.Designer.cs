@@ -41,40 +41,45 @@
 			this.c_ignoreHiddenFilesCheckbox = new System.Windows.Forms.CheckBox();
 			this.c_logLevelLabel = new System.Windows.Forms.Label();
 			this.c_logLevelCombo = new System.Windows.Forms.ComboBox();
+			this.c_loadHistoryImages = new System.Windows.Forms.CheckBox();
 			this.panel1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// c_startUpDelayLabel
 			// 
 			this.c_startUpDelayLabel.AutoSize = true;
-			this.c_startUpDelayLabel.Location = new System.Drawing.Point(10, 84);
+			this.c_startUpDelayLabel.Location = new System.Drawing.Point(14, 129);
+			this.c_startUpDelayLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.c_startUpDelayLabel.Name = "c_startUpDelayLabel";
-			this.c_startUpDelayLabel.Size = new System.Drawing.Size(121, 13);
-			this.c_startUpDelayLabel.TabIndex = 5;
+			this.c_startUpDelayLabel.Size = new System.Drawing.Size(159, 17);
+			this.c_startUpDelayLabel.TabIndex = 6;
 			this.c_startUpDelayLabel.Text = "Start-up/Resume Delay:";
 			// 
 			// c_startUpDelayTextBox
 			// 
-			this.c_startUpDelayTextBox.Location = new System.Drawing.Point(137, 81);
+			this.c_startUpDelayTextBox.Location = new System.Drawing.Point(184, 126);
+			this.c_startUpDelayTextBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
 			this.c_startUpDelayTextBox.Name = "c_startUpDelayTextBox";
-			this.c_startUpDelayTextBox.Size = new System.Drawing.Size(60, 20);
-			this.c_startUpDelayTextBox.TabIndex = 6;
+			this.c_startUpDelayTextBox.Size = new System.Drawing.Size(79, 22);
+			this.c_startUpDelayTextBox.TabIndex = 7;
 			// 
 			// c_startUpDelayUnitsLabel
 			// 
 			this.c_startUpDelayUnitsLabel.AutoSize = true;
-			this.c_startUpDelayUnitsLabel.Location = new System.Drawing.Point(203, 84);
+			this.c_startUpDelayUnitsLabel.Location = new System.Drawing.Point(272, 129);
+			this.c_startUpDelayUnitsLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.c_startUpDelayUnitsLabel.Name = "c_startUpDelayUnitsLabel";
-			this.c_startUpDelayUnitsLabel.Size = new System.Drawing.Size(53, 13);
-			this.c_startUpDelayUnitsLabel.TabIndex = 7;
+			this.c_startUpDelayUnitsLabel.Size = new System.Drawing.Size(71, 17);
+			this.c_startUpDelayUnitsLabel.TabIndex = 8;
 			this.c_startUpDelayUnitsLabel.Text = "(seconds)";
 			// 
 			// c_okButton
 			// 
 			this.c_okButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.c_okButton.Location = new System.Drawing.Point(128, 4);
+			this.c_okButton.Location = new System.Drawing.Point(168, 5);
+			this.c_okButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
 			this.c_okButton.Name = "c_okButton";
-			this.c_okButton.Size = new System.Drawing.Size(75, 23);
+			this.c_okButton.Size = new System.Drawing.Size(100, 28);
 			this.c_okButton.TabIndex = 0;
 			this.c_okButton.Text = "&OK";
 			this.c_okButton.UseVisualStyleBackColor = true;
@@ -84,9 +89,10 @@
 			// 
 			this.c_cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.c_cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.c_cancelButton.Location = new System.Drawing.Point(206, 4);
+			this.c_cancelButton.Location = new System.Drawing.Point(272, 5);
+			this.c_cancelButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
 			this.c_cancelButton.Name = "c_cancelButton";
-			this.c_cancelButton.Size = new System.Drawing.Size(75, 23);
+			this.c_cancelButton.Size = new System.Drawing.Size(100, 28);
 			this.c_cancelButton.TabIndex = 1;
 			this.c_cancelButton.Text = "&Cancel";
 			this.c_cancelButton.UseVisualStyleBackColor = true;
@@ -95,9 +101,10 @@
 			// c_startWithWindowsCheckBox
 			// 
 			this.c_startWithWindowsCheckBox.AutoSize = true;
-			this.c_startWithWindowsCheckBox.Location = new System.Drawing.Point(13, 12);
+			this.c_startWithWindowsCheckBox.Location = new System.Drawing.Point(17, 15);
+			this.c_startWithWindowsCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
 			this.c_startWithWindowsCheckBox.Name = "c_startWithWindowsCheckBox";
-			this.c_startWithWindowsCheckBox.Size = new System.Drawing.Size(120, 17);
+			this.c_startWithWindowsCheckBox.Size = new System.Drawing.Size(152, 21);
 			this.c_startWithWindowsCheckBox.TabIndex = 1;
 			this.c_startWithWindowsCheckBox.Text = "Start With Windows";
 			this.c_startWithWindowsCheckBox.UseVisualStyleBackColor = true;
@@ -105,18 +112,20 @@
 			// c_checkForUpdatesCheckBox
 			// 
 			this.c_checkForUpdatesCheckBox.AutoSize = true;
-			this.c_checkForUpdatesCheckBox.Location = new System.Drawing.Point(13, 35);
+			this.c_checkForUpdatesCheckBox.Location = new System.Drawing.Point(17, 43);
+			this.c_checkForUpdatesCheckBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
 			this.c_checkForUpdatesCheckBox.Name = "c_checkForUpdatesCheckBox";
-			this.c_checkForUpdatesCheckBox.Size = new System.Drawing.Size(172, 17);
+			this.c_checkForUpdatesCheckBox.Size = new System.Drawing.Size(223, 21);
 			this.c_checkForUpdatesCheckBox.TabIndex = 2;
 			this.c_checkForUpdatesCheckBox.Text = "Check for Updates on Start Up";
 			this.c_checkForUpdatesCheckBox.UseVisualStyleBackColor = true;
 			// 
 			// c_checkForUpdatesButton
 			// 
-			this.c_checkForUpdatesButton.Location = new System.Drawing.Point(206, 31);
+			this.c_checkForUpdatesButton.Location = new System.Drawing.Point(275, 38);
+			this.c_checkForUpdatesButton.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
 			this.c_checkForUpdatesButton.Name = "c_checkForUpdatesButton";
-			this.c_checkForUpdatesButton.Size = new System.Drawing.Size(75, 23);
+			this.c_checkForUpdatesButton.Size = new System.Drawing.Size(100, 28);
 			this.c_checkForUpdatesButton.TabIndex = 3;
 			this.c_checkForUpdatesButton.Text = "Check Now";
 			this.c_checkForUpdatesButton.UseVisualStyleBackColor = true;
@@ -128,17 +137,19 @@
 			this.panel1.Controls.Add(this.c_okButton);
 			this.panel1.Controls.Add(this.c_cancelButton);
 			this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.panel1.Location = new System.Drawing.Point(0, 140);
+			this.panel1.Location = new System.Drawing.Point(0, 192);
+			this.panel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(284, 30);
+			this.panel1.Size = new System.Drawing.Size(376, 37);
 			this.panel1.TabIndex = 0;
 			// 
 			// c_ignoreHiddenFilesCheckbox
 			// 
 			this.c_ignoreHiddenFilesCheckbox.AutoSize = true;
-			this.c_ignoreHiddenFilesCheckbox.Location = new System.Drawing.Point(13, 58);
+			this.c_ignoreHiddenFilesCheckbox.Location = new System.Drawing.Point(17, 71);
+			this.c_ignoreHiddenFilesCheckbox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
 			this.c_ignoreHiddenFilesCheckbox.Name = "c_ignoreHiddenFilesCheckbox";
-			this.c_ignoreHiddenFilesCheckbox.Size = new System.Drawing.Size(175, 17);
+			this.c_ignoreHiddenFilesCheckbox.Size = new System.Drawing.Size(231, 21);
 			this.c_ignoreHiddenFilesCheckbox.TabIndex = 4;
 			this.c_ignoreHiddenFilesCheckbox.Text = "Ignore Hidden Files and Folders";
 			this.c_ignoreHiddenFilesCheckbox.UseVisualStyleBackColor = true;
@@ -146,29 +157,42 @@
 			// c_logLevelLabel
 			// 
 			this.c_logLevelLabel.AutoSize = true;
-			this.c_logLevelLabel.Location = new System.Drawing.Point(12, 110);
+			this.c_logLevelLabel.Location = new System.Drawing.Point(17, 161);
+			this.c_logLevelLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.c_logLevelLabel.Name = "c_logLevelLabel";
-			this.c_logLevelLabel.Size = new System.Drawing.Size(71, 13);
-			this.c_logLevelLabel.TabIndex = 8;
+			this.c_logLevelLabel.Size = new System.Drawing.Size(93, 17);
+			this.c_logLevelLabel.TabIndex = 9;
 			this.c_logLevelLabel.Text = "Loging Level:";
 			// 
 			// c_logLevelCombo
 			// 
 			this.c_logLevelCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.c_logLevelCombo.FormattingEnabled = true;
-			this.c_logLevelCombo.Location = new System.Drawing.Point(89, 107);
+			this.c_logLevelCombo.Location = new System.Drawing.Point(120, 158);
+			this.c_logLevelCombo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
 			this.c_logLevelCombo.Name = "c_logLevelCombo";
-			this.c_logLevelCombo.Size = new System.Drawing.Size(108, 21);
-			this.c_logLevelCombo.TabIndex = 9;
+			this.c_logLevelCombo.Size = new System.Drawing.Size(143, 24);
+			this.c_logLevelCombo.TabIndex = 10;
+			// 
+			// c_loadHistoryImages
+			// 
+			this.c_loadHistoryImages.AutoSize = true;
+			this.c_loadHistoryImages.Location = new System.Drawing.Point(17, 99);
+			this.c_loadHistoryImages.Name = "c_loadHistoryImages";
+			this.c_loadHistoryImages.Size = new System.Drawing.Size(213, 21);
+			this.c_loadHistoryImages.TabIndex = 5;
+			this.c_loadHistoryImages.Text = "Load History Images on Start";
+			this.c_loadHistoryImages.UseVisualStyleBackColor = true;
 			// 
 			// SettingsDialog
 			// 
 			this.AcceptButton = this.c_okButton;
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.SystemColors.Window;
 			this.CancelButton = this.c_cancelButton;
-			this.ClientSize = new System.Drawing.Size(284, 170);
+			this.ClientSize = new System.Drawing.Size(376, 229);
+			this.Controls.Add(this.c_loadHistoryImages);
 			this.Controls.Add(this.c_logLevelCombo);
 			this.Controls.Add(this.c_logLevelLabel);
 			this.Controls.Add(this.c_ignoreHiddenFilesCheckbox);
@@ -180,8 +204,9 @@
 			this.Controls.Add(this.c_startUpDelayTextBox);
 			this.Controls.Add(this.c_startUpDelayLabel);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-			this.MaximumSize = new System.Drawing.Size(300, 208);
-			this.MinimumSize = new System.Drawing.Size(300, 208);
+			this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.MaximumSize = new System.Drawing.Size(394, 276);
+			this.MinimumSize = new System.Drawing.Size(394, 276);
 			this.Name = "SettingsDialog";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Settings";
@@ -206,5 +231,6 @@
 		private System.Windows.Forms.CheckBox c_ignoreHiddenFilesCheckbox;
 		private System.Windows.Forms.Label c_logLevelLabel;
 		private System.Windows.Forms.ComboBox c_logLevelCombo;
+		private System.Windows.Forms.CheckBox c_loadHistoryImages;
 	}
 }

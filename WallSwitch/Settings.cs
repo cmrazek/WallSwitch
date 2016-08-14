@@ -20,6 +20,7 @@ namespace WallSwitch
 		private const LogLevel k_defaultLogLevel = LogLevel.Info;
 #endif
 		private const double k_defaultTransparency = 1.0;
+		private const bool k_defaultLoadHistoryImages = true;
 		#endregion
 
 		#region Variables
@@ -29,6 +30,7 @@ namespace WallSwitch
 		private static bool _ignoreHiddenFiles = k_defaultIgnoreHiddenFiles;
 		private static LogLevel _logLevel = k_defaultLogLevel;
 		private static double _transparency = k_defaultTransparency;
+		private static bool _loadHistoryImages = k_defaultLoadHistoryImages;
 		#endregion
 
 		/// <summary>
@@ -63,6 +65,7 @@ namespace WallSwitch
 			db.WriteSetting("IgnoreHiddenFiles", _ignoreHiddenFiles.ToString());
 			db.WriteSetting("LogLevel", _logLevel.ToString());
 			db.WriteSetting("Transparency", _transparency.ToString());
+			db.WriteSetting("LoadHistoryImages", _loadHistoryImages.ToString());
 		}
 
 		public static void Load(Database db)
@@ -81,6 +84,8 @@ namespace WallSwitch
 
 			double dValue;
 			if (double.TryParse(db.LoadSetting("Transparency"), out dValue)) _transparency = dValue;
+
+			if (bool.TryParse(db.LoadSetting("LoadHistoryImages"), out bValue)) _loadHistoryImages = bValue;
 		}
 
 		public static void Load(XmlElement xmlSettings)
@@ -217,6 +222,12 @@ namespace WallSwitch
 		{
 			get { return _transparency; }
 			set { _transparency = value; }
+		}
+
+		public static bool LoadHistoryImages
+		{
+			get { return _loadHistoryImages; }
+			set { _loadHistoryImages = value; }
 		}
 	}
 }

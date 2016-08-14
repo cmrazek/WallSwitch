@@ -27,6 +27,7 @@ namespace WallSwitch
 				c_checkForUpdatesCheckBox.Checked = Settings.CheckForUpdatesOnStartup;
 				c_ignoreHiddenFilesCheckbox.Checked = Settings.IgnoreHiddenFiles;
 				c_logLevelCombo.InitForEnum<LogLevel>(Settings.LogLevel);
+				c_loadHistoryImages.Checked = Settings.LoadHistoryImages;
 			}
 			catch (Exception ex)
 			{
@@ -53,6 +54,7 @@ namespace WallSwitch
 				Settings.CheckForUpdatesOnStartup = c_checkForUpdatesCheckBox.Checked;
 				Settings.IgnoreHiddenFiles = c_ignoreHiddenFilesCheckbox.Checked;
 				Settings.LogLevel = c_logLevelCombo.GetEnumValue<LogLevel>();
+				Settings.LoadHistoryImages = c_loadHistoryImages.Checked;
 			}
 
 			return true;

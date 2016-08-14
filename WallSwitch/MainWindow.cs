@@ -76,7 +76,7 @@ namespace WallSwitch
 				using (var db = new Database())
 				{
 					LoadSettings(db);
-					LoadHistoryFromDatabase(db);
+					if (Settings.LoadHistoryImages) LoadHistoryFromDatabase(db);
 
 					// Determine which theme is the currently active theme
 					Theme activeTheme;
