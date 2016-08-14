@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
+using System.Data;
 using System.Drawing.Imaging;
+using System.Linq;
+using System.IO;
+using System.Text;
 using System.Xml;
 
 namespace WallSwitch
@@ -16,7 +17,7 @@ namespace WallSwitch
 			if (!string.IsNullOrEmpty(ret))
 			{
 				cacheFileName = Path.Combine(GetCacheDir(false), ret);
-				return File.Exists(ret);
+				return File.Exists(cacheFileName);
 			}
 
 			cacheFileName = string.Empty;
@@ -32,8 +33,8 @@ namespace WallSwitch
 
 				var fmt = img.ImageFormat ?? ImageFormat.Png;
 				var fileName = string.Concat(Guid.NewGuid().ToString(), ImageFormatDesc.ImageFormatToExtension(fmt));
-
-				image.Save(Path.Combine(GetCacheDir(true), fileName), fmt);
+				var cachePathName = Path.Combine(GetCacheDir(true), fileName);
+				image.Save(cachePathName, fmt);
 
 				if (Database.SelectInt("select count(*) from img_cache where location = @loc", "@loc", img.Location) == 0)
 				{
@@ -65,57 +66,51 @@ namespace WallSwitch
 
 		public static void ClearExpiredCache(IEnumerable<string> keepLocations)
 		{
-			var removeList = new List<long>();
-
-			using (var cmd = Database.CreateCommand("select rowid, location from img_cache"))
+			try
 			{
-				using (var rdr = cmd.ExecuteReader())
+				var cacheDir = GetCacheDir(false);
+				if (!Directory.Exists(cacheDir)) return;
+
+				var dbFiles = new List<string>();
+				foreach (DataRow row in Database.SelectDataTable("select rowid, location, cache_file_name from img_cache").Rows)
 				{
-					while (rdr.Read())
+					var location = row.GetString("location", string.Empty);
+					if (!keepLocations.Any(k => string.Equals(k, location, StringComparison.OrdinalIgnoreCase)))
 					{
-						var location = (string)rdr[1];
-						if (!keepLocations.Any(l => l.Equals(location, StringComparison.OrdinalIgnoreCase)))
-						{
-							removeList.Add((long)rdr[0]);
-						}
+						Database.ExecuteNonQuery("delete from img_cache where rowid = @rowid", "@rowid", row.GetLong("rowid"));
+					}
+					else
+					{
+						dbFiles.Add(row.GetString("cache_file_name"));
+					}
+				}
+
+				// Delete items from disk that don't exist in the database
+				var diskFiles = (from f in Directory.GetFiles(cacheDir) select Path.GetFileName(f)).ToArray();
+				var diskFilesToRemove = new List<string>();
+				foreach (var diskFileName in diskFiles)
+				{
+					if (!dbFiles.Any(x => string.Equals(x, diskFileName, StringComparison.OrdinalIgnoreCase)))
+					{
+						diskFilesToRemove.Add(diskFileName);
+					}
+				}
+
+				foreach (var fileName in diskFilesToRemove)
+				{
+					try
+					{
+						File.Delete(Path.Combine(cacheDir, fileName));
+					}
+					catch (Exception ex)
+					{
+						Log.Write(ex, "Exception when attempting to delete cached image file: {0}", fileName);
 					}
 				}
 			}
-
-			if (removeList.Any())
+			catch (Exception ex)
 			{
-				using (var cmd = Database.CreateCommand("delete from img_cache where rowid = @rowid"))
-				{
-					foreach (var rowid in removeList)
-					{
-						cmd.Parameters.Clear();
-						cmd.Parameters.AddWithValue("@rowid", rowid);
-						cmd.ExecuteNonQuery();
-					}
-				}
-			}
-
-			// Clean out old files in cache dir.
-			var cacheDir = GetCacheDir(false);
-			if (Directory.Exists(cacheDir))
-			{
-				foreach (var file in Directory.GetFiles(cacheDir))
-				{
-					var fileName = Path.GetFileName(file);
-
-					if (Database.SelectInt("select count(*) from img_cache where location = @loc", "@loc", "fileName") == 0)
-					{
-						try
-						{
-							Log.Write(LogLevel.Debug, "Cleaning disk cache file '{0}'", fileName);
-							File.Delete(file);
-						}
-						catch (Exception ex)
-						{
-							Log.Write(ex, "Failed to delete old file from cache dir '{0}'.", fileName);
-						}
-					}
-				}
+				Log.Write(ex, "Exception when clearing expired image cache items.");
 			}
 		}
 

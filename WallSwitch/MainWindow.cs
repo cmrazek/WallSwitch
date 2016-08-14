@@ -1523,6 +1523,7 @@ namespace WallSwitch
 				{
 					DetachTheme(deleteTheme);
 					_themes.Remove(deleteTheme);
+					deleteTheme.DeleteFromDatabase();
 
 					// Remove the theme out of the combo box, and use the combo-box's trigger to select the next theme.
 					cmbTheme.Items.RemoveAt(index);

@@ -603,6 +603,11 @@ namespace WallSwitch
 			LoadHistory(xmlTheme);
 		}
 
+		public void DeleteFromDatabase()
+		{
+			if (_rowid == 0) return;
+			Database.ExecuteNonQuery("delete from theme where rowid = @id", "@id", _rowid);
+		}
 		#endregion
 
 		#region Locations
@@ -1052,6 +1057,7 @@ namespace WallSwitch
 				maxCount = Database.SelectInt("select count(*) from img where theme_id = @id", "@id", _rowid);
 				Log.Debug("Number of images in database: {0}", maxCount);
 			}
+			if (maxCount == 0) return null;
 
 			while (true)
 			{
