@@ -122,15 +122,21 @@ namespace WallSwitch
 				var dbConfig = (from c in dbConfigs where c.name == setting.Name select c).FirstOrDefault();
 				if (dbConfig == null)
 				{
-					Database.ExecuteNonQuery("insert into widget_config (name, value) values (@name, @value)",
-						"@name", setting.Name,
-						"@value", setting.Value);
+					Database.Insert("widget_config", new object[]
+						{
+							"widget_id", _rowid,
+							"name", setting.Name,
+							"value", setting.Value
+						});
 				}
 				else
 				{
-					Database.ExecuteNonQuery("update widget_config set name = @name, value = @value where rowid = @rowid",
-						"@name", setting.Name,
-						"@value", setting.Value);
+					Database.Update("widget_config", "rowid = @rowid", new object[]
+						{
+							"name", setting.Name,
+							"value", setting.Value
+						},
+						new object[] { "@rowid", _rowid });
 				}
 			}
 
