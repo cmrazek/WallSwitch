@@ -84,6 +84,7 @@ namespace WallSwitch
 				_mainWindow = this;
 
 				LoadSettings();
+				LoadHistoryFromDatabase();
 
 				// Determine which theme is the currently active theme
 				Theme activeTheme;
@@ -2653,6 +2654,34 @@ namespace WallSwitch
 			{
 				FileUtil.RecycleFile(fileName);
 				c_historyTab.RemoveItem(item);
+			}
+		}
+
+		private void LoadHistoryFromDatabase()
+		{
+			try
+			{
+				var maxHistory = c_historyTab.MaxHistory;
+
+				var history = new List<HistoryItem>();
+				foreach (DataRow row in Database.SelectDataTable("select rowid, * from history order by display_date desc limit @max", "@max", maxHistory).Rows)
+				{
+					var img = ImageRec.FromDataRow(row);
+					if (img.Retrieve())
+					{
+						history.Add(new HistoryItem(img));
+					}
+				}
+
+				history.Reverse();
+				foreach (var item in history)
+				{
+					c_historyTab.AddHistory(item);
+				}
+			}
+			catch (Exception ex)
+			{
+				Log.Write(ex, "Exception when attempting to load history.");
 			}
 		}
 		#endregion

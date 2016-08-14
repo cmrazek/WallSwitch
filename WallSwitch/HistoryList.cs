@@ -621,6 +621,11 @@ namespace WallSwitch
 		{
 			get { return _imageHeight; }
 		}
+
+		public int MaxHistory
+		{
+			get { return _maxHistory; }
+		}
 	}
 
 	public class HistoryItem

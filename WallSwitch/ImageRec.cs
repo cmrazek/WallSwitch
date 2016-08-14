@@ -191,6 +191,7 @@ namespace WallSwitch
 							{
 								Log.Write(LogLevel.Debug, "Loading cached image from '{0}'.", fileName);
 								_image = Image.FromFile(fileName);
+								MakeThumbnail();
 								return true;
 							}
 							catch (Exception ex)
