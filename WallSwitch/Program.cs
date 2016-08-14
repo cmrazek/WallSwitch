@@ -11,7 +11,6 @@ namespace WallSwitch
 	{
 		private const string k_guid = "57FF779B-63F3-430A-B420-AD436F2D2AEB";
 
-		private static WallSwitchServiceManager _serviceMgr;
 		private static SwitchThread _switchThread;
 		private static MainWindow _mainWindow;
 		private static OsVersion? _osVersion;
@@ -59,21 +58,6 @@ namespace WallSwitch
 					{
 						Log.Debug("Main thread is terminating.");
 
-						// Shutdown the WCF service
-						try
-						{
-							Log.Debug("Shutting down WCF service.");
-							if (_serviceMgr != null)
-							{
-								_serviceMgr.Dispose();
-								_serviceMgr = null;
-							}
-						}
-						catch (Exception ex)
-						{
-							Log.Write(ex);
-						}
-
 						// Terminal the switch thread
 						try
 						{
@@ -111,7 +95,8 @@ namespace WallSwitch
 				}
 				else if (!winStart)
 				{
-					MainWindow.AppActivateExternal();
+					NativeMethods.PostMessage((IntPtr)NativeMethods.HWND_BROADCAST,
+						NativeMethods.WM_SHOWME, IntPtr.Zero, IntPtr.Zero);
 				}
 			}
 			catch (Exception ex)
@@ -124,12 +109,6 @@ namespace WallSwitch
 		{
 			get { return _switchThread; }
 			set { _switchThread = value; }
-		}
-
-		public static WallSwitchServiceManager ServiceManager
-		{
-			get { return _serviceMgr; }
-			set { _serviceMgr = value; }
 		}
 
 		public static OsVersion OsVersion

@@ -34,16 +34,6 @@ namespace WallSwitch
 		private EventHandler _balloonClickedHandler = null;
 		#endregion
 
-		#region PInvoke
-		[DllImport("user32.dll", SetLastError = true)]
-		static extern bool BringWindowToTop(IntPtr hWnd);
-
-		private const int WM_HOTKEY = 0x0312;
-
-		[DllImport("User32.dll")]
-		public static extern Int32 SetForegroundWindow(IntPtr hWnd);
-		#endregion
-
 		#region Constants
 		// Items in theme period combo
 		private const int k_periodSeconds = 0;
@@ -130,10 +120,6 @@ namespace WallSwitch
 				if (_winStart) HideToTray();
 
 				RegisterHotKeys();
-
-				var serviceMgr = new WallSwitchServiceManager();
-				serviceMgr.CreateService();
-				Program.ServiceManager = serviceMgr;
 
 				if (Settings.CheckForUpdatesOnStartup) CheckForUpdates();
 			}
@@ -304,18 +290,27 @@ namespace WallSwitch
 		{
 			base.WndProc(ref m);
 
-			try
+			if (m.Msg == NativeMethods.WM_HOTKEY)
 			{
-				switch (m.Msg)
+				try
 				{
-					case WM_HOTKEY:
-						HotKey.OnWmHotKey(m.WParam.ToInt32());
-						break;
+					HotKey.OnWmHotKey(m.WParam.ToInt32());
+				}
+				catch (Exception ex)
+				{
+					this.ShowError(ex, Res.Exception_Generic);
 				}
 			}
-			catch (Exception ex)
+			else if (m.Msg == NativeMethods.WM_SHOWME)
 			{
-				this.ShowError(ex, Res.Exception_Generic);
+				try
+				{
+					AppActivate();
+				}
+				catch (Exception ex)
+				{
+					this.ShowError(ex, Res.Exception_Generic);
+				}
 			}
 		}
 
@@ -330,14 +325,6 @@ namespace WallSwitch
 		{
 			WindowState = FormWindowState.Minimized;
 			Visible = false;
-
-			if (ShowInTaskbar != false)
-			{
-				ShowInTaskbar = false;
-
-				// Switching ShowInTaskbar causes hotkeys to be unregistered; reregister them.
-				ReregisterHotKeys();
-			}
 		}
 
 		private void ShowFromTray()
@@ -347,15 +334,11 @@ namespace WallSwitch
 			Visible = true;
 			WindowState = FormWindowState.Normal;
 
-			if (ShowInTaskbar != true)
-			{
-				ShowInTaskbar = true;
+			NativeMethods.BringWindowToTop(this.Handle);
 
-				// Switching ShowInTaskbar causes hotkeys to be unregistered; reregister them.
-				ReregisterHotKeys();
-			}
-
-			BringWindowToTop(this.Handle);
+			var oldTopMost = TopMost;
+			TopMost = true;
+			TopMost = oldTopMost;
 
 			// Select the active theme.
 			Theme activeTheme = GetActiveTheme();
@@ -368,6 +351,8 @@ namespace WallSwitch
 		{
 			if (IsDisposed) return;
 
+			Log.Debug("Received activate message.");
+
 			if (InvokeRequired)
 			{
 				if (_appActivateFunc == null) _appActivateFunc = new VoidDelegate(AppActivate);
@@ -376,21 +361,7 @@ namespace WallSwitch
 			}
 
 			ShowFromTray();
-			SetForegroundWindow(this.Handle);
-		}
-
-		public static void AppActivateExternal()
-		{
-			try
-			{
-				var client = WallSwitchServiceManager.GetClient();
-				if (client != null)
-				{
-					client.Activate();
-				}
-			}
-			catch (Exception)
-			{ }
+			NativeMethods.SetForegroundWindow(this.Handle);
 		}
 
 		public void ShowNotification(string message, EventHandler clickCallback = null)

@@ -155,6 +155,7 @@
     <Compile Include="MainWindow.Designer.cs">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="NativeMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="PromptDialog.cs">
       <SubType>Form</SubType>
@@ -189,8 +190,6 @@
     <Compile Include="UpdateCheck.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="WallpaperRenderer.cs" />
-    <Compile Include="WallSwitchService.cs" />
-    <Compile Include="WallSwitchServiceManager.cs" />
     <Compile Include="WidgetInstance.cs" />
     <Compile Include="WidgetLayoutControl.cs">
       <SubType>UserControl</SubType>
@@ -319,7 +318,7 @@
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.102.0\build\net40\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.102.0\build\net40\System.Data.SQLite.Core.targets')" />
