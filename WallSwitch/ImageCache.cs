@@ -95,24 +95,6 @@ namespace WallSwitch
 				}
 			}
 
-			//// Clean out old entries in internal cache.
-			//var removeList = new List<CacheEntry>();
-			//foreach (var entry in _cache)
-			//{
-			//	if (!(from l in keepLocations
-			//		  where l.Equals(entry.location, StringComparison.OrdinalIgnoreCase)
-			//		  select l).Any())
-			//	{
-			//		removeList.Add(entry);
-			//	}
-			//}
-
-			//foreach (var entry in removeList)
-			//{
-			//	Log.Write(LogLevel.Debug, "Cleaning internal cache item: {0} - {1}", entry.location, entry.cacheFileName);
-			//	_cache.Remove(entry);
-			//}
-
 			// Clean out old files in cache dir.
 			var cacheDir = GetCacheDir(false);
 			if (Directory.Exists(cacheDir))

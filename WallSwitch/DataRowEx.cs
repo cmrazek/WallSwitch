@@ -12,6 +12,7 @@ namespace WallSwitch
 		{
 			var obj = row[name];
 			if (obj == null) return defaultValue;
+			if (Convert.IsDBNull(obj)) return defaultValue;
 			return Convert.ToString(obj);
 		}
 
@@ -19,6 +20,7 @@ namespace WallSwitch
 		{
 			var obj = row[name];
 			if (obj == null) return defaultValue;
+			if (Convert.IsDBNull(obj)) return defaultValue;
 			if (obj.GetType() == typeof(bool)) return (bool)obj;
 			return Convert.ToInt32(obj) != 0;
 		}
@@ -27,6 +29,7 @@ namespace WallSwitch
 		{
 			var obj = row[name];
 			if (obj == null) return defaultValue;
+			if (Convert.IsDBNull(obj)) return defaultValue;
 			return Convert.ToInt32(obj);
 		}
 
@@ -34,6 +37,7 @@ namespace WallSwitch
 		{
 			var obj = row[name];
 			if (obj == null) return defaultValue;
+			if (Convert.IsDBNull(obj)) return defaultValue;
 			return Convert.ToInt64(obj);
 		}
 
@@ -41,6 +45,7 @@ namespace WallSwitch
 		{
 			var obj = row[name];
 			if (obj == null) return defaultValue;
+			if (Convert.IsDBNull(obj)) return defaultValue;
 			if (obj.GetType() == typeof(T)) return (T)obj;
 
 			T val;
@@ -51,7 +56,7 @@ namespace WallSwitch
 		public static DateTime GetDateTime(this DataRow row, string name, DateTime? defaultValue = null)
 		{
 			var obj = row[name];
-			if (obj == null)
+			if (obj == null || Convert.IsDBNull(obj))
 			{
 				if (defaultValue.HasValue) return defaultValue.Value;
 				return DateTime.MinValue;

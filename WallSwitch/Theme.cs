@@ -359,11 +359,11 @@ namespace WallSwitch
 			if (!newRecord)
 			{
 				// Purge removed locations
-				foreach (var id in Database.SelectLongList("select rowid from location where theme_id = @theme_id", "@theme_id", _rowid))
+				foreach (var locId in Database.SelectLongList("select rowid from location where theme_id = @theme_id", "@theme_id", _rowid))
 				{
-					if (!_locations.Any(l => l.RowId == id))
+					if (!_locations.Any(l => l.RowId == locId))
 					{
-						Database.ExecuteNonQuery("delete from location where rowid = @rowid", "@rowid", _rowid);
+						Database.ExecuteNonQuery("delete from location where rowid = @rowid", "@rowid", locId);
 					}
 				}
 			}

@@ -1321,6 +1321,8 @@ namespace WallSwitch
 					theme.Save();
 				}
 
+				PurgeDatabaseOrphans();
+
 				// As good time as any to flush the log.
 				Log.Flush();
 			}
@@ -1352,6 +1354,17 @@ namespace WallSwitch
 			{
 				this.ShowError(ex);
 			}
+		}
+
+		private void PurgeDatabaseOrphans()
+		{
+			Database.ExecuteNonQuery("delete from location where theme_id not in (select rowid from theme)");
+			Database.ExecuteNonQuery("delete from img where theme_id not in (select rowid from theme)");
+			Database.ExecuteNonQuery("delete from img where location_id not in (select rowid from location)");
+			Database.ExecuteNonQuery("delete from widget where theme_id not in (select rowid from theme)");
+			Database.ExecuteNonQuery("delete from widget_config where widget_id not in (select rowid from widget)");
+			Database.ExecuteNonQuery("delete from history where theme_id not in (select rowid from theme)");
+			Database.ExecuteNonQuery("delete from rhistory where theme_id not in (select rowid from theme)");
 		}
 		#endregion
 

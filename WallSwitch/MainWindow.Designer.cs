@@ -33,6 +33,7 @@
 			this.lstLocations = new System.Windows.Forms.ListView();
 			this.colLocation = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.colNextUpdate = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.colFrequency = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.cmLocations = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.ciAddFolder = new System.Windows.Forms.ToolStripMenuItem();
 			this.miAddRssFeed = new System.Windows.Forms.ToolStripMenuItem();
@@ -184,7 +185,6 @@
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.c_transparencyTrackBar = new System.Windows.Forms.TrackBar();
-			this.colFrequency = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.cmLocations.SuspendLayout();
 			this.grpTheme.SuspendLayout();
 			this.cmTheme.SuspendLayout();
@@ -264,6 +264,11 @@
 			this.colNextUpdate.Text = "Next Update";
 			this.colNextUpdate.Width = 100;
 			// 
+			// colFrequency
+			// 
+			this.colFrequency.Text = "Frequency";
+			this.colFrequency.Width = 100;
+			// 
 			// cmLocations
 			// 
 			this.cmLocations.ImageScalingSize = new System.Drawing.Size(20, 20);
@@ -278,66 +283,66 @@
             this.ciDeleteLocation,
             this.ciLocationProperties});
 			this.cmLocations.Name = "locationsMenu";
-			this.cmLocations.Size = new System.Drawing.Size(163, 184);
+			this.cmLocations.Size = new System.Drawing.Size(235, 198);
 			this.cmLocations.Opening += new System.ComponentModel.CancelEventHandler(this.Locations_Opening);
 			// 
 			// ciAddFolder
 			// 
 			this.ciAddFolder.Name = "ciAddFolder";
-			this.ciAddFolder.Size = new System.Drawing.Size(162, 24);
+			this.ciAddFolder.Size = new System.Drawing.Size(234, 26);
 			this.ciAddFolder.Text = "Add &Folder";
 			this.ciAddFolder.Click += new System.EventHandler(this.ciAddFolder_Click);
 			// 
 			// miAddRssFeed
 			// 
 			this.miAddRssFeed.Name = "miAddRssFeed";
-			this.miAddRssFeed.Size = new System.Drawing.Size(162, 24);
+			this.miAddRssFeed.Size = new System.Drawing.Size(234, 26);
 			this.miAddRssFeed.Text = "&Add Feed";
 			this.miAddRssFeed.Click += new System.EventHandler(this.btnAddFeed_Click);
 			// 
 			// ciAddImage
 			// 
 			this.ciAddImage.Name = "ciAddImage";
-			this.ciAddImage.Size = new System.Drawing.Size(162, 24);
+			this.ciAddImage.Size = new System.Drawing.Size(234, 26);
 			this.ciAddImage.Text = "Add &Image";
 			this.ciAddImage.Click += new System.EventHandler(this.ciAddImage_Click);
 			// 
 			// ciLocationExplore
 			// 
 			this.ciLocationExplore.Name = "ciLocationExplore";
-			this.ciLocationExplore.Size = new System.Drawing.Size(162, 24);
+			this.ciLocationExplore.Size = new System.Drawing.Size(234, 26);
 			this.ciLocationExplore.Text = "&Explore";
 			this.ciLocationExplore.Click += new System.EventHandler(this.ciLocationExplore_Click);
 			// 
 			// toolStripMenuItem6
 			// 
 			this.toolStripMenuItem6.Name = "toolStripMenuItem6";
-			this.toolStripMenuItem6.Size = new System.Drawing.Size(159, 6);
+			this.toolStripMenuItem6.Size = new System.Drawing.Size(231, 6);
 			// 
 			// ciUpdateLocationNow
 			// 
 			this.ciUpdateLocationNow.Name = "ciUpdateLocationNow";
-			this.ciUpdateLocationNow.Size = new System.Drawing.Size(162, 24);
-			this.ciUpdateLocationNow.Text = "&Update Now";
+			this.ciUpdateLocationNow.Size = new System.Drawing.Size(234, 26);
+			this.ciUpdateLocationNow.Text = "&Update At Next Switch";
 			this.ciUpdateLocationNow.Click += new System.EventHandler(this.ciUpdateLocationNow_Click);
 			// 
 			// toolStripMenuItem5
 			// 
 			this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-			this.toolStripMenuItem5.Size = new System.Drawing.Size(159, 6);
+			this.toolStripMenuItem5.Size = new System.Drawing.Size(231, 6);
 			// 
 			// ciDeleteLocation
 			// 
 			this.ciDeleteLocation.Name = "ciDeleteLocation";
 			this.ciDeleteLocation.ShortcutKeys = System.Windows.Forms.Keys.Delete;
-			this.ciDeleteLocation.Size = new System.Drawing.Size(162, 24);
+			this.ciDeleteLocation.Size = new System.Drawing.Size(234, 26);
 			this.ciDeleteLocation.Text = "&Delete";
 			this.ciDeleteLocation.Click += new System.EventHandler(this.ciDeleteLocation_Click);
 			// 
 			// ciLocationProperties
 			// 
 			this.ciLocationProperties.Name = "ciLocationProperties";
-			this.ciLocationProperties.Size = new System.Drawing.Size(162, 24);
+			this.ciLocationProperties.Size = new System.Drawing.Size(234, 26);
 			this.ciLocationProperties.Text = "&Properties";
 			this.ciLocationProperties.Click += new System.EventHandler(this.ciLocationProperties_Click);
 			// 
@@ -1694,7 +1699,7 @@
 			// 
 			this.c_widgetPanelSplitter.Panel2.Controls.Add(this.c_widgetPanelPropSplitter);
 			this.c_widgetPanelSplitter.Size = new System.Drawing.Size(931, 476);
-			this.c_widgetPanelSplitter.SplitterDistance = 715;
+			this.c_widgetPanelSplitter.SplitterDistance = 714;
 			this.c_widgetPanelSplitter.SplitterWidth = 5;
 			this.c_widgetPanelSplitter.TabIndex = 2;
 			// 
@@ -1704,7 +1709,7 @@
 			this.c_widgetLayout.Location = new System.Drawing.Point(0, 41);
 			this.c_widgetLayout.Margin = new System.Windows.Forms.Padding(5);
 			this.c_widgetLayout.Name = "c_widgetLayout";
-			this.c_widgetLayout.Size = new System.Drawing.Size(715, 435);
+			this.c_widgetLayout.Size = new System.Drawing.Size(714, 435);
 			this.c_widgetLayout.TabIndex = 0;
 			this.c_widgetLayout.WidgetsChanged += new System.EventHandler(this.c_widgetLayout_WidgetsChanged);
 			this.c_widgetLayout.SelectedWidgetChanged += new System.EventHandler<WallSwitch.WidgetLayoutControl.WidgetEventArgs>(this.c_widgetLayout_SelectedWidgetChanged);
@@ -1721,13 +1726,13 @@
 			this.c_widgetTopPanel.Location = new System.Drawing.Point(0, 0);
 			this.c_widgetTopPanel.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetTopPanel.Name = "c_widgetTopPanel";
-			this.c_widgetTopPanel.Size = new System.Drawing.Size(715, 41);
+			this.c_widgetTopPanel.Size = new System.Drawing.Size(714, 41);
 			this.c_widgetTopPanel.TabIndex = 1;
 			// 
 			// c_addWidgetButton
 			// 
 			this.c_addWidgetButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.c_addWidgetButton.Location = new System.Drawing.Point(631, 5);
+			this.c_addWidgetButton.Location = new System.Drawing.Point(630, 5);
 			this.c_addWidgetButton.Margin = new System.Windows.Forms.Padding(4);
 			this.c_addWidgetButton.Name = "c_addWidgetButton";
 			this.c_addWidgetButton.Size = new System.Drawing.Size(80, 28);
@@ -1745,7 +1750,7 @@
 			this.c_widgetTypes.Location = new System.Drawing.Point(71, 6);
 			this.c_widgetTypes.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetTypes.Name = "c_widgetTypes";
-			this.c_widgetTypes.Size = new System.Drawing.Size(551, 24);
+			this.c_widgetTypes.Size = new System.Drawing.Size(550, 24);
 			this.c_widgetTypes.TabIndex = 1;
 			this.c_widgetTypes.SelectedIndexChanged += new System.EventHandler(this.c_widgetTypes_SelectedIndexChanged);
 			// 
@@ -1775,7 +1780,7 @@
 			// c_widgetPanelPropSplitter.Panel2
 			// 
 			this.c_widgetPanelPropSplitter.Panel2.Controls.Add(this.c_widgetPropertyGrid);
-			this.c_widgetPanelPropSplitter.Size = new System.Drawing.Size(211, 476);
+			this.c_widgetPanelPropSplitter.Size = new System.Drawing.Size(212, 476);
 			this.c_widgetPanelPropSplitter.SplitterDistance = 160;
 			this.c_widgetPanelPropSplitter.SplitterWidth = 5;
 			this.c_widgetPanelPropSplitter.TabIndex = 0;
@@ -1790,7 +1795,7 @@
 			this.c_widgetList.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetList.MultiSelect = false;
 			this.c_widgetList.Name = "c_widgetList";
-			this.c_widgetList.Size = new System.Drawing.Size(178, 160);
+			this.c_widgetList.Size = new System.Drawing.Size(179, 160);
 			this.c_widgetList.TabIndex = 0;
 			this.c_widgetList.UseCompatibleStateImageBehavior = false;
 			this.c_widgetList.View = System.Windows.Forms.View.Details;
@@ -1807,7 +1812,7 @@
 			this.c_widgetControlRightPanel.Controls.Add(this.c_widgetMoveUpButton);
 			this.c_widgetControlRightPanel.Controls.Add(this.c_widgetMoveDownButton);
 			this.c_widgetControlRightPanel.Dock = System.Windows.Forms.DockStyle.Right;
-			this.c_widgetControlRightPanel.Location = new System.Drawing.Point(178, 0);
+			this.c_widgetControlRightPanel.Location = new System.Drawing.Point(179, 0);
 			this.c_widgetControlRightPanel.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetControlRightPanel.Name = "c_widgetControlRightPanel";
 			this.c_widgetControlRightPanel.Size = new System.Drawing.Size(33, 160);
@@ -1863,7 +1868,7 @@
 			this.c_widgetPropertyGrid.Location = new System.Drawing.Point(0, 0);
 			this.c_widgetPropertyGrid.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetPropertyGrid.Name = "c_widgetPropertyGrid";
-			this.c_widgetPropertyGrid.Size = new System.Drawing.Size(211, 311);
+			this.c_widgetPropertyGrid.Size = new System.Drawing.Size(212, 311);
 			this.c_widgetPropertyGrid.TabIndex = 0;
 			this.c_widgetPropertyGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.c_widgetPropertyGrid_PropertyValueChanged);
 			// 
@@ -1986,11 +1991,6 @@
 			this.c_transparencyTrackBar.TabIndex = 0;
 			this.c_transparencyTrackBar.Value = 1;
 			this.c_transparencyTrackBar.Scroll += new System.EventHandler(this.TransparencyTrackBar_Scroll);
-			// 
-			// colFrequency
-			// 
-			this.colFrequency.Text = "Frequency";
-			this.colFrequency.Width = 100;
 			// 
 			// MainWindow
 			// 

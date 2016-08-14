@@ -12,6 +12,7 @@ namespace WallSwitch
 		{
 			var ret = rdr.GetString(rdr.GetOrdinal(fieldName));
 			if (ret == null) return defaultValue;
+			if (Convert.IsDBNull(ret)) return defaultValue;
 			return ret;
 		}
 
@@ -19,6 +20,7 @@ namespace WallSwitch
 		{
 			var obj = rdr[rdr.GetOrdinal(fieldName)];
 			if (obj == null) return defaultValue;
+			if (Convert.IsDBNull(obj)) return defaultValue;
 			var ret = Convert.ToInt32(obj);
 			return ret != 0 ? true : false;
 		}
@@ -27,6 +29,7 @@ namespace WallSwitch
 		{
 			var obj = rdr[rdr.GetOrdinal(fieldName)];
 			if (obj == null) return defaultValue;
+			if (Convert.IsDBNull(obj)) return defaultValue;
 			return Convert.ToInt32(obj);
 		}
 
@@ -34,6 +37,7 @@ namespace WallSwitch
 		{
 			var obj = rdr[rdr.GetOrdinal(fieldName)];
 			if (obj == null) return defaultValue;
+			if (Convert.IsDBNull(obj)) return defaultValue;
 
 			T val;
 			if (Enum.TryParse<T>(Convert.ToString(obj), false, out val)) return val;
