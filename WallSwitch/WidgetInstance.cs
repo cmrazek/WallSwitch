@@ -65,12 +65,12 @@ namespace WallSwitch
 			xml.WriteEndElement();  // Widget
 		}
 
-		public void Save(long themeId)
+		public void Save(Database db, long themeId)
 		{
 			var newRecord = false;
 			if (_rowid == 0L)
 			{
-				_rowid = Database.Insert("widget", new object[]
+				_rowid = db.Insert("widget", new object[]
 					{
 						"theme_id", themeId,
 						"name", _wtype.FullName,
@@ -83,7 +83,7 @@ namespace WallSwitch
 			}
 			else
 			{
-				Database.Update("widget", "rowid = @rowid", new object[]
+				db.Update("widget", "rowid = @rowid", new object[]
 					{
 						"theme_id", themeId,
 						"name", _wtype.FullName,
@@ -99,7 +99,7 @@ namespace WallSwitch
 			var dbConfigs = new List<WidgetConfigDb>();
 			if (!newRecord)
 			{
-				using (var cmd = Database.CreateCommand("select rowid, name, value from widget_config where widget_id = @widget_id"))
+				using (var cmd = db.CreateCommand("select rowid, name, value from widget_config where widget_id = @widget_id"))
 				{
 					cmd.Parameters.AddWithValue("@widget_id", _rowid);
 					using (var rdr = cmd.ExecuteReader())
@@ -122,7 +122,7 @@ namespace WallSwitch
 				var dbConfig = (from c in dbConfigs where c.name == setting.Name select c).FirstOrDefault();
 				if (dbConfig == null)
 				{
-					Database.Insert("widget_config", new object[]
+					db.Insert("widget_config", new object[]
 						{
 							"widget_id", _rowid,
 							"name", setting.Name,
@@ -131,7 +131,7 @@ namespace WallSwitch
 				}
 				else
 				{
-					Database.Update("widget_config", "rowid = @rowid", new object[]
+					db.Update("widget_config", "rowid = @rowid", new object[]
 						{
 							"name", setting.Name,
 							"value", setting.Value
@@ -146,15 +146,15 @@ namespace WallSwitch
 			{
 				foreach (var rowid in idsToPurge)
 				{
-					Database.ExecuteNonQuery("delete from widget_config where rowid = @rowid", "@rowid", rowid);
+					db.ExecuteNonQuery("delete from widget_config where rowid = @rowid", "@rowid", rowid);
 				}
 			}
 		}
 
-		public static void PurgeFromDatabase(long id)
+		public static void PurgeFromDatabase(Database db, long id)
 		{
-			Database.ExecuteNonQuery("delete from widget_config where widget_id = @id", "@id", id);
-			Database.ExecuteNonQuery("delete from widget where rowid = @id", "@id", id);
+			db.ExecuteNonQuery("delete from widget_config where widget_id = @id", "@id", id);
+			db.ExecuteNonQuery("delete from widget where rowid = @id", "@id", id);
 		}
 
 		private class WidgetConfigDb
@@ -164,7 +164,7 @@ namespace WallSwitch
 			public string value;
 		}
 
-		public static WidgetInstance Load(System.Data.DataRow row)
+		public static WidgetInstance Load(Database db, System.Data.DataRow row)
 		{
 			var rowid = row.GetLong("rowid");
 			var fullName = row.GetString("name");
@@ -176,7 +176,7 @@ namespace WallSwitch
 				row.GetInt("bounds_width"), row.GetInt("bounds_height"));
 
 			var settings = new WidgetConfig();
-			foreach (System.Data.DataRow settingRow in Database.SelectDataTable("select name, value from widget_config where widget_id = @id", "@id", rowid).Rows)
+			foreach (System.Data.DataRow settingRow in db.SelectDataTable("select name, value from widget_config where widget_id = @id", "@id", rowid).Rows)
 			{
 				var name = settingRow.GetString("name");
 				if (string.IsNullOrEmpty(name)) continue;

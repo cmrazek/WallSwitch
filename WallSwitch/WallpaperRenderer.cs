@@ -141,7 +141,7 @@ namespace WallSwitch
 			}
 		}
 
-		public void RenderCollageImageOnScreen(ImageRec file, Rectangle screenRect)
+		public void RenderCollageImageOnScreen(Database db, ImageRec file, Rectangle screenRect)
 		{
 			try
 			{
@@ -186,7 +186,7 @@ namespace WallSwitch
 						scale *= ratio;
 					}
 
-					var imgRect = GetRandomImageRect(screenRect, imgWidth, imgHeight);
+					var imgRect = GetRandomImageRect(db, screenRect, imgWidth, imgHeight);
 					var imgToDraw = img;
 					RectangleF srcRect = new RectangleF(0, 0, img.Width, img.Height);
 
@@ -527,7 +527,7 @@ namespace WallSwitch
 			}
 		}
 
-		private RectangleF GetRandomImageRect(Rectangle screenRect, float imgWidth, float imgHeight)
+		private RectangleF GetRandomImageRect(Database db, Rectangle screenRect, float imgWidth, float imgHeight)
 		{
 			var retries = k_randomRectRetries;
 			var bestRect = new RectangleF(0.0f, 0.0f, 0.0f, 0.0f);
@@ -559,7 +559,7 @@ namespace WallSwitch
 				}
 			}
 
-			_theme.AddImageRectHistory(bestRect, _screenRects.Count);
+			_theme.AddImageRectHistory(db, bestRect, _screenRects.Count);
 			return bestRect;
 		}
 

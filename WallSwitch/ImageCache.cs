@@ -11,9 +11,9 @@ namespace WallSwitch
 {
 	static class ImageCache
 	{
-		public static bool TryGetCachedImage(string location, out string cacheFileName)
+		public static bool TryGetCachedImage(Database db, string location, out string cacheFileName)
 		{
-			var ret = Database.SelectString("select cache_file_name from img_cache where location = @loc", "@loc", location);
+			var ret = db.SelectString("select cache_file_name from img_cache where location = @loc", "@loc", location);
 			if (!string.IsNullOrEmpty(ret))
 			{
 				cacheFileName = Path.Combine(GetCacheDir(false), ret);
@@ -24,7 +24,7 @@ namespace WallSwitch
 			return false;
 		}
 
-		public static void SaveImage(ImageRec img)
+		public static void SaveImage(ImageRec img, Database db)
 		{
 			try
 			{
@@ -36,9 +36,9 @@ namespace WallSwitch
 				var cachePathName = Path.Combine(GetCacheDir(true), fileName);
 				image.Save(cachePathName, fmt);
 
-				if (Database.SelectInt("select count(*) from img_cache where location = @loc", "@loc", img.Location) == 0)
+				if (db.SelectInt("select count(*) from img_cache where location = @loc", "@loc", img.Location) == 0)
 				{
-					Database.Insert("img_cache", new object[]
+					db.Insert("img_cache", new object[]
 						{
 							"location", img.Location,
 							"cache_file_name", fileName,
@@ -64,7 +64,7 @@ namespace WallSwitch
 			return dir;
 		}
 
-		public static void ClearExpiredCache(IEnumerable<string> keepLocations)
+		public static void ClearExpiredCache(Database db, IEnumerable<string> keepLocations)
 		{
 			try
 			{
@@ -72,12 +72,12 @@ namespace WallSwitch
 				if (!Directory.Exists(cacheDir)) return;
 
 				var dbFiles = new List<string>();
-				foreach (DataRow row in Database.SelectDataTable("select rowid, location, cache_file_name from img_cache").Rows)
+				foreach (DataRow row in db.SelectDataTable("select rowid, location, cache_file_name from img_cache").Rows)
 				{
 					var location = row.GetString("location", string.Empty);
 					if (!keepLocations.Any(k => string.Equals(k, location, StringComparison.OrdinalIgnoreCase)))
 					{
-						Database.ExecuteNonQuery("delete from img_cache where rowid = @rowid", "@rowid", row.GetLong("rowid"));
+						db.ExecuteNonQuery("delete from img_cache where rowid = @rowid", "@rowid", row.GetLong("rowid"));
 					}
 					else
 					{

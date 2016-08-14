@@ -82,9 +82,9 @@ namespace WallSwitch
 			return _path.Equals(path, StringComparison.OrdinalIgnoreCase);
 		}
 
-		private void SyncDatabaseToImageRecList(IEnumerable<ImageRec> files, Theme theme)
+		private void SyncDatabaseToImageRecList(IEnumerable<ImageRec> files, Theme theme, Database db)
 		{
-			var table = Database.SelectDataTable("select rowid, * from img where location_id = @id", "@id", _rowid);
+			var table = db.SelectDataTable("select rowid, * from img where location_id = @id", "@id", _rowid);
 
 			// Find files in the database that don't exist on disk
 			var filesToRemove = new List<long>();
@@ -105,7 +105,7 @@ namespace WallSwitch
 
 			if (filesToRemove.Count > 0)
 			{
-				using (var cmd = Database.CreateCommand("delete from img where rowid = @rowid"))
+				using (var cmd = db.CreateCommand("delete from img where rowid = @rowid"))
 				{
 					foreach (var rowid in filesToRemove)
 					{
@@ -135,7 +135,7 @@ namespace WallSwitch
 
 			if (filesToAdd.Count > 0)
 			{
-				using (var cmd = Database.CreateCommand("insert into img (theme_id, location_id, type, path, pub_date)"
+				using (var cmd = db.CreateCommand("insert into img (theme_id, location_id, type, path, pub_date)"
 					+ " values (@theme_id, @location_id, @type, @path, @pub_date)"))
 				{
 					foreach (var img in filesToAdd)
@@ -188,11 +188,11 @@ namespace WallSwitch
 			}
 		}
 
-		public void Save(long themeId)
+		public void Save(Database db, long themeId)
 		{
 			if (_rowid == 0L)
 			{
-				_rowid = Database.Insert("location", new object[]
+				_rowid = db.Insert("location", new object[]
 					{
 						"theme_id", themeId,
 						"path", _path,
@@ -205,7 +205,7 @@ namespace WallSwitch
 			}
 			else
 			{
-				Database.Update("location", "rowid = @rowid", new object[]
+				db.Update("location", "rowid = @rowid", new object[]
 					{
 						"theme_id", themeId,
 						"path", _path,
@@ -290,7 +290,7 @@ namespace WallSwitch
 			return ir.GetFileIcon(_path);
 		}
 
-		public void UpdateIfRequired(Theme theme)
+		public void UpdateIfRequired(Database db, Theme theme)
 		{
 			try
 			{
@@ -307,7 +307,7 @@ namespace WallSwitch
 						var files = SearchDir(_path);
 						if (files.Any())
 						{
-							SyncDatabaseToImageRecList(files, theme);
+							SyncDatabaseToImageRecList(files, theme, db);
 						}
 						break;
 
@@ -316,7 +316,7 @@ namespace WallSwitch
 							var loader = new FeedLoader();
 							if (loader.LoadUrl(_path))
 							{
-								SyncDatabaseToImageRecList(loader.Images, theme);
+								SyncDatabaseToImageRecList(loader.Images, theme, db);
 							}
 						}
 						break;

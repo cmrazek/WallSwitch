@@ -628,7 +628,7 @@ namespace WallSwitch
 		}
 	}
 
-	public class HistoryItem
+	class HistoryItem
 	{
 		public Bitmap Thumbnail { get; private set; }
 		public Size ThumbnailSize { get; private set; }
@@ -636,12 +636,12 @@ namespace WallSwitch
 		public string LocationOnDisk { get; private set; }
 		public Rectangle Bounds { get; set; }
 
-		public HistoryItem(ImageRec rec)
+		public HistoryItem(Database db, ImageRec rec)
 		{
 			Thumbnail = rec.Thumbnail;
 			ThumbnailSize = rec.Thumbnail.Size;
 			Location = rec.Location;
-			LocationOnDisk = rec.LocationOnDisk;
+			LocationOnDisk = rec.GetLocationOnDisk(db);
 		}
 	}
 }

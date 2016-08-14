@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace WallSwitch
 {
-	public class ImageLayout
+	class ImageLayout
 	{
 		public ImageRec ImageRec { get; set; }
 		public int[] Monitors { get; set; }

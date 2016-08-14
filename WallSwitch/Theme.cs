@@ -121,7 +121,13 @@ namespace WallSwitch
 		{
 			try
 			{
-				if (MainWindow.Window != null) MainWindow.Window.OnActivateTheme(this);
+				if (MainWindow.Window != null)
+				{
+					using (var db = new Database())
+					{
+						MainWindow.Window.OnActivateTheme(db, this);
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -293,7 +299,7 @@ namespace WallSwitch
 		#endregion
 
 		#region Save/Load
-		public void Save()
+		public void Save(Database db)
 		{
 			var cols = new object[]
 			{
@@ -340,53 +346,53 @@ namespace WallSwitch
 			var newRecord = false;
 			if (_rowid == 0L)
 			{
-				_rowid = Database.Insert("theme", cols.ToArray());
+				_rowid = db.Insert("theme", cols.ToArray());
 				newRecord = true;
 			}
 			else
 			{
-				Database.Update("theme", "rowid = @rowid", cols, new object [] { "@rowid", _rowid });
+				db.Update("theme", "rowid = @rowid", cols, new object [] { "@rowid", _rowid });
 			}
 
 			// Save locations
 			var locRowIds = new List<long>();
 			foreach (var loc in _locations)
 			{
-				loc.Save(_rowid);
+				loc.Save(db, _rowid);
 				locRowIds.Add(loc.RowId);
 			}
 
 			if (!newRecord)
 			{
 				// Purge removed locations
-				foreach (var locId in Database.SelectLongList("select rowid from location where theme_id = @theme_id", "@theme_id", _rowid))
+				foreach (var locId in db.SelectLongList("select rowid from location where theme_id = @theme_id", "@theme_id", _rowid))
 				{
 					if (!_locations.Any(l => l.RowId == locId))
 					{
-						Database.ExecuteNonQuery("delete from location where rowid = @rowid", "@rowid", locId);
+						db.ExecuteNonQuery("delete from location where rowid = @rowid", "@rowid", locId);
 					}
 				}
 			}
 
 			foreach (var widget in _widgets)
 			{
-				widget.Save(_rowid);
+				widget.Save(db, _rowid);
 			}
 
 			if (!newRecord)
 			{
 				// Purge removed widgets
-				foreach (var id in Database.SelectLongList("select rowid from widget where theme_id = @theme_id", "@theme_id", _rowid))
+				foreach (var id in db.SelectLongList("select rowid from widget where theme_id = @theme_id", "@theme_id", _rowid))
 				{
 					if (!_widgets.Any(w => w.RowId == id))
 					{
-						WidgetInstance.PurgeFromDatabase(id);
+						WidgetInstance.PurgeFromDatabase(db, id);
 					}
 				}
 			}
 		}
 
-		public void Load(System.Data.DataRow row)
+		public void Load(Database db, System.Data.DataRow row)
 		{
 			_rowid = row.GetLong("rowid");
 
@@ -442,7 +448,7 @@ namespace WallSwitch
 			_historyGuid = row.GetString("history_guid");
 			_historyLatestGuid = row.GetString("latest_guid");
 
-			foreach (DataRow locRow in Database.SelectDataTable("select rowid, * from location where theme_id = @theme_id", "@theme_id", _rowid).Rows)
+			foreach (DataRow locRow in db.SelectDataTable("select rowid, * from location where theme_id = @theme_id", "@theme_id", _rowid).Rows)
 			{
 				try
 				{
@@ -456,11 +462,11 @@ namespace WallSwitch
 				}
 			}
 
-			foreach (DataRow wRow in Database.SelectDataTable("select rowid, * from widget where theme_id = @theme_id", "@theme_id", _rowid).Rows)
+			foreach (DataRow wRow in db.SelectDataTable("select rowid, * from widget where theme_id = @theme_id", "@theme_id", _rowid).Rows)
 			{
 				try
 				{
-					var widget = WidgetInstance.Load(wRow);
+					var widget = WidgetInstance.Load(db, wRow);
 					_widgets.Add(widget);
 				}
 				catch (Exception ex)
@@ -469,11 +475,11 @@ namespace WallSwitch
 				}
 			}
 
-			_historyCanGoPrev = Database.SelectInt("select count(*) from history where theme_id = @theme_id", "@theme_id", _rowid) > 0;
+			_historyCanGoPrev = db.SelectInt("select count(*) from history where theme_id = @theme_id", "@theme_id", _rowid) > 0;
 
 			// Image rect history
 			_imageRectHistory.Clear();
-			foreach (DataRow rRow in Database.SelectDataTable("select * from rhistory where theme_id = @id order by display_date", "@id", _rowid).Rows)
+			foreach (DataRow rRow in db.SelectDataTable("select * from rhistory where theme_id = @id order by display_date", "@id", _rowid).Rows)
 			{
 				_imageRectHistory.Add(new RectangleF(rRow.GetInt("left"), rRow.GetInt("top"), rRow.GetInt("width"), rRow.GetInt("height")));
 			}
@@ -603,10 +609,10 @@ namespace WallSwitch
 			LoadHistory(xmlTheme);
 		}
 
-		public void DeleteFromDatabase()
+		public void DeleteFromDatabase(Database db)
 		{
 			if (_rowid == 0) return;
-			Database.ExecuteNonQuery("delete from theme where rowid = @id", "@id", _rowid);
+			db.ExecuteNonQuery("delete from theme where rowid = @id", "@id", _rowid);
 		}
 		#endregion
 
@@ -748,11 +754,11 @@ namespace WallSwitch
 			}
 		}
 
-		public void ClearHistory()
+		public void ClearHistory(Database db)
 		{
             Log.Debug("Clearing history for theme '{0}'", _name);
 
-			Database.ExecuteNonQuery("delete from history where theme_id = @theme_id", "@theme_id", _rowid);
+			db.ExecuteNonQuery("delete from history where theme_id = @theme_id", "@theme_id", _rowid);
 			_historyGuid = null;
 
             foreach (var fileName in Directory.GetFiles(Util.AppDataDir, string.Format("{0}_*", _rowid)))
@@ -785,11 +791,11 @@ namespace WallSwitch
 			get { return _imageRectHistory; }
 		}
 
-		public void AddImageRectHistory(RectangleF rect, int numMonitors)
+		public void AddImageRectHistory(Database db, RectangleF rect, int numMonitors)
 		{
 			_imageRectHistory.Add(rect);
 
-			Database.Insert("rhistory", new object[]
+			db.Insert("rhistory", new object[]
 				{
 					"theme_id", _rowid,
 					"display_date", DateTime.Now,
@@ -807,10 +813,10 @@ namespace WallSwitch
 				_imageRectHistory.RemoveAt(0);
 			}
 
-			var rowids = Database.SelectLongList("select rowid from rhistory where theme_id = @theme_id order by display_date", "@theme_id", _rowid);
+			var rowids = db.SelectLongList("select rowid from rhistory where theme_id = @theme_id order by display_date", "@theme_id", _rowid);
 			while (rowids.Count > maxHistory)
 			{
-				Database.ExecuteNonQuery("delete from rhistory where rowid = @rowid", "@rowid", rowids[0]);
+				db.ExecuteNonQuery("delete from rhistory where rowid = @rowid", "@rowid", rowids[0]);
 				rowids.RemoveAt(0);
 			}
 		}
@@ -822,7 +828,7 @@ namespace WallSwitch
 		#endregion
 
 		#region ImageSelection
-		public IEnumerable<ImageLayout> GetNextImages(Rectangle[] monitorRects, ref int randomGroupCounter, ref bool randomGroupClear)
+		public IEnumerable<ImageLayout> GetNextImages(Database db, Rectangle[] monitorRects, ref int randomGroupCounter, ref bool randomGroupClear)
 		{
 			IEnumerable<ImageLayout> ret = null;
 
@@ -830,12 +836,12 @@ namespace WallSwitch
 
 			if (!string.IsNullOrEmpty(_historyGuid) && _historyGuid != _historyLatestGuid)
 			{
-				var lastHistoryTable = Database.SelectDataTable("select * from history where theme_id = @theme_id and guid = @guid",
+				var lastHistoryTable = db.SelectDataTable("select * from history where theme_id = @theme_id and guid = @guid",
 					"@theme_id", _rowid, "@guid", _historyGuid);
 				if (lastHistoryTable.Rows.Count > 0)
 				{
 					var lastHistoryTime = lastHistoryTable.Rows[0].GetDateTime("display_date");
-					var nextTable = Database.SelectDataTable("select * from history where theme_id = @theme_id and display_date > @date order by display_date",
+					var nextTable = db.SelectDataTable("select * from history where theme_id = @theme_id and display_date > @date order by display_date",
 						"@theme_id", _rowid, "date", lastHistoryTime);
 					if (nextTable.Rows.Count > 0)
 					{
@@ -854,9 +860,9 @@ namespace WallSwitch
 				_historyGuid = _historyLatestGuid;
 			}
 
-			foreach (var loc in _locations) loc.UpdateIfRequired(this);
-			ret = PickImages(monitorRects, ref randomGroupCounter, ref randomGroupClear);
-			AddHistoryImages(ret);
+			foreach (var loc in _locations) loc.UpdateIfRequired(db, this);
+			ret = PickImages(db, monitorRects, ref randomGroupCounter, ref randomGroupClear);
+			AddHistoryImages(db, ret);
 			return ret;
 		}
 
@@ -867,7 +873,7 @@ namespace WallSwitch
 		/// <param name="allFiles">A list of all available image files</param>
 		/// <param name="monitorRects">A list of all monitor rectangles</param>
 		/// <returns>A list of images to be rendered</returns>
-		private List<ImageLayout> PickImages(Rectangle[] monitorRects, ref int randomGroupCounter, ref bool randomGroupClear)
+		private List<ImageLayout> PickImages(Database db, Rectangle[] monitorRects, ref int randomGroupCounter, ref bool randomGroupClear)
 		{
 			if (_mode == ThemeMode.Collage)
 			{
@@ -880,9 +886,9 @@ namespace WallSwitch
 				{
 					for (int imageIndex = 0; imageIndex < _numCollageImages; imageIndex++)
 					{
-						var img = PickRandomOrSequentialImage(pickedFiles, sequenceNumber, ref randomGroupCounter, ref randomGroupClear, ref maxCount);
+						var img = PickRandomOrSequentialImage(db, pickedFiles, sequenceNumber, ref randomGroupCounter, ref randomGroupClear, ref maxCount);
 						if (img == null) break;
-						img.Retrieve();
+						img.Retrieve(db);
 
 						if (_separateMonitors)
 						{
@@ -913,9 +919,9 @@ namespace WallSwitch
 
 				while (monitorSelections.Any(m => m.ImageRec == null) && retries <= k_maxRetrievalRetries)
 				{
-					var img = PickRandomOrSequentialImage(pickedFiles, sequenceNumber, ref randomGroupCounter, ref randomGroupClear, ref maxCount);
+					var img = PickRandomOrSequentialImage(db, pickedFiles, sequenceNumber, ref randomGroupCounter, ref randomGroupClear, ref maxCount);
 					if (img == null) break;
-					img.Retrieve();
+					img.Retrieve(db);
 
 					bool success = false;
 
@@ -1004,7 +1010,7 @@ namespace WallSwitch
 			}
 		}
 
-		private ImageRec PickRandomOrSequentialImage(List<ImageLayout> filesPickedThisTime, int sequenceNumber,
+		private ImageRec PickRandomOrSequentialImage(Database db, List<ImageLayout> filesPickedThisTime, int sequenceNumber,
 			ref int randomGroupCounter, ref bool randomGroupClear, ref int maxCount)
 		{
 			ImageRec img = null;
@@ -1012,7 +1018,7 @@ namespace WallSwitch
 			{
 				if (_randomGroupCount <= 1)
 				{
-					img = PickRandomImage(ref maxCount, filesPickedThisTime);
+					img = PickRandomImage(db, ref maxCount, filesPickedThisTime);
 				}
 				else
 				{
@@ -1021,14 +1027,14 @@ namespace WallSwitch
 					if (randomGroupCounter == 0)
 					{
 						Log.Debug("Picking random image because random group counter is {0}", randomGroupCounter);
-						img = PickRandomImage(ref maxCount, filesPickedThisTime);
+						img = PickRandomImage(db, ref maxCount, filesPickedThisTime);
 						randomGroupCounter++;
 						if (_clearBetweenRandomGroups) randomGroupClear = true;
 					}
 					else if (randomGroupCounter < _randomGroupCount)
 					{
 						Log.Debug("Picking sequential image because random group counter is {0}", randomGroupCounter);
-						img = PickSequentialImage(filesPickedThisTime);
+						img = PickSequentialImage(db, filesPickedThisTime);
 						randomGroupCounter++;
 					}
 					else
@@ -1039,14 +1045,14 @@ namespace WallSwitch
 			}
 			else // sequential
 			{
-				img = PickSequentialImage(filesPickedThisTime);
+				img = PickSequentialImage(db, filesPickedThisTime);
 			}
 
 			if (img != null) _lastImage = img.Location;
 			return img;
 		}
 
-		private ImageRec PickRandomImage(ref int maxCount, List<ImageLayout> filesPickedThisTime)
+		private ImageRec PickRandomImage(Database db, ref int maxCount, List<ImageLayout> filesPickedThisTime)
 		{
 			var repeatNowRetries = 0;
 			var repeatHistoryRetries = 0;
@@ -1054,7 +1060,7 @@ namespace WallSwitch
 
 			if (maxCount < 0)
 			{
-				maxCount = Database.SelectInt("select count(*) from img where theme_id = @id", "@id", _rowid);
+				maxCount = db.SelectInt("select count(*) from img where theme_id = @id", "@id", _rowid);
 				Log.Debug("Number of images in database: {0}", maxCount);
 			}
 			if (maxCount == 0) return null;
@@ -1064,7 +1070,7 @@ namespace WallSwitch
 				var index = _rand.Next(maxCount);
 				Log.Debug("Selecting image index {0} of {1}", index, maxCount);
 
-				var table = Database.SelectDataTable("select rowid, * from img where theme_id = @id limit 1 offset @num",
+				var table = db.SelectDataTable("select rowid, * from img where theme_id = @id limit 1 offset @num",
 					"@id", _rowid, "@num", index);
 				if (table.Rows.Count > 0)
 				{
@@ -1077,14 +1083,14 @@ namespace WallSwitch
 					}
 					repeatNowRetries = 0;
 
-					if (ImageRecIsInHistory(img))
+					if (ImageRecIsInHistory(db, img))
 					{
 						repeatHistoryRetries++;
 						if (repeatHistoryRetries <= k_maxRepeatHistoryRetries) continue;
 					}
 					repeatHistoryRetries = 0;
 
-					if (img.Retrieve()) return img;
+					if (img.Retrieve(db)) return img;
 				}
 				else return null;
 
@@ -1095,7 +1101,7 @@ namespace WallSwitch
 			return null;
 		}
 
-		private ImageRec PickSequentialImage(List<ImageLayout> filesPickedThisTime)
+		private ImageRec PickSequentialImage(Database db, List<ImageLayout> filesPickedThisTime)
 		{
 			Log.Write(LogLevel.Debug, "Picking sequential image (last image = [{0}])", _lastImage);
 
@@ -1103,7 +1109,7 @@ namespace WallSwitch
 
 			if (string.IsNullOrEmpty(_lastImage))
 			{
-				table = Database.SelectDataTable("select rowid, * from img where theme_id = @id order by path limit 1", "@id", _rowid);
+				table = db.SelectDataTable("select rowid, * from img where theme_id = @id order by path limit 1", "@id", _rowid);
 				if (table.Rows.Count > 0)
 				{
 					var img = ImageRec.FromDataRow(table.Rows[0]);
@@ -1118,7 +1124,7 @@ namespace WallSwitch
 			}
 
 			// Find the first image that is greater than the last file.
-			table = Database.SelectDataTable("select rowid, * from img where theme_id = @id and path > @path order by path limit 1",
+			table = db.SelectDataTable("select rowid, * from img where theme_id = @id and path > @path order by path limit 1",
 				"@id", _rowid, "@path", _lastImage);
 			if (table.Rows.Count > 0)
 			{
@@ -1129,7 +1135,7 @@ namespace WallSwitch
 			else
 			{
 				// This is the last image for this theme. Select the first one in the database.
-				table = Database.SelectDataTable("select rowid, * from img where theme_id = @id order by path limit 1", "@id", _rowid);
+				table = db.SelectDataTable("select rowid, * from img where theme_id = @id order by path limit 1", "@id", _rowid);
 				if (table.Rows.Count > 0)
 				{
 					var img = ImageRec.FromDataRow(table.Rows[0]);
@@ -1334,23 +1340,23 @@ namespace WallSwitch
 			}
 		}
 
-		private bool ImageRecIsInHistory(ImageRec img)
+		private bool ImageRecIsInHistory(Database db, ImageRec img)
 		{
-			return Database.SelectInt("select count(*) from history where theme_id = @theme_id and path = @path",
+			return db.SelectInt("select count(*) from history where theme_id = @theme_id and path = @path",
 				"@theme_id", _rowid, "@path", img.Location) > 0;
 		}
 
-		public IEnumerable<ImageLayout> GetPrevImages()
+		public IEnumerable<ImageLayout> GetPrevImages(Database db)
 		{
 			Log.Write(LogLevel.Debug, "Going back to previous images.");
 			if (!string.IsNullOrEmpty(_historyGuid))
 			{
-				var lastHistoryTable = Database.SelectDataTable("select * from history where theme_id = @theme_id and guid = @guid",
+				var lastHistoryTable = db.SelectDataTable("select * from history where theme_id = @theme_id and guid = @guid",
 					"@theme_id", _rowid, "@guid", _historyGuid);
 				if (lastHistoryTable.Rows.Count > 0)
 				{
 					var lastHistoryTime = lastHistoryTable.Rows[0].GetDateTime("display_date");
-					var nextTable = Database.SelectDataTable("select * from history where theme_id = @theme_id and display_date < @date order by display_date desc",
+					var nextTable = db.SelectDataTable("select * from history where theme_id = @theme_id and display_date < @date order by display_date desc",
 						"@theme_id", _rowid, "date", lastHistoryTime);
 					if (nextTable.Rows.Count > 0)
 					{
@@ -1360,7 +1366,7 @@ namespace WallSwitch
 										  where i.GetString("guid") == nextGuid
 										  select ImageLayout.FromDataRow(i)).ToArray();
 						_historyGuid = nextGuid;
-						_historyCanGoPrev = Database.SelectInt("select count(*) from history where theme_id = @theme_id and display_date < @date",
+						_historyCanGoPrev = db.SelectInt("select count(*) from history where theme_id = @theme_id and display_date < @date",
 							"@theme_id", _rowid, "@date", nextTable.Rows[0].GetDateTime("display_date")) > 0;
 						return nextImages;
 					}
@@ -1372,11 +1378,11 @@ namespace WallSwitch
 			else
 			{
 				// Currently in 'new' mode, go to the last images displayed
-				var lastGuid = Database.SelectString("select guid from history where theme_id = @theme_id order by display_date desc limit 1", "@theme_id", _rowid);
+				var lastGuid = db.SelectString("select guid from history where theme_id = @theme_id order by display_date desc limit 1", "@theme_id", _rowid);
 				if (!string.IsNullOrEmpty(lastGuid))
 				{
-					var lastTable = Database.SelectDataTable("select * from history where theme_id = @theme_id and guid = @guid", "@theme_id", _rowid, "@guid", lastGuid);
-					_historyCanGoPrev = Database.SelectStringList("select distinct guid from history where theme_id = @theme_id", "@theme_id", _rowid).Count > 1;
+					var lastTable = db.SelectDataTable("select * from history where theme_id = @theme_id and guid = @guid", "@theme_id", _rowid, "@guid", lastGuid);
+					_historyCanGoPrev = db.SelectStringList("select distinct guid from history where theme_id = @theme_id", "@theme_id", _rowid).Count > 1;
 					_historyGuid = lastGuid;
 					return (from i in lastTable.Rows.Cast<DataRow>() select ImageLayout.FromDataRow(i)).ToArray();
 				}
@@ -1387,14 +1393,14 @@ namespace WallSwitch
 			}
 		}
 
-		private void AddHistoryImages(IEnumerable<ImageLayout> images)
+		private void AddHistoryImages(Database db, IEnumerable<ImageLayout> images)
 		{
 			var guid = Guid.NewGuid().ToString();
 			var now = DateTime.Now;
 
 			foreach (var imgLayout in images)
 			{
-				Database.Insert("history", new object[]
+				db.Insert("history", new object[]
 					{
 						"theme_id", _rowid,
 						"display_date", now,
@@ -1406,11 +1412,11 @@ namespace WallSwitch
 					});
 			}
 
-			var allGuids = Database.SelectStringList("select distinct guid from history where theme_id = @theme_id order by display_date",
+			var allGuids = db.SelectStringList("select distinct guid from history where theme_id = @theme_id order by display_date",
 				"@theme_id", _rowid);
 			while (allGuids.Count > k_maxHistory)
 			{
-				Database.ExecuteNonQuery("delete from history where theme_id = @theme_id and guid = @guid",
+				db.ExecuteNonQuery("delete from history where theme_id = @theme_id and guid = @guid",
 					"@theme_id", _rowid, "@guid", allGuids[0]);
 				allGuids.RemoveAt(allGuids.Count - 1);
 			}

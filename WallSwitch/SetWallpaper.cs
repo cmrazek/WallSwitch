@@ -1367,7 +1367,7 @@ namespace WallSwitch
 			}
 		}
 
-		public void Set(Theme theme, SwitchDir dir, bool forceQuick, ref int randomGroupCounter)
+		public void Set(Database db, Theme theme, SwitchDir dir, bool forceQuick, ref int randomGroupCounter)
 		{
 			// Get the list of images to display next.
 			IEnumerable<ImageLayout> images = null;
@@ -1378,12 +1378,12 @@ namespace WallSwitch
 					{
 						var screenList = new ScreenList();
 						var monitorRects = (from s in screenList select s.Bounds).ToArray();
-						images = theme.GetNextImages(monitorRects, ref randomGroupCounter, ref randomGroupClear);
+						images = theme.GetNextImages(db, monitorRects, ref randomGroupCounter, ref randomGroupClear);
 					}
 					break;
 
 				case SwitchDir.Prev:
-					images = theme.GetPrevImages();
+					images = theme.GetPrevImages(db);
 					break;
 
 				default:
@@ -1397,15 +1397,15 @@ namespace WallSwitch
 				foreach (var img in images)
 				{
 					Log.Write(LogLevel.Debug, "  Image: {0}", img.ImageRec.Location);
-					img.ImageRec.Retrieve();
+					img.ImageRec.Retrieve(db);
 				}
-				if (images != null) Set(theme, images, forceQuick, randomGroupClear);
+				if (images != null) Set(db, theme, images, forceQuick, randomGroupClear);
 
 				foreach (var img in images) img.ImageRec.Release();
 			}
 		}
 
-		public void Set(Theme theme, IEnumerable<ImageLayout> files, bool forceQuick, bool clear)
+		public void Set(Database db, Theme theme, IEnumerable<ImageLayout> files, bool forceQuick, bool clear)
 		{
 			if (theme == null) throw new ArgumentNullException("Theme is null.");
 			if (files == null) throw new ArgumentNullException("Files list is null.");
@@ -1432,7 +1432,7 @@ namespace WallSwitch
 							{
 								if (imgLayout.Monitors.Length >= 1 && imgLayout.Monitors[0] < screenRects.Length)
 								{
-									_renderer.RenderCollageImageOnScreen(imgLayout.ImageRec, screenRects[imgLayout.Monitors[0]]);
+									_renderer.RenderCollageImageOnScreen(db, imgLayout.ImageRec, screenRects[imgLayout.Monitors[0]]);
 								}
 							}
 							else

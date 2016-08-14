@@ -73,39 +73,42 @@ namespace WallSwitch
 			{
 				_mainWindow = this;
 
-				LoadSettings();
-				LoadHistoryFromDatabase();
-
-				// Determine which theme is the currently active theme
-				Theme activeTheme;
-				if (_themes.Count == 0)
+				using (var db = new Database())
 				{
-					_currentTheme = new Theme();
-					_themes.Add(_currentTheme);
-					activeTheme = _currentTheme;
-					_currentTheme.IsActive = true;
+					LoadSettings(db);
+					LoadHistoryFromDatabase(db);
+
+					// Determine which theme is the currently active theme
+					Theme activeTheme;
+					if (_themes.Count == 0)
+					{
+						_currentTheme = new Theme();
+						_themes.Add(_currentTheme);
+						activeTheme = _currentTheme;
+						_currentTheme.IsActive = true;
+					}
+					else
+					{
+						activeTheme = GetActiveTheme();
+						if (!activeTheme.IsActive) activeTheme.IsActive = true;
+						_currentTheme = activeTheme;
+					}
+
+					c_activateThemeHotKey.HotKey = _changeThemeHotKey;
+
+					// Start the switch thread
+					var switchThread = new SwitchThread();
+					switchThread.SetStartUpDelay();
+					switchThread.Start(db, activeTheme);
+					switchThread.Switching += new SwitchThread.SwitchEventHandler(SwitchThread_Switching);
+					switchThread.Switched += new SwitchThread.SwitchEventHandler(SwitchThread_Switched);
+					Program.SwitchThread = switchThread;
+
+					cmbColorEffectFore.InitForEnum<ColorEffect>(ColorEffect.None);
+					cmbColorEffectBack.InitForEnum<ColorEffect>(ColorEffect.None);
+
+					c_edgeMode.InitForEnum<EdgeMode>(EdgeMode.Feather);
 				}
-				else
-				{
-					activeTheme = GetActiveTheme();
-					if (!activeTheme.IsActive) activeTheme.IsActive = true;
-					_currentTheme = activeTheme;
-				}
-
-				c_activateThemeHotKey.HotKey = _changeThemeHotKey;
-
-				// Start the switch thread
-				var switchThread = new SwitchThread();
-				switchThread.SetStartUpDelay();
-				switchThread.Start(activeTheme);
-				switchThread.Switching += new SwitchThread.SwitchEventHandler(SwitchThread_Switching);
-				switchThread.Switched += new SwitchThread.SwitchEventHandler(SwitchThread_Switched);
-				Program.SwitchThread = switchThread;
-
-				cmbColorEffectFore.InitForEnum<ColorEffect>(ColorEffect.None);
-				cmbColorEffectBack.InitForEnum<ColorEffect>(ColorEffect.None);
-
-				c_edgeMode.InitForEnum<EdgeMode>(EdgeMode.Feather);
 
 				// Update all the controls
 				PopulateWidgetCombo();
@@ -135,27 +138,30 @@ namespace WallSwitch
 			{
 				Log.Write(LogLevel.Debug, "Main window closed.");
 
-				SaveSettings();
-				UnregisterHotKeys();
-
-				// If the user has an 'exit theme' set, then switch to that theme.
-				if (Program.SwitchThread != null)
+				using (var db = new Database())
 				{
-					var exitTheme = _mainWindow.Themes.FirstOrDefault(t => t.ActivateOnExit);
-					if (exitTheme != null && exitTheme != _currentTheme)
+					SaveSettings(db);
+					UnregisterHotKeys();
+
+					// If the user has an 'exit theme' set, then switch to that theme.
+					if (Program.SwitchThread != null)
 					{
-						Log.Write(LogLevel.Info, "Switching to theme '{0}' on exit...", exitTheme.Name);
-						int randomGroupCounter = Program.SwitchThread.RandomGroupCounter;
-						Program.SwitchThread.WallpaperSetter.Set(exitTheme, SwitchDir.Next, true, ref randomGroupCounter);
+						var exitTheme = _mainWindow.Themes.FirstOrDefault(t => t.ActivateOnExit);
+						if (exitTheme != null && exitTheme != _currentTheme)
+						{
+							Log.Write(LogLevel.Info, "Switching to theme '{0}' on exit...", exitTheme.Name);
+							int randomGroupCounter = Program.SwitchThread.RandomGroupCounter;
+							Program.SwitchThread.WallpaperSetter.Set(db, exitTheme, SwitchDir.Next, true, ref randomGroupCounter);
+						}
+						else
+						{
+							Log.Debug("No exit theme is set.");
+						}
 					}
 					else
 					{
-						Log.Debug("No exit theme is set.");
+						Log.Write(LogLevel.Warning, "On application exit, the switch thread or main window is null.");
 					}
-				}
-				else
-				{
-					Log.Write(LogLevel.Warning, "On application exit, the switch thread or main window is null.");
 				}
 			}
 			catch (Exception ex)
@@ -249,7 +255,7 @@ namespace WallSwitch
 					if (hideWindow)
 					{
 						WindowState = FormWindowState.Minimized;
-						SaveSettings();
+						//SaveSettings();
 					}
 				}
 				else
@@ -808,7 +814,6 @@ namespace WallSwitch
 
 			Dirty = false;
 			EnableControls();
-			SaveSettings();
 
 			return true;
 		}
@@ -827,7 +832,13 @@ namespace WallSwitch
 		{
 			try
 			{
-				if (SaveControls(true)) SaveSettings();
+				if (SaveControls(true))
+				{
+					using (var db = new Database())
+					{
+						SaveSettings(db);
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -1197,21 +1208,21 @@ namespace WallSwitch
 		#endregion
 
 		#region Settings
-		private void LoadSettings()
+		private void LoadSettings(Database db)
 		{
 			try
 			{
 				if (!Database.IsNew)
 				{
-					Settings.Load();
-					LoadHotKeys();
+					Settings.Load(db);
+					LoadHotKeys(db);
 
-					foreach (DataRow themeRow in Database.SelectDataTable("select rowid, * from theme").Rows)
+					foreach (DataRow themeRow in db.SelectDataTable("select rowid, * from theme").Rows)
 					{
 						try
 						{
 							var theme = new Theme();
-							theme.Load(themeRow);
+							theme.Load(db, themeRow);
 							_themes.Add(theme);
 							AttachTheme(theme);
 						}
@@ -1255,7 +1266,7 @@ namespace WallSwitch
 							}
 						}
 
-						SaveSettings();
+						SaveSettings(db);
 
 						try
 						{
@@ -1281,19 +1292,19 @@ namespace WallSwitch
 			
 		}
 
-		private void SaveSettings()
+		private void SaveSettings(Database db)
 		{
 			try
 			{
-				Settings.Save();
-				SaveHotKeys();
+				Settings.Save(db);
+				SaveHotKeys(db);
 
 				foreach (var theme in _themes)
 				{
-					theme.Save();
+					theme.Save(db);
 				}
 
-				PurgeDatabaseOrphans();
+				PurgeDatabaseOrphans(db);
 
 				// As good time as any to flush the log.
 				Log.Flush();
@@ -1319,7 +1330,10 @@ namespace WallSwitch
 				var dlg = new SettingsDialog();
 				if (dlg.ShowDialog(this) == DialogResult.OK)
 				{
-					SaveSettings();
+					using (var db = new Database())
+					{
+						SaveSettings(db);
+					}
 				}
 			}
 			catch (Exception ex)
@@ -1328,15 +1342,15 @@ namespace WallSwitch
 			}
 		}
 
-		private void PurgeDatabaseOrphans()
+		private void PurgeDatabaseOrphans(Database db)
 		{
-			Database.ExecuteNonQuery("delete from location where theme_id not in (select rowid from theme)");
-			Database.ExecuteNonQuery("delete from img where theme_id not in (select rowid from theme)");
-			Database.ExecuteNonQuery("delete from img where location_id not in (select rowid from location)");
-			Database.ExecuteNonQuery("delete from widget where theme_id not in (select rowid from theme)");
-			Database.ExecuteNonQuery("delete from widget_config where widget_id not in (select rowid from widget)");
-			Database.ExecuteNonQuery("delete from history where theme_id not in (select rowid from theme)");
-			Database.ExecuteNonQuery("delete from rhistory where theme_id not in (select rowid from theme)");
+			db.ExecuteNonQuery("delete from location where theme_id not in (select rowid from theme)");
+			db.ExecuteNonQuery("delete from img where theme_id not in (select rowid from theme)");
+			db.ExecuteNonQuery("delete from img where location_id not in (select rowid from location)");
+			db.ExecuteNonQuery("delete from widget where theme_id not in (select rowid from theme)");
+			db.ExecuteNonQuery("delete from widget_config where widget_id not in (select rowid from widget)");
+			db.ExecuteNonQuery("delete from history where theme_id not in (select rowid from theme)");
+			db.ExecuteNonQuery("delete from rhistory where theme_id not in (select rowid from theme)");
 		}
 		#endregion
 
@@ -1390,6 +1404,7 @@ namespace WallSwitch
 				{
 					Theme theme = (Theme)((TagString)cmbTheme.Items[cmbTheme.SelectedIndex]).Tag;
 					bool cancelChange = false;
+					var saveRequired = false;
 
 					if (Dirty && !theme.Equals(_currentTheme) && _currentTheme != null)
 					{
@@ -1397,12 +1412,21 @@ namespace WallSwitch
 						{
 							case DialogResult.Yes:
 								if (!SaveControls(true)) cancelChange = true;
+								else saveRequired = true;
 								break;
 							case DialogResult.No:
 								break;
 							case DialogResult.Cancel:
 								cancelChange = true;
 								break;
+						}
+					}
+
+					if (saveRequired)
+					{
+						using (var db = new Database())
+						{
+							SaveSettings(db);
 						}
 					}
 
@@ -1493,21 +1517,23 @@ namespace WallSwitch
 					Res.Confirm_DeleteTheme_Caption, MessageBoxButtons.YesNo, MessageBoxIcon.Warning)
 					== DialogResult.Yes)
 				{
-					DetachTheme(deleteTheme);
-					_themes.Remove(deleteTheme);
-					deleteTheme.DeleteFromDatabase();
-
-					// Remove the theme out of the combo box, and use the combo-box's trigger to select the next theme.
-					cmbTheme.Items.RemoveAt(index);
-					if (index >= cmbTheme.Items.Count) index--;
-					cmbTheme.SelectedIndex = index;
-
-					if (deleteTheme.IsActive)
+					using (var db = new Database())
 					{
-						Theme newActiveTheme = (Theme)((TagString)cmbTheme.Items[cmbTheme.SelectedIndex]).Tag;
-						ActivateTheme(newActiveTheme);
-					}
+						DetachTheme(deleteTheme);
+						_themes.Remove(deleteTheme);
+						deleteTheme.DeleteFromDatabase(db);
 
+						// Remove the theme out of the combo box, and use the combo-box's trigger to select the next theme.
+						cmbTheme.Items.RemoveAt(index);
+						if (index >= cmbTheme.Items.Count) index--;
+						cmbTheme.SelectedIndex = index;
+
+						if (deleteTheme.IsActive)
+						{
+							Theme newActiveTheme = (Theme)((TagString)cmbTheme.Items[cmbTheme.SelectedIndex]).Tag;
+							ActivateTheme(db, newActiveTheme);
+						}
+					}
 					Dirty = true;
 				}
 			}
@@ -1524,6 +1550,7 @@ namespace WallSwitch
 				if (_currentTheme == null) return;
 
 				var cancel = false;
+				var saveRequired = false;
 				if (Dirty)
 				{
 					switch (MessageBox.Show(this, Res.DuplicateThemeDirtyPrompt, Res.DuplicateThemeDirtyTitle,
@@ -1531,12 +1558,21 @@ namespace WallSwitch
 					{
 						case DialogResult.Yes:
 							if (!SaveControls(true)) cancel = true;
+							else saveRequired = true;
 							break;
 						case DialogResult.No:
 							break;
 						case DialogResult.Cancel:
 							cancel = true;
 							break;
+					}
+				}
+
+				if (saveRequired)
+				{
+					using (var db = new Database())
+					{
+						SaveSettings(db);
 					}
 				}
 
@@ -1579,7 +1615,10 @@ namespace WallSwitch
 		{
 			try
 			{
-				ActivateTheme(_currentTheme);
+				using (var db = new Database())
+				{
+					ActivateTheme(db, _currentTheme);
+				}
 			}
 			catch (Exception ex)
 			{
@@ -1587,15 +1626,15 @@ namespace WallSwitch
 			}
 		}
 
-		public void OnActivateTheme(Theme setTheme)
+		public void OnActivateTheme(Database db, Theme setTheme)
 		{
 			try
 			{
-				if (!setTheme.IsActive) ActivateTheme(setTheme);
+				if (!setTheme.IsActive) ActivateTheme(db, setTheme);
 				else
 				{
 					var switchThread = Program.SwitchThread;
-					if (switchThread != null) switchThread.SwitchNow(SwitchDir.Next);
+					if (switchThread != null) switchThread.SwitchNow(db, SwitchDir.Next);
 				}
 			}
 			catch (Exception ex)
@@ -1604,7 +1643,7 @@ namespace WallSwitch
 			}
 		}
 
-		private void ActivateTheme(Theme setTheme)
+		private void ActivateTheme(Database db, Theme setTheme)
 		{
 			_refreshing = true;
 			try
@@ -1631,9 +1670,9 @@ namespace WallSwitch
 					cmbTheme.Items[i] = new TagString(name, theme);
 				}
 
-				switchThread.SwitchNow(SwitchDir.Next);
+				switchThread.SwitchNow(db, SwitchDir.Next);
 
-				SaveSettings();
+				SaveSettings(db);
 			}
 			finally
 			{
@@ -1674,7 +1713,10 @@ namespace WallSwitch
 					object tag = ((ToolStripItem)sender).Tag;
 					if (tag != null && tag.GetType() == typeof(Theme))
 					{
-						ActivateTheme((Theme)tag);
+						using (var db = new Database())
+						{
+							ActivateTheme(db, (Theme)tag);
+						}
 					}
 				}
 			}
@@ -2109,7 +2151,13 @@ namespace WallSwitch
 			try
 			{
 				var switchThread = Program.SwitchThread;
-				if (switchThread != null) switchThread.SwitchNow(SwitchDir.Next);
+				if (switchThread != null)
+				{
+					using (var db = new Database())
+					{
+						switchThread.SwitchNow(db, SwitchDir.Next);
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -2122,7 +2170,13 @@ namespace WallSwitch
 			try
 			{
 				var switchThread = Program.SwitchThread;
-				if (switchThread != null) switchThread.SwitchNow(SwitchDir.Prev);
+				if (switchThread != null)
+				{
+					using (var db = new Database())
+					{
+						switchThread.SwitchNow(db, SwitchDir.Prev);
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -2136,7 +2190,13 @@ namespace WallSwitch
 			try
 			{
 				var switchThread = Program.SwitchThread;
-				if (switchThread != null) switchThread.SwitchNow(SwitchDir.Next);
+				if (switchThread != null)
+				{
+					using (var db = new Database())
+					{
+						switchThread.SwitchNow(db, SwitchDir.Next);
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -2149,7 +2209,13 @@ namespace WallSwitch
 			try
 			{
 				var switchThread = Program.SwitchThread;
-				if (switchThread != null)  switchThread.SwitchNow(SwitchDir.Prev);
+				if (switchThread != null)
+				{
+					using (var db = new Database())
+					{
+						switchThread.SwitchNow(db, SwitchDir.Prev);
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -2192,7 +2258,10 @@ namespace WallSwitch
 				}
 
 				EnableControls();
-				ClearExpiredCache();
+				using (var db = new Database())
+				{
+					ClearExpiredCache(db);
+				}
 			}
 			catch (Exception ex)
 			{
@@ -2200,22 +2269,25 @@ namespace WallSwitch
 			}
 		}
 
-		private void ClearHistory()
+		private void ClearHistory(Database db)
 		{
             Log.Info("Clearing history...");
-			foreach (var theme in _themes) theme.ClearHistory();
+			foreach (var theme in _themes) theme.ClearHistory(db);
 			c_historyTab.Clear();
-			ClearExpiredCache();
+			ClearExpiredCache(db);
 		}
 
 		private void miClearHistory_Click(object sender, EventArgs e)
 		{
 			try
 			{
-				ClearHistory();
+				using (var db = new Database())
+				{
+					ClearHistory(db);
 
-				var switchThread = Program.SwitchThread;
-				if (switchThread != null) switchThread.SwitchNow(SwitchDir.Clear);
+					var switchThread = Program.SwitchThread;
+					if (switchThread != null) switchThread.SwitchNow(db, SwitchDir.Clear);
+				}
 			}
 			catch (Exception ex)
 			{
@@ -2224,17 +2296,17 @@ namespace WallSwitch
 			
 		}
 
-		private void ClearExpiredCache()
+		private void ClearExpiredCache(Database db)
 		{
 			// Create a list of all images currently in the history.
 			// These are the files that we don't want to delete.
 			var keepLocations = new List<string>();
-			keepLocations.AddRange(Database.SelectStringList("select history.path from history inner join theme on theme.rowid = history.theme_id"));
+			keepLocations.AddRange(db.SelectStringList("select history.path from history inner join theme on theme.rowid = history.theme_id"));
 
 			keepLocations.AddRange(from h in c_historyTab.History select h.Location);
 
 			// Tell the image cache object to delete all others.
-			ImageCache.ClearExpiredCache(keepLocations);
+			ImageCache.ClearExpiredCache(db, keepLocations);
 		}
 
 		private void chkLimitScale_CheckedChanged(object sender, EventArgs e)
@@ -2333,23 +2405,23 @@ namespace WallSwitch
 			_showWindowHotKey.Reregister();
 		}
 
-		private void SaveHotKeys()
+		private void SaveHotKeys(Database db)
 		{
-			Database.WriteSetting(k_nextImageHotKey, _nextImageHotKey.ToSaveString());
-			Database.WriteSetting(k_prevImageHotKey, _prevImageHotKey.ToSaveString());
-			Database.WriteSetting(k_pauseHotKey, _pauseHotKey.ToSaveString());
-			Database.WriteSetting(k_clearHistoryHotKey, _clearHistoryHotKey.ToSaveString());
-			Database.WriteSetting(k_showWindowHotKey, _showWindowHotKey.ToSaveString());
+			db.WriteSetting(k_nextImageHotKey, _nextImageHotKey.ToSaveString());
+			db.WriteSetting(k_prevImageHotKey, _prevImageHotKey.ToSaveString());
+			db.WriteSetting(k_pauseHotKey, _pauseHotKey.ToSaveString());
+			db.WriteSetting(k_clearHistoryHotKey, _clearHistoryHotKey.ToSaveString());
+			db.WriteSetting(k_showWindowHotKey, _showWindowHotKey.ToSaveString());
 		}
 
-		private void LoadHotKeys()
+		private void LoadHotKeys(Database db)
 		{
 			string str;
-			if (!string.IsNullOrEmpty(str = Database.LoadSetting(k_nextImageHotKey))) _nextImageHotKey.LoadFromSaveString(str);
-			if (!string.IsNullOrEmpty(str = Database.LoadSetting(k_prevImageHotKey))) _prevImageHotKey.LoadFromSaveString(str);
-			if (!string.IsNullOrEmpty(str = Database.LoadSetting(k_pauseHotKey))) _pauseHotKey.LoadFromSaveString(str);
-			if (!string.IsNullOrEmpty(str = Database.LoadSetting(k_clearHistoryHotKey))) _clearHistoryHotKey.LoadFromSaveString(str);
-			if (!string.IsNullOrEmpty(str = Database.LoadSetting(k_showWindowHotKey))) _showWindowHotKey.LoadFromSaveString(str);
+			if (!string.IsNullOrEmpty(str = db.LoadSetting(k_nextImageHotKey))) _nextImageHotKey.LoadFromSaveString(str);
+			if (!string.IsNullOrEmpty(str = db.LoadSetting(k_prevImageHotKey))) _prevImageHotKey.LoadFromSaveString(str);
+			if (!string.IsNullOrEmpty(str = db.LoadSetting(k_pauseHotKey))) _pauseHotKey.LoadFromSaveString(str);
+			if (!string.IsNullOrEmpty(str = db.LoadSetting(k_clearHistoryHotKey))) _clearHistoryHotKey.LoadFromSaveString(str);
+			if (!string.IsNullOrEmpty(str = db.LoadSetting(k_showWindowHotKey))) _showWindowHotKey.LoadFromSaveString(str);
 		}
 
 		private void LoadHotKeys(XmlElement xmlRoot)
@@ -2408,7 +2480,13 @@ namespace WallSwitch
 			try
 			{
 				var switchThread = Program.SwitchThread;
-				if (switchThread != null) switchThread.SwitchNow(SwitchDir.Next);
+				if (switchThread != null)
+				{
+					using (var db = new Database())
+					{
+						switchThread.SwitchNow(db, SwitchDir.Next);
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -2421,7 +2499,13 @@ namespace WallSwitch
 			try
 			{
 				var switchThread = Program.SwitchThread;
-				if (switchThread != null) switchThread.SwitchNow(SwitchDir.Prev);
+				if (switchThread != null)
+				{
+					using (var db = new Database())
+					{
+						switchThread.SwitchNow(db, SwitchDir.Prev);
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -2449,7 +2533,10 @@ namespace WallSwitch
 		{
 			try
 			{
-				ClearHistory();
+				using (var db = new Database())
+				{
+					ClearHistory(db);
+				}
 				ShowNotification(Res.Notify_HistoryCleared, null);
 			}
 			catch (Exception ex)
@@ -2482,9 +2569,12 @@ namespace WallSwitch
 
 			try
 			{
-				foreach (var img in (from i in e.Images select i.ImageRec).Distinct())
+				using (var db = new Database())
 				{
-					c_historyTab.AddHistory(new HistoryItem(img));
+					foreach (var img in (from i in e.Images select i.ImageRec).Distinct())
+					{
+						c_historyTab.AddHistory(new HistoryItem(db, img));
+					}
 				}
 			}
 			catch (Exception ex)
@@ -2579,7 +2669,10 @@ namespace WallSwitch
 		{
 			try
 			{
-				ClearHistory();
+				using (var db = new Database())
+				{
+					ClearHistory(db);
+				}
 			}
 			catch (Exception ex)
 			{
@@ -2628,19 +2721,19 @@ namespace WallSwitch
 			}
 		}
 
-		private void LoadHistoryFromDatabase()
+		private void LoadHistoryFromDatabase(Database db)
 		{
 			try
 			{
 				var maxHistory = c_historyTab.MaxHistory;
 
 				var history = new List<HistoryItem>();
-				foreach (DataRow row in Database.SelectDataTable("select rowid, * from history order by display_date desc limit @max", "@max", maxHistory).Rows)
+				foreach (DataRow row in db.SelectDataTable("select rowid, * from history order by display_date desc limit @max", "@max", maxHistory).Rows)
 				{
 					var img = ImageRec.FromDataRow(row);
-					if (img.Retrieve())
+					if (img.Retrieve(db))
 					{
-						history.Add(new HistoryItem(img));
+						history.Add(new HistoryItem(db, img));
 					}
 				}
 

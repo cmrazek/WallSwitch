@@ -11,13 +11,13 @@ using System.Xml;
 
 namespace WallSwitch
 {
-	public enum ImageLocationType
+	internal enum ImageLocationType
 	{
 		File,
 		Url
 	}
 
-	public class ImageRec : IComparable<ImageRec>
+	internal class ImageRec : IComparable<ImageRec>
 	{
 		#region Member Variables
 		private string _location;
@@ -124,26 +124,23 @@ namespace WallSwitch
 			return _hashCode;
 		}
 
-		public string LocationOnDisk
+		public string GetLocationOnDisk(Database db)
 		{
-			get
+			switch (_type)
 			{
-				switch (_type)
-				{
-					case ImageLocationType.File:
-						return File.Exists(_location) ? _location : string.Empty;
-					case ImageLocationType.Url:
+				case ImageLocationType.File:
+					return File.Exists(_location) ? _location : string.Empty;
+				case ImageLocationType.Url:
+					{
+						string fileName;
+						if (!ImageCache.TryGetCachedImage(db, _location, out fileName) || !File.Exists(fileName))
 						{
-							string fileName;
-							if (!ImageCache.TryGetCachedImage(_location, out fileName) || !File.Exists(fileName))
-							{
-								fileName = string.Empty;
-							}
-							return fileName;
+							fileName = string.Empty;
 						}
-				}
-				return string.Empty;
+						return fileName;
+					}
 			}
+			return string.Empty;
 		}
 
 		public ImageFormat ImageFormat
@@ -159,7 +156,7 @@ namespace WallSwitch
 		#endregion
 
 		#region Loading
-		public bool Retrieve()
+		public bool Retrieve(Database db)
 		{
 			if (_image != null) return true;
 
@@ -185,7 +182,7 @@ namespace WallSwitch
 					try
 					{
 						string fileName;
-						if (ImageCache.TryGetCachedImage(_location, out fileName))
+						if (ImageCache.TryGetCachedImage(db, _location, out fileName))
 						{
 							try
 							{
@@ -209,7 +206,7 @@ namespace WallSwitch
 
 						var stream = response.GetResponseStream();
 						_image = Image.FromStream(stream);
-						ImageCache.SaveImage(this);
+						ImageCache.SaveImage(this, db);
 						MakeThumbnail();
 						return true;
 					}

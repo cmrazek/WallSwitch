@@ -8,10 +8,10 @@ using System.Text;
 
 namespace WallSwitch
 {
-	class Database
+	class Database : IDisposable
 	{
 
-		private static SQLiteConnection _conn;
+		private SQLiteConnection _conn;
 		private static bool _isNew;
 
 		private static string[] k_initializationScripts = new string[] {
@@ -129,21 +129,23 @@ pub_date			datetime
 @"create index imgcache_ix_location on img_cache (location)"
 	};
 
-		public static void Initialize()
+		public Database()
 		{
 			try
 			{
 				var fileName = FileName;
+				var isNew = false;
 				if (!File.Exists(fileName))
 				{
 					SQLiteConnection.CreateFile(fileName);
-					_isNew = true;
+					_isNew = isNew = true;
 				}
 
+				Log.Debug("Connecting to database");
 				_conn = new SQLiteConnection(string.Format("Data Source={0};Version=3;", fileName));
 				_conn.Open();
 
-				if (_isNew)
+				if (isNew)
 				{
 					RunScripts(k_initializationScripts);
 				}
@@ -151,11 +153,11 @@ pub_date			datetime
 			catch (Exception ex)
 			{
 				Log.Write(ex);
-				Shutdown();
+				Dispose();
 			}
 		}
 
-		public static void Shutdown()
+		public void Dispose()
 		{
 			try
 			{
@@ -172,7 +174,12 @@ pub_date			datetime
 			}
 		}
 
-		private static void RunScripts(string[] scripts)
+		public void Close()
+		{
+			Dispose();
+		}
+
+		private void RunScripts(string[] scripts)
 		{
 			foreach (var script in scripts)
 			{
@@ -207,7 +214,7 @@ pub_date			datetime
 			get { return _isNew; }
 		}
 
-		public static SQLiteCommand CreateCommand(string sql)
+		public SQLiteCommand CreateCommand(string sql)
 		{
 			if (_conn == null) throw new InvalidOperationException("No connection to SQL database.");
 
@@ -219,7 +226,7 @@ pub_date			datetime
 			return cmd;
 		}
 
-		public static void ExecuteNonQuery(string sql, params object[] parameters)
+		public void ExecuteNonQuery(string sql, params object[] parameters)
 		{
 			if (parameters.Length % 2 != 0) throw new ArgumentException("The number of parameters must be of an even length.");
 
@@ -234,7 +241,7 @@ pub_date			datetime
 			}
 		}
 
-		public static List<int> SelectIntList(string sql, params object[] parameters)
+		public List<int> SelectIntList(string sql, params object[] parameters)
 		{
 			if (parameters.Length % 2 != 0) throw new ArgumentException("The number of parameters must be of an even length.");
 
@@ -259,7 +266,7 @@ pub_date			datetime
 			}
 		}
 
-		public static List<long> SelectLongList(string sql, params object[] parameters)
+		public List<long> SelectLongList(string sql, params object[] parameters)
 		{
 			if (parameters.Length % 2 != 0) throw new ArgumentException("The number of parameters must be of an even length.");
 
@@ -284,7 +291,7 @@ pub_date			datetime
 			}
 		}
 
-		public static List<string> SelectStringList(string sql, params object[] parameters)
+		public List<string> SelectStringList(string sql, params object[] parameters)
 		{
 			if (parameters.Length % 2 != 0) throw new ArgumentException("The number of parameters must be of an even length.");
 
@@ -309,7 +316,7 @@ pub_date			datetime
 			}
 		}
 
-		public static int SelectInt(string sql, params object[] parameters)
+		public int SelectInt(string sql, params object[] parameters)
 		{
 			if (parameters.Length % 2 != 0) throw new ArgumentException("The number of parameters must be of an even length.");
 
@@ -324,7 +331,7 @@ pub_date			datetime
 			}
 		}
 
-		public static string SelectString(string sql, params object[] parameters)
+		public string SelectString(string sql, params object[] parameters)
 		{
 			if (parameters.Length % 2 != 0) throw new ArgumentException("The number of parameters must be of an even length.");
 
@@ -341,7 +348,7 @@ pub_date			datetime
 			}
 		}
 
-		public static long Insert(string tableName, object[] columnValues)
+		public long Insert(string tableName, object[] columnValues)
 		{
 			if (columnValues.Length % 2 != 0) throw new ArgumentException("The length of columnValues must be even.");
 
@@ -372,16 +379,13 @@ pub_date			datetime
 				for (int i = 0, ii = columnValues.Length; i < ii; i += 2)
 				{
 					cmd.Parameters.AddWithValue(string.Concat("@", (string)columnValues[i]), columnValues[i + 1]);
-//#if DEBUG
-//					LogParam((string)columnValues[i], Convert.ToString(columnValues[i + 1]));
-//#endif
 				}
 
 				return Convert.ToInt64(cmd.ExecuteScalar(System.Data.CommandBehavior.SingleResult));
 			}
 		}
 
-		public static void Update(string tableName, string whereClause, object[] columnValues, object[] additionalParams = null)
+		public void Update(string tableName, string whereClause, object[] columnValues, object[] additionalParams = null)
 		{
 			if (columnValues.Length % 2 != 0) throw new ArgumentException("The length of columnValues must be even.");
 			if (additionalParams != null && additionalParams.Length % 2 != 0) throw new ArgumentException("The number of additional parameters must be of an even length.");
@@ -410,9 +414,6 @@ pub_date			datetime
 				for (int i = 0, ii = columnValues.Length; i < ii; i += 2)
 				{
 					cmd.Parameters.AddWithValue(string.Concat("@", (string)columnValues[i]), columnValues[i + 1]);
-//#if DEBUG
-//					LogParam((string)columnValues[i], Convert.ToString(columnValues[i + 1]));
-//#endif
 				}
 
 				if (additionalParams != null)
@@ -420,9 +421,6 @@ pub_date			datetime
 					for (int i = 0, ii = additionalParams.Length; i < ii; i += 2)
 					{
 						cmd.Parameters.AddWithValue((string)additionalParams[i], additionalParams[i + 1]);
-//#if DEBUG
-//						LogParam((string)additionalParams[i], Convert.ToString(additionalParams[i + 1]));
-//#endif
 					}
 				}
 
@@ -430,21 +428,7 @@ pub_date			datetime
 			}
 		}
 
-//#if DEBUG
-//		private static void LogParam(string name, object value)
-//		{
-//			if (value == null)
-//			{
-//				Log.Debug("  @{0}: (null)", name);
-//			}
-//			else
-//			{
-//				Log.Debug("  @{0}: {1}", name, Convert.ToString(value));
-//			}
-//		}
-//#endif
-
-		public static void WriteSetting(string name, string value)
+		public void WriteSetting(string name, string value)
 		{
 			if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException("name");
 
@@ -484,14 +468,14 @@ pub_date			datetime
 			}
 		}
 
-		public static string LoadSetting(string name, string defaultValue = null)
+		public string LoadSetting(string name, string defaultValue = null)
 		{
 			var ret = SelectString("select value from setting where name = @name", "@name", name);
 			if (ret == null) return defaultValue;
 			return ret;
 		}
 
-		public static Dictionary<string, object> SelectOne(string sql, params object[] parameters)
+		public Dictionary<string, object> SelectOne(string sql, params object[] parameters)
 		{
 			if (parameters.Length % 2 != 0) throw new ArgumentException("The number of parameters must be of an even length.");
 
@@ -521,7 +505,7 @@ pub_date			datetime
 			return null;
 		}
 
-		public static List<Dictionary<string, object>> SelectList(string sql, params object[] parameters)
+		public List<Dictionary<string, object>> SelectList(string sql, params object[] parameters)
 		{
 			if (parameters.Length % 2 != 0) throw new ArgumentException("The number of parameters must be of an even length.");
 
@@ -548,7 +532,7 @@ pub_date			datetime
 			return list;
 		}
 
-		public static DataTable SelectDataTable(string sql, params object[] parameters)
+		public DataTable SelectDataTable(string sql, params object[] parameters)
 		{
 			if (parameters.Length % 2 != 0) throw new ArgumentException("The number of parameters must be of an even length.");
 

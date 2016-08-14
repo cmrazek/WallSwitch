@@ -45,7 +45,7 @@ namespace WallSwitch
 		#endregion
 
 		#region Construction
-		public void Start(Theme theme)
+		public void Start(Database db, Theme theme)
 		{
 			if (theme == null) throw new ArgumentNullException("Theme is null.");
 			_theme = theme;
@@ -53,7 +53,7 @@ namespace WallSwitch
 			_kill = false;
 
 			_lastSwitch = DateTime.MinValue;
-			var str = Database.LoadSetting("LastSwitch");
+			var str = db.LoadSetting("LastSwitch");
 			if (!string.IsNullOrEmpty(str))
 			{
 				DateTime dt;
@@ -124,20 +124,23 @@ namespace WallSwitch
 					sw = CheckSwitch();
 					if (sw != SwitchDir.None)
 					{
-						try
+						using (var db = new Database())
 						{
-							DoSwitch(sw);
-						}
-						catch (Exception ex2)
-						{
-							Log.Write(LogLevel.Error, "Exception when switching wallpaper:\n" + ex2.ToString());
-						}
+							try
+							{
+								DoSwitch(db, sw);
+							}
+							catch (Exception ex2)
+							{
+								Log.Write(LogLevel.Error, "Exception when switching wallpaper:\n" + ex2.ToString());
+							}
 
-						_lastSwitch = DateTime.Now;
-						Database.WriteSetting("LastSwitch", _lastSwitch.ToString("s"));
-						lock (_themeLock)
-						{
-							Log.Write(LogLevel.Info, "Next wallpaper switch is in {0} seconds", _theme.Interval.TotalSeconds);
+							_lastSwitch = DateTime.Now;
+							db.WriteSetting("LastSwitch", _lastSwitch.ToString("s"));
+							lock (_themeLock)
+							{
+								Log.Write(LogLevel.Info, "Next wallpaper switch is in {0} seconds", _theme.Interval.TotalSeconds);
+							}
 						}
 					}
 
@@ -255,12 +258,12 @@ namespace WallSwitch
 			return SwitchDir.None;
 		}
 
-		public void SwitchNow(SwitchDir dir)
+		public void SwitchNow(Database db, SwitchDir dir)
 		{
 			if (_thread == null || !_thread.IsAlive)
 			{
 				Log.Write(LogLevel.Warning, "The switch thread was found to be inactive. Restarting...");
-				Start(_theme);
+				Start(db, _theme);
 			}
 
 			_switchNow = dir;
@@ -285,7 +288,7 @@ namespace WallSwitch
 		private bool _switching = false;
 		private volatile bool _paused = false;
 
-		private void DoSwitch(SwitchDir dir)
+		private void DoSwitch(Database db, SwitchDir dir)
 		{
 
 			if (_theme == null)
@@ -306,7 +309,7 @@ namespace WallSwitch
 				SwitchEventHandler ev = Switching;
 				if (ev != null) ev(this, new EventArgs());
 
-				_wallpaperSetter.Set(_theme, dir, false, ref _randomGroupCounter);
+				_wallpaperSetter.Set(db, _theme, dir, false, ref _randomGroupCounter);
 
 				Log.Write(LogLevel.Debug, "Finished switching wallpaper.");
 			}
