@@ -286,6 +286,27 @@ namespace WallSwitch
 					return TimeSpan.FromMinutes(freq);
 			}
 		}
+
+		public static string IntervalDisplayString(int freq, Period period)
+		{
+			switch (period)
+			{
+				case Period.Seconds:
+					if (freq == 1) return string.Concat(freq, " ", Res.Second);
+					return string.Concat(freq, " ", Res.Seconds);
+				case Period.Minutes:
+					if (freq == 1) return string.Concat(freq, " ", Res.Minute);
+					return string.Concat(freq, " ", Res.Minutes);
+				case Period.Hours:
+					if (freq == 1) return string.Concat(freq, " ", Res.Hour);
+					return string.Concat(freq, " ", Res.Hours);
+				case Period.Days:
+					if (freq == 1) return string.Concat(freq, " ", Res.Day);
+					return string.Concat(freq, " ", Res.Days);
+				default:
+					return string.Concat(freq, " ", period);
+			}
+		}
 	}
 
 	static class FormUtil

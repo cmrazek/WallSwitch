@@ -1846,6 +1846,10 @@ namespace WallSwitch
 			}
 			if (lvi.SubItems.Count < 2) lvi.SubItems.Add(nextUpdateString);
 			else lvi.SubItems[1].Text = nextUpdateString;
+
+			var freqStr = TimeSpanUtil.IntervalDisplayString(location.UpdateFrequency, location.UpdatePeriod);
+			if (lvi.SubItems.Count < 3) lvi.SubItems.Add(freqStr);
+			else lvi.SubItems[2].Text = freqStr;
 		}
 
 		private void btnAddFolder_Click(object sender, EventArgs e)
