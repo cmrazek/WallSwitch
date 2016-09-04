@@ -1,7 +1,7 @@
 WallSwitch
 Switches desktop wallpapers from a variety of sources.
 http://wallswitch.codeplex.com/
-Current Version: 1.3.11
+Current Version: 1.4
 
 Requirements:
 	.NET Framework 4:  http://www.microsoft.com/download/en/details.aspx?id=17718
@@ -12,7 +12,14 @@ Contact:
 
 ChangeLog:
 
-Version 1.3.11 - TBD:
+Version 1.4 - 2016-09-04:
+- Image lists are now saved to a database, rather than held in memory.
+- Refresh interval is now visible on the images list box.
+- You can now add a new image folder by pasting in the path, rather than forcing the user of the
+  browse folder dialog.
+- Images in the history view are now persisted when the app restarts.
+
+Version 1.3.11 - 2016-01-16:
 - Wallpaper images are now saved using unique filenames to try to avoid file locking from other processes.
 - Fix problem with the settings view not scaling with the window.
 
