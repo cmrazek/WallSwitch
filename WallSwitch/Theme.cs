@@ -1060,7 +1060,12 @@ namespace WallSwitch
 
 			if (maxCount < 0)
 			{
-				maxCount = db.SelectInt("select count(*) from img where theme_id = @id", "@id", _rowid);
+				var sql = @"
+					select count(*) from img
+					inner join location on location.rowid = img.location_id
+					where img.theme_id = @id
+					and location.disabled = 0";
+				maxCount = db.SelectInt(sql, "@id", _rowid);
 				Log.Debug("Number of images in database: {0}", maxCount);
 			}
 			if (maxCount == 0) return null;
@@ -1070,8 +1075,13 @@ namespace WallSwitch
 				var index = _rand.Next(maxCount);
 				Log.Debug("Selecting image index {0} of {1}", index, maxCount);
 
-				var table = db.SelectDataTable("select rowid, * from img where theme_id = @id limit 1 offset @num",
-					"@id", _rowid, "@num", index);
+				var sql = @"
+					select img.rowid, img.* from img
+					inner join location on location.rowid = img.location_id
+					where img.theme_id = @id
+					and location.disabled = 0
+					limit 1 offset @num";
+				var table = db.SelectDataTable(sql, "@id", _rowid, "@num", index);
 				if (table.Rows.Count > 0)
 				{
 					var img = ImageRec.FromDataRow(table.Rows[0]);
@@ -1106,10 +1116,17 @@ namespace WallSwitch
 			Log.Write(LogLevel.Debug, "Picking sequential image (last image = [{0}])", _lastImage);
 
 			DataTable table;
+			string sql;
 
 			if (string.IsNullOrEmpty(_lastImage))
 			{
-				table = db.SelectDataTable("select rowid, * from img where theme_id = @id order by path limit 1", "@id", _rowid);
+				sql = @"
+					select img.rowid, img.* from img
+					inner join location on location.rowid = img.location_id
+					where img.theme_id = @id
+					and location.disabled = 0
+					order by img.path limit 1";
+				table = db.SelectDataTable(sql, "@id", _rowid);
 				if (table.Rows.Count > 0)
 				{
 					var img = ImageRec.FromDataRow(table.Rows[0]);
@@ -1124,8 +1141,14 @@ namespace WallSwitch
 			}
 
 			// Find the first image that is greater than the last file.
-			table = db.SelectDataTable("select rowid, * from img where theme_id = @id and path > @path order by path limit 1",
-				"@id", _rowid, "@path", _lastImage);
+			sql = @"
+				select img.rowid, img.* from img
+				inner join location on location.rowid = img.location_id
+				where img.theme_id = @id
+				and img.path > @path
+				and location.disabled = 0
+				order by img.path limit 1";
+			table = db.SelectDataTable(sql, "@id", _rowid, "@path", _lastImage);
 			if (table.Rows.Count > 0)
 			{
 				var img = ImageRec.FromDataRow(table.Rows[0]);
@@ -1135,7 +1158,13 @@ namespace WallSwitch
 			else
 			{
 				// This is the last image for this theme. Select the first one in the database.
-				table = db.SelectDataTable("select rowid, * from img where theme_id = @id order by path limit 1", "@id", _rowid);
+				sql = @"
+					select img.rowid,img. * from img
+					inner join location on location.rowid = img.location_id
+					where img.theme_id = @id
+					and location.disabled = 0
+					order by img.path limit 1";
+				table = db.SelectDataTable(sql, "@id", _rowid);
 				if (table.Rows.Count > 0)
 				{
 					var img = ImageRec.FromDataRow(table.Rows[0]);

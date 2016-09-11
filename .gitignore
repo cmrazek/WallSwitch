@@ -4,6 +4,7 @@
 *.sdf
 *.suo
 *.user
+*.VC.db
 
 /Debug/*
 /Release/*

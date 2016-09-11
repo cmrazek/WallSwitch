@@ -1,7 +1,7 @@
 WallSwitch
 Switches desktop wallpapers from a variety of sources.
 http://wallswitch.codeplex.com/
-Current Version: 1.4
+Current Version: 1.4.1
 
 Requirements:
 	.NET Framework 4:  http://www.microsoft.com/download/en/details.aspx?id=17718
@@ -11,6 +11,9 @@ Contact:
 	Email: chrismrazek@gmail.com
 
 ChangeLog:
+
+Version 1.4.1 - 2016-09-11:
+- Fixed bug where unchecked locations were still being displayed.
 
 Version 1.4 - 2016-09-04:
 - Image lists are now saved to a database, rather than held in memory.
