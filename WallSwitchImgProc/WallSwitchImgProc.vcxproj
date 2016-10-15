@@ -87,6 +87,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BlurImage.cpp" />
+    <ClCompile Include="ShellEx.cpp" />
     <ClCompile Include="TransferChannel.cpp" />
   </ItemGroup>
   <ItemGroup>

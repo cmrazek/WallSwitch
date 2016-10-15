@@ -332,9 +332,12 @@ namespace WallSwitch
 
 	public static class FileUtil
 	{
+		[DllImport("WallSwitchImgProc.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+		private static extern void ShowFileInExplorer(string fileName);
+
 		public static void ExploreFile(string fileName)
 		{
-			Process.Start("explorer.exe", string.Format("/select,{0}", fileName));
+			ShowFileInExplorer(fileName);
 		}
 
 		public static void ExploreDir(string dirPath)
