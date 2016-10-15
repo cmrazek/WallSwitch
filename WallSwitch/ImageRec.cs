@@ -272,7 +272,26 @@ namespace WallSwitch
 
 		public Bitmap Thumbnail
 		{
-			get { return _thumbnail; }
+			get
+			{
+				MakeThumbnail();
+				return _thumbnail;
+			}
+		}
+
+		public byte[] GetThumbnailBlob()
+		{
+			if (_thumbnail == null) return null;
+
+			byte[] blob;
+			using (var memStream = new MemoryStream())
+			{
+				_thumbnail.Save(memStream, ImageFormat.Jpeg);
+				blob = new byte[memStream.Length];
+				memStream.Seek(0, SeekOrigin.Begin);
+				memStream.Read(blob, 0, blob.Length);
+			}
+			return blob;
 		}
 		#endregion
 

@@ -63,5 +63,12 @@ namespace WallSwitch
 			}
 			return Convert.ToDateTime(obj);
 		}
+
+		public static byte[] GetBytes(this DataRow row, string name, byte[] defaultValue = null)
+		{
+			var obj = row[name];
+			if (obj == null || Convert.IsDBNull(obj)) return defaultValue;
+			return (byte[])obj;
+		}
 	}
 }

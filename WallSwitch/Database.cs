@@ -79,7 +79,8 @@ location_id		integer not null,
 type			varchar(20) not null,
 path			varchar(300) not null,
 pub_date		datetime,
-rating			integer
+rating			integer,
+thumb			blob
 )",
 @"create index img_ix_theme on img (theme_id, path)",
 @"create index img_ix_location on img (location_id)",
@@ -110,7 +111,8 @@ monitors		varchar(20) not null,
 type			varchar(20) not null,
 path			varchar(300) not null,
 pub_date		datetime,
-rating			integer
+rating			integer,
+thumb			blob
 )",
 @"create index history_ix_theme on history (theme_id)",
 @"create index history_ix_path on history (path)",
@@ -212,9 +214,11 @@ pub_date			datetime
 		private void RunExistingScripts()
 		{
 			AddTableColumnIfMissing("img", "rating", "integer");
+			AddTableColumnIfMissing("img", "thumb", "blob");
 			AddIndexIfMissing("img_ix_path", "create index img_ix_path on img (path)");
 
 			AddTableColumnIfMissing("history", "rating", "integer");
+			AddTableColumnIfMissing("history", "thumb", "blob");
 			AddIndexIfMissing("history_ix_path", "create index history_ix_path on history (path)");
 		}
 

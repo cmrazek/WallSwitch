@@ -2573,7 +2573,7 @@ namespace WallSwitch
 				{
 					foreach (var img in (from i in e.Images select i.ImageRec).Distinct())
 					{
-						c_historyTab.AddHistory(new HistoryItem(c_historyTab, db, img));
+						c_historyTab.AddHistory(HistoryItem.FromImageRec(c_historyTab, db, img));
 					}
 				}
 			}
@@ -2730,11 +2730,7 @@ namespace WallSwitch
 				var history = new List<HistoryItem>();
 				foreach (DataRow row in db.SelectDataTable("select rowid, * from history order by display_date desc limit @max", "@max", maxHistory).Rows)
 				{
-					var img = ImageRec.FromDataRow(row);
-					if (img.Retrieve(db))
-					{
-						history.Add(new HistoryItem(c_historyTab, db, img));
-					}
+					history.Add(HistoryItem.FromDataRow(c_historyTab, row));
 				}
 
 				history.Reverse();

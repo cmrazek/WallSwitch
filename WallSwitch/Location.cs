@@ -135,8 +135,8 @@ namespace WallSwitch
 
 			if (filesToAdd.Count > 0)
 			{
-				using (var cmd = db.CreateCommand("insert into img (theme_id, location_id, type, path, pub_date)"
-					+ " values (@theme_id, @location_id, @type, @path, @pub_date)"))
+				using (var cmd = db.CreateCommand("insert into img (theme_id, location_id, type, path, pub_date, rating, thumb)"
+					+ " values (@theme_id, @location_id, @type, @path, @pub_date, @rating, @thumb)"))
 				{
 					foreach (var img in filesToAdd)
 					{
@@ -146,6 +146,8 @@ namespace WallSwitch
 						cmd.Parameters.AddWithValue("@type", img.Type.ToString());
 						cmd.Parameters.AddWithValue("@path", img.Location);
 						cmd.Parameters.AddWithValue("@pub_date", img.PubDate.HasValue ? (object)img.PubDate.Value : null);
+						cmd.Parameters.AddWithValue("@rating", img.Rating);
+						cmd.Parameters.AddWithValue("@thumb", img.GetThumbnailBlob());
 
 						cmd.ExecuteNonQuery();
 					}

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -9,8 +11,7 @@ namespace WallSwitch
 	class HistoryItem
 	{
 		private HistoryList _list;
-		private Bitmap _thumbnail;
-		private Size _thumbnailSize;
+		private Image _thumbnail;
 		private string _location;
 		private string _locationOnDisk;
 		private Rectangle _bounds;
@@ -26,25 +27,52 @@ namespace WallSwitch
 		public const int RatingImageSpacer = 2;
 		public const int SelectColorFade = 128;
 
-		public HistoryItem(HistoryList list, Database db, ImageRec rec)
+		public static HistoryItem FromImageRec(HistoryList list, Database db, ImageRec rec)
 		{
-			_list = list;
+			if (rec == null) throw new ArgumentNullException(nameof(rec));
 
-			_thumbnail = rec.Thumbnail;
-			_thumbnailSize = rec.Thumbnail.Size;
-			_location = rec.Location;
-			_locationOnDisk = rec.GetLocationOnDisk(db);
-			_rating = rec.Rating;
+			var ret = new HistoryItem(list);
+
+			ret._thumbnail = rec.Thumbnail;
+			ret._location = rec.Location;
+			ret._locationOnDisk = rec.GetLocationOnDisk(db);
+			ret._rating = rec.Rating;
+
+			return ret;
 		}
 
-		public Bitmap Thumbnail
+		public static HistoryItem FromDataRow(HistoryList list, DataRow row)
+		{
+			if (row == null) throw new ArgumentNullException(nameof(row));
+
+			var ret = new HistoryItem(list);
+
+			ret._location = row.GetString("path");
+			ret._locationOnDisk = row.GetString("path");
+			ret._rating = row.GetInt("rating");
+
+			var bytes = row.GetBytes("thumb");
+			if (bytes != null)
+			{
+				using (var memStream = new MemoryStream(bytes))
+				{
+					ret._thumbnail = Image.FromStream(memStream);
+				}
+			}
+
+			return ret;
+		}
+
+		private HistoryItem(HistoryList list)
+		{
+			if (list == null) throw new ArgumentNullException(nameof(list));
+
+			_list = list;
+		}
+
+		public Image Thumbnail
 		{
 			get { return _thumbnail; }
-		}
-
-		public Size ThumbnailSize
-		{
-			get { return _thumbnailSize; }
 		}
 
 		public string Location
@@ -123,7 +151,7 @@ namespace WallSwitch
 		{
 			try
 			{
-				if (_thumbnail != null && _thumbnailRect.Width > 0 && _thumbnailRect.Height > 0)
+				if (_thumbnail != null)
 				{
 					lock (_thumbnail)
 					{
