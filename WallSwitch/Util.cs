@@ -238,6 +238,16 @@ namespace WallSwitch
 				return new Rectangle(left, top, right - left, bottom - top);
 			}
 		}
+
+		public static Rectangle OffsetInline(this Rectangle rect, int x, int y)
+		{
+			return new Rectangle(rect.Left + x, rect.Top + y, rect.Width, rect.Height);
+		}
+
+		public static Point OffsetInline(this Point pt, int x, int y)
+		{
+			return new Point(pt.X + x, pt.Y + y);
+		}
 	}
 
 	static class PointUtil

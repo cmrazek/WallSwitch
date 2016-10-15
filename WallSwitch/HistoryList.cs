@@ -15,17 +15,16 @@ namespace WallSwitch
 		public const int k_unscaledImageWidth = 120;
 		public const int k_unscaledImageHeight = 120;
 		private const int k_itemSpacer = 4;
-		private const int k_itemMargin = 1;
 		private const float k_mouseWheelScale = .4f;
 		private const int k_maxHistory = 30;
-		private const int k_selectColorFade = 128;
 		#endregion
 
 		#region Member Variables
 		private List<HistoryItem> _items = new List<HistoryItem>();
-		private int _scroll = 0;
-		private int _maxScroll = 0;
-		private HistoryItem _selectedItem = null;
+		private int _scroll;
+		private int _maxScroll;
+		private HistoryItem _selectedItem;
+		private HistoryItem _mouseOverItem;
 		private int _maxHistory = k_maxHistory;
 		private ToolTip _imageToolTip = null;
 
@@ -156,27 +155,24 @@ namespace WallSwitch
 			{
 				xScale = g.DpiX / 96.0f;
 				yScale = g.DpiY / 96.0f;
-				_imageWidth = (int)Math.Round(k_unscaledImageWidth * xScale);
-				_imageHeight = (int)Math.Round(k_unscaledImageHeight * yScale);
 			}
+			var imageSize = new Size((int)Math.Round(k_unscaledImageWidth * xScale),
+				(int)Math.Round(k_unscaledImageHeight * yScale));
 
-			int widthRequired = _imageWidth + k_itemSpacer + k_itemMargin * 2;
-			int heightRequired = _imageHeight + k_itemSpacer + k_itemMargin * 2;
+			var itemSize = HistoryItem.GetRequiredSize(imageSize);
 
 			foreach (var item in _items)
 			{
-				if (currentX > k_itemSpacer && currentX + widthRequired > clientSize.Width)
+				if (currentX > k_itemSpacer && currentX + itemSize.Width > clientSize.Width)
 				{
 					currentX = k_itemSpacer;
-					currentY += heightRequired;
+					currentY += itemSize.Height + k_itemSpacer;
 				}
 
-				item.Bounds = new Rectangle(currentX - k_itemMargin, currentY - k_itemMargin,
-					_imageWidth + (k_itemMargin * 2), _imageHeight + (k_itemMargin * 2));
-
-				currentX += widthRequired;
+				item.SetBounds(new Rectangle(currentX , currentY, itemSize.Width, itemSize.Height), imageSize);
+				currentX += itemSize.Width + k_itemSpacer;
 			}
-			currentY += heightRequired;
+			currentY += itemSize.Height;
 
 			_maxScroll = currentY - clientSize.Height;
 			if (_maxScroll <= 0)
@@ -203,61 +199,23 @@ namespace WallSwitch
 		{
 			try
 			{
+				var g = e.Graphics;
+				g.TranslateTransform(0.0f, -_scroll);
+
+				var visibleRect = e.ClipRectangle;
+				visibleRect.Offset(0, _scroll);
+
 				foreach (var item in _items)
 				{
-					var itemBounds = item.Bounds;
-					itemBounds.Offset(0, -_scroll);
-
-					if (itemBounds.IntersectsWith(e.ClipRectangle))
+					if (item.Bounds.IntersectsWith(visibleRect))
 					{
-						DrawItem(item, e.Graphics);
+						item.Draw(g, item == _selectedItem);
 					}
 				}
 			}
 			catch (Exception ex)
 			{
 				this.ShowError(ex);
-			}
-		}
-
-		private SolidBrush _selBrush = null;
-
-		private void DrawItem(HistoryItem item, Graphics g)
-		{
-			try
-			{
-				var image = item.Thumbnail;
-				if (image != null && image.Width > 0 && image.Height > 0)
-				{
-					var imageRect = new Rectangle(item.Bounds.X + k_itemMargin, item.Bounds.Y + k_itemMargin, item.ThumbnailSize.Width, item.ThumbnailSize.Height);
-					imageRect.Offset((_imageWidth - imageRect.Width) / 2, (_imageHeight - imageRect.Height) / 2);
-					imageRect.Offset(0, -_scroll);
-
-					lock (image)
-					{
-						g.DrawImage(image, imageRect);
-					}
-				}
-
-				var shadeRect = item.Bounds;
-				shadeRect.Offset(0, -_scroll);
-				g.DrawRectangle(SystemPens.ControlLight, shadeRect);
-
-				if (object.Equals(item, _selectedItem))
-				{
-					if (_selBrush == null)
-					{
-						Color color = SystemColors.Highlight;
-						_selBrush = new SolidBrush(Color.FromArgb(k_selectColorFade, color.R, color.G, color.B));
-					}
-					var selRect = item.Bounds;
-					selRect.Offset(0, -_scroll);
-					g.FillRectangle(_selBrush, selRect);
-				}
-			}
-			catch (Exception ex)
-			{
-				Log.Write(ex, "Error when drawing history item.");
 			}
 		}
 
@@ -310,6 +268,33 @@ namespace WallSwitch
 
 			vScroll.Value = _scroll;
 		}
+
+		public void InvalidateItem(HistoryItem item)
+		{
+			var bounds = item.Bounds;
+			bounds.Offset(0, -_scroll);
+			if (ClientRectangle.IntersectsWith(bounds)) Invalidate(bounds);
+		}
+
+		public Point ClientToDoc(Point pt)
+		{
+			return new Point(pt.X, pt.Y + _scroll);
+		}
+
+		public Rectangle ClientToDoc(Rectangle rect)
+		{
+			return new Rectangle(rect.Left, rect.Top + _scroll, rect.Width, rect.Height);
+		}
+
+		public Point DocToClient(Point pt)
+		{
+			return new Point(pt.X, pt.Y - _scroll);
+		}
+
+		public Rectangle DocToClient(Rectangle rect)
+		{
+			return new Rectangle(rect.Left, rect.Top - _scroll, rect.Width, rect.Height);
+		}
 		#endregion
 
 		#region Selection
@@ -359,7 +344,7 @@ namespace WallSwitch
 			{
 				if (e.Button == MouseButtons.Left || e.Button == MouseButtons.Right)
 				{
-					SelectItemUnderMouse(e.Location);
+					ProcessItemClick(e.Location);
 				}
 			}
 			catch (Exception ex)
@@ -368,15 +353,45 @@ namespace WallSwitch
 			}
 		}
 
-		private void SelectItemUnderMouse(Point pt)
+		private void ProcessItemClick(Point pt)
 		{
 			var item = HitTest(pt);
 
-			if (!object.Equals(item, _selectedItem))
+			if (item != null)
 			{
-				_selectedItem = item;
-				FireSelectionChanged();
-				Invalidate();
+				var rating = item.RatingHitTest(ClientToDoc(pt));
+				if (rating == -1)
+				{
+					if (_selectedItem != null) Invalidate(DocToClient(_selectedItem.Bounds));
+					_selectedItem = item;
+					FireSelectionChanged();
+					Invalidate(DocToClient(_selectedItem.Bounds));
+				}
+				else
+				{
+					// Find all history items that share the same location
+					var itemList = new List<HistoryItem>();
+					foreach (var i in _items)
+					{
+						if (i.Location == item.Location) itemList.Add(i);
+					}
+
+					var first = true;
+					foreach (var i in itemList)
+					{
+						item.SetRating(rating, first);
+						first = false;
+					}
+				}
+			}
+			else
+			{
+				if (_selectedItem != null)
+				{
+					_selectedItem = null;
+					FireSelectionChanged();
+					Invalidate(DocToClient(_selectedItem.Bounds));
+				}
 			}
 		}
 
@@ -385,11 +400,6 @@ namespace WallSwitch
 			try
 			{
 				Focus();
-
-				if (e.Button == MouseButtons.Left || e.Button == MouseButtons.Right)
-				{
-					SelectItemUnderMouse(e.Location);
-				}
 			}
 			catch (Exception ex)
 			{
@@ -443,6 +453,29 @@ namespace WallSwitch
 			try
 			{
 				this.ResetMouseEventArgs();
+
+				var item = HitTest(e.Location);
+				if (item != null)
+				{
+					if (_mouseOverItem != item && _mouseOverItem != null)
+					{
+						_mouseOverItem = item;
+						_mouseOverItem.OnMouseLeave();
+					}
+
+					var pt = e.Location;
+					pt.Offset(0, _scroll);
+					_mouseOverItem = item;
+					_mouseOverItem.OnMouseOver(pt);
+				}
+				else
+				{
+					if (_mouseOverItem != null)
+					{
+						_mouseOverItem.OnMouseLeave();
+						_mouseOverItem = null;
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -494,7 +527,7 @@ namespace WallSwitch
 						else
 						{
 							var pt = _selectedItem.Bounds.Center();
-							pt.Y -= _imageHeight + k_itemSpacer + k_itemMargin * 2;
+							pt.Y -= _selectedItem.Bounds.Height;
 
 							var found = false;
 							foreach (var item in _items)
@@ -521,7 +554,7 @@ namespace WallSwitch
 						else
 						{
 							var pt = _selectedItem.Bounds.Center();
-							pt.Y += _imageHeight + k_itemSpacer + k_itemMargin * 2;
+							pt.Y += _selectedItem.Bounds.Height;
 
 							var found = false;
 							foreach (var item in _items)
@@ -625,23 +658,6 @@ namespace WallSwitch
 		public int MaxHistory
 		{
 			get { return _maxHistory; }
-		}
-	}
-
-	class HistoryItem
-	{
-		public Bitmap Thumbnail { get; private set; }
-		public Size ThumbnailSize { get; private set; }
-		public string Location { get; private set; }
-		public string LocationOnDisk { get; private set; }
-		public Rectangle Bounds { get; set; }
-
-		public HistoryItem(Database db, ImageRec rec)
-		{
-			Thumbnail = rec.Thumbnail;
-			ThumbnailSize = rec.Thumbnail.Size;
-			Location = rec.Location;
-			LocationOnDisk = rec.GetLocationOnDisk(db);
 		}
 	}
 }

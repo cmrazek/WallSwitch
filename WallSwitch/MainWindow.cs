@@ -2573,7 +2573,7 @@ namespace WallSwitch
 				{
 					foreach (var img in (from i in e.Images select i.ImageRec).Distinct())
 					{
-						c_historyTab.AddHistory(new HistoryItem(db, img));
+						c_historyTab.AddHistory(new HistoryItem(c_historyTab, db, img));
 					}
 				}
 			}
@@ -2733,7 +2733,7 @@ namespace WallSwitch
 					var img = ImageRec.FromDataRow(row);
 					if (img.Retrieve(db))
 					{
-						history.Add(new HistoryItem(db, img));
+						history.Add(new HistoryItem(c_historyTab, db, img));
 					}
 				}
 

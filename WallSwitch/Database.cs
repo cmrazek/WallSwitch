@@ -78,10 +78,12 @@ theme_id		integer not null,
 location_id		integer not null,
 type			varchar(20) not null,
 path			varchar(300) not null,
-pub_date		datetime
+pub_date		datetime,
+rating			integer
 )",
 @"create index img_ix_theme on img (theme_id, path)",
 @"create index img_ix_location on img (location_id)",
+@"create index img_ix_path on img (path)",
 
 @"create table widget (
 theme_id		integer not null,
@@ -107,9 +109,11 @@ guid			varchar(40) not null,
 monitors		varchar(20) not null,
 type			varchar(20) not null,
 path			varchar(300) not null,
-pub_date		datetime
+pub_date		datetime,
+rating			integer
 )",
 @"create index history_ix_theme on history (theme_id)",
+@"create index history_ix_path on history (path)",
 
 @"create table rhistory (
 theme_id		integer not null,
@@ -147,7 +151,11 @@ pub_date			datetime
 
 				if (isNew)
 				{
-					RunScripts(k_initializationScripts);
+					RunNewScripts(k_initializationScripts);
+				}
+				else
+				{
+					RunExistingScripts();
 				}
 			}
 			catch (Exception ex)
@@ -179,7 +187,7 @@ pub_date			datetime
 			Dispose();
 		}
 
-		private void RunScripts(string[] scripts)
+		private void RunNewScripts(string[] scripts)
 		{
 			foreach (var script in scripts)
 			{
@@ -198,6 +206,49 @@ pub_date			datetime
 				{
 					Log.Write(ex);
 				}
+			}
+		}
+
+		private void RunExistingScripts()
+		{
+			AddTableColumnIfMissing("img", "rating", "integer");
+			AddIndexIfMissing("img_ix_path", "create index img_ix_path on img (path)");
+
+			AddTableColumnIfMissing("history", "rating", "integer");
+			AddIndexIfMissing("history_ix_path", "create index history_ix_path on history (path)");
+		}
+
+		private void AddTableColumnIfMissing(string tableName, string columnName, string dataType)
+		{
+			using (var cmd = CreateCommand(string.Format("select * from {0} limit 1", tableName)))
+			{
+				using (var rdr = cmd.ExecuteReader(CommandBehavior.SingleRow))
+				{
+					for (int i = 0; i < rdr.FieldCount; i++)
+					{
+						if (rdr.GetName(i) == columnName) return;
+					}
+				}
+			}
+
+			using (var cmd = CreateCommand(string.Format("alter table {0} add column {1} {2}", tableName, columnName, dataType)))
+			{
+				cmd.ExecuteNonQuery();
+			}
+		}
+
+		private void AddIndexIfMissing(string indexName, string createStatement)
+		{
+			using (var cmd = CreateCommand("select count(*) from sqlite_master where type = 'index' and name = @name"))
+			{
+				cmd.Parameters.AddWithValue("@name", indexName);
+				int count = Convert.ToInt32(cmd.ExecuteScalar());
+				if (count > 0) return;
+			}
+
+			using (var cmd = CreateCommand(createStatement))
+			{
+				cmd.ExecuteNonQuery();
 			}
 		}
 

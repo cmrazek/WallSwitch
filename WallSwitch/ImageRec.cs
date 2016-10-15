@@ -27,6 +27,7 @@ namespace WallSwitch
 		private Bitmap _thumbnail = null;
 		private DateTime? _pubDate = null;
 		private int _hashCode;
+		private int _rating;
 		#endregion
 
 		#region Construction
@@ -66,11 +67,13 @@ namespace WallSwitch
 		{
 			var type = row.GetEnum<ImageLocationType>("type");
 			var path = row.GetString("path");
+			var rating = row.GetInt("rating");
 
 			var loc = new ImageRec();
 			loc._location = path;
 			loc._type = type;
 			loc._hashCode = loc._location.ToLower().GetHashCode();
+			loc._rating = rating;
 			return loc;
 		}
 
@@ -109,6 +112,11 @@ namespace WallSwitch
 		public ImageLocationType Type
 		{
 			get { return _type; }
+		}
+
+		public int Rating
+		{
+			get { return _rating; }
 		}
 
 		public override bool Equals(object obj)

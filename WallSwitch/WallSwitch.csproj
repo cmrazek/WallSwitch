@@ -121,6 +121,7 @@
       <DependentUpon>FeedDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="FeedLoader.cs" />
+    <Compile Include="HistoryItem.cs" />
     <Compile Include="HistoryList.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -261,6 +262,15 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AppIcon.ico" />
+    <None Include="Resources\StarMouseOver1.png" />
+    <None Include="Resources\StarMouseOver0.jpg" />
+    <None Include="Resources\StarUnrated.png" />
+    <None Include="Resources\StarRated1.png" />
+    <None Include="Resources\StarRated0.png" />
+    <None Include="Resources\StarMouseOver.png" />
+    <None Include="Resources\StarM.png" />
+    <None Include="Resources\Star0.png" />
+    <None Include="Resources\Star1.png" />
     <None Include="Resources\Delete.png" />
     <None Include="Resources\MoveDown.png" />
     <None Include="Resources\MoveUp.png" />
@@ -318,7 +328,7 @@
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.102.0\build\net40\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.102.0\build\net40\System.Data.SQLite.Core.targets')" />
