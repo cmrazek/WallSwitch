@@ -338,6 +338,23 @@ namespace WallSwitch
 			Log.Write(ex, "Error:");
 			MessageBox.Show(String.Format(Res.Error_ContentEx, ex.Message, ex.ToString()), Res.Error_Caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
 		}
+
+		public static void InsertAfter(this Control.ControlCollection controls, Control after, Control newCtrl)
+		{
+			var newIndex = controls.Count;
+			controls.Add(newCtrl);
+
+			if (after != null)
+			{
+				var index = 0;
+				foreach (var ctrl in controls)
+				{
+					if (ctrl == after) break;
+					index++;
+				}
+				if (index < newIndex) controls.SetChildIndex(newCtrl, index + 1);
+			}
+		}
 	}
 
 	public static class FileUtil

@@ -141,6 +141,23 @@
     </Compile>
     <Compile Include="IconReader.cs" />
     <Compile Include="ImageCache.cs" />
+    <Compile Include="ImageFilters\ConditionControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ImageFilters\ConditionControl.Designer.cs">
+      <DependentUpon>ConditionControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ImageFilters\FilterCondition.cs" />
+    <Compile Include="ImageFilters\FilterConditionType.cs" />
+    <Compile Include="ImageFilters\ImageFilter.cs" />
+    <Compile Include="ImageFilters\PathNameCondition.cs" />
+    <Compile Include="ImageFilters\RatingCondition.cs" />
+    <Compile Include="ImageFilters\RatingControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ImageFilters\RatingControl.Designer.cs">
+      <DependentUpon>RatingControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="ImageFit.cs" />
     <Compile Include="ImageFormatDesc.cs" />
     <Compile Include="ImageLayout.cs" />
@@ -197,6 +214,9 @@
     <Compile Include="ThemeOrder.cs" />
     <Compile Include="UpdateCheck.cs" />
     <Compile Include="Util.cs" />
+    <Compile Include="VStackPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="WallpaperRenderer.cs" />
     <Compile Include="WidgetInstance.cs" />
     <Compile Include="WidgetLayoutControl.cs">
@@ -222,6 +242,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="HotKeySettings.resx">
       <DependentUpon>HotKeySettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ImageFilters\ConditionControl.resx">
+      <DependentUpon>ConditionControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ImageFilters\RatingControl.resx">
+      <DependentUpon>RatingControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LocationBrowser.resx">
       <DependentUpon>LocationBrowser.cs</DependentUpon>
@@ -339,7 +365,7 @@
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.102.0\build\net40\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.102.0\build\net40\System.Data.SQLite.Core.targets')" />

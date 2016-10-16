@@ -59,7 +59,8 @@ random_group_count			int,
 clear_between_random_groups	tinyint,
 hot_key						varchar(100),
 history_guid				varchar(40),
-latest_guid					varchar(40)
+latest_guid					varchar(40),
+filter_xml					text
 )",
 @"create index theme_ix_name on theme (name)",
 
@@ -220,6 +221,8 @@ pub_date			datetime
 
 		private void RunExistingScripts()
 		{
+			AddTableColumnIfMissing("theme", "filter_xml", "text");
+
 			AddTableColumnIfMissing("img", "rating", "integer");
 			AddTableColumnIfMissing("img", "thumb", "blob");
 			AddTableColumnIfMissing("img", "size", "bigint");

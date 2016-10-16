@@ -38,6 +38,7 @@
 			this.ciAddFolder = new System.Windows.Forms.ToolStripMenuItem();
 			this.miAddRssFeed = new System.Windows.Forms.ToolStripMenuItem();
 			this.ciAddImage = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripSeparator();
 			this.c_browseLocationMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.ciLocationExplore = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripSeparator();
@@ -157,6 +158,8 @@
 			this.cmbColorEffectBack = new System.Windows.Forms.ComboBox();
 			this.lblColorEffectCollageFadeRatioUnit = new System.Windows.Forms.Label();
 			this.trkColorEffectCollageFadeRatio = new System.Windows.Forms.TrackBar();
+			this.c_filterTab = new System.Windows.Forms.TabPage();
+			this.c_filterFlow = new System.Windows.Forms.FlowLayoutPanel();
 			this.c_widgetsTab = new System.Windows.Forms.TabPage();
 			this.c_widgetPanelSplitter = new System.Windows.Forms.SplitContainer();
 			this.c_widgetLayout = new WallSwitch.WidgetLayoutControl();
@@ -186,7 +189,8 @@
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.c_transparencyTrackBar = new System.Windows.Forms.TrackBar();
-			this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripSeparator();
+			this.panel3 = new System.Windows.Forms.Panel();
+			this.c_addFilterButton = new System.Windows.Forms.Button();
 			this.cmLocations.SuspendLayout();
 			this.grpTheme.SuspendLayout();
 			this.cmTheme.SuspendLayout();
@@ -211,6 +215,7 @@
 			this.grpBackgroundColorEffects.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.trkBackgroundBlurDist)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.trkColorEffectCollageFadeRatio)).BeginInit();
+			this.c_filterTab.SuspendLayout();
 			this.c_widgetsTab.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.c_widgetPanelSplitter)).BeginInit();
 			this.c_widgetPanelSplitter.Panel1.SuspendLayout();
@@ -229,6 +234,7 @@
 			this.groupBox1.SuspendLayout();
 			this.panel1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.c_transparencyTrackBar)).BeginInit();
+			this.panel3.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// lstLocations
@@ -310,6 +316,11 @@
 			this.ciAddImage.Size = new System.Drawing.Size(234, 26);
 			this.ciAddImage.Text = "Add &Image";
 			this.ciAddImage.Click += new System.EventHandler(this.ciAddImage_Click);
+			// 
+			// toolStripMenuItem7
+			// 
+			this.toolStripMenuItem7.Name = "toolStripMenuItem7";
+			this.toolStripMenuItem7.Size = new System.Drawing.Size(231, 6);
 			// 
 			// c_browseLocationMenuItem
 			// 
@@ -907,6 +918,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.c_themeTabControl.Controls.Add(this.c_locationsTab);
 			this.c_themeTabControl.Controls.Add(this.c_settingsTab);
+			this.c_themeTabControl.Controls.Add(this.c_filterTab);
 			this.c_themeTabControl.Controls.Add(this.c_widgetsTab);
 			this.c_themeTabControl.Controls.Add(this.tabHistory);
 			this.c_themeTabControl.Location = new System.Drawing.Point(16, 102);
@@ -1681,6 +1693,26 @@
 			this.trkColorEffectCollageFadeRatio.Value = 25;
 			this.trkColorEffectCollageFadeRatio.Scroll += new System.EventHandler(this.ColorEffectCollageFadeRatioTrackBar_Scroll);
 			// 
+			// c_filterTab
+			// 
+			this.c_filterTab.Controls.Add(this.c_filterFlow);
+			this.c_filterTab.Controls.Add(this.panel3);
+			this.c_filterTab.Location = new System.Drawing.Point(4, 25);
+			this.c_filterTab.Name = "c_filterTab";
+			this.c_filterTab.Padding = new System.Windows.Forms.Padding(3);
+			this.c_filterTab.Size = new System.Drawing.Size(939, 484);
+			this.c_filterTab.TabIndex = 5;
+			this.c_filterTab.Text = "Filter";
+			this.c_filterTab.UseVisualStyleBackColor = true;
+			// 
+			// c_filterFlow
+			// 
+			this.c_filterFlow.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.c_filterFlow.Location = new System.Drawing.Point(3, 31);
+			this.c_filterFlow.Name = "c_filterFlow";
+			this.c_filterFlow.Size = new System.Drawing.Size(933, 450);
+			this.c_filterFlow.TabIndex = 0;
+			// 
 			// c_widgetsTab
 			// 
 			this.c_widgetsTab.Controls.Add(this.c_widgetPanelSplitter);
@@ -1710,7 +1742,7 @@
 			// 
 			this.c_widgetPanelSplitter.Panel2.Controls.Add(this.c_widgetPanelPropSplitter);
 			this.c_widgetPanelSplitter.Size = new System.Drawing.Size(931, 476);
-			this.c_widgetPanelSplitter.SplitterDistance = 711;
+			this.c_widgetPanelSplitter.SplitterDistance = 701;
 			this.c_widgetPanelSplitter.SplitterWidth = 5;
 			this.c_widgetPanelSplitter.TabIndex = 2;
 			// 
@@ -1720,7 +1752,7 @@
 			this.c_widgetLayout.Location = new System.Drawing.Point(0, 41);
 			this.c_widgetLayout.Margin = new System.Windows.Forms.Padding(5);
 			this.c_widgetLayout.Name = "c_widgetLayout";
-			this.c_widgetLayout.Size = new System.Drawing.Size(711, 435);
+			this.c_widgetLayout.Size = new System.Drawing.Size(701, 435);
 			this.c_widgetLayout.TabIndex = 0;
 			this.c_widgetLayout.WidgetsChanged += new System.EventHandler(this.c_widgetLayout_WidgetsChanged);
 			this.c_widgetLayout.SelectedWidgetChanged += new System.EventHandler<WallSwitch.WidgetLayoutControl.WidgetEventArgs>(this.c_widgetLayout_SelectedWidgetChanged);
@@ -1737,13 +1769,13 @@
 			this.c_widgetTopPanel.Location = new System.Drawing.Point(0, 0);
 			this.c_widgetTopPanel.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetTopPanel.Name = "c_widgetTopPanel";
-			this.c_widgetTopPanel.Size = new System.Drawing.Size(711, 41);
+			this.c_widgetTopPanel.Size = new System.Drawing.Size(701, 41);
 			this.c_widgetTopPanel.TabIndex = 1;
 			// 
 			// c_addWidgetButton
 			// 
 			this.c_addWidgetButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.c_addWidgetButton.Location = new System.Drawing.Point(627, 5);
+			this.c_addWidgetButton.Location = new System.Drawing.Point(617, 5);
 			this.c_addWidgetButton.Margin = new System.Windows.Forms.Padding(4);
 			this.c_addWidgetButton.Name = "c_addWidgetButton";
 			this.c_addWidgetButton.Size = new System.Drawing.Size(80, 28);
@@ -1761,7 +1793,7 @@
 			this.c_widgetTypes.Location = new System.Drawing.Point(71, 6);
 			this.c_widgetTypes.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetTypes.Name = "c_widgetTypes";
-			this.c_widgetTypes.Size = new System.Drawing.Size(547, 24);
+			this.c_widgetTypes.Size = new System.Drawing.Size(537, 24);
 			this.c_widgetTypes.TabIndex = 1;
 			this.c_widgetTypes.SelectedIndexChanged += new System.EventHandler(this.c_widgetTypes_SelectedIndexChanged);
 			// 
@@ -1791,7 +1823,7 @@
 			// c_widgetPanelPropSplitter.Panel2
 			// 
 			this.c_widgetPanelPropSplitter.Panel2.Controls.Add(this.c_widgetPropertyGrid);
-			this.c_widgetPanelPropSplitter.Size = new System.Drawing.Size(215, 476);
+			this.c_widgetPanelPropSplitter.Size = new System.Drawing.Size(225, 476);
 			this.c_widgetPanelPropSplitter.SplitterDistance = 160;
 			this.c_widgetPanelPropSplitter.SplitterWidth = 5;
 			this.c_widgetPanelPropSplitter.TabIndex = 0;
@@ -1806,7 +1838,7 @@
 			this.c_widgetList.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetList.MultiSelect = false;
 			this.c_widgetList.Name = "c_widgetList";
-			this.c_widgetList.Size = new System.Drawing.Size(182, 160);
+			this.c_widgetList.Size = new System.Drawing.Size(192, 160);
 			this.c_widgetList.TabIndex = 0;
 			this.c_widgetList.UseCompatibleStateImageBehavior = false;
 			this.c_widgetList.View = System.Windows.Forms.View.Details;
@@ -1823,7 +1855,7 @@
 			this.c_widgetControlRightPanel.Controls.Add(this.c_widgetMoveUpButton);
 			this.c_widgetControlRightPanel.Controls.Add(this.c_widgetMoveDownButton);
 			this.c_widgetControlRightPanel.Dock = System.Windows.Forms.DockStyle.Right;
-			this.c_widgetControlRightPanel.Location = new System.Drawing.Point(182, 0);
+			this.c_widgetControlRightPanel.Location = new System.Drawing.Point(192, 0);
 			this.c_widgetControlRightPanel.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetControlRightPanel.Name = "c_widgetControlRightPanel";
 			this.c_widgetControlRightPanel.Size = new System.Drawing.Size(33, 160);
@@ -1879,7 +1911,7 @@
 			this.c_widgetPropertyGrid.Location = new System.Drawing.Point(0, 0);
 			this.c_widgetPropertyGrid.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetPropertyGrid.Name = "c_widgetPropertyGrid";
-			this.c_widgetPropertyGrid.Size = new System.Drawing.Size(215, 311);
+			this.c_widgetPropertyGrid.Size = new System.Drawing.Size(225, 311);
 			this.c_widgetPropertyGrid.TabIndex = 0;
 			this.c_widgetPropertyGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.c_widgetPropertyGrid_PropertyValueChanged);
 			// 
@@ -2003,10 +2035,24 @@
 			this.c_transparencyTrackBar.Value = 1;
 			this.c_transparencyTrackBar.Scroll += new System.EventHandler(this.TransparencyTrackBar_Scroll);
 			// 
-			// toolStripMenuItem7
+			// panel3
 			// 
-			this.toolStripMenuItem7.Name = "toolStripMenuItem7";
-			this.toolStripMenuItem7.Size = new System.Drawing.Size(231, 6);
+			this.panel3.Controls.Add(this.c_addFilterButton);
+			this.panel3.Dock = System.Windows.Forms.DockStyle.Top;
+			this.panel3.Location = new System.Drawing.Point(3, 3);
+			this.panel3.Name = "panel3";
+			this.panel3.Size = new System.Drawing.Size(933, 28);
+			this.panel3.TabIndex = 0;
+			// 
+			// c_addFilterButton
+			// 
+			this.c_addFilterButton.Location = new System.Drawing.Point(3, 3);
+			this.c_addFilterButton.Name = "c_addFilterButton";
+			this.c_addFilterButton.Size = new System.Drawing.Size(180, 23);
+			this.c_addFilterButton.TabIndex = 0;
+			this.c_addFilterButton.Text = "Add Filter Condition";
+			this.c_addFilterButton.UseVisualStyleBackColor = true;
+			this.c_addFilterButton.Click += new System.EventHandler(this.c_addFilterButton_Click);
 			// 
 			// MainWindow
 			// 
@@ -2060,6 +2106,7 @@
 			this.grpBackgroundColorEffects.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.trkBackgroundBlurDist)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.trkColorEffectCollageFadeRatio)).EndInit();
+			this.c_filterTab.ResumeLayout(false);
 			this.c_widgetsTab.ResumeLayout(false);
 			this.c_widgetPanelSplitter.Panel1.ResumeLayout(false);
 			this.c_widgetPanelSplitter.Panel2.ResumeLayout(false);
@@ -2080,6 +2127,7 @@
 			this.panel1.ResumeLayout(false);
 			this.panel1.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.c_transparencyTrackBar)).EndInit();
+			this.panel3.ResumeLayout(false);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -2244,6 +2292,10 @@
 		private System.Windows.Forms.ColumnHeader colFrequency;
 		private System.Windows.Forms.ToolStripMenuItem c_browseLocationMenuItem;
 		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem7;
+		private System.Windows.Forms.TabPage c_filterTab;
+		private System.Windows.Forms.FlowLayoutPanel c_filterFlow;
+		private System.Windows.Forms.Panel panel3;
+		private System.Windows.Forms.Button c_addFilterButton;
 	}
 }
 

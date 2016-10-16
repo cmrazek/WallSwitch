@@ -103,6 +103,7 @@ namespace WallSwitch
 		private int _backgroundBlurDist = k_defaultBackgroundBlurDist;
 
 		private List<WidgetInstance> _widgets = new List<WidgetInstance>();
+		private string _filterXml = null;
 
 		private static Random _rand = null;
 		#endregion
@@ -296,6 +297,12 @@ namespace WallSwitch
 			get { return _clearBetweenRandomGroups; }
 			set { _clearBetweenRandomGroups = value; }
 		}
+
+		public string FilterXml
+		{
+			get { return _filterXml; }
+			set { _filterXml = value; }
+		}
 		#endregion
 
 		#region Save/Load
@@ -340,7 +347,8 @@ namespace WallSwitch
 				"clear_between_random_groups", _clearBetweenRandomGroups ? 1 : 0,
 				"hot_key", _hotKey.ToSaveString(),
 				"history_guid", _historyGuid,
-				"latest_guid", _historyLatestGuid
+				"latest_guid", _historyLatestGuid,
+				"filter_xml", _filterXml
 			};
 
 			var newRecord = false;
@@ -447,6 +455,7 @@ namespace WallSwitch
 
 			_historyGuid = row.GetString("history_guid");
 			_historyLatestGuid = row.GetString("latest_guid");
+			_filterXml = row.GetString("filter_xml");
 
 			foreach (DataRow locRow in db.SelectDataTable("select rowid, * from location where theme_id = @theme_id", "@theme_id", _rowid).Rows)
 			{

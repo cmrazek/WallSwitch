@@ -12,6 +12,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Linq;
+using WallSwitch.ImageFilters;
 
 namespace WallSwitch
 {
@@ -569,6 +570,7 @@ namespace WallSwitch
 			}
 
 			RefreshTransparency();
+			RefreshFilter();
 
 			Dirty = false;
 
@@ -738,6 +740,12 @@ namespace WallSwitch
 				clearBetweenRandomGroups = false;
 			}
 
+			string filterXml;
+			if (!SaveFilter(showErrors, out filterXml))
+			{
+				return false;
+			}
+
 			_currentTheme.Frequency = freq;
 			_currentTheme.Period = period;
 			_currentTheme.Mode = mode;
@@ -793,6 +801,8 @@ namespace WallSwitch
 
 			_currentTheme.RandomGroupCount = randomGroupCount;
 			_currentTheme.ClearBetweenRandomGroups = clearBetweenRandomGroups;
+
+			_currentTheme.FilterXml = filterXml;
 
 			c_widgetLayout.SaveToTheme(_currentTheme);
 
@@ -3113,6 +3123,95 @@ namespace WallSwitch
 			ImageFileDeleted?.Invoke(this, new ImageFileEventArgs { FileName = fileName });
 
 			c_historyTab.RemoveItem(fileName);
+		}
+		#endregion
+
+		#region Filter
+		private void RefreshFilter()
+		{
+			c_filterFlow.Controls.Clear();
+
+			var filterXml = _currentTheme.FilterXml;
+			if (!string.IsNullOrEmpty(filterXml))
+			{
+				try
+				{
+					var xmlDoc = new XmlDocument();
+					xmlDoc.LoadXml(filterXml);
+
+					foreach (XmlElement element in xmlDoc.SelectNodes("/Filter/Condition"))
+					{
+						var condCtrl = new ConditionControl();
+						condCtrl.LoadXml(element);
+						c_filterFlow.Controls.Add(condCtrl);
+					}
+				}
+				catch (Exception ex)
+				{
+					Log.Error(ex);
+					c_filterFlow.Controls.Clear();
+				}
+			}
+		}
+
+		private bool SaveFilter(bool showErrors, out string xmlOut)
+		{
+			var count = (from c in c_filterFlow.Controls.Cast<Control>() where c is ConditionControl select c).Count();
+			if (count == 0)
+			{
+				xmlOut = null;
+				return true;
+			}
+
+			var sb = new StringBuilder();
+			using (var xml = XmlWriter.Create(sb, new XmlWriterSettings { OmitXmlDeclaration = true }))
+			{
+				xml.WriteStartDocument();
+				xml.WriteStartElement("Filter");
+
+				foreach (ConditionControl ctrl in c_filterFlow.Controls.Cast<Control>().Where(x => x is ConditionControl))
+				{
+					xml.WriteStartElement("Condition");
+					if (!ctrl.SaveXml(xml, showErrors, c_filterTab))
+					{
+						xmlOut = null;
+						return false;
+					}
+					xml.WriteEndElement();
+				}
+
+				xml.WriteEndElement();
+				xml.WriteEndDocument();
+			}
+
+			xmlOut = sb.ToString();
+			return true;
+		}
+
+		public void OnFiltersChanged()
+		{
+			var index = 0;
+			foreach (var ctrl in c_filterFlow.Controls)
+			{
+				var cond = ctrl as ConditionControl;
+				if (cond == null) continue;
+
+				cond.Index = index;
+				cond.EnableControls();
+				index++;
+			}
+		}
+
+		private void c_addFilterButton_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				c_filterFlow.Controls.Add(new ConditionControl());
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
 		}
 		#endregion
 	}
