@@ -172,10 +172,10 @@ namespace WallSwitch
 			return string.Empty;
 		}
 
-		public string GetLocationOnDisk()
+		public string GetLocationOnDisk(bool tryDatabase)
 		{
 			var path = GetLocationOnDisk(null);
-			if (string.IsNullOrEmpty(path))
+			if (string.IsNullOrEmpty(path) && tryDatabase)
 			{
 				using (var db = new Database())
 				{

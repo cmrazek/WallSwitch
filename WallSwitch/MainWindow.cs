@@ -18,6 +18,8 @@ namespace WallSwitch
 	internal partial class MainWindow : Form
 	{
 		#region Variables
+		public static MainWindow Current;
+
 		private List<Theme> _themes = new List<Theme>();
 		private Theme _currentTheme = null;
 		private bool _reallyClose = false;
@@ -63,6 +65,8 @@ namespace WallSwitch
 		#region Window Management
 		public MainWindow(bool winStart)
 		{
+			MainWindow.Current = this;
+
 			if (_winStart = winStart) HideToTray();
 			InitializeComponent();
 		}
@@ -2735,8 +2739,7 @@ namespace WallSwitch
 				MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)
 				== DialogResult.Yes)
 			{
-				FileUtil.RecycleFile(fileName);
-				c_historyTab.RemoveItem(item);
+				DeleteImageFile(fileName);
 			}
 		}
 
@@ -3082,6 +3085,24 @@ namespace WallSwitch
 			if (value < c_transparencyTrackBar.Minimum) value = c_transparencyTrackBar.Minimum;
 			if (value > c_transparencyTrackBar.Maximum) value = c_transparencyTrackBar.Maximum;
 			c_transparencyTrackBar.Value = value;
+		}
+		#endregion
+
+		#region Image Management
+		public event EventHandler<ImageFileEventArgs> ImageFileDeleted;
+
+		public class ImageFileEventArgs : EventArgs
+		{
+			public string FileName { get; set; }
+		}
+
+		public void DeleteImageFile(string fileName)
+		{
+			FileUtil.RecycleFile(fileName);
+
+			ImageFileDeleted?.Invoke(this, new ImageFileEventArgs { FileName = fileName });
+
+			c_historyTab.RemoveItem(fileName);
 		}
 		#endregion
 	}

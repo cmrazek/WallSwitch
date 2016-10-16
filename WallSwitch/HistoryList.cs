@@ -141,6 +141,19 @@ namespace WallSwitch
 
 			return false;
 		}
+
+		public bool RemoveItem(string fileName)
+		{
+			foreach (var item in _items)
+			{
+				if (item.LocationOnDisk == fileName)
+				{
+					return RemoveItem(item);
+				}
+			}
+
+			return false;
+		}
 		#endregion
 
 		#region Layout / Drawing

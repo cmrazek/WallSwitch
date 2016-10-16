@@ -18,13 +18,22 @@ namespace WallSwitch
 		private volatile bool _kill;
 		private ItemInfo _mouseOverItem;
 
-		private class ItemInfo
+		private class ItemInfo : IComparable<ItemInfo>
 		{
 			public ListViewItem lvi;
 			public ImageRec img;
+			public string relativeLocation;
+			public string locationOnDisk;
 			public long? size;
 			public Rectangle[] starRects;
 			public int mouseOverRating;
+
+			public int CompareTo(ItemInfo other)
+			{
+				if (other == null) return -1;
+
+				return relativeLocation.CompareTo(other.relativeLocation);
+			}
 		}
 
 		public LocationBrowser(Location loc)
@@ -44,6 +53,8 @@ namespace WallSwitch
 
 			var prop = c_list.GetType().GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
 			if (prop != null) prop.SetValue(c_list, true, null);
+
+			MainWindow.Current.ImageFileDeleted += MainWindow_ImageFileDeleted;
 		}
 
 		private void LocationBrowser_Load(object sender, EventArgs e)
@@ -53,17 +64,26 @@ namespace WallSwitch
 				using (var db = new Database())
 				{
 					var table = db.SelectDataTable("select * from img where location_id = @location_id", "@location_id", _loc.RowId);
+					var items = new List<ItemInfo>();
 					foreach (DataRow row in table.Rows)
 					{
 						var img = ImageRec.FromDataRow(row);
-						var lvi = CreateLVI(img);
+						var item = CreateItemInfo(img);
+						items.Add(item);
+					}
+
+					items.Sort();
+
+					foreach (var item in items)
+					{
+						var lvi = CreateLVI(item);
 						c_list.Items.Add(lvi);
 
-						if (img.Thumbnail == null)
+						if (item.img.Thumbnail == null)
 						{
 							if (_thumbnailLoadQueue == null) _thumbnailLoadQueue = new Queue<ImageRec>();
-							_thumbnailLoadQueue.Enqueue(img);
-							img.ThumbnailUpdated += Img_ThumbnailUpdated;
+							_thumbnailLoadQueue.Enqueue(item.img);
+							item.img.ThumbnailUpdated += Img_ThumbnailUpdated;
 						}
 					}
 				}
@@ -84,6 +104,8 @@ namespace WallSwitch
 		private void LocationBrowser_FormClosed(object sender, FormClosedEventArgs e)
 		{
 			_kill = true;
+
+			MainWindow.Current.ImageFileDeleted -= MainWindow_ImageFileDeleted;
 		}
 
 		private void Img_ThumbnailUpdated(object sender, EventArgs e)
@@ -113,12 +135,31 @@ namespace WallSwitch
 			}
 		}
 
-		private ListViewItem CreateLVI(ImageRec img)
+		private ItemInfo CreateItemInfo(ImageRec img)
+		{
+			var info = new ItemInfo();
+			info.img = img;
+
+			info.relativeLocation = img.Location;
+			if (info.relativeLocation.StartsWith(_loc.Path, StringComparison.OrdinalIgnoreCase))
+			{
+				var remove = _loc.Path.Length;
+				if (remove < info.relativeLocation.Length && info.relativeLocation[remove] == '\\') remove++;
+				info.relativeLocation = info.relativeLocation.Substring(remove);
+			}
+
+			info.locationOnDisk = img.GetLocationOnDisk(false);
+			if (info.locationOnDisk == null) info.locationOnDisk = string.Empty;
+
+			info.starRects = new Rectangle[5];
+
+			return info;
+		}
+
+		private ListViewItem CreateLVI(ItemInfo info)
 		{
 			var lvi = new ListViewItem();
-			var info = new ItemInfo();
 			info.lvi = lvi;
-			info.img = img;
 			lvi.Tag = info;
 
 			while (lvi.SubItems.Count < c_list.Columns.Count)
@@ -127,16 +168,7 @@ namespace WallSwitch
 				switch (col.Tag.ToString())
 				{
 					case "path":
-						{
-							var path = img.Location;
-							if (path.StartsWith(_loc.Path, StringComparison.OrdinalIgnoreCase))
-							{
-								var remove = _loc.Path.Length;
-								if (remove < path.Length && path[remove] == '\\') remove++;
-								path = path.Substring(remove);
-							}
-							lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, path));
-						}
+						lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, info.relativeLocation));
 						break;
 					case "rating":
 					case "size":
@@ -146,8 +178,6 @@ namespace WallSwitch
 						throw new InvalidOperationException(string.Format("Invalid column tag '{0}'.", col.Tag));
 				}
 			}
-
-			info.starRects = new Rectangle[5];
 
 			return lvi;
 		}
@@ -183,7 +213,7 @@ namespace WallSwitch
 						{
 							try
 							{
-								var fileName = info.img.GetLocationOnDisk(null);
+								var fileName = info.locationOnDisk;
 								if (!string.IsNullOrEmpty(fileName))
 								{
 									var fileInfo = new System.IO.FileInfo(fileName);
@@ -459,7 +489,7 @@ namespace WallSwitch
 				var item = lvi.Tag as ItemInfo;
 				if (item == null) return;
 
-				var fileName = item.img.GetLocationOnDisk();
+				var fileName = item.locationOnDisk;
 				if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
 				{
 					this.ShowError(Res.Error_ImageFileMissing);
@@ -484,7 +514,7 @@ namespace WallSwitch
 				var item = lvi.Tag as ItemInfo;
 				if (item == null) return;
 
-				var fileName = item.img.GetLocationOnDisk();
+				var fileName = item.locationOnDisk;
 				if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
 				{
 					this.ShowError(Res.Error_ImageFileMissing);
@@ -503,7 +533,24 @@ namespace WallSwitch
 		{
 			try
 			{
+				var lvi = c_list.SelectedItems.Cast<ListViewItem>().FirstOrDefault();
+				if (lvi == null) return;
 
+				var item = lvi.Tag as ItemInfo;
+				if (item == null) return;
+
+				var fileName = item.locationOnDisk;
+				if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
+				{
+					this.ShowError(Res.Error_ImageFileMissing);
+					return;
+				}
+
+				if (MessageBox.Show(this, Res.Confirm_DeleteHistoryFile, Res.Confirm_DeleteHistoryFile_Caption,
+					MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+				{
+					MainWindow.Current.DeleteImageFile(fileName);
+				}
 			}
 			catch (Exception ex)
 			{
@@ -530,6 +577,21 @@ namespace WallSwitch
 			c_openContextMenuItem.Enabled = selectCount == 1;
 			c_exploreContextMenuItem.Enabled = selectCount == 1;
 			c_deleteContextMenuItem.Enabled = selectCount == 1;
+		}
+
+		private void MainWindow_ImageFileDeleted(object sender, MainWindow.ImageFileEventArgs e)
+		{
+			var delFileName = e.FileName;
+
+			foreach (var lvi in c_list.Items.Cast<ListViewItem>())
+			{
+				var item = lvi.Tag as ItemInfo;
+				if (delFileName.Equals(item.locationOnDisk, StringComparison.OrdinalIgnoreCase))
+				{
+					c_list.Items.Remove(lvi);
+					break;
+				}
+			}
 		}
 	}
 }
