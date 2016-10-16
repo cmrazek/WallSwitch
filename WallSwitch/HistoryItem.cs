@@ -11,7 +11,7 @@ namespace WallSwitch
 	class HistoryItem
 	{
 		private HistoryList _list;
-		private Image _thumbnail;
+		private CompressedImage _thumbnail;
 		private string _location;
 		private string _locationOnDisk;
 		private Rectangle _bounds;
@@ -54,10 +54,7 @@ namespace WallSwitch
 			var bytes = row.GetBytes("thumb");
 			if (bytes != null)
 			{
-				using (var memStream = new MemoryStream(bytes))
-				{
-					ret._thumbnail = Image.FromStream(memStream);
-				}
+				ret._thumbnail = new CompressedImage(bytes);
 			}
 
 			return ret;
@@ -70,7 +67,7 @@ namespace WallSwitch
 			_list = list;
 		}
 
-		public Image Thumbnail
+		public CompressedImage Thumbnail
 		{
 			get { return _thumbnail; }
 		}

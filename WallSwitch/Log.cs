@@ -288,6 +288,11 @@ namespace WallSwitch
 			Write(LogLevel.Error, format, args);
 		}
 
+		public static void Error(Exception ex)
+		{
+			Write(LogLevel.Error, ex.ToString());
+		}
+
 		public static void Flush()
 		{
 			if (_file != null)

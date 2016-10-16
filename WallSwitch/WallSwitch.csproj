@@ -107,6 +107,7 @@
     <Compile Include="ColorSample.Designer.cs">
       <DependentUpon>ColorSample.cs</DependentUpon>
     </Compile>
+    <Compile Include="CompressedImage.cs" />
     <Compile Include="Data.cs">
       <DependentUpon>Data.xsd</DependentUpon>
     </Compile>
@@ -149,6 +150,12 @@
     <Compile Include="ImageRec.cs" />
     <Compile Include="IWallSwitchService.cs" />
     <Compile Include="Location.cs" />
+    <Compile Include="LocationBrowser.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LocationBrowser.Designer.cs">
+      <DependentUpon>LocationBrowser.cs</DependentUpon>
+    </Compile>
     <Compile Include="Log.cs" />
     <Compile Include="MainWindow.cs">
       <SubType>Form</SubType>
@@ -216,6 +223,9 @@
     <EmbeddedResource Include="HotKeySettings.resx">
       <DependentUpon>HotKeySettings.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="LocationBrowser.resx">
+      <DependentUpon>LocationBrowser.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -262,6 +272,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AppIcon.ico" />
+    <None Include="Resources\StarMouseOver0.png" />
     <None Include="Resources\StarMouseOver1.png" />
     <None Include="Resources\StarMouseOver0.jpg" />
     <None Include="Resources\StarUnrated.png" />

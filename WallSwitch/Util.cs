@@ -429,7 +429,7 @@ namespace WallSwitch
 			if (clientWidth <= 0) return;
 
 			var totalWidth = (from c in listView.Columns.Cast<ColumnHeader>() select Math.Abs(c.Width)).Sum();
-			if (totalWidth <= 0) totalWidth = 1;	// To avoid divide-by-zero.
+			if (totalWidth <= 0) totalWidth = 1;    // To avoid divide-by-zero.
 
 			foreach (ColumnHeader col in listView.Columns)
 			{
@@ -438,6 +438,30 @@ namespace WallSwitch
 				var ratio = (float)width / (float)totalWidth;
 				col.Width = (int)(clientWidth * ratio);
 			}
+		}
+
+		public static int GetItemIndex(this ListView lv, ListViewItem lvi)
+		{
+			var index = 0;
+			foreach (var item in lv.Items)
+			{
+				if (item == lvi) return index;
+				index++;
+			}
+			return -1;
+		}
+
+		public static Rectangle? GetItemRect(this ListView lv, ListViewItem lvi)
+		{
+			var index = lv.GetItemIndex(lvi);
+			if (index >= 0) return lv.GetItemRect(index);
+			return null;
+		}
+
+		public static void InvalidateItem(this ListView lv, ListViewItem lvi)
+		{
+			var rect = lv.GetItemRect(lvi);
+			if (rect.HasValue && rect.Value.IntersectsWith(lv.ClientRectangle)) lv.Invalidate(rect.Value);
 		}
 	}
 
@@ -539,7 +563,27 @@ namespace WallSwitch
 		}
 	}
 
-	public static class GraphicsUtil
+	public static class LongUtil
+	{
+		public static string ToSizeString(this long value)
+		{
+			if (value < 1024) return string.Format("{0} B", value);
+
+			double val = value / 1024.0;
+			if (val < 1024.0) return string.Format("{0:N1} KB", val);
+
+			val /= 1024;
+			if (val < 1024.0) return string.Format("{0:N1} MB", val);
+
+			val /= 1024;
+			if (val < 1024.0) return string.Format("{0:N1} GB", val);
+
+			val /= 1024;
+			return string.Format("{0:N1} TB", val);
+		}
+	}
+
+	static class GraphicsUtil
 	{
 		public static void DrawImageWithColorMatrix(this Graphics g, Image img, RectangleF imgRect, RectangleF srcRect, ColorMatrix colorMatrix)
 		{
@@ -578,6 +622,14 @@ namespace WallSwitch
 			}
 
 			return pgb;
+		}
+
+		public static void DrawImage(this Graphics g, CompressedImage img, Rectangle rect)
+		{
+			using (var i = img.GetImage())
+			{
+				g.DrawImage(i, rect);
+			}
 		}
 	}
 

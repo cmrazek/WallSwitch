@@ -1439,7 +1439,7 @@ namespace WallSwitch
 						"path", imgLayout.ImageRec.Location,
 						"pub_date", imgLayout.ImageRec.PubDate.HasValue ? (object)imgLayout.ImageRec.PubDate.Value : null,
 						"rating", imgLayout.ImageRec.Rating,
-						"thumb", imgLayout.ImageRec.GetThumbnailBlob()
+						"thumb", imgLayout.ImageRec.Thumbnail?.Data
 					});
 			}
 

@@ -1826,6 +1826,7 @@ namespace WallSwitch
 			ciDeleteLocation.Enabled = multiSelectedItems;
 			ciUpdateLocationNow.Enabled = multiSelectedItems;
 			ciLocationExplore.Enabled = multiFileOrDirSelected;
+			c_browseLocationMenuItem.Enabled = singleSelectedItem;
 			ciLocationProperties.Enabled = singleSelectedItem;
 		}
 
@@ -2137,6 +2138,24 @@ namespace WallSwitch
 			try
 			{
 				ControlChanged(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void c_browseLocationMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (lstLocations.SelectedItems.Count != 1) return;
+
+				var selectedItem = lstLocations.SelectedItems[0];
+				var loc = selectedItem.Tag as Location;
+
+				var window = new LocationBrowser(loc);
+				window.Show();
 			}
 			catch (Exception ex)
 			{

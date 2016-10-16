@@ -147,7 +147,7 @@ namespace WallSwitch
 						cmd.Parameters.AddWithValue("@path", img.Location);
 						cmd.Parameters.AddWithValue("@pub_date", img.PubDate.HasValue ? (object)img.PubDate.Value : null);
 						cmd.Parameters.AddWithValue("@rating", img.Rating);
-						cmd.Parameters.AddWithValue("@thumb", img.GetThumbnailBlob());
+						cmd.Parameters.AddWithValue("@thumb", img.Thumbnail?.Data);
 
 						cmd.ExecuteNonQuery();
 					}

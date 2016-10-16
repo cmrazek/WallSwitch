@@ -556,9 +556,6 @@ Click 'yes' to be taken to the download page.</value>
   <data name="Seconds" xml:space="preserve">
     <value>Seconds</value>
   </data>
-  <data name="StarMouseOver0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\StarMouseOver0.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="StarMouseOver1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\StarMouseOver1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -570,5 +567,8 @@ Click 'yes' to be taken to the download page.</value>
   </data>
   <data name="StarUnrated" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\StarUnrated.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="StarMouseOver0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\StarMouseOver0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

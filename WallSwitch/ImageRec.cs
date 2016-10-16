@@ -24,10 +24,14 @@ namespace WallSwitch
 		private ImageLocationType _type;
 		private Image _image = null;
 		private ImageFormat _imageFormat = null;
-		private Bitmap _thumbnail = null;
+		private CompressedImage _thumbnail = null;
 		private DateTime? _pubDate = null;
 		private int _hashCode;
 		private int _rating;
+		#endregion
+
+		#region Events
+		public event EventHandler ThumbnailUpdated;
 		#endregion
 
 		#region Construction
@@ -74,6 +78,13 @@ namespace WallSwitch
 			loc._type = type;
 			loc._hashCode = loc._location.ToLower().GetHashCode();
 			loc._rating = rating;
+
+			var bytes = row.GetBytes("thumb");
+			if (bytes != null)
+			{
+				loc._thumbnail = new CompressedImage(bytes);
+			}
+
 			return loc;
 		}
 
@@ -117,6 +128,11 @@ namespace WallSwitch
 		public int Rating
 		{
 			get { return _rating; }
+			set
+			{
+				if (value < 0 || value > 5) throw new ArgumentOutOfRangeException();
+				_rating = value;
+			}
 		}
 
 		public override bool Equals(object obj)
@@ -139,6 +155,7 @@ namespace WallSwitch
 				case ImageLocationType.File:
 					return File.Exists(_location) ? _location : string.Empty;
 				case ImageLocationType.Url:
+					if (db != null)
 					{
 						string fileName;
 						if (!ImageCache.TryGetCachedImage(db, _location, out fileName) || !File.Exists(fileName))
@@ -147,8 +164,25 @@ namespace WallSwitch
 						}
 						return fileName;
 					}
+					else
+					{
+						return null;
+					}
 			}
 			return string.Empty;
+		}
+
+		public string GetLocationOnDisk()
+		{
+			var path = GetLocationOnDisk(null);
+			if (string.IsNullOrEmpty(path))
+			{
+				using (var db = new Database())
+				{
+					path = GetLocationOnDisk(db);
+				}
+			}
+			return path;
 		}
 
 		public ImageFormat ImageFormat
@@ -175,7 +209,7 @@ namespace WallSwitch
 					{
 						_imageFormat = ImageFormatDesc.FileNameToImageFormat(_location);
 						_image = Image.FromFile(_location);
-						MakeThumbnail();
+						MakeThumbnail(db);
 						return true;
 					}
 					catch (Exception ex)
@@ -196,7 +230,7 @@ namespace WallSwitch
 							{
 								Log.Write(LogLevel.Debug, "Loading cached image from '{0}'.", fileName);
 								_image = Image.FromFile(fileName);
-								MakeThumbnail();
+								MakeThumbnail(db);
 								return true;
 							}
 							catch (Exception ex)
@@ -215,7 +249,7 @@ namespace WallSwitch
 						var stream = response.GetResponseStream();
 						_image = Image.FromStream(stream);
 						ImageCache.SaveImage(this, db);
-						MakeThumbnail();
+						MakeThumbnail(db);
 						return true;
 					}
 					catch (Exception ex)
@@ -249,7 +283,7 @@ namespace WallSwitch
 			get { return _image; }
 		}
 
-		private void MakeThumbnail()
+		private void MakeThumbnail(Database db)
 		{
 			try
 			{
@@ -260,7 +294,22 @@ namespace WallSwitch
 					if (imageRect.Width > HistoryList.ThumbnailWidth) imageRect = imageRect.ScaleRectWidth(HistoryList.ThumbnailWidth);
 					if (imageRect.Height > HistoryList.ThumbnailHeight) imageRect = imageRect.ScaleRectHeight(HistoryList.ThumbnailHeight);
 
-					_thumbnail = new Bitmap(_image, (int)imageRect.Width, (int)imageRect.Height);
+					_thumbnail = new CompressedImage(new Bitmap(_image, (int)imageRect.Width, (int)imageRect.Height));
+					ThumbnailUpdated?.Invoke(this, EventArgs.Empty);
+				}
+
+				using (var cmd = db.CreateCommand("update img set thumb = @thumb where path = @path"))
+				{
+					cmd.Parameters.AddWithValue("@thumb", _thumbnail.Data);
+					cmd.Parameters.AddWithValue("@path", _location);
+					cmd.ExecuteNonQuery();
+				}
+
+				using (var cmd = db.CreateCommand("update history set thumb = @thumb where path = @path"))
+				{
+					cmd.Parameters.AddWithValue("@thumb", _thumbnail.Data);
+					cmd.Parameters.AddWithValue("@path", _location);
+					cmd.ExecuteNonQuery();
 				}
 			}
 			catch (Exception ex)
@@ -270,28 +319,12 @@ namespace WallSwitch
 			}
 		}
 
-		public Bitmap Thumbnail
+		public CompressedImage Thumbnail
 		{
 			get
 			{
-				MakeThumbnail();
 				return _thumbnail;
 			}
-		}
-
-		public byte[] GetThumbnailBlob()
-		{
-			if (_thumbnail == null) return null;
-
-			byte[] blob;
-			using (var memStream = new MemoryStream())
-			{
-				_thumbnail.Save(memStream, ImageFormat.Jpeg);
-				blob = new byte[memStream.Length];
-				memStream.Seek(0, SeekOrigin.Begin);
-				memStream.Read(blob, 0, blob.Length);
-			}
-			return blob;
 		}
 		#endregion
 
