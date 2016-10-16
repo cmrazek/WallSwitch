@@ -143,6 +143,24 @@ namespace WallSwitch {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} images.
+        /// </summary>
+        internal static string Browser_ImageCount {
+            get {
+                return ResourceManager.GetString("Browser_ImageCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} image.
+        /// </summary>
+        internal static string Browser_ImageCount1 {
+            get {
+                return ResourceManager.GetString("Browser_ImageCount1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Return.
         /// </summary>
         internal static string Char_Cr {

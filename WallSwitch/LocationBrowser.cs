@@ -83,6 +83,8 @@ namespace WallSwitch
 							item.img.ThumbnailUpdated += Img_ThumbnailUpdated;
 						}
 					}
+
+					RefreshStatusCounts();
 				}
 
 				if (_thumbnailLoadQueue != null)
@@ -245,6 +247,8 @@ namespace WallSwitch
 			{
 				Log.Info("Loading {0} thumbnail(s) in background thread.", _thumbnailLoadQueue.Count);
 
+				int loadCount = 0;
+
 				using (var db = new Database())
 				{
 					while (_thumbnailLoadQueue.Count > 0 && !_kill)
@@ -252,9 +256,10 @@ namespace WallSwitch
 						var img = _thumbnailLoadQueue.Dequeue();
 						try
 						{
-							Log.Info("Loading thumbnail for image: {0}", img.Location);
+							SetStatusMessage(string.Format("Getting Thumbnail: {0}", img.Location));
 							img.Retrieve(db);
 							img.Release();
+							loadCount++;
 						}
 						catch (Exception ex)
 						{
@@ -262,6 +267,8 @@ namespace WallSwitch
 						}
 					}
 				}
+
+				SetStatusMessage("Completed");
 			}
 			catch (Exception ex)
 			{
@@ -561,6 +568,12 @@ namespace WallSwitch
 
 		private void MainWindow_ImageFileDeleted(object sender, MainWindow.ImageFileEventArgs e)
 		{
+			if (InvokeRequired)
+			{
+				BeginInvoke(new Action(() => { MainWindow_ImageFileDeleted(sender, e); }));
+				return;
+			}
+
 			var delFileName = e.FileName;
 
 			foreach (var lvi in c_list.Items.Cast<ListViewItem>())
@@ -572,6 +585,8 @@ namespace WallSwitch
 					break;
 				}
 			}
+
+			RefreshStatusCounts();
 		}
 
 		public enum CompareColumn
@@ -664,6 +679,31 @@ namespace WallSwitch
 			{
 				this.ShowError(ex);
 			}
+		}
+
+		private void RefreshStatusCounts()
+		{
+			if (InvokeRequired)
+			{
+				BeginInvoke(new Action(() => { RefreshStatusCounts(); }));
+				return;
+			}
+
+			var count = c_list.Items.Count;
+			if (count == 1) c_statusCounts.Text = string.Format(Res.Browser_ImageCount1, count);
+			else c_statusCounts.Text = string.Format(Res.Browser_ImageCount, count);
+		}
+
+		private void SetStatusMessage(string message)
+		{
+			if (InvokeRequired)
+			{
+				BeginInvoke(new Action(() => { SetStatusMessage(message); }));
+				return;
+			}
+
+			Log.Info("Status: {0}", message);
+			c_statusMessage.Text = message;
 		}
 	}
 }

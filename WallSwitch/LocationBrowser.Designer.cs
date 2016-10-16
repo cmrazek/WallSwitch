@@ -40,7 +40,11 @@
 			this.c_exploreContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
 			this.c_deleteContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+			this.c_statusMessage = new System.Windows.Forms.ToolStripStatusLabel();
+			this.c_statusCounts = new System.Windows.Forms.ToolStripStatusLabel();
 			this.c_listContextMenu.SuspendLayout();
+			this.statusStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// c_list
@@ -57,7 +61,7 @@
 			this.c_list.MultiSelect = false;
 			this.c_list.Name = "c_list";
 			this.c_list.OwnerDraw = true;
-			this.c_list.Size = new System.Drawing.Size(741, 508);
+			this.c_list.Size = new System.Drawing.Size(741, 486);
 			this.c_list.TabIndex = 0;
 			this.c_list.UseCompatibleStateImageBehavior = false;
 			this.c_list.View = System.Windows.Forms.View.Details;
@@ -133,19 +137,47 @@
 			this.c_deleteContextMenuItem.Text = "&Delete";
 			this.c_deleteContextMenuItem.Click += new System.EventHandler(this.DeleteContextMenuItem_Click);
 			// 
+			// statusStrip1
+			// 
+			this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+			this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.c_statusMessage,
+            this.c_statusCounts});
+			this.statusStrip1.Location = new System.Drawing.Point(0, 486);
+			this.statusStrip1.Name = "statusStrip1";
+			this.statusStrip1.Size = new System.Drawing.Size(741, 22);
+			this.statusStrip1.TabIndex = 1;
+			this.statusStrip1.Text = "statusStrip1";
+			// 
+			// c_statusMessage
+			// 
+			this.c_statusMessage.Name = "c_statusMessage";
+			this.c_statusMessage.Size = new System.Drawing.Size(726, 17);
+			this.c_statusMessage.Spring = true;
+			this.c_statusMessage.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			// 
+			// c_statusCounts
+			// 
+			this.c_statusCounts.Name = "c_statusCounts";
+			this.c_statusCounts.Size = new System.Drawing.Size(0, 17);
+			// 
 			// LocationBrowser
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(741, 508);
 			this.Controls.Add(this.c_list);
+			this.Controls.Add(this.statusStrip1);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "LocationBrowser";
 			this.Text = "LocationBrowser";
 			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.LocationBrowser_FormClosed);
 			this.Load += new System.EventHandler(this.LocationBrowser_Load);
 			this.c_listContextMenu.ResumeLayout(false);
+			this.statusStrip1.ResumeLayout(false);
+			this.statusStrip1.PerformLayout();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 
@@ -161,5 +193,8 @@
 		private System.Windows.Forms.ToolStripMenuItem c_exploreContextMenuItem;
 		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
 		private System.Windows.Forms.ToolStripMenuItem c_deleteContextMenuItem;
+		private System.Windows.Forms.StatusStrip statusStrip1;
+		private System.Windows.Forms.ToolStripStatusLabel c_statusMessage;
+		private System.Windows.Forms.ToolStripStatusLabel c_statusCounts;
 	}
 }
