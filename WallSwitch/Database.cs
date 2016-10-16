@@ -269,11 +269,11 @@ pub_date			datetime
 			get { return _isNew; }
 		}
 
-		public SQLiteCommand CreateCommand(string sql)
+		public SQLiteCommand CreateCommand(string sql, LogLevel logLevel = LogLevel.Debug)
 		{
 			if (_conn == null) throw new InvalidOperationException("No connection to SQL database.");
 
-			Log.Debug("SQL> {0}", sql);
+			Log.Write(logLevel, "SQL> {0}", sql);
 
 			var cmd = _conn.CreateCommand();
 			cmd.CommandType = System.Data.CommandType.Text;
