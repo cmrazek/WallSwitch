@@ -316,7 +316,7 @@
 			this.c_browseLocationMenuItem.Name = "c_browseLocationMenuItem";
 			this.c_browseLocationMenuItem.Size = new System.Drawing.Size(234, 26);
 			this.c_browseLocationMenuItem.Text = "&Browse";
-			this.c_browseLocationMenuItem.Click += new System.EventHandler(this.c_browseLocationMenuItem_Click);
+			this.c_browseLocationMenuItem.Click += new System.EventHandler(this.BrowseLocationMenuItem_Click);
 			// 
 			// ciLocationExplore
 			// 

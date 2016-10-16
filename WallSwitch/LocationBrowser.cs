@@ -108,6 +108,11 @@ namespace WallSwitch
 			MainWindow.Current.ImageFileDeleted -= MainWindow_ImageFileDeleted;
 		}
 
+		public Location LocationObject
+		{
+			get { return _loc; }
+		}
+
 		private void Img_ThumbnailUpdated(object sender, EventArgs e)
 		{
 			if (InvokeRequired)

@@ -21,19 +21,19 @@ namespace WallSwitch
 		public static MainWindow Current;
 
 		private List<Theme> _themes = new List<Theme>();
-		private Theme _currentTheme = null;
-		private bool _reallyClose = false;
-		private bool _refreshing = false;
-		private bool _dirty = false;
+		private Theme _currentTheme;
+		private bool _reallyClose;
+		private bool _refreshing;
+		private bool _dirty;
 		private ImageList _locationImages = new ImageList();
-		private bool _winStart = false;
+		private bool _winStart;
 		private HotKey _changeThemeHotKey = new HotKey();
-		private static MainWindow _mainWindow = null;
+		private Dictionary<Location, LocationBrowser> _locationBrowsers = new Dictionary<Location, LocationBrowser>();
 
 		private delegate void VoidDelegate();
-		private VoidDelegate _appActivateFunc = null;
+		private VoidDelegate _appActivateFunc;
 		
-		private EventHandler _balloonClickedHandler = null;
+		private EventHandler _balloonClickedHandler;
 		#endregion
 
 		#region Constants
@@ -75,8 +75,6 @@ namespace WallSwitch
 		{
 			try
 			{
-				_mainWindow = this;
-
 				using (var db = new Database())
 				{
 					LoadSettings(db);
@@ -150,7 +148,7 @@ namespace WallSwitch
 					// If the user has an 'exit theme' set, then switch to that theme.
 					if (Program.SwitchThread != null)
 					{
-						var exitTheme = _mainWindow.Themes.FirstOrDefault(t => t.ActivateOnExit);
+						var exitTheme = MainWindow.Current.Themes.FirstOrDefault(t => t.ActivateOnExit);
 						if (exitTheme != null && exitTheme != _currentTheme)
 						{
 							Log.Write(LogLevel.Info, "Switching to theme '{0}' on exit...", exitTheme.Name);
@@ -322,11 +320,6 @@ namespace WallSwitch
 					this.ShowError(ex, Res.Exception_Generic);
 				}
 			}
-		}
-
-		public static MainWindow Window
-		{
-			get { return _mainWindow; }
 		}
 		#endregion
 
@@ -2149,7 +2142,7 @@ namespace WallSwitch
 			}
 		}
 
-		private void c_browseLocationMenuItem_Click(object sender, EventArgs e)
+		private void BrowseLocationMenuItem_Click(object sender, EventArgs e)
 		{
 			try
 			{
@@ -2158,13 +2151,30 @@ namespace WallSwitch
 				var selectedItem = lstLocations.SelectedItems[0];
 				var loc = selectedItem.Tag as Location;
 
-				var window = new LocationBrowser(loc);
-				window.Show();
+				LocationBrowser window;
+				if (_locationBrowsers.TryGetValue(loc, out window))
+				{
+					window.BringToFront();
+					window.Activate();
+					window.FormClosed += LocationBrowser_FormClosed;
+				}
+				else
+				{
+					window = new LocationBrowser(loc);
+					window.Show();
+					_locationBrowsers[loc] = window;
+				}
 			}
 			catch (Exception ex)
 			{
 				this.ShowError(ex);
 			}
+		}
+
+		private void LocationBrowser_FormClosed(object sender, FormClosedEventArgs e)
+		{
+			var window = sender as LocationBrowser;
+			if (window != null) _locationBrowsers.Remove(window.LocationObject);
 		}
 		#endregion
 

@@ -121,11 +121,11 @@ namespace WallSwitch
 		{
 			try
 			{
-				if (MainWindow.Window != null)
+				if (MainWindow.Current != null)
 				{
 					using (var db = new Database())
 					{
-						MainWindow.Window.OnActivateTheme(db, this);
+						MainWindow.Current.OnActivateTheme(db, this);
 					}
 				}
 			}
