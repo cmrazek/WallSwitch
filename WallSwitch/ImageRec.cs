@@ -21,6 +21,7 @@ namespace WallSwitch
 	{
 		#region Member Variables
 		private string _location;
+		private string _cachePathName;
 		private ImageLocationType _type;
 		private Image _image = null;
 		private ImageFormat _imageFormat = null;
@@ -28,6 +29,7 @@ namespace WallSwitch
 		private DateTime? _pubDate = null;
 		private int _hashCode;
 		private int _rating;
+		private long? _size;
 		#endregion
 
 		#region Events
@@ -84,6 +86,9 @@ namespace WallSwitch
 			{
 				loc._thumbnail = new CompressedImage(bytes);
 			}
+
+			loc._size = row.GetLong("size");
+			loc._cachePathName = row.GetString("cache_path");
 
 			return loc;
 		}
@@ -148,43 +153,32 @@ namespace WallSwitch
 			return _hashCode;
 		}
 
-		public string GetLocationOnDisk(Database db)
+		public string LocationOnDisk
 		{
-			switch (_type)
+			get
 			{
-				case ImageLocationType.File:
-					return File.Exists(_location) ? _location : string.Empty;
-				case ImageLocationType.Url:
-					if (db != null)
-					{
-						string fileName;
-						if (!ImageCache.TryGetCachedImage(db, _location, out fileName) || !File.Exists(fileName))
-						{
-							fileName = string.Empty;
-						}
-						return fileName;
-					}
-					else
-					{
-						return null;
-					}
-			}
-			return string.Empty;
-		}
-
-		public string GetLocationOnDisk(bool tryDatabase)
-		{
-			var path = GetLocationOnDisk(null);
-			if (string.IsNullOrEmpty(path) && tryDatabase)
-			{
-				using (var db = new Database())
+				switch (_type)
 				{
-					path = GetLocationOnDisk(db);
+					case ImageLocationType.File:
+						return _location;
+					case ImageLocationType.Url:
+						if (!string.IsNullOrEmpty(_cachePathName)) return _cachePathName;
+						return null;
+					default:
+						return null;
 				}
 			}
-			return path;
 		}
 
+		public void RefreshFileSize()
+		{
+			var path = LocationOnDisk;
+			if (!string.IsNullOrEmpty(path))
+			{
+				_size = FileUtil.GetFileSize(path);
+			}
+		}
+		
 		public ImageFormat ImageFormat
 		{
 			get { return _imageFormat; }
@@ -209,6 +203,7 @@ namespace WallSwitch
 					{
 						_imageFormat = ImageFormatDesc.FileNameToImageFormat(_location);
 						_image = Image.FromFile(_location);
+						_size = FileUtil.GetFileSize(_location);
 						MakeThumbnail(db);
 						return true;
 					}
@@ -217,6 +212,7 @@ namespace WallSwitch
 						Log.Write(ex, "Failed to load image from file '{0}'.", _location);
 						_image = null;
 						_imageFormat = null;
+						_size = null;
 						return false;
 					}
 
@@ -230,6 +226,7 @@ namespace WallSwitch
 							{
 								Log.Write(LogLevel.Debug, "Loading cached image from '{0}'.", fileName);
 								_image = Image.FromFile(fileName);
+								_size = FileUtil.GetFileSize(fileName);
 								MakeThumbnail(db);
 								return true;
 							}
@@ -248,7 +245,15 @@ namespace WallSwitch
 
 						var stream = response.GetResponseStream();
 						_image = Image.FromStream(stream);
-						ImageCache.SaveImage(this, db);
+
+						_cachePathName = ImageCache.SaveImage(this, db);
+						if (!string.IsNullOrEmpty(_cachePathName)) _size = FileUtil.GetFileSize(_cachePathName);
+						else _size = null;
+
+						db.ExecuteNonQuery("update img set cache_path = @cache_path where path = @path",
+							"@cache_path", _cachePathName,
+							"@path", _location);
+
 						MakeThumbnail(db);
 						return true;
 					}
@@ -281,6 +286,11 @@ namespace WallSwitch
 		public Image Image
 		{
 			get { return _image; }
+		}
+
+		public long? Size
+		{
+			get { return _size; }
 		}
 
 		private void MakeThumbnail(Database db)

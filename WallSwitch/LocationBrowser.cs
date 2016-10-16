@@ -17,23 +17,20 @@ namespace WallSwitch
 		private Thread _thumbnailLoadThread;
 		private volatile bool _kill;
 		private ItemInfo _mouseOverItem;
+		private ItemSorter _itemSorter = new ItemSorter();
 
-		private class ItemInfo : IComparable<ItemInfo>
+		private const int k_imageColumn = 0;
+		private const int k_pathColumn = 1;
+		private const int k_ratingColumn = 2;
+		private const int k_sizeColumn = 3;
+
+		private class ItemInfo
 		{
 			public ListViewItem lvi;
 			public ImageRec img;
 			public string relativeLocation;
-			public string locationOnDisk;
-			public long? size;
 			public Rectangle[] starRects;
 			public int mouseOverRating;
-
-			public int CompareTo(ItemInfo other)
-			{
-				if (other == null) return -1;
-
-				return relativeLocation.CompareTo(other.relativeLocation);
-			}
 		}
 
 		public LocationBrowser(Location loc)
@@ -72,7 +69,7 @@ namespace WallSwitch
 						items.Add(item);
 					}
 
-					items.Sort();
+					c_list.ListViewItemSorter = _itemSorter;
 
 					foreach (var item in items)
 					{
@@ -129,6 +126,11 @@ namespace WallSwitch
 			{
 				if (((ItemInfo)lvi.Tag).img == img)
 				{
+					if (img.Size.HasValue)
+					{
+						lvi.SubItems[k_sizeColumn].Text = img.Size.Value.ToSizeString();
+					}
+
 					var rect = c_list.GetItemRect(index);
 					if (rect.IntersectsWith(ClientRectangle))
 					{
@@ -153,9 +155,6 @@ namespace WallSwitch
 				info.relativeLocation = info.relativeLocation.Substring(remove);
 			}
 
-			info.locationOnDisk = img.GetLocationOnDisk(false);
-			if (info.locationOnDisk == null) info.locationOnDisk = string.Empty;
-
 			info.starRects = new Rectangle[5];
 
 			return info;
@@ -177,7 +176,8 @@ namespace WallSwitch
 						break;
 					case "rating":
 					case "size":
-						lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, string.Empty));
+						lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi,
+							info.img.Size.HasValue ? info.img.Size.Value.ToSizeString() : string.Empty));
 						break;
 					default:
 						throw new InvalidOperationException(string.Format("Invalid column tag '{0}'.", col.Tag));
@@ -211,31 +211,6 @@ namespace WallSwitch
 
 							e.Graphics.DrawImage(info.img.Thumbnail, imgRect);
 						}
-						break;
-
-					case "size":
-						if (!info.size.HasValue)
-						{
-							try
-							{
-								var fileName = info.locationOnDisk;
-								if (!string.IsNullOrEmpty(fileName))
-								{
-									var fileInfo = new System.IO.FileInfo(fileName);
-									e.SubItem.Text = fileInfo.Length.ToSizeString();
-									info.size = fileInfo.Length;
-								}
-								else
-								{
-									info.size = -1L;
-								}
-							}
-							catch (Exception ex)
-							{
-								Log.Error(ex);
-							}
-						}
-						e.DrawDefault = true;
 						break;
 
 					case "rating":
@@ -428,7 +403,7 @@ namespace WallSwitch
 			return -1;
 		}
 
-		private void c_list_MouseClick(object sender, MouseEventArgs e)
+		private void List_MouseClick(object sender, MouseEventArgs e)
 		{
 			try
 			{
@@ -494,7 +469,7 @@ namespace WallSwitch
 				var item = lvi.Tag as ItemInfo;
 				if (item == null) return;
 
-				var fileName = item.locationOnDisk;
+				var fileName = item.img.LocationOnDisk;
 				if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
 				{
 					this.ShowError(Res.Error_ImageFileMissing);
@@ -519,7 +494,7 @@ namespace WallSwitch
 				var item = lvi.Tag as ItemInfo;
 				if (item == null) return;
 
-				var fileName = item.locationOnDisk;
+				var fileName = item.img.LocationOnDisk;
 				if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
 				{
 					this.ShowError(Res.Error_ImageFileMissing);
@@ -544,7 +519,7 @@ namespace WallSwitch
 				var item = lvi.Tag as ItemInfo;
 				if (item == null) return;
 
-				var fileName = item.locationOnDisk;
+				var fileName = item.img.LocationOnDisk;
 				if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
 				{
 					this.ShowError(Res.Error_ImageFileMissing);
@@ -563,7 +538,7 @@ namespace WallSwitch
 			}
 		}
 
-		private void c_list_SelectedIndexChanged(object sender, EventArgs e)
+		private void List_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			try
 			{
@@ -591,11 +566,103 @@ namespace WallSwitch
 			foreach (var lvi in c_list.Items.Cast<ListViewItem>())
 			{
 				var item = lvi.Tag as ItemInfo;
-				if (delFileName.Equals(item.locationOnDisk, StringComparison.OrdinalIgnoreCase))
+				if (delFileName.Equals(item.img.LocationOnDisk, StringComparison.OrdinalIgnoreCase))
 				{
 					c_list.Items.Remove(lvi);
 					break;
 				}
+			}
+		}
+
+		public enum CompareColumn
+		{
+			Path,
+			Rating,
+			Size
+		}
+
+		private class ItemSorter : System.Collections.IComparer
+		{
+			private List<CompareColumn> _cols = new List<CompareColumn>();
+			private int _asc = 1;
+
+			public ItemSorter()
+			{
+				_cols.Add(CompareColumn.Path);
+				_cols.Add(CompareColumn.Rating);
+				_cols.Add(CompareColumn.Size);
+			}
+
+			public int Compare(object x, object y)
+			{
+				var leftLvi = x as ListViewItem;
+				var rightLvi = y as ListViewItem;
+				if (leftLvi == null || rightLvi == null) throw new ArgumentException("Both objects must be a list view item.");
+
+				var left = leftLvi.Tag as ItemInfo;
+				var right = rightLvi.Tag as ItemInfo;
+				var result = 0;
+
+				foreach (var col in _cols)
+				{
+					switch (col)
+					{
+						case CompareColumn.Path:
+							result = string.Compare(left.relativeLocation, right.relativeLocation, true) * _asc;
+							break;
+						case CompareColumn.Rating:
+							result = left.img.Rating.CompareTo(right.img.Rating) * _asc;
+							break;
+						case CompareColumn.Size:
+							result = left.img.Size.GetValueOrDefault().CompareTo(right.img.Size.GetValueOrDefault()) * _asc;
+							break;
+					}
+
+					if (result != 0) return result;
+				}
+
+				return 0;
+			}
+
+			public void OnColumnClick(CompareColumn col)
+			{
+				if (col == _cols[0])
+				{
+					_asc = -_asc;
+				}
+				else
+				{
+					_cols.Remove(col);
+					_cols.Insert(0, col);
+					_asc = 1;
+				}
+			}
+		}
+
+		private void c_list_ColumnClick(object sender, ColumnClickEventArgs e)
+		{
+			try
+			{
+				var col = c_list.Columns[e.Column];
+				switch (col.Tag.ToString())
+				{
+					case "path":
+						_itemSorter.OnColumnClick(CompareColumn.Path);
+						c_list.Sort();
+						break;
+					case "rating":
+						_itemSorter.OnColumnClick(CompareColumn.Rating);
+						c_list.Sort();
+						break;
+					case "size":
+						_itemSorter.OnColumnClick(CompareColumn.Size);
+						c_list.Sort();
+						break;
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
 			}
 		}
 	}

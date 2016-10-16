@@ -35,7 +35,7 @@ namespace WallSwitch
 
 			ret._thumbnail = rec.Thumbnail;
 			ret._location = rec.Location;
-			ret._locationOnDisk = rec.GetLocationOnDisk(db);
+			ret._locationOnDisk = rec.LocationOnDisk;
 			ret._rating = rec.Rating;
 
 			return ret;

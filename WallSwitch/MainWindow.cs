@@ -2156,7 +2156,6 @@ namespace WallSwitch
 				{
 					window.BringToFront();
 					window.Activate();
-					window.FormClosed += LocationBrowser_FormClosed;
 				}
 				else
 				{
@@ -2164,6 +2163,7 @@ namespace WallSwitch
 					window.Show();
 					_locationBrowsers[loc] = window;
 				}
+				window.FormClosed += LocationBrowser_FormClosed;
 			}
 			catch (Exception ex)
 			{
@@ -2335,8 +2335,8 @@ namespace WallSwitch
 			// These are the files that we don't want to delete.
 			var keepLocations = new List<string>();
 			keepLocations.AddRange(db.SelectStringList("select history.path from history inner join theme on theme.rowid = history.theme_id"));
-
 			keepLocations.AddRange(from h in c_historyTab.History select h.Location);
+			keepLocations.AddRange(db.SelectStringList("select img.path from img inner join theme on theme.rowid = img.theme_id where cache_path != ''"));
 
 			// Tell the image cache object to delete all others.
 			ImageCache.ClearExpiredCache(db, keepLocations);

@@ -386,6 +386,20 @@ namespace WallSwitch
 
 			SHFileOperation(ref fileop);
 		}
+
+		public static long? GetFileSize(string fileName)
+		{
+			try
+			{
+				var fileInfo = new FileInfo(fileName);
+				return fileInfo.Length;
+			}
+			catch (Exception ex)
+			{
+				Log.Error(ex);
+				return null;
+			}
+		}
 	}
 
 	public static class ColorUtil

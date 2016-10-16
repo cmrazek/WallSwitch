@@ -13,6 +13,7 @@ namespace WallSwitch
 
 		private SQLiteConnection _conn;
 		private static bool _isNew;
+		private static bool _initCompleted;
 
 		private static string[] k_initializationScripts = new string[] {
 @"create table setting (
@@ -78,9 +79,11 @@ theme_id		integer not null,
 location_id		integer not null,
 type			varchar(20) not null,
 path			varchar(300) not null,
+cache_path		varchar(300),
 pub_date		datetime,
 rating			integer,
-thumb			blob
+thumb			blob,
+size			bigint
 )",
 @"create index img_ix_theme on img (theme_id, path)",
 @"create index img_ix_location on img (location_id)",
@@ -110,9 +113,11 @@ guid			varchar(40) not null,
 monitors		varchar(20) not null,
 type			varchar(20) not null,
 path			varchar(300) not null,
+cache_path		varchar(300),
 pub_date		datetime,
 rating			integer,
-thumb			blob
+thumb			blob,
+size			bigint
 )",
 @"create index history_ix_theme on history (theme_id)",
 @"create index history_ix_path on history (path)",
@@ -157,8 +162,10 @@ pub_date			datetime
 				}
 				else
 				{
-					RunExistingScripts();
+					if (!_initCompleted) RunExistingScripts();
 				}
+
+				_initCompleted = true;
 			}
 			catch (Exception ex)
 			{
@@ -215,10 +222,14 @@ pub_date			datetime
 		{
 			AddTableColumnIfMissing("img", "rating", "integer");
 			AddTableColumnIfMissing("img", "thumb", "blob");
+			AddTableColumnIfMissing("img", "size", "bigint");
+			AddTableColumnIfMissing("img", "cache_path", "varchar(300)");
 			AddIndexIfMissing("img_ix_path", "create index img_ix_path on img (path)");
 
 			AddTableColumnIfMissing("history", "rating", "integer");
 			AddTableColumnIfMissing("history", "thumb", "blob");
+			AddTableColumnIfMissing("history", "size", "bigint");
+			AddTableColumnIfMissing("history", "cache_path", "varchar(300)");
 			AddIndexIfMissing("history_ix_path", "create index history_ix_path on history (path)");
 		}
 

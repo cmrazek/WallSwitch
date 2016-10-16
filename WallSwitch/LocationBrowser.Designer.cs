@@ -61,12 +61,13 @@
 			this.c_list.TabIndex = 0;
 			this.c_list.UseCompatibleStateImageBehavior = false;
 			this.c_list.View = System.Windows.Forms.View.Details;
+			this.c_list.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.c_list_ColumnClick);
 			this.c_list.DrawColumnHeader += new System.Windows.Forms.DrawListViewColumnHeaderEventHandler(this.List_DrawColumnHeader);
 			this.c_list.DrawItem += new System.Windows.Forms.DrawListViewItemEventHandler(this.List_DrawItem);
 			this.c_list.DrawSubItem += new System.Windows.Forms.DrawListViewSubItemEventHandler(this.List_DrawSubItem);
 			this.c_list.ItemActivate += new System.EventHandler(this.List_ItemActivate);
-			this.c_list.SelectedIndexChanged += new System.EventHandler(this.c_list_SelectedIndexChanged);
-			this.c_list.MouseClick += new System.Windows.Forms.MouseEventHandler(this.c_list_MouseClick);
+			this.c_list.SelectedIndexChanged += new System.EventHandler(this.List_SelectedIndexChanged);
+			this.c_list.MouseClick += new System.Windows.Forms.MouseEventHandler(this.List_MouseClick);
 			this.c_list.MouseLeave += new System.EventHandler(this.List_MouseLeave);
 			this.c_list.MouseMove += new System.Windows.Forms.MouseEventHandler(this.List_MouseMove);
 			// 

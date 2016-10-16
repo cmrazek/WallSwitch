@@ -24,12 +24,12 @@ namespace WallSwitch
 			return false;
 		}
 
-		public static void SaveImage(ImageRec img, Database db)
+		public static string SaveImage(ImageRec img, Database db)
 		{
 			try
 			{
 				var image = img.Image;
-				if (image == null) return;
+				if (image == null) return null;
 
 				var fmt = img.ImageFormat ?? ImageFormat.Png;
 				var fileName = string.Concat(Guid.NewGuid().ToString(), ImageFormatDesc.ImageFormatToExtension(fmt));
@@ -45,10 +45,13 @@ namespace WallSwitch
 							"pub_date", img.PubDate
 						});
 				}
+
+				return cachePathName;
 			}
 			catch (Exception ex)
 			{
 				Log.Write(ex, "Error when saving cached image.");
+				return null;
 			}
 		}
 

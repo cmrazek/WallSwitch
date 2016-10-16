@@ -26,6 +26,7 @@ namespace WallSwitch
 
 				var uri = new Uri(url);
 				var req = (HttpWebRequest)HttpWebRequest.Create(uri);
+				req.Timeout = 10000;
 				var rsp = (HttpWebResponse)req.GetResponse();
 				var stream = rsp.GetResponseStream();
 
