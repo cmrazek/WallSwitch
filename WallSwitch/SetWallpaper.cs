@@ -1367,7 +1367,7 @@ namespace WallSwitch
 			}
 		}
 
-		public void Set(Database db, Theme theme, SwitchDir dir, bool forceQuick, ref int randomGroupCounter)
+		public void Set(Database db, Theme theme, SwitchDir dir, bool forceQuick, ref int randomGroupCounter, CancellationToken cancel)
 		{
 			// Get the list of images to display next.
 			IEnumerable<ImageLayout> images = null;
@@ -1378,7 +1378,7 @@ namespace WallSwitch
 					{
 						var screenList = new ScreenList();
 						var monitorRects = (from s in screenList select s.Bounds).ToArray();
-						images = theme.GetNextImages(db, monitorRects, ref randomGroupCounter, ref randomGroupClear);
+						images = theme.GetNextImages(db, monitorRects, ref randomGroupCounter, ref randomGroupClear, cancel);
 					}
 					break;
 

@@ -5,6 +5,7 @@ using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.Win32;
 
 namespace WallSwitch
 {
@@ -14,7 +15,9 @@ namespace WallSwitch
 		private SQLiteConnection _conn;
 		private static bool _isNew;
 		private static bool _initCompleted;
+		private static string _dbFileName;
 
+		#region Initialization Scripts
 		private static string[] k_initializationScripts = new string[] {
 @"create table setting (
 name	varchar(100) not null,
@@ -140,6 +143,7 @@ pub_date			datetime
 )",
 @"create index imgcache_ix_location on img_cache (location)"
 	};
+		#endregion
 
 		public Database()
 		{
@@ -274,7 +278,36 @@ pub_date			datetime
 		{
 			get
 			{
-				return Path.Combine(Util.AppDataDir, Res.DatabaseFileName);
+				if (_dbFileName == null)
+				{
+					using (var key = Registry.CurrentUser.OpenSubKey(Settings.RegistryKey, false))
+					{
+						if (key != null)
+						{
+							var obj = key.GetValue("SettingsDatabase", null);
+							if (obj != null) _dbFileName = Convert.ToString(obj);
+						}
+					}
+
+					if (_dbFileName == null)
+					{
+						using (var key = Registry.LocalMachine.OpenSubKey(Settings.RegistryKey, false))
+						{
+							if (key != null)
+							{
+								var obj = key.GetValue("SettingsDatabase", null);
+								if (obj != null) _dbFileName = Convert.ToString(obj);
+							}
+						}
+					}
+
+					if (_dbFileName == null)
+					{
+						_dbFileName = Path.Combine(Util.AppDataDir, Res.DatabaseFileName);
+					}
+				}
+				
+				return _dbFileName;
 			}
 		}
 
@@ -619,6 +652,11 @@ pub_date			datetime
 					return table;
 				}
 			}
+		}
+
+		public SQLiteTransaction BeginTransaction()
+		{
+			return _conn.BeginTransaction();
 		}
 	}
 }

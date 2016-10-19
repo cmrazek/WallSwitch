@@ -5,6 +5,8 @@ using System.Drawing;
 using System.Linq;
 using System.IO;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace WallSwitch
@@ -82,114 +84,133 @@ namespace WallSwitch
 			return _path.Equals(path, StringComparison.OrdinalIgnoreCase);
 		}
 
-		private void SyncDatabaseToImageRecList(IEnumerable<ImageRec> filesOnDisk, Theme theme, Database db)
+		private void SyncDatabaseToImageRecList(IEnumerable<ImageRec> filesOnDisk, Theme theme, Database db, CancellationToken cancel)
 		{
-			var table = db.SelectDataTable("select rowid, * from img where location_id = @id", "@id", _rowid);
-
-			// Find files in the database that don't exist on disk
-			var filesToRemove = new List<long>();
-			foreach (DataRow row in table.Rows)
+			using (var tran = db.BeginTransaction())
 			{
-				var path = (string)row["path"];
-				var found = false;
-				foreach (var file in filesOnDisk)
-				{
-					if (string.Equals(file.Location, path, StringComparison.OrdinalIgnoreCase))
-					{
-						found = true;
-						break;
-					}
-				}
-				if (!found) filesToRemove.Add((long)row["rowid"]);
-			}
+				var table = db.SelectDataTable("select rowid, * from img where location_id = @id", "@id", _rowid);
 
-			if (filesToRemove.Count > 0)
-			{
-				using (var cmd = db.CreateCommand("delete from img where rowid = @rowid"))
-				{
-					foreach (var rowid in filesToRemove)
-					{
-						cmd.Parameters.Clear();
-						cmd.Parameters.AddWithValue("@rowid", rowid);
-
-						cmd.ExecuteNonQuery();
-					}
-				}
-			}
-
-			// Find files on disk that don't exist in the database
-			var filesToAdd = new List<ImageRec>();
-			foreach (var file in filesOnDisk)
-			{
-				DataRow foundRow = null;
+				// Find files in the database that don't exist on disk
+				var filesToRemove = new List<long>();
 				foreach (DataRow row in table.Rows)
 				{
-					if (string.Equals(file.Location, (string)row["path"], StringComparison.OrdinalIgnoreCase))
-					{
-						foundRow = row;
-						break;
-					}
-				}
-				if (foundRow == null)
-				{
-					filesToAdd.Add(file);
-				}
-				else
-				{
-					// Check if new cache path needs to be updated in the img table
-					if (file.Type == ImageLocationType.Url && string.IsNullOrEmpty(file.LocationOnDisk))
-					{
-						string cachePathName;
-						if (ImageCache.TryGetCachedImage(db, file.Location, out cachePathName))
-						{
-							db.ExecuteNonQuery("update img set cache_path = @cache_path where path = @path",
-								"@cache_path", cachePathName,
-								"@path", file.Location);
+					if (cancel.IsCancellationRequested) return;
 
-							db.ExecuteNonQuery("update history set cache_path = @cache_path where path = @path",
-								"@cache_path", cachePathName,
-								"@path", file.Location);
+					var path = (string)row["path"];
+					var found = false;
+					foreach (var file in filesOnDisk)
+					{
+						if (string.Equals(file.Location, path, StringComparison.OrdinalIgnoreCase))
+						{
+							found = true;
+							break;
 						}
 					}
+					if (!found) filesToRemove.Add((long)row["rowid"]);
+				}
 
-					// Check if the size needs updating
-					if (foundRow.GetLong("size", -1) == -1 && !string.IsNullOrEmpty(file.LocationOnDisk))
+				if (filesToRemove.Count > 0)
+				{
+					using (var cmd = db.CreateCommand("delete from img where rowid = @rowid"))
 					{
-						file.RefreshFileSize();
-						var size = file.Size;
-						if (size.HasValue)
+						foreach (var rowid in filesToRemove)
 						{
-							db.ExecuteNonQuery("update img set size = @size where path = @path",
-								"@size", size.Value,
-								"@path", file.Location);
+							if (cancel.IsCancellationRequested) return;
 
-							// No need to update history since it doesn't care about the size.
+							cmd.Parameters.Clear();
+							cmd.Parameters.AddWithValue("@rowid", rowid);
+
+							cmd.ExecuteNonQuery();
 						}
 					}
 				}
-			}
 
-			if (filesToAdd.Count > 0)
-			{
-				using (var cmd = db.CreateCommand("insert into img (theme_id, location_id, type, path, pub_date, rating, thumb, size)"
-					+ " values (@theme_id, @location_id, @type, @path, @pub_date, @rating, @thumb, @size)"))
+				// Find files on disk that don't exist in the database
+				var filesToAdd = new List<ImageRec>();
+				foreach (var file in filesOnDisk)
 				{
-					foreach (var img in filesToAdd)
-					{
-						cmd.Parameters.Clear();
-						cmd.Parameters.AddWithValue("@theme_id", theme.RowId);
-						cmd.Parameters.AddWithValue("@location_id", _rowid);
-						cmd.Parameters.AddWithValue("@type", img.Type.ToString());
-						cmd.Parameters.AddWithValue("@path", img.Location);
-						cmd.Parameters.AddWithValue("@pub_date", img.PubDate.HasValue ? (object)img.PubDate.Value : null);
-						cmd.Parameters.AddWithValue("@rating", img.Rating);
-						cmd.Parameters.AddWithValue("@thumb", img.Thumbnail?.Data);
-						if (img.Size.HasValue) cmd.Parameters.AddWithValue("@size", img.Size.Value);
-						else cmd.Parameters.AddWithValue("@size", null);
+					if (cancel.IsCancellationRequested) return;
 
-						cmd.ExecuteNonQuery();
+					DataRow foundRow = null;
+					foreach (DataRow row in table.Rows)
+					{
+						if (cancel.IsCancellationRequested) return;
+
+						if (string.Equals(file.Location, (string)row["path"], StringComparison.OrdinalIgnoreCase))
+						{
+							foundRow = row;
+							break;
+						}
+					}
+					if (foundRow == null)
+					{
+						filesToAdd.Add(file);
+					}
+					else
+					{
+						// Check if new cache path needs to be updated in the img table
+						if (file.Type == ImageLocationType.Url && string.IsNullOrEmpty(file.LocationOnDisk))
+						{
+							string cachePathName;
+							if (ImageCache.TryGetCachedImage(db, file.Location, out cachePathName))
+							{
+								db.ExecuteNonQuery("update img set cache_path = @cache_path where path = @path",
+									"@cache_path", cachePathName,
+									"@path", file.Location);
+
+								db.ExecuteNonQuery("update history set cache_path = @cache_path where path = @path",
+									"@cache_path", cachePathName,
+									"@path", file.Location);
+							}
+						}
+
+						// Check if the size needs updating
+						if (foundRow.GetLong("size", -1) == -1 && !string.IsNullOrEmpty(file.LocationOnDisk))
+						{
+							file.RefreshFileSize();
+							var size = file.Size;
+							if (size.HasValue)
+							{
+								db.ExecuteNonQuery("update img set size = @size where path = @path",
+									"@size", size.Value,
+									"@path", file.Location);
+
+								// No need to update history since it doesn't care about the size.
+							}
+						}
 					}
 				}
+
+				if (filesToAdd.Count > 0)
+				{
+					using (var cmd = db.CreateCommand("insert into img (theme_id, location_id, type, path, pub_date, rating, thumb, size)"
+						+ " values (@theme_id, @location_id, @type, @path, @pub_date, @rating, @thumb, @size)"))
+					{
+						foreach (var img in filesToAdd)
+						{
+							if (cancel.IsCancellationRequested) return;
+
+#if DEBUG
+							Log.Debug("Inserting: {0}", img.Location);
+#endif
+
+							cmd.Parameters.Clear();
+							cmd.Parameters.AddWithValue("@theme_id", theme.RowId);
+							cmd.Parameters.AddWithValue("@location_id", _rowid);
+							cmd.Parameters.AddWithValue("@type", img.Type.ToString());
+							cmd.Parameters.AddWithValue("@path", img.Location);
+							cmd.Parameters.AddWithValue("@pub_date", img.PubDate.HasValue ? (object)img.PubDate.Value : null);
+							cmd.Parameters.AddWithValue("@rating", img.Rating);
+							cmd.Parameters.AddWithValue("@thumb", img.Thumbnail?.Data);
+							if (img.Size.HasValue) cmd.Parameters.AddWithValue("@size", img.Size.Value);
+							else cmd.Parameters.AddWithValue("@size", null);
+
+							cmd.ExecuteNonQuery();
+						}
+					}
+				}
+
+				tran.Commit();
 			}
 		}
 
@@ -330,7 +351,7 @@ namespace WallSwitch
 			return ir.GetFileIcon(_path);
 		}
 
-		public void UpdateIfRequired(Database db, Theme theme)
+		public void UpdateIfRequired(Database db, Theme theme, CancellationToken cancel)
 		{
 			try
 			{
@@ -347,7 +368,7 @@ namespace WallSwitch
 						var files = SearchDir(_path);
 						if (files.Any())
 						{
-							SyncDatabaseToImageRecList(files, theme, db);
+							SyncDatabaseToImageRecList(files, theme, db, cancel);
 						}
 						break;
 
@@ -356,7 +377,7 @@ namespace WallSwitch
 							var loader = new FeedLoader();
 							if (loader.LoadUrl(_path))
 							{
-								SyncDatabaseToImageRecList(loader.Images, theme, db);
+								SyncDatabaseToImageRecList(loader.Images, theme, db, cancel);
 							}
 						}
 						break;

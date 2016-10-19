@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
+using System.Threading;
 using System.Xml;
 
 namespace WallSwitch
@@ -837,7 +836,8 @@ namespace WallSwitch
 		#endregion
 
 		#region ImageSelection
-		public IEnumerable<ImageLayout> GetNextImages(Database db, Rectangle[] monitorRects, ref int randomGroupCounter, ref bool randomGroupClear)
+		public IEnumerable<ImageLayout> GetNextImages(Database db, Rectangle[] monitorRects,
+			ref int randomGroupCounter, ref bool randomGroupClear, CancellationToken cancel)
 		{
 			IEnumerable<ImageLayout> ret = null;
 
@@ -869,7 +869,7 @@ namespace WallSwitch
 				_historyGuid = _historyLatestGuid;
 			}
 
-			foreach (var loc in _locations) loc.UpdateIfRequired(db, this);
+			foreach (var loc in _locations) loc.UpdateIfRequired(db, this, cancel);
 			ret = PickImages(db, monitorRects, ref randomGroupCounter, ref randomGroupClear);
 			AddHistoryImages(db, ret);
 			return ret;

@@ -43,19 +43,21 @@ namespace WallSwitch
 
 		public static ImageRec FromFile(string fileName)
 		{
+			FileInfo fileInfo = null;
+			try
+			{
+				fileInfo = new FileInfo(fileName);
+			}
+			catch (Exception ex)
+			{
+				Log.Warning(ex);
+			}
+
 			var loc = new ImageRec();
 			loc._location = fileName;
 			loc._type = ImageLocationType.File;
 			loc._hashCode = loc._location.ToLower().GetHashCode();
-			return loc;
-		}
-
-		public static ImageRec FromDirectory(string pathName)
-		{
-			var loc = new ImageRec();
-			loc._location = pathName;
-			loc._type = ImageLocationType.File;
-			loc._hashCode = loc._location.ToLower().GetHashCode();
+			loc._size = fileInfo?.Length;
 			return loc;
 		}
 

@@ -2,16 +2,15 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
-using System.Resources;
-using System.Reflection;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
-using System.Linq;
 using WallSwitch.ImageFilters;
 
 namespace WallSwitch
@@ -154,7 +153,14 @@ namespace WallSwitch
 						{
 							Log.Write(LogLevel.Info, "Switching to theme '{0}' on exit...", exitTheme.Name);
 							int randomGroupCounter = Program.SwitchThread.RandomGroupCounter;
-							Program.SwitchThread.WallpaperSetter.Set(db, exitTheme, SwitchDir.Next, true, ref randomGroupCounter);
+							var cancel = new CancellationTokenSource();
+							Task.WaitAny(
+								Task.Run(() =>
+								{
+									Program.SwitchThread.WallpaperSetter.Set(db, exitTheme, SwitchDir.Next, true, ref randomGroupCounter, cancel.Token);
+								}),
+								Task.Delay(3000));
+							cancel.Cancel();
 						}
 						else
 						{

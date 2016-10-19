@@ -18,7 +18,7 @@ namespace WallSwitch
 		private Random _rand = new Random();
 		private int _randomGroupCounter = 0;
 
-		private volatile bool _kill = false;
+		private CancellationTokenSource _cancel = new CancellationTokenSource();
 		private volatile SwitchDir _switchNow = SwitchDir.None;
 		private volatile bool _locked = false;
 		private volatile bool _screensaverRunning = false;
@@ -50,8 +50,6 @@ namespace WallSwitch
 			if (theme == null) throw new ArgumentNullException("Theme is null.");
 			_theme = theme;
 
-			_kill = false;
-
 			_lastSwitch = DateTime.MinValue;
 			var str = db.LoadSetting("LastSwitch");
 			if (!string.IsNullOrEmpty(str))
@@ -76,7 +74,7 @@ namespace WallSwitch
 			{
 				if (_thread.IsAlive)
 				{
-					_kill = true;
+					_cancel.Cancel();
 					_thread.Join();
 				}
 
@@ -119,7 +117,7 @@ namespace WallSwitch
 				SystemEvents.SessionSwitch += SystemEvents_SessionSwitch;
 				SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
 
-				while (!_kill)
+				while (!_cancel.IsCancellationRequested)
 				{
 					sw = CheckSwitch();
 					if (sw != SwitchDir.None)
@@ -309,7 +307,7 @@ namespace WallSwitch
 				SwitchEventHandler ev = Switching;
 				if (ev != null) ev(this, new EventArgs());
 
-				_wallpaperSetter.Set(db, _theme, dir, false, ref _randomGroupCounter);
+				_wallpaperSetter.Set(db, _theme, dir, false, ref _randomGroupCounter, _cancel.Token);
 
 				Log.Write(LogLevel.Debug, "Finished switching wallpaper.");
 			}

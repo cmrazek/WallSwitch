@@ -278,6 +278,11 @@ namespace WallSwitch
 			Write(LogLevel.Warning, format, args);
 		}
 
+		public static void Warning(Exception ex)
+		{
+			Write(LogLevel.Warning, ex.ToString());
+		}
+
         public static void Error(string message)
         {
             Write(LogLevel.Error, message);
