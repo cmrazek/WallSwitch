@@ -96,53 +96,58 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AboutDialog.cs">
+    <Compile Include="Core\AboutDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AboutDialog.Designer.cs">
+    <Compile Include="Core\AboutDialog.Designer.cs">
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="ColorEffect.cs" />
-    <Compile Include="ColorSample.cs">
+    <Compile Include="Rendering\ColorEffect.cs" />
+    <Compile Include="Rendering\ColorSample.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ColorSample.Designer.cs">
+    <Compile Include="Rendering\ColorSample.Designer.cs">
       <DependentUpon>ColorSample.cs</DependentUpon>
     </Compile>
-    <Compile Include="CompressedImage.cs" />
+    <Compile Include="Rendering\CompressedImage.cs" />
     <Compile Include="Data.cs">
       <DependentUpon>Data.xsd</DependentUpon>
     </Compile>
-    <Compile Include="Database.cs" />
-    <Compile Include="DataEx.cs" />
-    <Compile Include="DataRowEx.cs" />
-    <Compile Include="EdgeMode.cs" />
-    <Compile Include="FeedDialog.cs">
+    <Compile Include="Database\Database.cs" />
+    <Compile Include="Rendering\DataEx.cs" />
+    <Compile Include="Database\DataRowEx.cs" />
+    <Compile Include="Rendering\EdgeMode.cs" />
+    <Compile Include="Res.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Res.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Themes\FeedDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FeedDialog.Designer.cs">
+    <Compile Include="Themes\FeedDialog.Designer.cs">
       <DependentUpon>FeedDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="FeedLoader.cs" />
-    <Compile Include="HistoryItem.cs" />
-    <Compile Include="HistoryList.cs">
+    <Compile Include="Themes\FeedLoader.cs" />
+    <Compile Include="History\HistoryItem.cs" />
+    <Compile Include="History\HistoryList.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="HistoryList.Designer.cs">
+    <Compile Include="History\HistoryList.Designer.cs">
       <DependentUpon>HistoryList.cs</DependentUpon>
     </Compile>
-    <Compile Include="HotKey.cs" />
-    <Compile Include="HotKeySettings.cs">
+    <Compile Include="HotKeys\HotKey.cs" />
+    <Compile Include="HotKeys\HotKeySettings.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="HotKeySettings.Designer.cs">
+    <Compile Include="HotKeys\HotKeySettings.Designer.cs">
       <DependentUpon>HotKeySettings.cs</DependentUpon>
     </Compile>
-    <Compile Include="HotKeyTextBox.cs">
+    <Compile Include="HotKeys\HotKeyTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="IconReader.cs" />
-    <Compile Include="ImageCache.cs" />
+    <Compile Include="Rendering\IconReader.cs" />
+    <Compile Include="Themes\ImageCache.cs" />
     <Compile Include="ImageFilters\ConditionControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -160,89 +165,80 @@
     <Compile Include="ImageFilters\RatingControl.Designer.cs">
       <DependentUpon>RatingControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="ImageFit.cs" />
-    <Compile Include="ImageFormatDesc.cs" />
-    <Compile Include="ImageLayout.cs" />
-    <Compile Include="ImageListView.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="ImageRec.cs" />
-    <Compile Include="IWallSwitchService.cs" />
-    <Compile Include="Location.cs" />
-    <Compile Include="LocationBrowser.cs">
+    <Compile Include="Rendering\ImageFit.cs" />
+    <Compile Include="Rendering\ImageFormatDesc.cs" />
+    <Compile Include="Rendering\ImageLayout.cs" />
+    <Compile Include="Themes\ImageRec.cs" />
+    <Compile Include="Themes\Location.cs" />
+    <Compile Include="Themes\LocationBrowser.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="LocationBrowser.Designer.cs">
+    <Compile Include="Themes\LocationBrowser.Designer.cs">
       <DependentUpon>LocationBrowser.cs</DependentUpon>
     </Compile>
-    <Compile Include="Log.cs" />
-    <Compile Include="MainWindow.cs">
+    <Compile Include="Core\Log.cs" />
+    <Compile Include="Core\MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainWindow.Designer.cs">
+    <Compile Include="Core\MainWindow.Designer.cs">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="NativeMethods.cs" />
+    <Compile Include="Core\NativeMethods.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="PromptDialog.cs">
+    <Compile Include="Core\PromptDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="PromptDialog.Designer.cs">
+    <Compile Include="Core\PromptDialog.Designer.cs">
       <DependentUpon>PromptDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Settings.cs" />
-    <Compile Include="SettingsDialog.cs">
+    <Compile Include="Settings\Settings.cs" />
+    <Compile Include="Settings\SettingsDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SettingsDialog.Designer.cs">
+    <Compile Include="Settings\SettingsDialog.Designer.cs">
       <DependentUpon>SettingsDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="SettingsException.cs" />
-    <Compile Include="SetWallpaper.cs" />
-    <Compile Include="shlobj.cs" />
-    <Compile Include="SQLiteDataReaderEx.cs" />
-    <Compile Include="SwitchDir.cs" />
-    <Compile Include="SwitchThread.cs" />
-    <Compile Include="TagString.cs" />
-    <Compile Include="Theme.cs" />
-    <Compile Include="Res.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Res.resx</DependentUpon>
-    </Compile>
-    <Compile Include="ThemeMode.cs" />
-    <Compile Include="Period.cs" />
-    <Compile Include="ThemeOrder.cs" />
-    <Compile Include="UpdateCheck.cs" />
-    <Compile Include="Util.cs" />
-    <Compile Include="VStackPanel.cs">
+    <Compile Include="Settings\SettingsException.cs" />
+    <Compile Include="Rendering\SetWallpaper.cs" />
+    <Compile Include="Core\shlobj.cs" />
+    <Compile Include="Database\SQLiteDataReaderEx.cs" />
+    <Compile Include="Themes\SwitchDir.cs" />
+    <Compile Include="Rendering\SwitchThread.cs" />
+    <Compile Include="Core\TagString.cs" />
+    <Compile Include="Themes\Theme.cs" />
+    <Compile Include="Themes\ThemeMode.cs" />
+    <Compile Include="Themes\Period.cs" />
+    <Compile Include="Themes\ThemeOrder.cs" />
+    <Compile Include="Settings\UpdateCheck.cs" />
+    <Compile Include="Core\Util.cs" />
+    <Compile Include="Core\VStackPanel.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="WallpaperRenderer.cs" />
-    <Compile Include="WidgetInstance.cs" />
-    <Compile Include="WidgetLayoutControl.cs">
+    <Compile Include="Rendering\WallpaperRenderer.cs" />
+    <Compile Include="Widgets\WidgetInstance.cs" />
+    <Compile Include="Widgets\WidgetLayoutControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="WidgetLayoutControl.Designer.cs">
+    <Compile Include="Widgets\WidgetLayoutControl.Designer.cs">
       <DependentUpon>WidgetLayoutControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="WidgetManager.cs" />
-    <Compile Include="WidgetType.cs" />
-    <Compile Include="Xml.cs" />
-    <EmbeddedResource Include="AboutDialog.resx">
+    <Compile Include="Widgets\WidgetManager.cs" />
+    <Compile Include="Widgets\WidgetType.cs" />
+    <Compile Include="Settings\Xml.cs" />
+    <EmbeddedResource Include="Core\AboutDialog.resx">
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ColorSample.resx">
+    <EmbeddedResource Include="Rendering\ColorSample.resx">
       <DependentUpon>ColorSample.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FeedDialog.resx">
+    <EmbeddedResource Include="Themes\FeedDialog.resx">
       <DependentUpon>FeedDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="HistoryList.resx">
+    <EmbeddedResource Include="History\HistoryList.resx">
       <DependentUpon>HistoryList.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="HotKeySettings.resx">
+    <EmbeddedResource Include="HotKeys\HotKeySettings.resx">
       <DependentUpon>HotKeySettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ImageFilters\ConditionControl.resx">
@@ -251,13 +247,13 @@
     <EmbeddedResource Include="ImageFilters\RatingControl.resx">
       <DependentUpon>RatingControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="LocationBrowser.resx">
+    <EmbeddedResource Include="Themes\LocationBrowser.resx">
       <DependentUpon>LocationBrowser.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainWindow.resx">
+    <EmbeddedResource Include="Core\MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PromptDialog.resx">
+    <EmbeddedResource Include="Core\PromptDialog.resx">
       <DependentUpon>PromptDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -272,13 +268,13 @@
     </Compile>
     <EmbeddedResource Include="Res.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Res.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>Res.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="SettingsDialog.resx">
+    <EmbeddedResource Include="Settings\SettingsDialog.resx">
       <DependentUpon>SettingsDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="WidgetLayoutControl.resx">
+    <EmbeddedResource Include="Widgets\WidgetLayoutControl.resx">
       <DependentUpon>WidgetLayoutControl.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
