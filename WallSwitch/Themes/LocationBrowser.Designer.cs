@@ -1,4 +1,4 @@
-﻿namespace WallSwitch
+﻿namespace WallSwitch.Themes
 {
 	partial class LocationBrowser
 	{

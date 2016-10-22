@@ -740,4 +740,15 @@ namespace WallSwitch
 			return new SizeF(size.Width * scale, size.Height * scale);
 		}
 	}
+
+	public static class ImageUtil
+	{
+		public static Image LoadFromFile(string fileName)
+		{
+			using (var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+			{
+				return Image.FromStream(stream);
+			}
+		}
+	}
 }

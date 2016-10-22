@@ -382,19 +382,7 @@ namespace WallSwitch
 				}
 				else
 				{
-					// Find all history items that share the same location
-					var itemList = new List<HistoryItem>();
-					foreach (var i in _items)
-					{
-						if (i.Location == item.Location) itemList.Add(i);
-					}
-
-					var first = true;
-					foreach (var i in itemList)
-					{
-						item.SetRating(rating, first);
-						first = false;
-					}
+					item.Rating = rating;
 				}
 			}
 			else

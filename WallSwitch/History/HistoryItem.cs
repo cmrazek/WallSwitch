@@ -65,6 +65,25 @@ namespace WallSwitch
 			if (list == null) throw new ArgumentNullException(nameof(list));
 
 			_list = list;
+
+			Global.RatingUpdated += Global_RatingUpdated;
+		}
+
+		~HistoryItem()
+		{
+			Global.RatingUpdated -= Global_RatingUpdated;
+		}
+
+		private void Global_RatingUpdated(object sender, Global.RatingUpdatedEventArgs e)
+		{
+			try
+			{
+				_list.InvalidateItem(this);
+			}
+			catch (Exception ex)
+			{
+				Log.Error(ex);
+			}
 		}
 
 		public CompressedImage Thumbnail
@@ -92,15 +111,19 @@ namespace WallSwitch
 			get { return _rating; }
 			set
 			{
-				if (value < 0 || value > 5) throw new ArgumentOutOfRangeException();
-				_rating = value;
+				if (_rating != value)
+				{
+					if (value < 0 || value > 5) throw new ArgumentOutOfRangeException();
+					_rating = value;
+					Global.UpdateRating(_location, _rating);
+				}
 			}
 		}
 
 		public static Size GetRequiredSize(Size thumbnailSize)
 		{
-			var ratingHeight = Res.StarUnrated.Height;
-			var ratingWidth = (Res.StarUnrated.Width + RatingSpacer) * 5;
+			var ratingHeight = Images.StarUnrated.Height;
+			var ratingWidth = (Images.StarUnrated.Width + RatingSpacer) * 5;
 
 			var widthRequired = thumbnailSize.Width;
 			if (widthRequired < ratingWidth) widthRequired = ratingWidth;
@@ -132,8 +155,8 @@ namespace WallSwitch
 				_thumbnailRect = Rectangle.Empty;
 			}
 
-			var starWidth = Res.StarUnrated.Width;
-			var starHeight = Res.StarUnrated.Height;
+			var starWidth = Images.StarUnrated.Width;
+			var starHeight = Images.StarUnrated.Height;
 			var ratingTop = _bounds.Bottom - Margin - starHeight;
 			var ratingLeft = bounds.Left + (bounds.Width - (starWidth + RatingSpacer) * 5) / 2;
 
@@ -164,21 +187,21 @@ namespace WallSwitch
 				{
 					for (int r = 1; r <= 5; r++)
 					{
-						g.DrawImage(_mouseOverRating >= r ? Res.StarMouseOver1 : Res.StarMouseOver0, _starRects[r - 1]);
+						g.DrawImage(_mouseOverRating >= r ? Images.StarMouseOver1 : Images.StarMouseOver0, _starRects[r - 1]);
 					}
 				}
 				else if (_rating > 0)
 				{
 					for (int r = 1; r <= 5; r++)
 					{
-						g.DrawImage(_rating >= r ? Res.StarRated1 : Res.StarRated0, _starRects[r - 1]);
+						g.DrawImage(_rating >= r ? Images.StarRated1 : Images.StarRated0, _starRects[r - 1]);
 					}
 				}
 				else
 				{
 					for (int r = 1; r <= 5; r++)
 					{
-						g.DrawImage(Res.StarUnrated, _starRects[r - 1]);
+						g.DrawImage(Images.StarUnrated, _starRects[r - 1]);
 					}
 				}
 
@@ -243,32 +266,6 @@ namespace WallSwitch
 			{
 				_mouseOverRating = 0;
 				_list.InvalidateItem(this);
-			}
-		}
-
-		public void SetRating(int rating, bool saveToDb)
-		{
-			_rating = rating;
-			_list.InvalidateItem(this);
-
-			if (saveToDb)
-			{
-				using (var db = new Database())
-				{
-					using (var cmd = db.CreateCommand("update history set rating = @rating where path = @path"))
-					{
-						cmd.Parameters.AddWithValue("@rating", rating);
-						cmd.Parameters.AddWithValue("@path", _location);
-						cmd.ExecuteNonQuery();
-					}
-
-					using (var cmd = db.CreateCommand("update img set rating = @rating where path = @path"))
-					{
-						cmd.Parameters.AddWithValue("@rating", rating);
-						cmd.Parameters.AddWithValue("@path", _location);
-						cmd.ExecuteNonQuery();
-					}
-				}
 			}
 		}
 	}

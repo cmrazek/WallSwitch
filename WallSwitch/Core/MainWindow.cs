@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using WallSwitch.ImageFilters;
+using WallSwitch.Themes;
 
 namespace WallSwitch
 {

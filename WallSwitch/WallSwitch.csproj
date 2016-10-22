@@ -102,7 +102,9 @@
     <Compile Include="Core\AboutDialog.Designer.cs">
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Global.cs" />
     <Compile Include="ImageFilters\Operator.cs" />
+    <Compile Include="Images.cs" />
     <Compile Include="Rendering\ColorEffect.cs" />
     <Compile Include="Rendering\ColorSample.cs">
       <SubType>UserControl</SubType>
@@ -170,6 +172,7 @@
     <Compile Include="Rendering\ImageFormatDesc.cs" />
     <Compile Include="Rendering\ImageLayout.cs" />
     <Compile Include="Themes\ImageRec.cs" />
+    <Compile Include="Themes\LBItem.cs" />
     <Compile Include="Themes\Location.cs" />
     <Compile Include="Themes\LocationBrowser.cs">
       <SubType>Form</SubType>
@@ -212,7 +215,7 @@
     <Compile Include="Themes\Period.cs" />
     <Compile Include="Themes\ThemeOrder.cs" />
     <Compile Include="Settings\UpdateCheck.cs" />
-    <Compile Include="Core\Util.cs" />
+    <Compile Include="Util.cs" />
     <Compile Include="Core\VStackPanel.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -364,7 +367,7 @@
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" />
+      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.YearDayOfYear.Increment" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.103\build\net451\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.103\build\net451\System.Data.SQLite.Core.targets')" />

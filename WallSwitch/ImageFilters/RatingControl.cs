@@ -54,7 +54,7 @@ namespace WallSwitch.ImageFilters
 
 		private void RefreshLayout()
 		{
-			var starSize = Res.StarUnrated.Size;
+			var starSize = Images.StarUnrated.Size;
 			var totalWidth = starSize.Width * 5 + k_spacer * 4;
 
 			var rect = new Rectangle((ClientSize.Width - totalWidth) / 2, (ClientSize.Height - starSize.Height) / 2,
@@ -79,23 +79,23 @@ namespace WallSwitch.ImageFilters
 				{
 					for (int i = 1; i <= 5; i++)
 					{
-						if (_mouseOverRating >= i) g.DrawImage(Res.StarMouseOver1, _starRects[i - 1]);
-						else g.DrawImage(Res.StarMouseOver0, _starRects[i - 1]);
+						if (_mouseOverRating >= i) g.DrawImage(Images.StarMouseOver1, _starRects[i - 1]);
+						else g.DrawImage(Images.StarMouseOver0, _starRects[i - 1]);
 					}
 				}
 				else if (_rating > 0)
 				{
 					for (int i = 1; i <= 5; i++)
 					{
-						if (_rating >= i) g.DrawImage(Res.StarRated1, _starRects[i - 1]);
-						else g.DrawImage(Res.StarRated0, _starRects[i - 1]);
+						if (_rating >= i) g.DrawImage(Images.StarRated1, _starRects[i - 1]);
+						else g.DrawImage(Images.StarRated0, _starRects[i - 1]);
 					}
 				}
 				else
 				{
 					for (int i = 1; i <= 5; i++)
 					{
-						g.DrawImage(Res.StarUnrated, _starRects[i - 1]);
+						g.DrawImage(Images.StarUnrated, _starRects[i - 1]);
 					}
 				}
 			}

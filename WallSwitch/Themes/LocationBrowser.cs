@@ -8,13 +8,13 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace WallSwitch
+namespace WallSwitch.Themes
 {
 	partial class LocationBrowser : Form
 	{
 		private Location _loc;
-		private ItemInfo _mouseOverItem;
-		private List<ItemInfo> _items = new List<ItemInfo>();
+		private LBItem _mouseOverItem;
+		private List<LBItem> _items = new List<LBItem>();
 		private int _itemHeight = k_rawItemHeight;
 		private int _totalHeight;
 		private int _maxThumbWidth = k_rawThumbWidth;
@@ -26,15 +26,6 @@ namespace WallSwitch
 
 		private const int k_rawItemHeight = 100;
 		private const int k_rawThumbWidth = 175;
-
-		private class ItemInfo
-		{
-			public ImageRec img;
-			public string relativeLocation;
-			public Rectangle[] starRects;
-			public int mouseOverRating;
-			public int index;
-		}
 
 		#region Construction
 		public LocationBrowser(Location loc)
@@ -61,9 +52,7 @@ namespace WallSwitch
 					var table = db.SelectDataTable("select * from img where location_id = @location_id order by img.path", "@location_id", _loc.RowId);
 					foreach (DataRow row in table.Rows)
 					{
-						var img = ImageRec.FromDataRow(row);
-						var item = CreateItemInfo(img);
-						item.index = _items.Count;
+						var item = new LBItem(this, ImageRec.FromDataRow(row), _loc, _items.Count);
 						_items.Add(item);
 					}
 
@@ -87,24 +76,6 @@ namespace WallSwitch
 		public Location LocationObject
 		{
 			get { return _loc; }
-		}
-
-		private ItemInfo CreateItemInfo(ImageRec img)
-		{
-			var info = new ItemInfo();
-			info.img = img;
-
-			info.relativeLocation = img.Location;
-			if (info.relativeLocation.StartsWith(_loc.Path, StringComparison.OrdinalIgnoreCase))
-			{
-				var remove = _loc.Path.Length;
-				if (remove < info.relativeLocation.Length && info.relativeLocation[remove] == '\\') remove++;
-				info.relativeLocation = info.relativeLocation.Substring(remove);
-			}
-
-			info.starRects = new Rectangle[5];
-
-			return info;
 		}
 		#endregion
 
@@ -282,45 +253,50 @@ namespace WallSwitch
 
 			var topItem = _scroll / _itemHeight;
 			var bottomItem = (_scroll + _clientRect.Height) / _itemHeight;
+			var clipRectDoc = ClientToDoc(e.ClipRectangle);
 
 			for (var itemIndex = topItem; itemIndex <= bottomItem && itemIndex < _items.Count; itemIndex++)
 			{
 				var item = _items[itemIndex];
 				var itemBounds = GetItemDocBounds(itemIndex);
-				DrawItem(g, item, itemBounds);
+				if (itemBounds.IntersectsWith(clipRectDoc))
+				{
+					DrawItem(g, item, itemBounds);
+				}
 			}
 		}
 
-		private void DrawItem(Graphics g, ItemInfo item, Rectangle itemBounds)
+		private void DrawItem(Graphics g, LBItem item, Rectangle itemBounds)
 		{
 			// Highlight
-			var selected = ItemIsSelected(item.index);
+			var selected = ItemIsSelected(item.Index);
 			if (selected) g.FillRectangle(SystemBrushes.Highlight, itemBounds);
 
 			// Border
 			if (_borderPen == null) _borderPen = new Pen(SystemBrushes.Control);
 			g.DrawRectangle(_borderPen, itemBounds);
 
+			// Thumbnail background
+			var maxThumbRect = new Rectangle(itemBounds.Left + _spacer, itemBounds.Top + _spacer, _maxThumbWidth, _maxThumbHeight);
+			if (!selected)
+			{
+				var thumbBackgroundRect = maxThumbRect;
+				thumbBackgroundRect.Inflate(1, 1);
+				g.FillRectangle(SystemBrushes.Control, thumbBackgroundRect);
+			}
+
 			// Thumbnail
-			var thumb = item.img.Thumbnail;
+			var thumb = item.ImageRec.Thumbnail;
 			if (thumb == null)
 			{
-				QueueThumbnailRetrieval(item.img);
+				QueueThumbnailRetrieval(item);
 			}
 			else
 			{
-				var maxThumbRect = new Rectangle(itemBounds.Left + _spacer, itemBounds.Top + _spacer, _maxThumbWidth, _maxThumbHeight);
-
 				var imgRect = new RectangleF(PointF.Empty, thumb.Size);
 				imgRect = imgRect.ScaleRectWidth(_maxThumbWidth);
 				if (imgRect.Height > _maxThumbHeight) imgRect = imgRect.ScaleRectHeight(_maxThumbHeight);
 				imgRect = imgRect.CenterInside(maxThumbRect);
-
-				if (!selected)
-				{
-					maxThumbRect.Inflate(1, 1);
-					g.FillRectangle(SystemBrushes.Control, maxThumbRect);
-				}
 
 				g.DrawImage(thumb, imgRect);
 			}
@@ -332,13 +308,13 @@ namespace WallSwitch
 				var infoPt = new Point(infoLeft, itemBounds.Top + _spacer);
 
 				// File Name
-				var stringSize = g.MeasureString(item.relativeLocation, Font, infoWidth);
-				g.DrawString(item.relativeLocation, Font, selected ? SystemBrushes.HighlightText : SystemBrushes.WindowText,
+				var stringSize = g.MeasureString(item.RelativeLocation, Font, infoWidth);
+				g.DrawString(item.RelativeLocation, Font, selected ? SystemBrushes.HighlightText : SystemBrushes.WindowText,
 					new RectangleF(infoPt, stringSize));
 				infoPt.Y += (int)Math.Ceiling(stringSize.Height) + _spacer;
 
 				// Size
-				var imgSize = item.img.Size;
+				var imgSize = item.ImageRec.Size;
 				if (imgSize.HasValue)
 				{
 					// TODO: this should be drawn using a slightly smaller font
@@ -352,37 +328,37 @@ namespace WallSwitch
 				// Rating
 				infoPt.Y += _spacer;
 				var pt = infoPt;
-				var starSize = new Size((int)Math.Round(Res.StarUnrated.Width * g.DpiX / 96.0f),
-					(int)Math.Round(Res.StarUnrated.Height * g.DpiY / 96.0f));
+				var starSize = new Size((int)Math.Round(Images.StarUnrated.Width * g.DpiX / 96.0f),
+					(int)Math.Round(Images.StarUnrated.Height * g.DpiY / 96.0f));
 
 				for (int i = 0; i < 5; i++)
 				{
-					item.starRects[i] = new Rectangle(pt, starSize);
+					item.StarRects[i] = new Rectangle(pt, starSize);
 					pt.X += starSize.Width;
 				}
 
-				var rating = item.img.Rating;
-				if (item.mouseOverRating > 0 && item.mouseOverRating != rating)
+				var rating = item.ImageRec.Rating;
+				if (item.MouseOverRating > 0 && item.MouseOverRating != rating)
 				{
 					for (int i = 1; i <= 5; i++)
 					{
-						if (item.mouseOverRating >= i) g.DrawImage(Res.StarMouseOver1, item.starRects[i - 1]);
-						else g.DrawImage(Res.StarMouseOver0, item.starRects[i - 1]);
+						if (item.MouseOverRating >= i) g.DrawImage(Images.StarMouseOver1, item.StarRects[i - 1]);
+						else g.DrawImage(Images.StarMouseOver0, item.StarRects[i - 1]);
 					}
 				}
 				else if (rating > 0)
 				{
 					for (int i = 1; i <= 5; i++)
 					{
-						if (rating >= i) g.DrawImage(Res.StarRated1, item.starRects[i - 1]);
-						else g.DrawImage(Res.StarRated0, item.starRects[i - 1]);
+						if (rating >= i) g.DrawImage(Images.StarRated1, item.StarRects[i - 1]);
+						else g.DrawImage(Images.StarRated0, item.StarRects[i - 1]);
 					}
 				}
 				else
 				{
 					for (int i = 0; i < 5; i++)
 					{
-						g.DrawImage(Res.StarUnrated, item.starRects[i]);
+						g.DrawImage(Images.StarUnrated, item.StarRects[i]);
 					}
 				}
 			}
@@ -404,21 +380,28 @@ namespace WallSwitch
 			return new Point(pt.X + _clientRect.X, pt.Y + _clientRect.Y - _scroll);
 		}
 
+		private Rectangle ClientToDoc(Rectangle r)
+		{
+			return new Rectangle(r.X - _clientRect.X, r.Y - _clientRect.Y + _scroll, r.Width, r.Height);
+		}
+
+		private Rectangle DocToClient(Rectangle r)
+		{
+			return new Rectangle(r.X + _clientRect.X, r.Y + _clientRect.Y - _scroll, r.Width, r.Height);
+		}
+
 		private Rectangle GetItemDocBounds(int index)
 		{
 			return new Rectangle(_clientRect.Left, index * _itemHeight, _clientRect.Width, _itemHeight);
 		}
 
-		private bool ItemIsVisible(ItemInfo item)
+		private bool ItemIsVisible(int index)
 		{
-			var index = GetItemIndex(item);
-			if (index == -1) return false;
-
 			var itemBounds = GetItemDocBounds(index);
 			return itemBounds.IntersectsWith(_visibleRect);
 		}
 
-		private int GetItemIndex(ItemInfo item)
+		private int GetItemIndex(LBItem item)
 		{
 			var index = 0;
 			foreach (var i in _items)
@@ -427,6 +410,14 @@ namespace WallSwitch
 				index++;
 			}
 			return -1;
+		}
+
+		public void InvalidateItem(int index)
+		{
+			if (index < 0 || index >= _items.Count) throw new ArgumentOutOfRangeException(nameof(index));
+
+			var itemBounds = DocToClient(GetItemDocBounds(index));
+			if (itemBounds.IntersectsWith(_clientRect)) Invalidate(itemBounds);
 		}
 		#endregion
 
@@ -540,6 +531,35 @@ namespace WallSwitch
 						SetSelection(_selStart, index);
 					}
 				}
+				else if (e.Button == MouseButtons.None)
+				{
+					var index = HitTest(e.Location);
+					if (index != -1)
+					{
+						if (_mouseOverItem != _items[index])
+						{
+							if (_mouseOverItem != null) _mouseOverItem.MouseOverRating = 0;
+							_mouseOverItem = _items[index];
+
+							var rating = HitTestRating(index, e.Location);
+							if (rating != -1) _mouseOverItem.MouseOverRating = rating;
+						}
+						else // mouse is still over mouse-over item
+						{
+							var rating = HitTestRating(index, e.Location);
+							if (rating != -1) _mouseOverItem.MouseOverRating = rating;
+							else _mouseOverItem.MouseOverRating = 0;
+						}
+					}
+					else // index == -1
+					{
+						if (_mouseOverItem != null)
+						{
+							_mouseOverItem.MouseOverRating = 0;
+							_mouseOverItem = null;
+						}
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -551,6 +571,12 @@ namespace WallSwitch
 		{
 			try
 			{
+				var index = HitTest(e.Location);
+				if (index != -1)
+				{
+					var rating = HitTestRating(index, e.Location);
+					if (rating != -1) SetItemRating(index, rating);
+				}
 
 			}
 			catch (Exception ex)
@@ -565,6 +591,52 @@ namespace WallSwitch
 			var index = docPt.Y / _itemHeight;
 			if (index < 0 || index >= _items.Count) return -1;
 			return index;
+		}
+
+		private int HitTestRating(int index, Point clientPt)
+		{
+			if (index < 0 || index >= _items.Count) throw new ArgumentOutOfRangeException(nameof(index));
+
+			var docPt = ClientToDoc(clientPt);
+			var item = _items[index];
+
+			for (int i = 0; i < 5; i++)
+			{
+				if (item.StarRects[i].Contains(docPt)) return i + 1;
+			}
+
+			return -1;
+		}
+
+		private void SetItemRating(int index, int rating)
+		{
+			if (index < 0 || index >= _items.Count) throw new ArgumentOutOfRangeException(nameof(index));
+			if (rating < 0 || rating > 5) throw new ArgumentOutOfRangeException(nameof(rating));
+
+			var item = _items[index];
+			Global.UpdateRating(item.ImageRec.Location, rating);
+
+			using (var db = new Database())
+			{
+				using (var tran = db.BeginTransaction())
+				{
+					using (var cmd = db.CreateCommand("update history set rating = @rating where path = @path"))
+					{
+						cmd.Parameters.AddWithValue("@rating", rating);
+						cmd.Parameters.AddWithValue("@path", item.ImageRec.Location);
+						cmd.ExecuteNonQuery();
+					}
+
+					using (var cmd = db.CreateCommand("update img set rating = @rating where path = @path"))
+					{
+						cmd.Parameters.AddWithValue("@rating", rating);
+						cmd.Parameters.AddWithValue("@path", item.ImageRec.Location);
+						cmd.ExecuteNonQuery();
+					}
+
+					tran.Commit();
+				}
+			}
 		}
 		#endregion
 
@@ -590,31 +662,67 @@ namespace WallSwitch
 		#endregion
 
 		#region Thumbnail Retrieval
-		private List<ImageRec> _thumbnailQueue = new List<ImageRec>();
+		private object _thumbnailLock = new object();
+		private Queue<LBItem> _thumbnailQueue;
 
-		private void QueueThumbnailRetrieval(ImageRec img)
+		private void QueueThumbnailRetrieval(LBItem item)
 		{
-			if (_thumbnailQueue.Contains(img)) return;
-
-			System.Threading.ThreadPool.QueueUserWorkItem((x) =>
+			lock (_thumbnailLock)
 			{
-				SetStatusMessage(string.Format("Getting Thumbnail: {0}", img.Location));
-				using (var db = new Database())
+				if (_thumbnailQueue == null)
 				{
-					img.Retrieve(db);
-					var thumb = img.Thumbnail;
-					img.Release();
-					BeginInvoke(new Action(() => {  OnThumbnailUpdated(img); }));
+					_thumbnailQueue = new Queue<LBItem>();
+					_thumbnailQueue.Enqueue(item);
+					System.Threading.ThreadPool.QueueUserWorkItem(ThumbnailRetrievalProc);
 				}
-			});
+				else if (!_thumbnailQueue.Contains(item))
+				{
+					_thumbnailQueue.Enqueue(item);
+				}
+			}
 		}
 
-		private void OnThumbnailUpdated(ImageRec img)
+		private void ThumbnailRetrievalProc(object state)
 		{
-			var item = (from i in _items where i.img == img select i).FirstOrDefault();
+			using (var db = new Database())
+			{
+				while (true)
+				{
+					LBItem item = null;
+					lock (_thumbnailLock)
+					{
+						item = _thumbnailQueue.Peek();  // Don't remove it from the queue until the image is fully loaded
+					}
+
+					// If item is no longer visible on the screen, then don't spend time getting the thumbnail.
+					if (ItemIsVisible(item.Index))
+					{
+						SetStatusMessage(string.Format("Getting Thumbnail: {0}", item.ImageRec.Location));
+
+						item.ImageRec.Retrieve(db);
+						item.ImageRec.Release();
+						var thumb = item.ImageRec.Thumbnail;
+						BeginInvoke(new Action(() => { OnThumbnailUpdated(item); }));
+					}
+
+					lock (_thumbnailLock)
+					{
+						_thumbnailQueue.Dequeue();
+						if (_thumbnailQueue.Count == 0)
+						{
+							_thumbnailQueue = null;
+							return;
+						}
+					}
+				}
+			}
+		}
+
+		private void OnThumbnailUpdated(LBItem item)
+		{
 			if (item != null)
 			{
-				if (ItemIsVisible(item)) Invalidate();
+				if (ItemIsVisible(item.Index)) Invalidate();
 			}
 		}
 		#endregion

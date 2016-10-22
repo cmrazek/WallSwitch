@@ -34,11 +34,18 @@ namespace WallSwitch
 
 		#region Events
 		public event EventHandler ThumbnailUpdated;
+		public event EventHandler RatingUpdated;
 		#endregion
 
 		#region Construction
 		private ImageRec()
 		{
+			Global.RatingUpdated += Global_RatingUpdated;
+		}
+
+		~ImageRec()
+		{
+			Global.RatingUpdated -= Global_RatingUpdated;
 		}
 
 		public static ImageRec FromFile(string fileName)
@@ -203,10 +210,16 @@ namespace WallSwitch
 				case ImageLocationType.File:
 					try
 					{
+						if (!File.Exists(_location))
+						{
+							Log.Warning("Image file no longer exists: {0}", _location);
+							return false;
+						}
+
 						lock (this)
 						{
 							_imageFormat = ImageFormatDesc.FileNameToImageFormat(_location);
-							_image = Image.FromFile(_location);
+							_image = ImageUtil.LoadFromFile(_location);
 							_size = FileUtil.GetFileSize(_location);
 							MakeThumbnail(db);
 						}
@@ -235,7 +248,7 @@ namespace WallSwitch
 								Log.Write(LogLevel.Debug, "Loading cached image from '{0}'.", fileName);
 								lock (this)
 								{
-									_image = Image.FromFile(fileName);
+									_image = ImageUtil.LoadFromFile(fileName);
 									_size = FileUtil.GetFileSize(fileName);
 									MakeThumbnail(db);
 								}
@@ -363,5 +376,16 @@ namespace WallSwitch
 			return string.Compare(_location, other._location, StringComparison.OrdinalIgnoreCase);
 		}
 
+		private void Global_RatingUpdated(object sender, Global.RatingUpdatedEventArgs e)
+		{
+			if (e.Location.Equals(_location, StringComparison.OrdinalIgnoreCase))
+			{
+				if (_rating != e.Rating)
+				{
+					_rating = e.Rating;
+					RatingUpdated?.Invoke(this, EventArgs.Empty);
+				}
+			}
+		}
 	}
 }
