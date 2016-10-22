@@ -387,6 +387,15 @@ namespace WallSwitch {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Field cannot be blank..
+        /// </summary>
+        internal static string Error_BlankField {
+            get {
+                return ResourceManager.GetString("Error_BlankField", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You cannot delete the last theme in the list. There must be at least one theme present..
         /// </summary>
         internal static string Error_CantDeleteLastTheme {
@@ -448,6 +457,24 @@ namespace WallSwitch {
         internal static string Error_ImageFileMissing {
             get {
                 return ResourceManager.GetString("Error_ImageFileMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Filter condition comparison mode not selected..
+        /// </summary>
+        internal static string Error_ImageFilterConditionCompareBlank {
+            get {
+                return ResourceManager.GetString("Error_ImageFilterConditionCompareBlank", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Filter condition type not selected..
+        /// </summary>
+        internal static string Error_ImageFilterConditionTypeBlank {
+            get {
+                return ResourceManager.GetString("Error_ImageFilterConditionTypeBlank", resourceCulture);
             }
         }
         

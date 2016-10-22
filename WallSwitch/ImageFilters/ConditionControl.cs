@@ -41,8 +41,6 @@ namespace WallSwitch.ImageFilters
 			{
 				_suppressControls = true;
 
-				c_operatorCombo.SelectedIndex = 0;
-
 				// Refresh the 'type' combo
 				var selIndex = -1;
 				foreach (var type in GlobalConditionTypes)
@@ -54,6 +52,7 @@ namespace WallSwitch.ImageFilters
 
 				RefreshCompareCombo();
 				RefreshValueControl();
+				RefreshOperatorCombo();
 
 				EnableControls();
 			}
@@ -121,6 +120,14 @@ namespace WallSwitch.ImageFilters
 					_cond = (FilterCondition)Activator.CreateInstance(condType.Type);
 					_cond.ValueChanged += Condition_ValueChanged;
 
+					// Set the condition operator to whatever is selected in the operator combo box at this time
+					Operator op;
+					if (Enum.TryParse((c_operatorCombo.SelectedItem as string), true, out op))
+					{
+						_cond.Operator = op;
+						DataChanged?.Invoke(this, EventArgs.Empty);
+					}
+
 					RefreshCompareCombo();
 					RefreshValueControl();
 				}
@@ -169,6 +176,18 @@ namespace WallSwitch.ImageFilters
 
 		private void RefreshOperatorCombo()
 		{
+			c_operatorCombo.Items.Clear();
+
+			string selItem = null;
+			foreach (Operator op in Enum.GetValues(typeof(Operator)))
+			{
+				var str = op.ToString().ToLower();
+				c_operatorCombo.Items.Add(str);
+				if (_cond != null && _cond.Operator == op) selItem = str;
+			}
+
+			if (selItem != null) c_operatorCombo.SelectedItem = selItem;
+			else c_operatorCombo.SelectedIndex = 0;
 		}
 
 		private void AddButton_Click(object sender, EventArgs e)
@@ -297,6 +316,16 @@ namespace WallSwitch.ImageFilters
 			{
 				this.ShowError(ex);
 			}
+		}
+
+		public ComboBox TypeComboBox
+		{
+			get { return c_condTypeCombo; }
+		}
+
+		public ComboBox CompareComboBox
+		{
+			get { return c_condCompareCombo; }
 		}
 	}
 }

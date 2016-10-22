@@ -577,4 +577,13 @@ Click 'yes' to be taken to the download page.</value>
   <data name="Browser_ImageCount1" xml:space="preserve">
     <value>{0} image</value>
   </data>
+  <data name="Error_BlankField" xml:space="preserve">
+    <value>Field cannot be blank.</value>
+  </data>
+  <data name="Error_ImageFilterConditionCompareBlank" xml:space="preserve">
+    <value>Filter condition comparison mode not selected.</value>
+  </data>
+  <data name="Error_ImageFilterConditionTypeBlank" xml:space="preserve">
+    <value>Filter condition type not selected.</value>
+  </data>
 </root>

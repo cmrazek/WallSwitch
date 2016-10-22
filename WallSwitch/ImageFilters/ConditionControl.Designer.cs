@@ -91,9 +91,6 @@
 			// 
 			this.c_operatorCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.c_operatorCombo.FormattingEnabled = true;
-			this.c_operatorCombo.Items.AddRange(new object[] {
-            "and",
-            "or"});
 			this.c_operatorCombo.Location = new System.Drawing.Point(3, 3);
 			this.c_operatorCombo.Name = "c_operatorCombo";
 			this.c_operatorCombo.Size = new System.Drawing.Size(60, 24);

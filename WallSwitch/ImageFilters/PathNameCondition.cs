@@ -54,7 +54,7 @@ namespace WallSwitch.ImageFilters
 			var ctrl = ValueControl as TextBox;
 			if (string.IsNullOrWhiteSpace(ctrl.Text))
 			{
-				error = "Field cannot be blank.";	// TODO: make resource
+				error = Res.Error_BlankField;
 				return false;
 			}
 

@@ -3177,6 +3177,32 @@ namespace WallSwitch
 			foreach (ConditionControl ctrl in c_filterFlow.Controls.Cast<Control>().Where(x => x is ConditionControl))
 			{
 				var cond = ctrl.Condition;
+				if (cond == null)
+				{
+					if (showErrors)
+					{
+						c_themeTabControl.SelectedTab = c_filterTab;
+						ctrl.TypeComboBox.Focus();
+						this.ShowError(Res.Error_ImageFilterConditionTypeBlank);
+					}
+
+					filterOut = null;
+					return false;
+				}
+
+				var compare = cond.Compare;
+				if (string.IsNullOrEmpty(compare))
+				{
+					if (showErrors)
+					{
+						c_themeTabControl.SelectedTab = c_filterTab;
+						ctrl.CompareComboBox.Focus();
+						this.ShowError(Res.Error_ImageFilterConditionCompareBlank);
+					}
+
+					filterOut = null;
+					return false;
+				}
 
 				string error = null;
 				if (!cond.Validate(ref error))
