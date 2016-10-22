@@ -51,8 +51,7 @@ namespace WallSwitch.ImageFilters
 
 		public override bool Validate(ref string error)
 		{
-			var ctrl = ValueControl as TextBox;
-			if (string.IsNullOrWhiteSpace(ctrl.Text))
+			if (string.IsNullOrWhiteSpace(_text))
 			{
 				error = Res.Error_BlankField;
 				return false;
@@ -63,7 +62,7 @@ namespace WallSwitch.ImageFilters
 
 		public override void SaveXml(XmlWriter xml)
 		{
-			xml.WriteAttributeString("text", (ValueControl as TextBox).Text);
+			xml.WriteAttributeString("text", _text);
 		}
 
 		public override bool LoadXml(XmlElement element)

@@ -690,6 +690,14 @@ namespace WallSwitch
 				g.DrawImage(i, rect);
 			}
 		}
+
+		public static void DrawImage(this Graphics g, CompressedImage img, RectangleF rect)
+		{
+			using (var i = img.GetImage())
+			{
+				g.DrawImage(i, rect);
+			}
+		}
 	}
 
 	public static class VersionUtil

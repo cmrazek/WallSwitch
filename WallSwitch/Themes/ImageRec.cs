@@ -203,18 +203,24 @@ namespace WallSwitch
 				case ImageLocationType.File:
 					try
 					{
-						_imageFormat = ImageFormatDesc.FileNameToImageFormat(_location);
-						_image = Image.FromFile(_location);
-						_size = FileUtil.GetFileSize(_location);
-						MakeThumbnail(db);
+						lock (this)
+						{
+							_imageFormat = ImageFormatDesc.FileNameToImageFormat(_location);
+							_image = Image.FromFile(_location);
+							_size = FileUtil.GetFileSize(_location);
+							MakeThumbnail(db);
+						}
 						return true;
 					}
 					catch (Exception ex)
 					{
 						Log.Write(ex, "Failed to load image from file '{0}'.", _location);
-						_image = null;
-						_imageFormat = null;
-						_size = null;
+						lock (this)
+						{
+							_image = null;
+							_imageFormat = null;
+							_size = null;
+						}
 						return false;
 					}
 
@@ -227,9 +233,12 @@ namespace WallSwitch
 							try
 							{
 								Log.Write(LogLevel.Debug, "Loading cached image from '{0}'.", fileName);
-								_image = Image.FromFile(fileName);
-								_size = FileUtil.GetFileSize(fileName);
-								MakeThumbnail(db);
+								lock (this)
+								{
+									_image = Image.FromFile(fileName);
+									_size = FileUtil.GetFileSize(fileName);
+									MakeThumbnail(db);
+								}
 								return true;
 							}
 							catch (Exception ex)
@@ -246,24 +255,30 @@ namespace WallSwitch
 						_imageFormat = ImageFormatDesc.ContentTypeToImageFormat(response.ContentType);
 
 						var stream = response.GetResponseStream();
-						_image = Image.FromStream(stream);
+						lock (this)
+						{
+							_image = Image.FromStream(stream);
 
-						_cachePathName = ImageCache.SaveImage(this, db);
-						if (!string.IsNullOrEmpty(_cachePathName)) _size = FileUtil.GetFileSize(_cachePathName);
-						else _size = null;
+							_cachePathName = ImageCache.SaveImage(this, db);
+							if (!string.IsNullOrEmpty(_cachePathName)) _size = FileUtil.GetFileSize(_cachePathName);
+							else _size = null;
 
-						db.ExecuteNonQuery("update img set cache_path = @cache_path where path = @path",
-							"@cache_path", _cachePathName,
-							"@path", _location);
+							db.ExecuteNonQuery("update img set cache_path = @cache_path where path = @path",
+								"@cache_path", _cachePathName,
+								"@path", _location);
 
-						MakeThumbnail(db);
+							MakeThumbnail(db);
+						}
 						return true;
 					}
 					catch (Exception ex)
 					{
 						Log.Write(ex, "Failed to load image from url '{0}'.", _location);
-						_image = null;
-						_imageFormat = null;
+						lock (this)
+						{
+							_image = null;
+							_imageFormat = null;
+						}
 						return false;
 					}
 			}
@@ -273,21 +288,24 @@ namespace WallSwitch
 
 		public void Release()
 		{
-			if (_image != null)
+			lock (this)
 			{
-				_image.Dispose();
-				_image = null;
+				if (_image != null)
+				{
+					_image.Dispose();
+					_image = null;
+				}
 			}
 		}
 
 		public bool IsPresent
 		{
-			get { return _image != null; }
+			get { lock (this) { return _image != null; } }
 		}
 
 		public Image Image
 		{
-			get { return _image; }
+			get { lock (this) { return _image; } }
 		}
 
 		public long? Size
@@ -299,9 +317,9 @@ namespace WallSwitch
 		{
 			try
 			{
-				if (_thumbnail != null || _image == null) return;
-				lock (_image)
+				lock (this)
 				{
+					if (_thumbnail != null || _image == null) return;
 					var imageRect = new RectangleF(new PointF(0.0f, 0.0f), _image.Size);
 					if (imageRect.Width > HistoryList.ThumbnailWidth) imageRect = imageRect.ScaleRectWidth(HistoryList.ThumbnailWidth);
 					if (imageRect.Height > HistoryList.ThumbnailHeight) imageRect = imageRect.ScaleRectHeight(HistoryList.ThumbnailHeight);

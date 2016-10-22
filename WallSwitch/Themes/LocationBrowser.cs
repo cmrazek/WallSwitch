@@ -13,26 +13,30 @@ namespace WallSwitch
 	partial class LocationBrowser : Form
 	{
 		private Location _loc;
-		private Queue<ImageRec> _thumbnailLoadQueue;
-		private Thread _thumbnailLoadThread;
-		private volatile bool _kill;
 		private ItemInfo _mouseOverItem;
-		private ItemSorter _itemSorter = new ItemSorter();
+		private List<ItemInfo> _items = new List<ItemInfo>();
+		private int _itemHeight = k_rawItemHeight;
+		private int _totalHeight;
+		private int _maxThumbWidth = k_rawThumbWidth;
+		private int _maxThumbHeight = k_rawItemHeight;
+		
+		private bool _itemLayoutUpdateRequired = true;
+		private int _spacer;
+		private Rectangle _clientRect;
 
-		private const int k_imageColumn = 0;
-		private const int k_pathColumn = 1;
-		private const int k_ratingColumn = 2;
-		private const int k_sizeColumn = 3;
+		private const int k_rawItemHeight = 100;
+		private const int k_rawThumbWidth = 175;
 
 		private class ItemInfo
 		{
-			public ListViewItem lvi;
 			public ImageRec img;
 			public string relativeLocation;
 			public Rectangle[] starRects;
 			public int mouseOverRating;
+			public int index;
 		}
 
+		#region Construction
 		public LocationBrowser(Location loc)
 		{
 			if (loc == null) throw new ArgumentNullException(nameof(loc));
@@ -42,16 +46,10 @@ namespace WallSwitch
 			InitializeComponent();
 
 			Text = _loc.Path;
-
-			// Hack to set the height of each item
-			var imgList = new ImageList();
-			imgList.ImageSize = new Size(1, 100);
-			c_list.SmallImageList = imgList;
-
-			var prop = c_list.GetType().GetProperty("DoubleBuffered", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-			if (prop != null) prop.SetValue(c_list, true, null);
+			DoubleBuffered = true;
 
 			MainWindow.Current.ImageFileDeleted += MainWindow_ImageFileDeleted;
+			MouseWheel += LocationBrowser_MouseWheel;
 		}
 
 		private void LocationBrowser_Load(object sender, EventArgs e)
@@ -60,38 +58,17 @@ namespace WallSwitch
 			{
 				using (var db = new Database())
 				{
-					var table = db.SelectDataTable("select * from img where location_id = @location_id", "@location_id", _loc.RowId);
-					var items = new List<ItemInfo>();
+					var table = db.SelectDataTable("select * from img where location_id = @location_id order by img.path", "@location_id", _loc.RowId);
 					foreach (DataRow row in table.Rows)
 					{
 						var img = ImageRec.FromDataRow(row);
 						var item = CreateItemInfo(img);
-						items.Add(item);
-					}
-
-					c_list.ListViewItemSorter = _itemSorter;
-
-					foreach (var item in items)
-					{
-						var lvi = CreateLVI(item);
-						c_list.Items.Add(lvi);
-
-						if (item.img.Thumbnail == null)
-						{
-							if (_thumbnailLoadQueue == null) _thumbnailLoadQueue = new Queue<ImageRec>();
-							_thumbnailLoadQueue.Enqueue(item.img);
-							item.img.ThumbnailUpdated += Img_ThumbnailUpdated;
-						}
+						item.index = _items.Count;
+						_items.Add(item);
 					}
 
 					RefreshStatusCounts();
-				}
-
-				if (_thumbnailLoadQueue != null)
-				{
-					_thumbnailLoadThread = new Thread(new ThreadStart(ThumbnailLoadThreadProc));
-					_thumbnailLoadThread.Name = "Thumbnail Load";
-					_thumbnailLoadThread.Start();
+					UpdateScroll();
 				}
 			}
 			catch (Exception ex)
@@ -102,7 +79,7 @@ namespace WallSwitch
 
 		private void LocationBrowser_FormClosed(object sender, FormClosedEventArgs e)
 		{
-			_kill = true;
+			//_kill = true;		TODO: remove
 
 			MainWindow.Current.ImageFileDeleted -= MainWindow_ImageFileDeleted;
 		}
@@ -110,38 +87,6 @@ namespace WallSwitch
 		public Location LocationObject
 		{
 			get { return _loc; }
-		}
-
-		private void Img_ThumbnailUpdated(object sender, EventArgs e)
-		{
-			if (InvokeRequired)
-			{
-				Invoke(new Action(() => { Img_ThumbnailUpdated(sender, e); }));
-				return;
-			}
-
-			var img = sender as ImageRec;
-			if (img == null) return;
-
-			var index = 0;
-			foreach (ListViewItem lvi in c_list.Items)
-			{
-				if (((ItemInfo)lvi.Tag).img == img)
-				{
-					if (img.Size.HasValue)
-					{
-						lvi.SubItems[k_sizeColumn].Text = img.Size.Value.ToSizeString();
-					}
-
-					var rect = c_list.GetItemRect(index);
-					if (rect.IntersectsWith(ClientRectangle))
-					{
-						c_list.Invalidate(rect);
-					}
-					break;
-				}
-				index++;
-			}
 		}
 
 		private ItemInfo CreateItemInfo(ImageRec img)
@@ -161,329 +106,27 @@ namespace WallSwitch
 
 			return info;
 		}
+		#endregion
 
-		private ListViewItem CreateLVI(ItemInfo info)
-		{
-			var lvi = new ListViewItem();
-			info.lvi = lvi;
-			lvi.Tag = info;
-
-			while (lvi.SubItems.Count < c_list.Columns.Count)
-			{
-				var col = c_list.Columns[lvi.SubItems.Count];
-				switch (col.Tag.ToString())
-				{
-					case "path":
-						lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, info.relativeLocation));
-						break;
-					case "rating":
-					case "size":
-						lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi,
-							info.img.Size.HasValue ? info.img.Size.Value.ToSizeString() : string.Empty));
-						break;
-					default:
-						throw new InvalidOperationException(string.Format("Invalid column tag '{0}'.", col.Tag));
-				}
-			}
-
-			return lvi;
-		}
-
-		private void List_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
-		{
-			try
-			{
-				var info = (ItemInfo)e.Item.Tag;
-				var col = e.Header;
-				switch (col.Tag.ToString())
-				{
-					case "thumb":
-						e.DrawBackground();
-						if ((e.ItemState & ListViewItemStates.Selected) != 0) e.Graphics.FillRectangle(SystemBrushes.Highlight, e.Bounds);
-						if (info.img.Thumbnail != null)
-						{
-							var thumb = info.img.Thumbnail;
-
-							var rect = new RectangleF(0, 0, thumb.Size.Width, thumb.Size.Height);
-							if (rect.Width > e.Bounds.Width) rect = rect.ScaleRectWidth(e.Bounds.Width);
-							if (rect.Height > e.Bounds.Height) rect = rect.ScaleRectHeight(e.Bounds.Height);
-							rect = rect.CenterInside(e.Bounds);
-							var imgRect = new Rectangle((int)Math.Round(rect.Left), (int)Math.Round(rect.Top),
-								(int)Math.Round(rect.Width), (int)Math.Round(rect.Height));
-
-							e.Graphics.DrawImage(info.img.Thumbnail, imgRect);
-						}
-						break;
-
-					case "rating":
-						e.DrawBackground();
-						if ((e.ItemState & ListViewItemStates.Selected) != 0) e.Graphics.FillRectangle(SystemBrushes.Highlight, e.Bounds);
-						DrawRating(info, e.Bounds, e.Graphics);
-						break;
-
-					default:
-						e.DrawDefault = true;
-						break;
-				}
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex);
-			}
-		}
-
-		private void List_DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)
-		{
-			e.DrawDefault = true;
-		}
-
-		private void List_DrawItem(object sender, DrawListViewItemEventArgs e)
-		{
-		}
-
-		private void ThumbnailLoadThreadProc()
-		{
-			try
-			{
-				Log.Info("Loading {0} thumbnail(s) in background thread.", _thumbnailLoadQueue.Count);
-
-				int loadCount = 0;
-
-				using (var db = new Database())
-				{
-					while (_thumbnailLoadQueue.Count > 0 && !_kill)
-					{
-						var img = _thumbnailLoadQueue.Dequeue();
-						try
-						{
-							SetStatusMessage(string.Format("Getting Thumbnail: {0}", img.Location));
-							img.Retrieve(db);
-							img.Release();
-							loadCount++;
-						}
-						catch (Exception ex)
-						{
-							Log.Error(ex);
-						}
-					}
-				}
-
-				SetStatusMessage("Completed");
-			}
-			catch (Exception ex)
-			{
-				Log.Error(ex);
-			}
-		}
-
-		private void DrawRating(ItemInfo info, Rectangle bounds, Graphics g)
-		{
-			g.SetClip(bounds);
-
-			const int spacer = 1;
-			var starWidth = Res.StarUnrated.Width;
-			var starHeight = Res.StarUnrated.Height;
-
-			var center = bounds.Center();
-			var rect = new Rectangle(center.X - (starWidth * 5 + spacer * 4) / 2, center.Y - starHeight / 2, starWidth, starHeight);
-
-			if (info.mouseOverRating > 0 && info.mouseOverRating != info.img.Rating)
-			{
-				for (int i = 1; i <= 5; i++)
-				{
-					if (info.mouseOverRating >= i) g.DrawImage(Res.StarMouseOver1, rect);
-					else g.DrawImage(Res.StarMouseOver0, rect);
-
-					info.starRects[i - 1] = rect;
-					rect.X += starWidth + spacer;
-				}
-			}
-			else if (info.img.Rating > 0)
-			{
-				var rating = info.img.Rating;
-
-				for (int i = 1; i <= 5; i++)
-				{
-					if (rating >= i) g.DrawImage(Res.StarRated1, rect);
-					else g.DrawImage(Res.StarRated0, rect);
-
-					info.starRects[i - 1] = rect;
-					rect.X += starWidth + spacer;
-				}
-			}
-			else
-			{
-				for (int i = 1; i <= 5; i++)
-				{
-					g.DrawImage(Res.StarUnrated, rect);
-
-					info.starRects[i - 1] = rect;
-					rect.X += starWidth + spacer;
-				}
-			}
-		}
-
-		private void List_MouseMove(object sender, MouseEventArgs e)
-		{
-			try
-			{
-				var lvi = c_list.GetItemAt(e.X, e.Y);
-				if (lvi != null)
-				{
-					var item = lvi.Tag as ItemInfo;
-					if (_mouseOverItem != item)
-					{
-						if (_mouseOverItem != null)
-						{
-							if (_mouseOverItem.mouseOverRating != 0)
-							{
-								_mouseOverItem.mouseOverRating = 0;
-								c_list.InvalidateItem(_mouseOverItem.lvi);
-							}
-						}
-						_mouseOverItem = item;
-					}
-
-					var rating = HitTestRating(item, e.Location);
-					if (rating != -1)
-					{
-						if (item.mouseOverRating != rating)
-						{
-							item.mouseOverRating = rating;
-							c_list.InvalidateItem(item.lvi);
-						}
-					}
-					else
-					{
-						if (item.mouseOverRating != 0)
-						{
-							item.mouseOverRating = 0;
-							c_list.InvalidateItem(item.lvi);
-						}
-					}
-				}
-				else
-				{
-					if (_mouseOverItem != null) _mouseOverItem.mouseOverRating = 0;
-					_mouseOverItem = null;
-				}
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex);
-			}
-		}
-
-		private void List_MouseLeave(object sender, EventArgs e)
-		{
-			try
-			{
-				if (_mouseOverItem != null)
-				{
-					if (_mouseOverItem.mouseOverRating > 0)
-					{
-						_mouseOverItem.mouseOverRating = 0;
-						c_list.InvalidateItem(_mouseOverItem.lvi);
-					}
-					_mouseOverItem = null;
-				}
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex);
-			}
-		}
-
-		private int HitTestRating(ItemInfo item, Point pt)
-		{
-			for (int r = 1; r <= 5; r++)
-			{
-				if (item.starRects[r - 1].Contains(pt)) return r;
-			}
-
-			if (pt.Y >= item.starRects[0].Y && pt.Y < item.starRects[0].Bottom &&
-				pt.X < item.starRects[0].X && item.starRects[0].X - pt.X < item.starRects[0].Width)
-			{
-				return 0;
-			}
-
-			return -1;
-		}
-
-		private void List_MouseClick(object sender, MouseEventArgs e)
-		{
-			try
-			{
-				var lvi = c_list.GetItemAt(e.X, e.Y);
-				if (lvi != null)
-				{
-					var item = lvi.Tag as ItemInfo;
-					var rating = HitTestRating(item, e.Location);
-					if (rating != -1)
-					{
-						SetItemRating(item, rating);
-						c_list.InvalidateItem(item.lvi);
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex);
-			}
-		}
-
-		private void SetItemRating(ItemInfo item, int rating)
-		{
-			item.img.Rating = rating;
-
-			using (var db = new Database())
-			{
-				using (var cmd = db.CreateCommand("update history set rating = @rating where path = @path"))
-				{
-					cmd.Parameters.AddWithValue("@rating", rating);
-					cmd.Parameters.AddWithValue("@path", item.img.Location);
-					cmd.ExecuteNonQuery();
-				}
-
-				using (var cmd = db.CreateCommand("update img set rating = @rating where path = @path"))
-				{
-					cmd.Parameters.AddWithValue("@rating", rating);
-					cmd.Parameters.AddWithValue("@path", item.img.Location);
-					cmd.ExecuteNonQuery();
-				}
-			}
-		}
-
-		private void List_ItemActivate(object sender, EventArgs e)
-		{
-			try
-			{
-				OpenContextMenuItem_Click(sender, e);
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex);
-			}
-		}
-
+		#region Context Menu
 		private void OpenContextMenuItem_Click(object sender, EventArgs e)
 		{
 			try
 			{
-				var lvi = c_list.SelectedItems.Cast<ListViewItem>().FirstOrDefault();
-				if (lvi == null) return;
+				//var lvi = c_list.SelectedItems.Cast<ListViewItem>().FirstOrDefault();
+				//if (lvi == null) return;
 
-				var item = lvi.Tag as ItemInfo;
-				if (item == null) return;
+				//var item = lvi.Tag as ItemInfo;
+				//if (item == null) return;
 
-				var fileName = item.img.LocationOnDisk;
-				if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
-				{
-					this.ShowError(Res.Error_ImageFileMissing);
-					return;
-				}
+				//var fileName = item.img.LocationOnDisk;
+				//if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
+				//{
+				//	this.ShowError(Res.Error_ImageFileMissing);
+				//	return;
+				//}
 
-				System.Diagnostics.Process.Start(fileName);
+				//System.Diagnostics.Process.Start(fileName);
 			}
 			catch (Exception ex)
 			{
@@ -495,20 +138,20 @@ namespace WallSwitch
 		{
 			try
 			{
-				var lvi = c_list.SelectedItems.Cast<ListViewItem>().FirstOrDefault();
-				if (lvi == null) return;
+				//var lvi = c_list.SelectedItems.Cast<ListViewItem>().FirstOrDefault();
+				//if (lvi == null) return;
 
-				var item = lvi.Tag as ItemInfo;
-				if (item == null) return;
+				//var item = lvi.Tag as ItemInfo;
+				//if (item == null) return;
 
-				var fileName = item.img.LocationOnDisk;
-				if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
-				{
-					this.ShowError(Res.Error_ImageFileMissing);
-					return;
-				}
+				//var fileName = item.img.LocationOnDisk;
+				//if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
+				//{
+				//	this.ShowError(Res.Error_ImageFileMissing);
+				//	return;
+				//}
 
-				FileUtil.ExploreFile(fileName);
+				//FileUtil.ExploreFile(fileName);
 			}
 			catch (Exception ex)
 			{
@@ -520,36 +163,24 @@ namespace WallSwitch
 		{
 			try
 			{
-				var lvi = c_list.SelectedItems.Cast<ListViewItem>().FirstOrDefault();
-				if (lvi == null) return;
+				//var lvi = c_list.SelectedItems.Cast<ListViewItem>().FirstOrDefault();
+				//if (lvi == null) return;
 
-				var item = lvi.Tag as ItemInfo;
-				if (item == null) return;
+				//var item = lvi.Tag as ItemInfo;
+				//if (item == null) return;
 
-				var fileName = item.img.LocationOnDisk;
-				if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
-				{
-					this.ShowError(Res.Error_ImageFileMissing);
-					return;
-				}
+				//var fileName = item.img.LocationOnDisk;
+				//if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
+				//{
+				//	this.ShowError(Res.Error_ImageFileMissing);
+				//	return;
+				//}
 
-				if (MessageBox.Show(this, Res.Confirm_DeleteHistoryFile, Res.Confirm_DeleteHistoryFile_Caption,
-					MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
-				{
-					MainWindow.Current.DeleteImageFile(fileName);
-				}
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex);
-			}
-		}
-
-		private void List_SelectedIndexChanged(object sender, EventArgs e)
-		{
-			try
-			{
-				EnableContextMenuItems();
+				//if (MessageBox.Show(this, Res.Confirm_DeleteHistoryFile, Res.Confirm_DeleteHistoryFile_Caption,
+				//	MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+				//{
+				//	MainWindow.Current.DeleteImageFile(fileName);
+				//}
 			}
 			catch (Exception ex)
 			{
@@ -559,7 +190,7 @@ namespace WallSwitch
 
 		private void EnableContextMenuItems()
 		{
-			var selectCount = c_list.SelectedItems.Count;
+			var selectCount = SelectionCount;
 
 			c_openContextMenuItem.Enabled = selectCount == 1;
 			c_exploreContextMenuItem.Enabled = selectCount == 1;
@@ -574,113 +205,24 @@ namespace WallSwitch
 				return;
 			}
 
-			var delFileName = e.FileName;
+			// TODO: re-implement this
+			//var delFileName = e.FileName;
 
-			foreach (var lvi in c_list.Items.Cast<ListViewItem>())
-			{
-				var item = lvi.Tag as ItemInfo;
-				if (delFileName.Equals(item.img.LocationOnDisk, StringComparison.OrdinalIgnoreCase))
-				{
-					c_list.Items.Remove(lvi);
-					break;
-				}
-			}
+			//foreach (var lvi in c_list.Items.Cast<ListViewItem>())
+			//{
+			//	var item = lvi.Tag as ItemInfo;
+			//	if (delFileName.Equals(item.img.LocationOnDisk, StringComparison.OrdinalIgnoreCase))
+			//	{
+			//		c_list.Items.Remove(lvi);
+			//		break;
+			//	}
+			//}
 
 			RefreshStatusCounts();
 		}
+		#endregion
 
-		public enum CompareColumn
-		{
-			Path,
-			Rating,
-			Size
-		}
-
-		private class ItemSorter : System.Collections.IComparer
-		{
-			private List<CompareColumn> _cols = new List<CompareColumn>();
-			private int _asc = 1;
-
-			public ItemSorter()
-			{
-				_cols.Add(CompareColumn.Path);
-				_cols.Add(CompareColumn.Rating);
-				_cols.Add(CompareColumn.Size);
-			}
-
-			public int Compare(object x, object y)
-			{
-				var leftLvi = x as ListViewItem;
-				var rightLvi = y as ListViewItem;
-				if (leftLvi == null || rightLvi == null) throw new ArgumentException("Both objects must be a list view item.");
-
-				var left = leftLvi.Tag as ItemInfo;
-				var right = rightLvi.Tag as ItemInfo;
-				var result = 0;
-
-				foreach (var col in _cols)
-				{
-					switch (col)
-					{
-						case CompareColumn.Path:
-							result = string.Compare(left.relativeLocation, right.relativeLocation, true) * _asc;
-							break;
-						case CompareColumn.Rating:
-							result = left.img.Rating.CompareTo(right.img.Rating) * _asc;
-							break;
-						case CompareColumn.Size:
-							result = left.img.Size.GetValueOrDefault().CompareTo(right.img.Size.GetValueOrDefault()) * _asc;
-							break;
-					}
-
-					if (result != 0) return result;
-				}
-
-				return 0;
-			}
-
-			public void OnColumnClick(CompareColumn col)
-			{
-				if (col == _cols[0])
-				{
-					_asc = -_asc;
-				}
-				else
-				{
-					_cols.Remove(col);
-					_cols.Insert(0, col);
-					_asc = 1;
-				}
-			}
-		}
-
-		private void c_list_ColumnClick(object sender, ColumnClickEventArgs e)
-		{
-			try
-			{
-				var col = c_list.Columns[e.Column];
-				switch (col.Tag.ToString())
-				{
-					case "path":
-						_itemSorter.OnColumnClick(CompareColumn.Path);
-						c_list.Sort();
-						break;
-					case "rating":
-						_itemSorter.OnColumnClick(CompareColumn.Rating);
-						c_list.Sort();
-						break;
-					case "size":
-						_itemSorter.OnColumnClick(CompareColumn.Size);
-						c_list.Sort();
-						break;
-				}
-			}
-			catch (Exception ex)
-			{
-				this.ShowError(ex);
-			}
-		}
-
+		#region Status Bar
 		private void RefreshStatusCounts()
 		{
 			if (InvokeRequired)
@@ -689,7 +231,7 @@ namespace WallSwitch
 				return;
 			}
 
-			var count = c_list.Items.Count;
+			var count = _items.Count;
 			if (count == 1) c_statusCounts.Text = string.Format(Res.Browser_ImageCount1, count);
 			else c_statusCounts.Text = string.Format(Res.Browser_ImageCount, count);
 		}
@@ -705,5 +247,414 @@ namespace WallSwitch
 			Log.Info("Status: {0}", message);
 			c_statusMessage.Text = message;
 		}
+		#endregion
+
+		#region Layout and Paint
+		private Pen _borderPen;
+
+		private void UpdateItemLayout(Graphics g)
+		{
+			_itemLayoutUpdateRequired = false;
+
+			_itemHeight = (int)Math.Ceiling((float)k_rawItemHeight * g.DpiY / 96.0f);
+			_totalHeight = _items.Count * _itemHeight;
+			_spacer = (int)(4.0 * g.DpiX / 96.0f);
+
+			_maxThumbWidth = (int)Math.Ceiling(k_rawThumbWidth * g.DpiX / 96.0f);
+			_maxThumbHeight = _itemHeight - _spacer * 2;
+
+			_clientRect = new Rectangle(0, 0, ClientSize.Width - c_vScroll.Width, ClientSize.Height - c_statusBar.Height);
+
+			_visibleRect = _clientRect;
+			_visibleRect.Offset(0, _scroll);
+
+			UpdateScroll();
+		}
+
+		protected override void OnPaint(PaintEventArgs e)
+		{
+			var g = e.Graphics;
+			if (_itemLayoutUpdateRequired) UpdateItemLayout(g);
+
+			g.FillRectangle(SystemBrushes.Window, _clientRect);
+
+			g.TranslateTransform(0.0f, (float)-_scroll);
+
+			var topItem = _scroll / _itemHeight;
+			var bottomItem = (_scroll + _clientRect.Height) / _itemHeight;
+
+			for (var itemIndex = topItem; itemIndex <= bottomItem && itemIndex < _items.Count; itemIndex++)
+			{
+				var item = _items[itemIndex];
+				var itemBounds = GetItemDocBounds(itemIndex);
+				DrawItem(g, item, itemBounds);
+			}
+		}
+
+		private void DrawItem(Graphics g, ItemInfo item, Rectangle itemBounds)
+		{
+			// Highlight
+			var selected = ItemIsSelected(item.index);
+			if (selected) g.FillRectangle(SystemBrushes.Highlight, itemBounds);
+
+			// Border
+			if (_borderPen == null) _borderPen = new Pen(SystemBrushes.Control);
+			g.DrawRectangle(_borderPen, itemBounds);
+
+			// Thumbnail
+			var thumb = item.img.Thumbnail;
+			if (thumb == null)
+			{
+				QueueThumbnailRetrieval(item.img);
+			}
+			else
+			{
+				var maxThumbRect = new Rectangle(itemBounds.Left + _spacer, itemBounds.Top + _spacer, _maxThumbWidth, _maxThumbHeight);
+
+				var imgRect = new RectangleF(PointF.Empty, thumb.Size);
+				imgRect = imgRect.ScaleRectWidth(_maxThumbWidth);
+				if (imgRect.Height > _maxThumbHeight) imgRect = imgRect.ScaleRectHeight(_maxThumbHeight);
+				imgRect = imgRect.CenterInside(maxThumbRect);
+
+				if (!selected)
+				{
+					maxThumbRect.Inflate(1, 1);
+					g.FillRectangle(SystemBrushes.Control, maxThumbRect);
+				}
+
+				g.DrawImage(thumb, imgRect);
+			}
+
+			var infoLeft = itemBounds.Left + _maxThumbWidth + _spacer * 2;
+			var infoWidth = itemBounds.Right - infoLeft;
+			if (infoWidth > 0)
+			{
+				var infoPt = new Point(infoLeft, itemBounds.Top + _spacer);
+
+				// File Name
+				var stringSize = g.MeasureString(item.relativeLocation, Font, infoWidth);
+				g.DrawString(item.relativeLocation, Font, selected ? SystemBrushes.HighlightText : SystemBrushes.WindowText,
+					new RectangleF(infoPt, stringSize));
+				infoPt.Y += (int)Math.Ceiling(stringSize.Height) + _spacer;
+
+				// Size
+				var imgSize = item.img.Size;
+				if (imgSize.HasValue)
+				{
+					// TODO: this should be drawn using a slightly smaller font
+					var str = imgSize.Value.ToSizeString();
+					stringSize = g.MeasureString(str, Font);
+					g.DrawString(str, Font, selected ? SystemBrushes.HighlightText : SystemBrushes.WindowText,
+						new RectangleF(infoPt, stringSize));
+					infoPt.Y += (int)Math.Ceiling(stringSize.Height);
+				}
+
+				// Rating
+				infoPt.Y += _spacer;
+				var pt = infoPt;
+				var starSize = new Size((int)Math.Round(Res.StarUnrated.Width * g.DpiX / 96.0f),
+					(int)Math.Round(Res.StarUnrated.Height * g.DpiY / 96.0f));
+
+				for (int i = 0; i < 5; i++)
+				{
+					item.starRects[i] = new Rectangle(pt, starSize);
+					pt.X += starSize.Width;
+				}
+
+				var rating = item.img.Rating;
+				if (item.mouseOverRating > 0 && item.mouseOverRating != rating)
+				{
+					for (int i = 1; i <= 5; i++)
+					{
+						if (item.mouseOverRating >= i) g.DrawImage(Res.StarMouseOver1, item.starRects[i - 1]);
+						else g.DrawImage(Res.StarMouseOver0, item.starRects[i - 1]);
+					}
+				}
+				else if (rating > 0)
+				{
+					for (int i = 1; i <= 5; i++)
+					{
+						if (rating >= i) g.DrawImage(Res.StarRated1, item.starRects[i - 1]);
+						else g.DrawImage(Res.StarRated0, item.starRects[i - 1]);
+					}
+				}
+				else
+				{
+					for (int i = 0; i < 5; i++)
+					{
+						g.DrawImage(Res.StarUnrated, item.starRects[i]);
+					}
+				}
+			}
+		}
+
+		private void LocationBrowser_Resize(object sender, EventArgs e)
+		{
+			_itemLayoutUpdateRequired = true;
+			Invalidate();
+		}
+
+		private Point ClientToDoc(Point pt)
+		{
+			return new Point(pt.X - _clientRect.X, pt.Y - _clientRect.Y + _scroll);
+		}
+
+		private Point DocToClient(Point pt)
+		{
+			return new Point(pt.X + _clientRect.X, pt.Y + _clientRect.Y - _scroll);
+		}
+
+		private Rectangle GetItemDocBounds(int index)
+		{
+			return new Rectangle(_clientRect.Left, index * _itemHeight, _clientRect.Width, _itemHeight);
+		}
+
+		private bool ItemIsVisible(ItemInfo item)
+		{
+			var index = GetItemIndex(item);
+			if (index == -1) return false;
+
+			var itemBounds = GetItemDocBounds(index);
+			return itemBounds.IntersectsWith(_visibleRect);
+		}
+
+		private int GetItemIndex(ItemInfo item)
+		{
+			var index = 0;
+			foreach (var i in _items)
+			{
+				if (i == item) return index;
+				index++;
+			}
+			return -1;
+		}
+		#endregion
+
+		#region Scrolling
+		private int _scroll;
+		private Rectangle _visibleRect;
+
+		private void UpdateScroll()
+		{
+			c_vScroll.Maximum = _totalHeight;
+			c_vScroll.LargeChange = _clientRect.Height;
+			c_vScroll.SmallChange = 24;
+		}
+
+		private void VScroll_ValueChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				_scroll = c_vScroll.Value;
+
+				_visibleRect = _clientRect;
+				_visibleRect.Offset(0, _scroll);
+
+				Invalidate();
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void SetScroll(int value)
+		{
+			if (value < 0) value = 0;
+			else if (value > _totalHeight) value = _totalHeight;
+
+			if (value != c_vScroll.Value)
+			{
+				c_vScroll.Value = value;
+			}
+		}
+		#endregion
+
+		#region Mouse
+		private void LocationBrowser_MouseWheel(object sender, MouseEventArgs e)
+		{
+			try
+			{
+				if (e.Delta > 0)
+				{
+					// Scroll Up
+					SetScroll(_scroll - c_vScroll.SmallChange * 3);
+				}
+				else if (e.Delta < 0)
+				{
+					// Scroll Down
+					SetScroll(_scroll + c_vScroll.SmallChange * 3);
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void LocationBrowser_MouseDown(object sender, MouseEventArgs e)
+		{
+			try
+			{
+				var index = HitTest(e.Location);
+				if (index != -1)
+				{
+					Capture = true;
+					if (ModifierKeys.HasFlag(Keys.Shift))
+					{
+						SetSelection(_selStart, index);
+					}
+					else
+					{
+						SetSelection(index, index);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void LocationBrowser_MouseUp(object sender, MouseEventArgs e)
+		{
+			try
+			{
+				Capture = false;
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void LocationBrowser_MouseMove(object sender, MouseEventArgs e)
+		{
+			try
+			{
+				if (e.Button.HasFlag(MouseButtons.Left))
+				{
+					var index = HitTest(e.Location);
+					if (index != -1)
+					{
+						SetSelection(_selStart, index);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void LocationBrowser_MouseClick(object sender, MouseEventArgs e)
+		{
+			try
+			{
+
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private int HitTest(Point clientPt)
+		{
+			var docPt = ClientToDoc(clientPt);
+			var index = docPt.Y / _itemHeight;
+			if (index < 0 || index >= _items.Count) return -1;
+			return index;
+		}
+		#endregion
+
+		#region Keyboard
+		private void LocationBrowser_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+		{
+			try
+			{
+				if (e.KeyCode == Keys.PageDown)
+				{
+					SetScroll(_scroll + c_vScroll.LargeChange);
+				}
+				else if (e.KeyCode == Keys.PageUp)
+				{
+					SetScroll(_scroll - c_vScroll.LargeChange);
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+		#endregion
+
+		#region Thumbnail Retrieval
+		private List<ImageRec> _thumbnailQueue = new List<ImageRec>();
+
+		private void QueueThumbnailRetrieval(ImageRec img)
+		{
+			if (_thumbnailQueue.Contains(img)) return;
+
+			System.Threading.ThreadPool.QueueUserWorkItem((x) =>
+			{
+				SetStatusMessage(string.Format("Getting Thumbnail: {0}", img.Location));
+				using (var db = new Database())
+				{
+					img.Retrieve(db);
+					var thumb = img.Thumbnail;
+					img.Release();
+					BeginInvoke(new Action(() => {  OnThumbnailUpdated(img); }));
+				}
+			});
+		}
+
+		private void OnThumbnailUpdated(ImageRec img)
+		{
+			var item = (from i in _items where i.img == img select i).FirstOrDefault();
+			if (item != null)
+			{
+				if (ItemIsVisible(item)) Invalidate();
+			}
+		}
+		#endregion
+
+		#region Selection
+		private int _selStart = -1;
+		private int _selEnd = -1;
+
+		private void SetSelection(int start, int end)
+		{
+			if (start != _selStart || end != _selEnd)
+			{
+				_selStart = start;
+				_selEnd = end;
+				Invalidate();
+				EnableContextMenuItems();
+			}
+		}
+
+		private bool ItemIsSelected(int index)
+		{
+			if (_selStart <= _selEnd)
+			{
+				return _selStart <= index && _selEnd >= index;
+			}
+			else
+			{
+				return _selEnd <= index && _selStart >= index;
+			}
+		}
+
+		private int SelectionCount
+		{
+			get
+			{
+				if (_selStart == -1) return 0;
+				if (_selStart <= _selEnd) return _selEnd - _selStart + 1;
+				return _selStart - _selEnd + 1;
+			}
+		}
+		#endregion
 	}
 }
