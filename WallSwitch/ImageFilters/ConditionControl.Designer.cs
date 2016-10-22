@@ -54,6 +54,7 @@
 			this.c_condCompareCombo.Name = "c_condCompareCombo";
 			this.c_condCompareCombo.Size = new System.Drawing.Size(200, 24);
 			this.c_condCompareCombo.TabIndex = 1;
+			this.c_condCompareCombo.SelectedIndexChanged += new System.EventHandler(this.CondCompareCombo_SelectedIndexChanged);
 			// 
 			// c_condValuePanel
 			// 
@@ -73,7 +74,7 @@
 			this.c_addButton.TabIndex = 3;
 			this.c_addButton.Text = "+";
 			this.c_addButton.UseVisualStyleBackColor = true;
-			this.c_addButton.Click += new System.EventHandler(this.c_addButton_Click);
+			this.c_addButton.Click += new System.EventHandler(this.AddButton_Click);
 			// 
 			// c_deleteButton
 			// 
@@ -84,7 +85,7 @@
 			this.c_deleteButton.TabIndex = 4;
 			this.c_deleteButton.Text = "-";
 			this.c_deleteButton.UseVisualStyleBackColor = true;
-			this.c_deleteButton.Click += new System.EventHandler(this.c_deleteButton_Click);
+			this.c_deleteButton.Click += new System.EventHandler(this.DeleteButton_Click);
 			// 
 			// c_operatorCombo
 			// 
@@ -97,6 +98,7 @@
 			this.c_operatorCombo.Name = "c_operatorCombo";
 			this.c_operatorCombo.Size = new System.Drawing.Size(60, 24);
 			this.c_operatorCombo.TabIndex = 6;
+			this.c_operatorCombo.SelectedIndexChanged += new System.EventHandler(this.OperatorCombo_SelectedIndexChanged);
 			// 
 			// ConditionControl
 			// 

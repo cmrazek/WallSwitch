@@ -11,7 +11,7 @@ using System.Xml;
 
 namespace WallSwitch.ImageFilters
 {
-	public partial class ConditionControl : UserControl
+	partial class ConditionControl : UserControl
 	{
 		private static List<FilterConditionType> _globalCondTypes;
 
@@ -19,8 +19,19 @@ namespace WallSwitch.ImageFilters
 		private int _index;
 		private bool _suppressControls;
 
+		public event EventHandler DataChanged;
+
 		public ConditionControl()
 		{
+			InitializeComponent();
+		}
+
+		public ConditionControl(FilterCondition cond)
+		{
+			if (cond == null) throw new ArgumentNullException(nameof(cond));
+			_cond = cond;
+			_cond.ValueChanged += Condition_ValueChanged;
+
 			InitializeComponent();
 		}
 
@@ -28,18 +39,31 @@ namespace WallSwitch.ImageFilters
 		{
 			try
 			{
+				_suppressControls = true;
+
 				c_operatorCombo.SelectedIndex = 0;
 
+				// Refresh the 'type' combo
+				var selIndex = -1;
 				foreach (var type in GlobalConditionTypes)
 				{
+					if (_cond != null && _cond.GetType() == type.Type) selIndex = c_condTypeCombo.Items.Count;
 					c_condTypeCombo.Items.Add(type);
 				}
+				if (selIndex >= 0) c_condTypeCombo.SelectedIndex = selIndex;
+
+				RefreshCompareCombo();
+				RefreshValueControl();
 
 				EnableControls();
 			}
 			catch (Exception ex)
 			{
 				this.ShowError(ex);
+			}
+			finally
+			{
+				_suppressControls = false;
 			}
 		}
 
@@ -64,6 +88,11 @@ namespace WallSwitch.ImageFilters
 			}
 		}
 
+		public FilterCondition Condition
+		{
+			get { return _cond; }
+		}
+
 		private void CondTypeCombo_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			try
@@ -73,29 +102,30 @@ namespace WallSwitch.ImageFilters
 				var condType = c_condTypeCombo.SelectedItem as FilterConditionType;
 				if (condType == null)
 				{
+					if (_cond != null)
+					{
+						_cond.ValueChanged -= Condition_ValueChanged;
+					}
+
 					_cond = null;
 					c_condCompareCombo.Items.Clear();
 					c_condValuePanel.Controls.Clear();
 				}
 				else
 				{
-					_cond = (FilterCondition)Activator.CreateInstance(condType.Type);
-
-					c_condCompareCombo.Items.Clear();
-					var count = 0;
-					foreach (var opt in _cond.ComparisonOptions)
+					if (_cond != null)
 					{
-						c_condCompareCombo.Items.Add(opt);
-						count++;
+						_cond.ValueChanged -= Condition_ValueChanged;
 					}
-					if (count > 0) c_condCompareCombo.SelectedIndex = 0;
 
-					c_condValuePanel.Controls.Clear();
-					var ctrl = _cond.CreateValueControl();
-					ctrl.Dock = DockStyle.Fill;
-					c_condValuePanel.Controls.Add(ctrl);
+					_cond = (FilterCondition)Activator.CreateInstance(condType.Type);
+					_cond.ValueChanged += Condition_ValueChanged;
+
+					RefreshCompareCombo();
+					RefreshValueControl();
 				}
 
+				DataChanged?.Invoke(this, EventArgs.Empty);
 				EnableControls();
 			}
 			catch (Exception ex)
@@ -104,7 +134,44 @@ namespace WallSwitch.ImageFilters
 			}
 		}
 
-		private void c_addButton_Click(object sender, EventArgs e)
+		private void RefreshCompareCombo()
+		{
+			c_condCompareCombo.Items.Clear();
+
+			if (_cond != null)
+			{
+				var index = 0;
+				var selIndex = -1;
+				foreach (var opt in _cond.ComparisonOptions)
+				{
+					c_condCompareCombo.Items.Add(opt);
+					if (opt == _cond.Compare) selIndex = index;
+					index++;
+				}
+
+				if (selIndex >= 0) c_condCompareCombo.SelectedIndex = selIndex;
+				else if (index > 0) c_condCompareCombo.SelectedIndex = 0;
+			}
+		}
+
+		private void RefreshValueControl()
+		{
+			c_condValuePanel.Controls.Clear();
+
+			if (_cond != null)
+			{
+				var ctrl = _cond.CreateValueControl();
+				_cond.ValueControl = ctrl;
+				ctrl.Dock = DockStyle.Fill;
+				c_condValuePanel.Controls.Add(ctrl);
+			}
+		}
+
+		private void RefreshOperatorCombo()
+		{
+		}
+
+		private void AddButton_Click(object sender, EventArgs e)
 		{
 			try
 			{
@@ -113,7 +180,9 @@ namespace WallSwitch.ImageFilters
 				{
 					var ctrl = new ConditionControl();
 					parent.Controls.InsertAfter(this, ctrl);
+					MainWindow.Current.OnFilterControlAdded(ctrl);
 					MainWindow.Current.OnFiltersChanged();
+					DataChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 			catch (Exception ex)
@@ -122,17 +191,15 @@ namespace WallSwitch.ImageFilters
 			}
 		}
 
-		private void c_deleteButton_Click(object sender, EventArgs e)
+		private void DeleteButton_Click(object sender, EventArgs e)
 		{
 			try
 			{
 				var parent = Parent as FlowLayoutPanel;
 				if (parent != null)
 				{
-					if (CountConditions() > 1)
-					{
-						parent.Controls.Remove(this);
-					}
+					parent.Controls.Remove(this);
+					DataChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
 			catch (Exception ex)
@@ -159,7 +226,6 @@ namespace WallSwitch.ImageFilters
 			c_operatorCombo.Visible = _index > 0;
 			c_condCompareCombo.Visible = c_condTypeCombo.SelectedIndex >= 0;
 			c_condValuePanel.Visible = c_condCompareCombo.Visible;
-			c_deleteButton.Visible = CountConditions() > 1;
 		}
 
 		private int CountConditions()
@@ -172,94 +238,65 @@ namespace WallSwitch.ImageFilters
 			return 0;
 		}
 
-		public bool SaveXml(XmlWriter xml, bool showErrors, TabPage tabPage)
+		private void CondCompareCombo_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			if (_cond == null)
-			{
-				if (showErrors)
-				{
-					tabPage?.Select();
-					c_condTypeCombo.Focus();
-					this.ShowError("Attribute cannot be blank.");	// TODO: make resource
-				}
-				return false;
-			}
-
-			var compare = c_condCompareCombo.SelectedItem as string;
-			if (compare == null)
-			{
-				if (showErrors)
-				{
-					tabPage?.Select();
-					c_condCompareCombo.Focus();
-					this.ShowError("Comparison cannot be blank.");	// TODO: make resource
-				}
-				return false;
-			}
-
-			var valueCtrl = c_condValuePanel.Controls.Cast<Control>().FirstOrDefault();
-			var error = string.Empty;
-			if (_cond.Validate(compare, valueCtrl, ref error))
-			{
-				if (showErrors)
-				{
-					tabPage?.Select();
-					valueCtrl?.Focus();
-					if (!string.IsNullOrEmpty(error)) this.ShowError(error);
-					else this.ShowError("Invalid value.");	// TODO: make resource
-				}
-				return false;
-			}
-
-			xml.WriteAttributeString("Type", _cond.GetType().FullName);
-			xml.WriteAttributeString("Compare", compare);
-			_cond.SaveXml(xml, compare, valueCtrl);
-
-			return true;
-		}
-
-		public void LoadXml(XmlElement element)
-		{
-			var typeFullName = element.GetAttribute("Type");
-			if (string.IsNullOrEmpty(typeFullName)) return;
-
-			var compare = element.GetAttribute("Compare");
-			if (string.IsNullOrEmpty(compare)) return;
-
-			var condType = (from g in GlobalConditionTypes where g.Type.FullName == typeFullName select g).FirstOrDefault();
-			if (condType == null) return;
-
-			_suppressControls = true;
 			try
 			{
-				c_condTypeCombo.SelectedItem = condType;
+				if (_suppressControls) return;
 
-				_cond = (FilterCondition)Activator.CreateInstance(condType.Type);
-
-				var valueControl = _cond.LoadXml(element, compare);
-
-				c_condCompareCombo.Items.Clear();
-				string selItem = null;
-				foreach (var opt in _cond.ComparisonOptions)
+				if (_cond != null)
 				{
-					c_condCompareCombo.Items.Add(opt);
-					if (opt == compare) selItem = opt;
+					_cond.Compare = c_condCompareCombo.SelectedItem as string;
 				}
-				c_condCompareCombo.SelectedItem = selItem;
 
-				c_condValuePanel.Controls.Clear();
-				if (valueControl != null)
-				{
-					valueControl.Dock = DockStyle.Fill;
-					c_condValuePanel.Controls.Add(valueControl);
-				}
+				DataChanged?.Invoke(this, EventArgs.Empty);
 			}
-			finally
+			catch (Exception ex)
 			{
-				_suppressControls = false;
+				this.ShowError(ex);
 			}
 		}
 
-		// TODO: When fields have changed, mark the theme as dirty
+		private void Condition_ValueChanged(object sender, EventArgs e)
+		{
+			if (_suppressControls) return;
+
+			if (InvokeRequired)
+			{
+				BeginInvoke(new Action(() => Condition_ValueChanged(sender, e)));
+				return;
+			}
+
+			try
+			{
+				DataChanged?.Invoke(this, EventArgs.Empty);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void OperatorCombo_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (_suppressControls) return;
+
+				if (_cond != null)
+				{
+					Operator op;
+					if (Enum.TryParse((c_operatorCombo.SelectedItem as string), true, out op))
+					{
+						_cond.Operator = op;
+						DataChanged?.Invoke(this, EventArgs.Empty);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
 	}
 }

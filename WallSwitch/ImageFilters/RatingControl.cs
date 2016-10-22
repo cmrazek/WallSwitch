@@ -19,6 +19,8 @@ namespace WallSwitch.ImageFilters
 
 		private const int k_spacer = 1;
 
+		public event EventHandler RatingChanged;
+
 		public RatingControl()
 		{
 			DoubleBuffered = true;
@@ -110,7 +112,7 @@ namespace WallSwitch.ImageFilters
 				var rating = HitTestRating(e.Location);
 				if (rating != -1 && rating != _rating)
 				{
-					_rating = rating;
+					Rating = rating;
 					Invalidate();
 				}
 			}
@@ -185,6 +187,7 @@ namespace WallSwitch.ImageFilters
 				if (_rating != value)
 				{
 					_rating = value;
+					RatingChanged?.Invoke(this, EventArgs.Empty);
 					Invalidate();
 				}
 			}

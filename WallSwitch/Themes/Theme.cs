@@ -102,7 +102,7 @@ namespace WallSwitch
 		private int _backgroundBlurDist = k_defaultBackgroundBlurDist;
 
 		private List<WidgetInstance> _widgets = new List<WidgetInstance>();
-		private string _filterXml = null;
+		private ImageFilters.ImageFilter _filter;
 
 		private static Random _rand = null;
 		#endregion
@@ -297,10 +297,10 @@ namespace WallSwitch
 			set { _clearBetweenRandomGroups = value; }
 		}
 
-		public string FilterXml
+		public ImageFilters.ImageFilter Filter
 		{
-			get { return _filterXml; }
-			set { _filterXml = value; }
+			get { return _filter; }
+			set { _filter = value; }
 		}
 		#endregion
 
@@ -347,7 +347,7 @@ namespace WallSwitch
 				"hot_key", _hotKey.ToSaveString(),
 				"history_guid", _historyGuid,
 				"latest_guid", _historyLatestGuid,
-				"filter_xml", _filterXml
+				"filter_xml", _filter?.ToSaveString()
 			};
 
 			var newRecord = false;
@@ -454,7 +454,7 @@ namespace WallSwitch
 
 			_historyGuid = row.GetString("history_guid");
 			_historyLatestGuid = row.GetString("latest_guid");
-			_filterXml = row.GetString("filter_xml");
+			_filter = ImageFilters.ImageFilter.FromSaveString(row.GetString("filter_xml"));
 
 			foreach (DataRow locRow in db.SelectDataTable("select rowid, * from location where theme_id = @theme_id", "@theme_id", _rowid).Rows)
 			{
@@ -1067,14 +1067,23 @@ namespace WallSwitch
 			var repeatHistoryRetries = 0;
 			var loadRetries = 0;
 
+			var filterClause = string.Empty;
+			if (_filter != null)
+			{
+				var f = _filter.GenerateSqlWhere();
+				if (!string.IsNullOrEmpty(f)) filterClause = string.Concat(" and ", f);
+			}
+
 			if (maxCount < 0)
 			{
-				var sql = @"
-					select count(*) from img
-					inner join location on location.rowid = img.location_id
-					where img.theme_id = @id
-					and location.disabled = 0";
-				maxCount = db.SelectInt(sql, "@id", _rowid);
+				var sql = new StringBuilder();
+				sql.Append("select count(*) from img");
+				sql.Append(" inner join location on location.rowid = img.location_id");
+				sql.Append(" where img.theme_id = @id");
+				sql.Append(" and location.disabled = 0");
+				sql.Append(filterClause);
+
+				maxCount = db.SelectInt(sql.ToString(), "@id", _rowid);
 				Log.Debug("Number of images in database: {0}", maxCount);
 			}
 			if (maxCount == 0) return null;
@@ -1084,13 +1093,15 @@ namespace WallSwitch
 				var index = _rand.Next(maxCount);
 				Log.Debug("Selecting image index {0} of {1}", index, maxCount);
 
-				var sql = @"
-					select img.rowid, img.* from img
-					inner join location on location.rowid = img.location_id
-					where img.theme_id = @id
-					and location.disabled = 0
-					limit 1 offset @num";
-				var table = db.SelectDataTable(sql, "@id", _rowid, "@num", index);
+				var sql = new StringBuilder();
+				sql.Append("select img.rowid, img.* from img");
+				sql.Append(" inner join location on location.rowid = img.location_id");
+				sql.Append(" where img.theme_id = @id");
+				sql.Append(" and location.disabled = 0");
+				sql.Append(filterClause);
+				sql.Append(" limit 1 offset @num");
+
+				var table = db.SelectDataTable(sql.ToString(), "@id", _rowid, "@num", index);
 				if (table.Rows.Count > 0)
 				{
 					var img = ImageRec.FromDataRow(table.Rows[0]);
@@ -1125,17 +1136,25 @@ namespace WallSwitch
 			Log.Write(LogLevel.Debug, "Picking sequential image (last image = [{0}])", _lastImage);
 
 			DataTable table;
-			string sql;
+			var sql = new StringBuilder();
+
+			var filterClause = string.Empty;
+			if (_filter != null)
+			{
+				var f = _filter.GenerateSqlWhere();
+				if (!string.IsNullOrEmpty(f)) filterClause = string.Concat(" and ", f);
+			}
 
 			if (string.IsNullOrEmpty(_lastImage))
 			{
-				sql = @"
-					select img.rowid, img.* from img
-					inner join location on location.rowid = img.location_id
-					where img.theme_id = @id
-					and location.disabled = 0
-					order by img.path limit 1";
-				table = db.SelectDataTable(sql, "@id", _rowid);
+				sql.Append("select img.rowid, img.* from img");
+				sql.Append(" inner join location on location.rowid = img.location_id");
+				sql.Append(" where img.theme_id = @id");
+				sql.Append(" and location.disabled = 0");
+				sql.Append(filterClause);
+				sql.Append(" order by img.path limit 1");
+
+				table = db.SelectDataTable(sql.ToString(), "@id", _rowid);
 				if (table.Rows.Count > 0)
 				{
 					var img = ImageRec.FromDataRow(table.Rows[0]);
@@ -1150,14 +1169,15 @@ namespace WallSwitch
 			}
 
 			// Find the first image that is greater than the last file.
-			sql = @"
-				select img.rowid, img.* from img
-				inner join location on location.rowid = img.location_id
-				where img.theme_id = @id
-				and img.path > @path
-				and location.disabled = 0
-				order by img.path limit 1";
-			table = db.SelectDataTable(sql, "@id", _rowid, "@path", _lastImage);
+			sql.Append("select img.rowid, img.* from img");
+			sql.Append(" inner join location on location.rowid = img.location_id");
+			sql.Append(" where img.theme_id = @id");
+			sql.Append(" and img.path > @path");
+			sql.Append(" and location.disabled = 0");
+			sql.Append(filterClause);
+			sql.Append(" order by img.path limit 1");
+
+			table = db.SelectDataTable(sql.ToString(), "@id", _rowid, "@path", _lastImage);
 			if (table.Rows.Count > 0)
 			{
 				var img = ImageRec.FromDataRow(table.Rows[0]);
@@ -1167,13 +1187,15 @@ namespace WallSwitch
 			else
 			{
 				// This is the last image for this theme. Select the first one in the database.
-				sql = @"
-					select img.rowid,img. * from img
-					inner join location on location.rowid = img.location_id
-					where img.theme_id = @id
-					and location.disabled = 0
-					order by img.path limit 1";
-				table = db.SelectDataTable(sql, "@id", _rowid);
+				sql.Clear();
+				sql.Append("select img.rowid,img. * from img");
+				sql.Append(" inner join location on location.rowid = img.location_id");
+				sql.Append(" where img.theme_id = @id");
+				sql.Append(" and location.disabled = 0");
+				sql.Append(filterClause);
+				sql.Append(" order by img.path limit 1");
+
+				table = db.SelectDataTable(sql.ToString(), "@id", _rowid);
 				if (table.Rows.Count > 0)
 				{
 					var img = ImageRec.FromDataRow(table.Rows[0]);

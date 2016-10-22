@@ -11,10 +11,15 @@ namespace WallSwitch.ImageFilters
 	[DisplayName("Path Name")]
 	class PathNameCondition : FilterCondition
 	{
+		private string _text = string.Empty;
+
+		private const string k_contains = "Contains";
+		private const string k_doesNotContain = "Does Not Contain";
+
 		private static readonly string[] _compares = new string[]
 		{
-			"Contains",
-			"Does Not Contain"
+			k_contains,
+			k_doesNotContain
 		};
 
 		public override IEnumerable<string> ComparisonOptions
@@ -24,12 +29,29 @@ namespace WallSwitch.ImageFilters
 
 		public override Control CreateValueControl()
 		{
-			return new TextBox();
+			var ctrl = new TextBox();
+			if (!string.IsNullOrEmpty(_text)) ctrl.Text = _text;
+			ctrl.TextChanged += ValueControl_TextChanged;
+			return ctrl;
 		}
 
-		public override bool Validate(string comparison, Control valueControl, ref string error)
+		private void ValueControl_TextChanged(object sender, EventArgs e)
 		{
-			var ctrl = valueControl as TextBox;
+			var textBox = sender as TextBox;
+			if (textBox != null)
+			{
+				var text = textBox.Text;
+				if (text != _text)
+				{
+					_text = text;
+					FireValueChanged();
+				}
+			}
+		}
+
+		public override bool Validate(ref string error)
+		{
+			var ctrl = ValueControl as TextBox;
 			if (string.IsNullOrWhiteSpace(ctrl.Text))
 			{
 				error = "Field cannot be blank.";	// TODO: make resource
@@ -39,14 +61,61 @@ namespace WallSwitch.ImageFilters
 			return true;
 		}
 
-		public override void SaveXml(XmlWriter xml, string compare, Control valueControl)
+		public override void SaveXml(XmlWriter xml)
 		{
-			xml.WriteAttributeString("Text", (valueControl as TextBox).Text);
+			xml.WriteAttributeString("text", (ValueControl as TextBox).Text);
 		}
 
-		public override Control LoadXml(XmlElement element, string compare)
+		public override bool LoadXml(XmlElement element)
 		{
-			return new TextBox() { Text = element.GetAttribute("Text") };
+			_text = element.GetAttribute("text");
+			return !string.IsNullOrEmpty(_text);
+		}
+
+		private string EscapeSqlLikeString(string str)
+		{
+			if (str.IndexOf('%') < 0 && str.IndexOf('_') < 0)
+			{
+				return string.Concat("'%", str.Replace("'", "''"), "%'");
+			}
+
+			var sb = new StringBuilder();
+			sb.Append("'%");
+			foreach (var ch in str)
+			{
+				switch (ch)
+				{
+					case '%':
+						sb.Append(@"\%");
+						break;
+					case '_':
+						sb.Append(@"\_");
+						break;
+					case '\\':
+						sb.Append(@"\\");
+						break;
+					default:
+						sb.Append(ch);
+						break;
+				}
+			}
+			sb.Append(@"%' escape '\'");
+			return sb.ToString();
+		}
+
+		public override string GenerateSqlWhere()
+		{
+			if (string.IsNullOrEmpty(_text)) return null;
+
+			switch (Compare)
+			{
+				case k_contains:
+					return string.Concat("img.path like ", EscapeSqlLikeString(_text));
+				case k_doesNotContain:
+					return string.Concat("img.path not like ", EscapeSqlLikeString(_text));
+				default:
+					return null;
+			}
 		}
 	}
 }

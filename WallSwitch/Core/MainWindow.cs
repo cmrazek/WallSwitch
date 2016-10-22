@@ -746,8 +746,8 @@ namespace WallSwitch
 				clearBetweenRandomGroups = false;
 			}
 
-			string filterXml;
-			if (!SaveFilter(showErrors, out filterXml))
+			ImageFilter filter;
+			if (!SaveFilter(showErrors, out filter))
 			{
 				return false;
 			}
@@ -808,7 +808,7 @@ namespace WallSwitch
 			_currentTheme.RandomGroupCount = randomGroupCount;
 			_currentTheme.ClearBetweenRandomGroups = clearBetweenRandomGroups;
 
-			_currentTheme.FilterXml = filterXml;
+			_currentTheme.Filter = filter;
 
 			c_widgetLayout.SaveToTheme(_currentTheme);
 
@@ -3137,20 +3137,19 @@ namespace WallSwitch
 		{
 			c_filterFlow.Controls.Clear();
 
-			var filterXml = _currentTheme.FilterXml;
-			if (!string.IsNullOrEmpty(filterXml))
+			var filter = _currentTheme.Filter;
+			if (filter != null)
 			{
 				try
 				{
-					var xmlDoc = new XmlDocument();
-					xmlDoc.LoadXml(filterXml);
-
-					foreach (XmlElement element in xmlDoc.SelectNodes("/Filter/Condition"))
+					foreach (var cond in filter.Conditions)
 					{
-						var condCtrl = new ConditionControl();
-						condCtrl.LoadXml(element);
-						c_filterFlow.Controls.Add(condCtrl);
+						var ctrl = new ConditionControl(cond);
+						c_filterFlow.Controls.Add(ctrl);
+						OnFilterControlAdded(ctrl);
 					}
+
+					OnFiltersChanged();
 				}
 				catch (Exception ex)
 				{
@@ -3160,42 +3159,55 @@ namespace WallSwitch
 			}
 		}
 
-		private bool SaveFilter(bool showErrors, out string xmlOut)
+		private void ConditionControl_DataChanged(object sender, EventArgs e)
+		{
+			ControlChanged(sender, e);
+		}
+
+		private bool SaveFilter(bool showErrors, out ImageFilter filterOut)
 		{
 			var count = (from c in c_filterFlow.Controls.Cast<Control>() where c is ConditionControl select c).Count();
 			if (count == 0)
 			{
-				xmlOut = null;
+				filterOut = null;
 				return true;
 			}
 
-			var sb = new StringBuilder();
-			using (var xml = XmlWriter.Create(sb, new XmlWriterSettings { OmitXmlDeclaration = true }))
+			var filter = new ImageFilter();
+			foreach (ConditionControl ctrl in c_filterFlow.Controls.Cast<Control>().Where(x => x is ConditionControl))
 			{
-				xml.WriteStartDocument();
-				xml.WriteStartElement("Filter");
+				var cond = ctrl.Condition;
 
-				foreach (ConditionControl ctrl in c_filterFlow.Controls.Cast<Control>().Where(x => x is ConditionControl))
+				string error = null;
+				if (!cond.Validate(ref error))
 				{
-					xml.WriteStartElement("Condition");
-					if (!ctrl.SaveXml(xml, showErrors, c_filterTab))
+					if (showErrors)
 					{
-						xmlOut = null;
-						return false;
+						c_themeTabControl.SelectedTab = c_filterTab;
+						var focusCtrl = cond.ValueControl;
+						if (focusCtrl != null) focusCtrl.Focus();
+						this.ShowError(error);
 					}
-					xml.WriteEndElement();
+
+					filterOut = null;
+					return false;
 				}
 
-				xml.WriteEndElement();
-				xml.WriteEndDocument();
+				filter.AddCondition(ctrl.Condition);
+			}
+			if (!filter.Conditions.Any())
+			{
+				filterOut = null;
+				return true;
 			}
 
-			xmlOut = sb.ToString();
+			filterOut = filter;
 			return true;
 		}
 
 		public void OnFiltersChanged()
 		{
+			// Renumber the condition control indices
 			var index = 0;
 			foreach (var ctrl in c_filterFlow.Controls)
 			{
@@ -3212,12 +3224,22 @@ namespace WallSwitch
 		{
 			try
 			{
-				c_filterFlow.Controls.Add(new ConditionControl());
+				var ctrl = new ConditionControl();
+				c_filterFlow.Controls.Add(ctrl);
+				OnFilterControlAdded(ctrl);
+
+				OnFiltersChanged();
+				ControlChanged(sender, e);
 			}
 			catch (Exception ex)
 			{
 				this.ShowError(ex);
 			}
+		}
+
+		public void OnFilterControlAdded(ConditionControl ctrl)
+		{
+			ctrl.DataChanged += ConditionControl_DataChanged;
 		}
 		#endregion
 	}
