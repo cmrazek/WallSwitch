@@ -207,6 +207,26 @@ namespace WallSwitch
 			return new Point(rect.Right, rect.Bottom);
 		}
 
+		public static PointF TopLeft(this RectangleF rect)
+		{
+			return new PointF(rect.Left, rect.Top);
+		}
+
+		public static PointF TopRight(this RectangleF rect)
+		{
+			return new PointF(rect.Right, rect.Top);
+		}
+
+		public static PointF BottomLeft(this RectangleF rect)
+		{
+			return new PointF(rect.Left, rect.Bottom);
+		}
+
+		public static PointF BottomRight(this RectangleF rect)
+		{
+			return new PointF(rect.Right, rect.Bottom);
+		}
+
 		public static Rectangle GetEnvelope(this IEnumerable<Rectangle> rects)
 		{
 			int left = -1, top = -1, right = -1, bottom = -1;
@@ -275,6 +295,14 @@ namespace WallSwitch
 		public static Point Add(this Point pt, int x, int y)
 		{
 			return new Point(pt.X + x, pt.Y + y);
+		}
+	}
+
+	static class PointFUtil
+	{
+		public static PointF Add(this PointF pt, float x, float y)
+		{
+			return new PointF(pt.X + x, pt.Y + y);
 		}
 	}
 
@@ -694,6 +722,14 @@ namespace WallSwitch
 		{
 			if (size.Height <= 0 || size.Width <= 0) return 0.0f;
 			return (float)size.Width / (float)size.Height;
+		}
+	}
+
+	public static class SizeFUtil
+	{
+		public static SizeF Scale(this SizeF size, float scale)
+		{
+			return new SizeF(size.Width * scale, size.Height * scale);
 		}
 	}
 }

@@ -18,6 +18,8 @@ namespace WallSwitch.ImageFilters
 		private FilterCondition _cond;
 		private int _index;
 		private bool _suppressControls;
+		private ConditionGroupMode _groupMode;
+		private Operator _op;
 
 		public event EventHandler DataChanged;
 
@@ -31,6 +33,7 @@ namespace WallSwitch.ImageFilters
 			if (cond == null) throw new ArgumentNullException(nameof(cond));
 			_cond = cond;
 			_cond.ValueChanged += Condition_ValueChanged;
+			_op = cond.Operator;
 
 			InitializeComponent();
 		}
@@ -53,7 +56,6 @@ namespace WallSwitch.ImageFilters
 				RefreshCompareCombo();
 				RefreshValueControl();
 				RefreshOperatorCombo();
-
 				EnableControls();
 			}
 			catch (Exception ex)
@@ -188,6 +190,8 @@ namespace WallSwitch.ImageFilters
 
 			if (selItem != null) c_operatorCombo.SelectedItem = selItem;
 			else c_operatorCombo.SelectedIndex = 0;
+
+			_op = _cond != null ? _cond.Operator : default(Operator);
 		}
 
 		private void AddButton_Click(object sender, EventArgs e)
@@ -200,7 +204,7 @@ namespace WallSwitch.ImageFilters
 					var ctrl = new ConditionControl();
 					parent.Controls.InsertAfter(this, ctrl);
 					MainWindow.Current.OnFilterControlAdded(ctrl);
-					MainWindow.Current.OnFiltersChanged();
+					MainWindow.Current.UpdateFilterConditionLayout();
 					DataChanged?.Invoke(this, EventArgs.Empty);
 				}
 			}
@@ -302,15 +306,15 @@ namespace WallSwitch.ImageFilters
 			{
 				if (_suppressControls) return;
 
-				if (_cond != null)
+				Operator op;
+				if (Enum.TryParse((c_operatorCombo.SelectedItem as string), true, out op))
 				{
-					Operator op;
-					if (Enum.TryParse((c_operatorCombo.SelectedItem as string), true, out op))
-					{
-						_cond.Operator = op;
-						DataChanged?.Invoke(this, EventArgs.Empty);
-					}
+					_op = op;
+					if (_cond != null) _cond.Operator = op;
+					DataChanged?.Invoke(this, EventArgs.Empty);
 				}
+
+				MainWindow.Current.UpdateFilterConditionLayout();
 			}
 			catch (Exception ex)
 			{
@@ -327,5 +331,77 @@ namespace WallSwitch.ImageFilters
 		{
 			get { return c_condCompareCombo; }
 		}
+
+		private void c_bracketsPanel_Paint(object sender, PaintEventArgs e)
+		{
+			try
+			{
+				if (_groupMode == ConditionGroupMode.Solo) return;
+
+				var g = e.Graphics;
+				var pen = new Pen(SystemBrushes.ControlDark, 2.0f);
+				var clientSize = new SizeF(c_bracketsPanel.ClientSize);
+				var cWidth = (float)c_bracketsPanel.ClientSize.Width - 2.0f;
+				var cHeight = (float)c_bracketsPanel.ClientSize.Height;
+
+				if (_groupMode == ConditionGroupMode.Begin)
+				{
+					var left = 2.0f;
+					var top = 2.0f;
+					var radius = cWidth - left;
+					var arcRect = new RectangleF(left, top, radius, radius);
+
+					g.DrawArc(pen, new RectangleF(arcRect.Location, arcRect.Size.Scale(2.0f)), 180.0f, 90);
+					g.DrawLine(pen, arcRect.BottomLeft(), new PointF(left, cHeight));
+				}
+				else if (_groupMode == ConditionGroupMode.Middle)
+				{
+					var left = 2.0f;
+
+					g.DrawLine(pen, left, 0.0f, left, cHeight);
+				}
+				else if (_groupMode == ConditionGroupMode.End)
+				{
+					var left = 2.0f;
+					var bottom = cHeight - 2.0f;
+					var radius = cWidth - left;
+					var arcRect = new RectangleF(left, bottom - radius, radius, radius);
+
+					g.DrawLine(pen, left, 0.0f, left, arcRect.Top);
+					g.DrawArc(pen, new RectangleF(arcRect.TopLeft().Add(-1.0f, -radius - 1.0f), arcRect.Size.Scale(2.0f)),
+						90.0f, 90.0f);
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		public ConditionGroupMode GroupMode
+		{
+			get { return _groupMode; }
+			set
+			{
+				if (_groupMode != value)
+				{
+					_groupMode = value;
+					c_bracketsPanel.Invalidate();
+				}
+			}
+		}
+
+		public Operator Operator
+		{
+			get { return _op; }
+		}
+	}
+
+	enum ConditionGroupMode
+	{
+		Solo,
+		Begin,
+		Middle,
+		End
 	}
 }

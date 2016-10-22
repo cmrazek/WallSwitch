@@ -3149,7 +3149,7 @@ namespace WallSwitch
 						OnFilterControlAdded(ctrl);
 					}
 
-					OnFiltersChanged();
+					UpdateFilterConditionLayout();
 				}
 				catch (Exception ex)
 				{
@@ -3231,18 +3231,37 @@ namespace WallSwitch
 			return true;
 		}
 
-		public void OnFiltersChanged()
+		public void UpdateFilterConditionLayout()
 		{
-			// Renumber the condition control indices
-			var index = 0;
-			foreach (var ctrl in c_filterFlow.Controls)
-			{
-				var cond = ctrl as ConditionControl;
-				if (cond == null) continue;
+			var ctrls = GetFilterConditionControls();
 
-				cond.Index = index;
-				cond.EnableControls();
-				index++;
+			for (int i = 0; i < ctrls.Length; i++)
+			{
+				var ctrl = ctrls[i];
+				ctrl.Index = i;
+
+				if (ctrl.Operator == Operator.And || i == 0)
+				{
+					if (i + 1 < ctrls.Length && ctrls[i + 1].Operator == Operator.Or)
+					{
+						ctrl.GroupMode = ConditionGroupMode.Begin;
+					}
+					else
+					{
+						ctrl.GroupMode = ConditionGroupMode.Solo;
+					}
+				}
+				else // Or
+				{
+					if (i + 1 < ctrls.Length && ctrls[i + 1].Operator == Operator.Or)
+					{
+						ctrl.GroupMode = ConditionGroupMode.Middle;
+					}
+					else
+					{
+						ctrl.GroupMode = ConditionGroupMode.End;
+					}
+				}
 			}
 		}
 
@@ -3254,7 +3273,7 @@ namespace WallSwitch
 				c_filterFlow.Controls.Add(ctrl);
 				OnFilterControlAdded(ctrl);
 
-				OnFiltersChanged();
+				UpdateFilterConditionLayout();
 				ControlChanged(sender, e);
 			}
 			catch (Exception ex)
@@ -3266,6 +3285,13 @@ namespace WallSwitch
 		public void OnFilterControlAdded(ConditionControl ctrl)
 		{
 			ctrl.DataChanged += ConditionControl_DataChanged;
+		}
+
+		private ConditionControl[] GetFilterConditionControls()
+		{
+			return (from c in c_filterFlow.Controls.Cast<Control>()
+					where c is ConditionControl
+					select c as ConditionControl).ToArray();
 		}
 		#endregion
 	}
