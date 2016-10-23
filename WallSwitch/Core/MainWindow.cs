@@ -26,7 +26,7 @@ namespace WallSwitch
 		private bool _reallyClose;
 		private bool _refreshing;
 		private bool _dirty;
-		private ImageList _locationImages = new ImageList();
+		//private ImageList _locationImages = new ImageList();		TODO: remove
 		private bool _winStart;
 		private HotKey _changeThemeHotKey = new HotKey();
 		private Dictionary<Location, LocationBrowser> _locationBrowsers = new Dictionary<Location, LocationBrowser>();
@@ -61,6 +61,11 @@ namespace WallSwitch
 
 		private const int k_groupBoxMargin = 8;
 		private const double k_minTransparency = 0.1;
+
+		// Location Image List
+		private const int k_locimgFolder = 0;
+		private const int k_locimgFeed = 1;
+		private const int k_locimgImageFile = 2;
 		#endregion
 
 		#region Window Management
@@ -835,9 +840,6 @@ namespace WallSwitch
 		private void RefreshLocations()
 		{
 			lstLocations.Items.Clear();
-
-			_locationImages.Images.Clear();
-			lstLocations.SmallImageList = _locationImages;
 
 			foreach (var loc in _currentTheme.Locations) AddLocationItem(loc);
 		}
@@ -1859,11 +1861,17 @@ namespace WallSwitch
 
 			try
 			{
-				var icon = location.GetIcon();
-				if (icon != null)
+				switch (location.Type)
 				{
-					lvi.ImageIndex = _locationImages.Images.Count;
-					_locationImages.Images.Add(icon);
+					case LocationType.Directory:
+						lvi.ImageIndex = k_locimgFolder;
+						break;
+					case LocationType.Feed:
+						lvi.ImageIndex = k_locimgFeed;
+						break;
+					case LocationType.File:
+						lvi.ImageIndex = k_locimgImageFile;
+						break;
 				}
 			}
 			catch (Exception ex)
@@ -3068,21 +3076,6 @@ namespace WallSwitch
 			}
 		}
 		#endregion
-
-		private void clrBackTop_ColorChanged(object sender, ColorSample.ColorChangedEventArgs e)
-		{
-
-		}
-
-		private void clrBackBottom_ColorChanged(object sender, ColorSample.ColorChangedEventArgs e)
-		{
-
-		}
-
-		private void c_borderColor_ColorChanged(object sender, ColorSample.ColorChangedEventArgs e)
-		{
-
-		}
 
 		#region Window Transparency
 		private void TransparencyTrackBar_Scroll(object sender, EventArgs e)

@@ -46,6 +46,7 @@
 			this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
 			this.ciDeleteLocation = new System.Windows.Forms.ToolStripMenuItem();
 			this.ciLocationProperties = new System.Windows.Forms.ToolStripMenuItem();
+			this.c_locationImages = new System.Windows.Forms.ImageList(this.components);
 			this.cmbTheme = new System.Windows.Forms.ComboBox();
 			this.grpTheme = new System.Windows.Forms.GroupBox();
 			this.btnSave = new System.Windows.Forms.Button();
@@ -251,6 +252,7 @@
 			this.lstLocations.Margin = new System.Windows.Forms.Padding(4);
 			this.lstLocations.Name = "lstLocations";
 			this.lstLocations.Size = new System.Drawing.Size(931, 476);
+			this.lstLocations.SmallImageList = this.c_locationImages;
 			this.lstLocations.TabIndex = 0;
 			this.toolTip1.SetToolTip(this.lstLocations, "Locations where images are retrieved");
 			this.lstLocations.UseCompatibleStateImageBehavior = false;
@@ -367,6 +369,14 @@
 			this.ciLocationProperties.Size = new System.Drawing.Size(234, 26);
 			this.ciLocationProperties.Text = "&Properties";
 			this.ciLocationProperties.Click += new System.EventHandler(this.ciLocationProperties_Click);
+			// 
+			// c_locationImages
+			// 
+			this.c_locationImages.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("c_locationImages.ImageStream")));
+			this.c_locationImages.TransparentColor = System.Drawing.Color.Transparent;
+			this.c_locationImages.Images.SetKeyName(0, "Folder.png");
+			this.c_locationImages.Images.SetKeyName(1, "RSS.ico");
+			this.c_locationImages.Images.SetKeyName(2, "ImageFile.png");
 			// 
 			// cmbTheme
 			// 
@@ -1764,7 +1774,7 @@
 			// 
 			this.c_widgetPanelSplitter.Panel2.Controls.Add(this.c_widgetPanelPropSplitter);
 			this.c_widgetPanelSplitter.Size = new System.Drawing.Size(931, 476);
-			this.c_widgetPanelSplitter.SplitterDistance = 699;
+			this.c_widgetPanelSplitter.SplitterDistance = 696;
 			this.c_widgetPanelSplitter.SplitterWidth = 5;
 			this.c_widgetPanelSplitter.TabIndex = 2;
 			// 
@@ -1774,7 +1784,7 @@
 			this.c_widgetLayout.Location = new System.Drawing.Point(0, 41);
 			this.c_widgetLayout.Margin = new System.Windows.Forms.Padding(5);
 			this.c_widgetLayout.Name = "c_widgetLayout";
-			this.c_widgetLayout.Size = new System.Drawing.Size(699, 435);
+			this.c_widgetLayout.Size = new System.Drawing.Size(696, 435);
 			this.c_widgetLayout.TabIndex = 0;
 			this.c_widgetLayout.WidgetsChanged += new System.EventHandler(this.c_widgetLayout_WidgetsChanged);
 			this.c_widgetLayout.SelectedWidgetChanged += new System.EventHandler<WallSwitch.WidgetLayoutControl.WidgetEventArgs>(this.c_widgetLayout_SelectedWidgetChanged);
@@ -1791,13 +1801,13 @@
 			this.c_widgetTopPanel.Location = new System.Drawing.Point(0, 0);
 			this.c_widgetTopPanel.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetTopPanel.Name = "c_widgetTopPanel";
-			this.c_widgetTopPanel.Size = new System.Drawing.Size(699, 41);
+			this.c_widgetTopPanel.Size = new System.Drawing.Size(696, 41);
 			this.c_widgetTopPanel.TabIndex = 1;
 			// 
 			// c_addWidgetButton
 			// 
 			this.c_addWidgetButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.c_addWidgetButton.Location = new System.Drawing.Point(615, 5);
+			this.c_addWidgetButton.Location = new System.Drawing.Point(612, 5);
 			this.c_addWidgetButton.Margin = new System.Windows.Forms.Padding(4);
 			this.c_addWidgetButton.Name = "c_addWidgetButton";
 			this.c_addWidgetButton.Size = new System.Drawing.Size(80, 28);
@@ -1815,7 +1825,7 @@
 			this.c_widgetTypes.Location = new System.Drawing.Point(71, 6);
 			this.c_widgetTypes.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetTypes.Name = "c_widgetTypes";
-			this.c_widgetTypes.Size = new System.Drawing.Size(535, 24);
+			this.c_widgetTypes.Size = new System.Drawing.Size(532, 24);
 			this.c_widgetTypes.TabIndex = 1;
 			this.c_widgetTypes.SelectedIndexChanged += new System.EventHandler(this.c_widgetTypes_SelectedIndexChanged);
 			// 
@@ -1845,7 +1855,7 @@
 			// c_widgetPanelPropSplitter.Panel2
 			// 
 			this.c_widgetPanelPropSplitter.Panel2.Controls.Add(this.c_widgetPropertyGrid);
-			this.c_widgetPanelPropSplitter.Size = new System.Drawing.Size(227, 476);
+			this.c_widgetPanelPropSplitter.Size = new System.Drawing.Size(230, 476);
 			this.c_widgetPanelPropSplitter.SplitterDistance = 160;
 			this.c_widgetPanelPropSplitter.SplitterWidth = 5;
 			this.c_widgetPanelPropSplitter.TabIndex = 0;
@@ -1860,7 +1870,7 @@
 			this.c_widgetList.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetList.MultiSelect = false;
 			this.c_widgetList.Name = "c_widgetList";
-			this.c_widgetList.Size = new System.Drawing.Size(194, 160);
+			this.c_widgetList.Size = new System.Drawing.Size(197, 160);
 			this.c_widgetList.TabIndex = 0;
 			this.c_widgetList.UseCompatibleStateImageBehavior = false;
 			this.c_widgetList.View = System.Windows.Forms.View.Details;
@@ -1877,7 +1887,7 @@
 			this.c_widgetControlRightPanel.Controls.Add(this.c_widgetMoveUpButton);
 			this.c_widgetControlRightPanel.Controls.Add(this.c_widgetMoveDownButton);
 			this.c_widgetControlRightPanel.Dock = System.Windows.Forms.DockStyle.Right;
-			this.c_widgetControlRightPanel.Location = new System.Drawing.Point(194, 0);
+			this.c_widgetControlRightPanel.Location = new System.Drawing.Point(197, 0);
 			this.c_widgetControlRightPanel.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetControlRightPanel.Name = "c_widgetControlRightPanel";
 			this.c_widgetControlRightPanel.Size = new System.Drawing.Size(33, 160);
@@ -1933,7 +1943,7 @@
 			this.c_widgetPropertyGrid.Location = new System.Drawing.Point(0, 0);
 			this.c_widgetPropertyGrid.Margin = new System.Windows.Forms.Padding(4);
 			this.c_widgetPropertyGrid.Name = "c_widgetPropertyGrid";
-			this.c_widgetPropertyGrid.Size = new System.Drawing.Size(227, 311);
+			this.c_widgetPropertyGrid.Size = new System.Drawing.Size(230, 311);
 			this.c_widgetPropertyGrid.TabIndex = 0;
 			this.c_widgetPropertyGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.c_widgetPropertyGrid_PropertyValueChanged);
 			// 
@@ -2299,6 +2309,7 @@
 		private System.Windows.Forms.FlowLayoutPanel c_filterFlow;
 		private System.Windows.Forms.Panel panel3;
 		private System.Windows.Forms.Button c_addFilterButton;
+		private System.Windows.Forms.ImageList c_locationImages;
 	}
 }
 
