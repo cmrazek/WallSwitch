@@ -39,8 +39,13 @@
 			this.c_statusMessage = new System.Windows.Forms.ToolStripStatusLabel();
 			this.c_statusCounts = new System.Windows.Forms.ToolStripStatusLabel();
 			this.c_vScroll = new System.Windows.Forms.VScrollBar();
+			this.c_filterPanel = new System.Windows.Forms.Panel();
+			this.c_clearFilterButton = new System.Windows.Forms.Button();
+			this.c_filterTextBox = new System.Windows.Forms.TextBox();
+			this.c_filterTimer = new System.Windows.Forms.Timer(this.components);
 			this.c_contextMenu.SuspendLayout();
 			this.c_statusBar.SuspendLayout();
+			this.c_filterPanel.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// c_contextMenu
@@ -52,31 +57,31 @@
             this.toolStripMenuItem1,
             this.c_deleteContextMenuItem});
 			this.c_contextMenu.Name = "c_listContextMenu";
-			this.c_contextMenu.Size = new System.Drawing.Size(182, 116);
+			this.c_contextMenu.Size = new System.Drawing.Size(135, 88);
 			// 
 			// c_openContextMenuItem
 			// 
 			this.c_openContextMenuItem.Name = "c_openContextMenuItem";
-			this.c_openContextMenuItem.Size = new System.Drawing.Size(181, 26);
+			this.c_openContextMenuItem.Size = new System.Drawing.Size(134, 26);
 			this.c_openContextMenuItem.Text = "&Open";
 			this.c_openContextMenuItem.Click += new System.EventHandler(this.OpenContextMenuItem_Click);
 			// 
 			// c_exploreContextMenuItem
 			// 
 			this.c_exploreContextMenuItem.Name = "c_exploreContextMenuItem";
-			this.c_exploreContextMenuItem.Size = new System.Drawing.Size(181, 26);
+			this.c_exploreContextMenuItem.Size = new System.Drawing.Size(134, 26);
 			this.c_exploreContextMenuItem.Text = "&Explore";
 			this.c_exploreContextMenuItem.Click += new System.EventHandler(this.ExploreContextMenuItem_Click);
 			// 
 			// toolStripMenuItem1
 			// 
 			this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-			this.toolStripMenuItem1.Size = new System.Drawing.Size(178, 6);
+			this.toolStripMenuItem1.Size = new System.Drawing.Size(131, 6);
 			// 
 			// c_deleteContextMenuItem
 			// 
 			this.c_deleteContextMenuItem.Name = "c_deleteContextMenuItem";
-			this.c_deleteContextMenuItem.Size = new System.Drawing.Size(181, 26);
+			this.c_deleteContextMenuItem.Size = new System.Drawing.Size(134, 26);
 			this.c_deleteContextMenuItem.Text = "&Delete";
 			this.c_deleteContextMenuItem.Click += new System.EventHandler(this.DeleteContextMenuItem_Click);
 			// 
@@ -112,12 +117,53 @@
 			this.c_vScroll.TabIndex = 2;
 			this.c_vScroll.ValueChanged += new System.EventHandler(this.VScroll_ValueChanged);
 			// 
+			// c_filterPanel
+			// 
+			this.c_filterPanel.Controls.Add(this.c_clearFilterButton);
+			this.c_filterPanel.Controls.Add(this.c_filterTextBox);
+			this.c_filterPanel.Dock = System.Windows.Forms.DockStyle.Top;
+			this.c_filterPanel.Location = new System.Drawing.Point(0, 0);
+			this.c_filterPanel.Name = "c_filterPanel";
+			this.c_filterPanel.Size = new System.Drawing.Size(720, 29);
+			this.c_filterPanel.TabIndex = 3;
+			// 
+			// c_clearFilterButton
+			// 
+			this.c_clearFilterButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.c_clearFilterButton.Location = new System.Drawing.Point(694, 3);
+			this.c_clearFilterButton.Name = "c_clearFilterButton";
+			this.c_clearFilterButton.Size = new System.Drawing.Size(23, 23);
+			this.c_clearFilterButton.TabIndex = 1;
+			this.c_clearFilterButton.Text = "X";
+			this.c_clearFilterButton.UseVisualStyleBackColor = true;
+			this.c_clearFilterButton.Click += new System.EventHandler(this.ClearFilterButton_Click);
+			// 
+			// c_filterTextBox
+			// 
+			this.c_filterTextBox.AcceptsReturn = true;
+			this.c_filterTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.c_filterTextBox.Location = new System.Drawing.Point(3, 4);
+			this.c_filterTextBox.Name = "c_filterTextBox";
+			this.c_filterTextBox.Size = new System.Drawing.Size(685, 22);
+			this.c_filterTextBox.TabIndex = 0;
+			this.c_filterTextBox.TextChanged += new System.EventHandler(this.FilterTextBox_TextChanged);
+			this.c_filterTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.c_filterTextBox_KeyDown);
+			this.c_filterTextBox.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.c_filterTextBox_PreviewKeyDown);
+			// 
+			// c_filterTimer
+			// 
+			this.c_filterTimer.Interval = 1000;
+			this.c_filterTimer.Tick += new System.EventHandler(this.FilterTimer_Tick);
+			// 
 			// LocationBrowser
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(741, 508);
 			this.ContextMenuStrip = this.c_contextMenu;
+			this.Controls.Add(this.c_filterPanel);
 			this.Controls.Add(this.c_vScroll);
 			this.Controls.Add(this.c_statusBar);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -134,6 +180,8 @@
 			this.c_contextMenu.ResumeLayout(false);
 			this.c_statusBar.ResumeLayout(false);
 			this.c_statusBar.PerformLayout();
+			this.c_filterPanel.ResumeLayout(false);
+			this.c_filterPanel.PerformLayout();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -149,5 +197,9 @@
 		private System.Windows.Forms.ToolStripStatusLabel c_statusMessage;
 		private System.Windows.Forms.ToolStripStatusLabel c_statusCounts;
 		private System.Windows.Forms.VScrollBar c_vScroll;
+		private System.Windows.Forms.Panel c_filterPanel;
+		private System.Windows.Forms.Button c_clearFilterButton;
+		private System.Windows.Forms.TextBox c_filterTextBox;
+		private System.Windows.Forms.Timer c_filterTimer;
 	}
 }

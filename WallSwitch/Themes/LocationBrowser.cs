@@ -14,6 +14,7 @@ namespace WallSwitch.Themes
 	{
 		private Location _loc;
 		private LBItem _mouseOverItem;
+		private List<LBItem> _rawItems = new List<LBItem>();
 		private List<LBItem> _items = new List<LBItem>();
 		private int _itemHeight = k_rawItemHeight;
 		private int _totalHeight;
@@ -52,10 +53,13 @@ namespace WallSwitch.Themes
 					foreach (DataRow row in table.Rows)
 					{
 						var item = new LBItem(this, ImageRec.FromDataRow(row), _loc, _items.Count);
-						_items.Add(item);
+						_rawItems.Add(item);
 					}
 				}
 
+				_items = _rawItems.ToList();
+
+				RenumberItems();
 				RefreshStatusCounts();
 				UpdateScroll();
 
@@ -122,6 +126,7 @@ namespace WallSwitch.Themes
 		private void RenumberItems()
 		{
 			var index = 0;
+			foreach (var item in _rawItems) item.Index = -1;
 			foreach (var item in _items) item.Index = index++;
 		}
 		#endregion
@@ -274,7 +279,9 @@ namespace WallSwitch.Themes
 			_maxThumbWidth = (int)Math.Ceiling(k_rawThumbWidth * g.DpiX / 96.0f);
 			_maxThumbHeight = _itemHeight - _spacer * 2;
 
-			_clientRect = new Rectangle(0, 0, ClientSize.Width - c_vScroll.Width, ClientSize.Height - c_statusBar.Height);
+			_clientRect = new Rectangle(0, c_filterPanel.Height,
+				ClientSize.Width - c_vScroll.Width,
+				ClientSize.Height - c_statusBar.Height - c_filterPanel.Height);
 
 			_visibleRect = _clientRect;
 			_visibleRect.Offset(0, _scroll);
@@ -289,7 +296,7 @@ namespace WallSwitch.Themes
 
 			g.FillRectangle(SystemBrushes.Window, _clientRect);
 
-			g.TranslateTransform(0.0f, (float)-_scroll);
+			g.TranslateTransform(0.0f, (float)(_clientRect.Top - _scroll));
 
 			var topItem = _scroll / _itemHeight;
 			var bottomItem = (_scroll + _clientRect.Height) / _itemHeight;
@@ -453,9 +460,15 @@ namespace WallSwitch.Themes
 		#region Scrolling
 		private int _scroll;
 		private Rectangle _visibleRect;
+		private int _maxScroll;
 
 		private void UpdateScroll()
 		{
+			_maxScroll = _totalHeight - _clientRect.Height;
+			if (_maxScroll < 0) _maxScroll = 0;
+
+			if (_scroll > _maxScroll) c_vScroll.Value = _maxScroll;
+
 			c_vScroll.Maximum = _totalHeight;
 			c_vScroll.LargeChange = _clientRect.Height;
 			c_vScroll.SmallChange = 24;
@@ -481,7 +494,7 @@ namespace WallSwitch.Themes
 		private void SetScroll(int value)
 		{
 			if (value < 0) value = 0;
-			else if (value > _totalHeight) value = _totalHeight;
+			else if (value > _maxScroll) value = _maxScroll;
 
 			if (value != c_vScroll.Value)
 			{
@@ -740,6 +753,12 @@ namespace WallSwitch.Themes
 					LBItem item = null;
 					lock (_thumbnailLock)
 					{
+						if (_thumbnailQueue.Count == 0)
+						{
+							_thumbnailQueue = null;
+							return;
+						}
+
 						item = _thumbnailQueue.Peek();  // Don't remove it from the queue until the image is fully loaded
 
 						if (!ItemIsVisible(item.Index))	// If item is no longer visible on the screen, then don't spend time getting the thumbnail.
@@ -774,7 +793,7 @@ namespace WallSwitch.Themes
 
 		private void OnThumbnailUpdated(LBItem item)
 		{
-			if (item != null)
+			if (item != null && item.Index >= 0)
 			{
 				if (ItemIsVisible(item.Index)) Invalidate();
 			}
@@ -830,6 +849,100 @@ namespace WallSwitch.Themes
 				{
 					for (int i = _selStart; i >= _selEnd; i--) yield return _items[i];
 				}
+			}
+		}
+		#endregion
+
+		#region Filter Text Box
+		private void FilterTextBox_TextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				c_filterTimer.Stop();
+				c_filterTimer.Start();
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void c_filterTextBox_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+		{
+			try
+			{
+				if (e.KeyCode == Keys.Enter)
+				{
+					FilterTimer_Tick(sender, e);
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void c_filterTextBox_KeyDown(object sender, KeyEventArgs e)
+		{
+			try
+			{
+				if (e.KeyCode == Keys.Enter)
+				{
+					e.Handled = true;
+					e.SuppressKeyPress = true;
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void FilterTimer_Tick(object sender, EventArgs e)
+		{
+			try
+			{
+				c_filterTimer.Stop();
+
+				var text = c_filterTextBox.Text;
+				SetStatusMessage(string.Format("Filtering for: {0}", text));
+
+				ApplyFilter(text);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void ClearFilterButton_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				c_filterTextBox.Text = string.Empty;
+				c_filterTextBox.Focus();
+				FilterTimer_Tick(sender, e);
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void ApplyFilter(string text)
+		{
+			var filter = new TextFilter(text);
+			var items = _rawItems.Where(x => filter.Match(x.RelativeLocation)).ToList();
+
+			lock (_thumbnailLock)
+			{
+				_items = items;
+				RenumberItems();
+				RefreshStatusCounts();
+				SetScroll(0);
+				SetSelection(-1, -1);
+				_itemLayoutUpdateRequired = true;
+				Invalidate();
 			}
 		}
 		#endregion
