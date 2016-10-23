@@ -45,9 +45,31 @@ namespace WallSwitch
 			}
 		}
 
-		public static void OnFileDeleted(string locationOnDisk)
+		public static void OnFileDeleted(string locationOnDisk, Database db = null)
 		{
 			FileDeleted?.Invoke(null, new DeleteFileEventArgs(locationOnDisk));
+
+			var selfDb = false;
+			try
+			{
+				if (db == null)
+				{
+					db = new Database();
+					selfDb = true;
+				}
+
+				using (var tran = db.BeginTransaction())
+				{
+					db.ExecuteNonQuery("delete from img where path = @path", "@path", locationOnDisk);
+					db.ExecuteNonQuery("delete from img where cache_path = @path", "@path", locationOnDisk);
+
+					tran.Commit();
+				}
+			}
+			finally
+			{
+				if (selfDb && db != null) db.Dispose();
+			}
 		}
 		#endregion
 	}

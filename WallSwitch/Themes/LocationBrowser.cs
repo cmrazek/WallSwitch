@@ -97,6 +97,7 @@ namespace WallSwitch.Themes
 				var item = _items.FirstOrDefault(x => string.Equals(x.ImageRec.LocationOnDisk, e.LocationOnDisk, StringComparison.OrdinalIgnoreCase));
 				if (item != null)
 				{
+					if (ItemIsVisible(item.Index)) Invalidate();
 					RemoveItem(item.Index);
 				}
 			}
@@ -114,6 +115,7 @@ namespace WallSwitch.Themes
 
 				_items.RemoveAt(index);
 				RenumberItems();
+				Invalidate();
 			}
 		}
 
@@ -135,7 +137,8 @@ namespace WallSwitch.Themes
 				var fileName = item.ImageRec.LocationOnDisk;
 				if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
 				{
-					this.ShowError(Res.Error_ImageFileMissing);
+					this.ShowError(Res.Error_ImageFileMissing, fileName);
+					Global.OnFileDeleted(item.ImageRec.LocationOnDisk);
 					return;
 				}
 
@@ -157,7 +160,8 @@ namespace WallSwitch.Themes
 				var fileName = item.ImageRec.LocationOnDisk;
 				if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
 				{
-					this.ShowError(Res.Error_ImageFileMissing);
+					this.ShowError(Res.Error_ImageFileMissing, fileName);
+					Global.OnFileDeleted(item.ImageRec.LocationOnDisk);
 					return;
 				}
 
@@ -173,20 +177,44 @@ namespace WallSwitch.Themes
 		{
 			try
 			{
-				var item = SelectedItems.FirstOrDefault();
-				if (item == null) return;
+				var items = SelectedItems.ToArray();
+				if (items.Length == 0) return;
 
-				var fileName = item.ImageRec.LocationOnDisk;
-				if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
+				if (items.Length == 1)
 				{
-					this.ShowError(Res.Error_ImageFileMissing);
-					return;
+					var item = items[0];
+					var fileName = item.ImageRec.LocationOnDisk;
+					if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
+					{
+						this.ShowError(Res.Error_ImageFileMissing, fileName);
+						Global.OnFileDeleted(item.ImageRec.LocationOnDisk);
+						return;
+					}
+
+					if (MessageBox.Show(this, Res.Confirm_DeleteHistoryFile, Res.Confirm_DeleteHistoryFile_Caption,
+						MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+					{
+						MainWindow.Current.DeleteImageFile(fileName);
+					}
 				}
-
-				if (MessageBox.Show(this, Res.Confirm_DeleteHistoryFile, Res.Confirm_DeleteHistoryFile_Caption,
-					MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+				else
 				{
-					MainWindow.Current.DeleteImageFile(fileName);
+					if (MessageBox.Show(this, Res.Confirm_DeleteFiles, Res.Confirm_DeleteFiles_Caption, MessageBoxButtons.YesNo,
+						MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+					{
+						foreach (var item in items)
+						{
+							var fileName = item.ImageRec.LocationOnDisk;
+							if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
+							{
+								this.ShowError(Res.Error_ImageFileMissing, fileName);
+								Global.OnFileDeleted(item.ImageRec.LocationOnDisk);
+								continue;
+							}
+
+							MainWindow.Current.DeleteImageFile(fileName);
+						}
+					}
 				}
 			}
 			catch (Exception ex)
@@ -201,7 +229,7 @@ namespace WallSwitch.Themes
 
 			c_openContextMenuItem.Enabled = selectCount == 1;
 			c_exploreContextMenuItem.Enabled = selectCount == 1;
-			c_deleteContextMenuItem.Enabled = selectCount == 1;
+			c_deleteContextMenuItem.Enabled = selectCount >= 1;
 		}
 		#endregion
 
@@ -488,17 +516,35 @@ namespace WallSwitch.Themes
 		{
 			try
 			{
-				var index = HitTest(e.Location);
-				if (index != -1)
+				if (e.Button == MouseButtons.Left)
 				{
-					Capture = true;
-					if (ModifierKeys.HasFlag(Keys.Shift))
+					var index = HitTest(e.Location);
+					if (index != -1)
 					{
-						SetSelection(_selStart, index);
+						Capture = true;
+						if (ModifierKeys.HasFlag(Keys.Shift))
+						{
+							SetSelection(_selStart, index);
+						}
+						else
+						{
+							SetSelection(index, index);
+						}
 					}
-					else
+				}
+				else if (e.Button == MouseButtons.Right)
+				{
+					var index = HitTest(e.Location);
+					if (index != -1)
 					{
-						SetSelection(index, index);
+						if (ModifierKeys.HasFlag(Keys.Shift))
+						{
+							SetSelection(_selStart, index);
+						}
+						else if (!ItemIsSelected(index))
+						{
+							SetSelection(index, index);
+						}
 					}
 				}
 			}
@@ -572,13 +618,15 @@ namespace WallSwitch.Themes
 		{
 			try
 			{
-				var index = HitTest(e.Location);
-				if (index != -1)
+				if (e.Button == MouseButtons.Left)
 				{
-					var rating = HitTestRating(index, e.Location);
-					if (rating != -1) SetItemRating(index, rating);
+					var index = HitTest(e.Location);
+					if (index != -1)
+					{
+						var rating = HitTestRating(index, e.Location);
+						if (rating != -1) SetItemRating(index, rating);
+					}
 				}
-
 			}
 			catch (Exception ex)
 			{

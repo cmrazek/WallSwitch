@@ -92,6 +92,7 @@ size			bigint
 @"create index img_ix_theme on img (theme_id, path)",
 @"create index img_ix_location on img (location_id)",
 @"create index img_ix_path on img (path)",
+@"create index img_ix_cachepath on img (cache_path)",
 
 @"create table widget (
 theme_id		integer not null,
@@ -232,6 +233,7 @@ pub_date			datetime
 			AddTableColumnIfMissing("img", "size", "bigint");
 			AddTableColumnIfMissing("img", "cache_path", "varchar(300)");
 			AddIndexIfMissing("img_ix_path", "create index img_ix_path on img (path)");
+			AddIndexIfMissing("img_ix_cachepath", "create index img_ix_cachepath on img (cache_path)");
 
 			AddTableColumnIfMissing("history", "rating", "integer");
 			AddTableColumnIfMissing("history", "thumb", "blob");

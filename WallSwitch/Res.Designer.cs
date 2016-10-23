@@ -224,6 +224,24 @@ namespace WallSwitch {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Are you sure you want to delete these files?.
+        /// </summary>
+        internal static string Confirm_DeleteFiles {
+            get {
+                return ResourceManager.GetString("Confirm_DeleteFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete Files?.
+        /// </summary>
+        internal static string Confirm_DeleteFiles_Caption {
+            get {
+                return ResourceManager.GetString("Confirm_DeleteFiles_Caption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Are you sure you want to delete this file?.
         /// </summary>
         internal static string Confirm_DeleteHistoryFile {
@@ -452,7 +470,7 @@ namespace WallSwitch {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The image file has been moved or deleted..
+        ///   Looks up a localized string similar to The image file has been moved or deleted.\n\n{0}.
         /// </summary>
         internal static string Error_ImageFileMissing {
             get {

@@ -331,7 +331,8 @@
     <value>ImageCache</value>
   </data>
   <data name="Error_ImageFileMissing" xml:space="preserve">
-    <value>The image file has been moved or deleted.</value>
+    <value>The image file has been moved or deleted.\n\n{0}</value>
+    <comment>{0} = file name</comment>
   </data>
   <data name="ImageFileFilter" xml:space="preserve">
     <value>Image Files ({0})|{0}|All Files (*.*)|*.*</value>
@@ -585,5 +586,11 @@ Click 'yes' to be taken to the download page.</value>
   </data>
   <data name="Error_ImageFilterConditionTypeBlank" xml:space="preserve">
     <value>Filter condition type not selected.</value>
+  </data>
+  <data name="Confirm_DeleteFiles" xml:space="preserve">
+    <value>Are you sure you want to delete these files?</value>
+  </data>
+  <data name="Confirm_DeleteFiles_Caption" xml:space="preserve">
+    <value>Delete Files?</value>
   </data>
 </root>

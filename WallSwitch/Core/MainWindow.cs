@@ -2134,7 +2134,7 @@ namespace WallSwitch
 						case LocationType.File:
 							if (!File.Exists(loc.Path))
 							{
-								this.ShowError(Res.Error_ImageFileMissing);
+								this.ShowError(Res.Error_ImageFileMissing, loc.Path);
 							}
 							else
 							{
@@ -2670,7 +2670,7 @@ namespace WallSwitch
 					var fileName = item.LocationOnDisk;
 					if (string.IsNullOrWhiteSpace(fileName))
 					{
-						this.ShowError(Res.Error_ImageFileMissing);
+						this.ShowError(Res.Error_ImageFileMissing, fileName);
 					}
 					else
 					{
@@ -2694,7 +2694,7 @@ namespace WallSwitch
 					var fileName = item.LocationOnDisk;
 					if (string.IsNullOrWhiteSpace(fileName))
 					{
-						this.ShowError(Res.Error_ImageFileMissing);
+						this.ShowError(Res.Error_ImageFileMissing, fileName);
 					}
 					else
 					{
@@ -2715,7 +2715,7 @@ namespace WallSwitch
 				var fileName = e.Item.LocationOnDisk;
 				if (string.IsNullOrWhiteSpace(fileName))
 				{
-					this.ShowError(Res.Error_ImageFileMissing);
+					this.ShowError(Res.Error_ImageFileMissing, fileName);
 				}
 				else
 				{
@@ -2773,7 +2773,7 @@ namespace WallSwitch
 			var fileName = item.LocationOnDisk;
 			if (string.IsNullOrWhiteSpace(fileName))
 			{
-				this.ShowError(Res.Error_ImageFileMissing);
+				this.ShowError(Res.Error_ImageFileMissing, fileName);
 			}
 			else if (MessageBox.Show(this, Res.Confirm_DeleteHistoryFile, Res.Confirm_DeleteHistoryFile_Caption,
 				MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)
@@ -3116,7 +3116,7 @@ namespace WallSwitch
 		#region Image Management
 		public void DeleteImageFile(string fileName)
 		{
-			FileUtil.RecycleFile(fileName);
+			if (File.Exists(fileName)) FileUtil.RecycleFile(fileName);
 			Global.OnFileDeleted(fileName);
 			c_historyTab.RemoveItem(fileName);
 		}

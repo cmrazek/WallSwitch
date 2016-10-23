@@ -355,6 +355,11 @@ namespace WallSwitch
 			MessageBox.Show(String.Format(Res.Error_Content, message), Res.Error_Caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
 		}
 
+		public static void ShowError(this IWin32Window form, string format, params object[] args)
+		{
+			form.ShowError(string.Format(format, args));
+		}
+
 		public static void ShowError(this IWin32Window form, Exception ex, string message)
 		{
 			Log.Write(ex, "Error: {0}", message);
