@@ -39,7 +39,6 @@ namespace WallSwitch.Themes
 			Text = _loc.Path;
 			DoubleBuffered = true;
 
-			MainWindow.Current.ImageFileDeleted += MainWindow_ImageFileDeleted;
 			MouseWheel += LocationBrowser_MouseWheel;
 		}
 
@@ -55,10 +54,12 @@ namespace WallSwitch.Themes
 						var item = new LBItem(this, ImageRec.FromDataRow(row), _loc, _items.Count);
 						_items.Add(item);
 					}
-
-					RefreshStatusCounts();
-					UpdateScroll();
 				}
+
+				RefreshStatusCounts();
+				UpdateScroll();
+
+				Global.FileDeleted += Global_FileDeleted;
 			}
 			catch (Exception ex)
 			{
@@ -68,9 +69,7 @@ namespace WallSwitch.Themes
 
 		private void LocationBrowser_FormClosed(object sender, FormClosedEventArgs e)
 		{
-			//_kill = true;		TODO: remove
-
-			MainWindow.Current.ImageFileDeleted -= MainWindow_ImageFileDeleted;
+			Global.FileDeleted -= Global_FileDeleted;
 		}
 
 		public Location LocationObject
@@ -79,25 +78,68 @@ namespace WallSwitch.Themes
 		}
 		#endregion
 
+		#region Image Management
+		private int GetItemIndex(LBItem item)
+		{
+			var index = 0;
+			foreach (var i in _items)
+			{
+				if (i == item) return index;
+				index++;
+			}
+			return -1;
+		}
+
+		private void Global_FileDeleted(object sender, Global.DeleteFileEventArgs e)
+		{
+			try
+			{
+				var item = _items.FirstOrDefault(x => string.Equals(x.ImageRec.LocationOnDisk, e.LocationOnDisk, StringComparison.OrdinalIgnoreCase));
+				if (item != null)
+				{
+					RemoveItem(item.Index);
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void RemoveItem(int index)
+		{
+			lock (_thumbnailLock)
+			{
+				if (index < 0 || index >= _items.Count) throw new ArgumentOutOfRangeException(nameof(index));
+
+				_items.RemoveAt(index);
+				RenumberItems();
+			}
+		}
+
+		private void RenumberItems()
+		{
+			var index = 0;
+			foreach (var item in _items) item.Index = index++;
+		}
+		#endregion
+
 		#region Context Menu
 		private void OpenContextMenuItem_Click(object sender, EventArgs e)
 		{
 			try
 			{
-				//var lvi = c_list.SelectedItems.Cast<ListViewItem>().FirstOrDefault();
-				//if (lvi == null) return;
+				var item = SelectedItems.FirstOrDefault();
+				if (item == null) return;
 
-				//var item = lvi.Tag as ItemInfo;
-				//if (item == null) return;
+				var fileName = item.ImageRec.LocationOnDisk;
+				if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
+				{
+					this.ShowError(Res.Error_ImageFileMissing);
+					return;
+				}
 
-				//var fileName = item.img.LocationOnDisk;
-				//if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
-				//{
-				//	this.ShowError(Res.Error_ImageFileMissing);
-				//	return;
-				//}
-
-				//System.Diagnostics.Process.Start(fileName);
+				System.Diagnostics.Process.Start(fileName);
 			}
 			catch (Exception ex)
 			{
@@ -109,20 +151,17 @@ namespace WallSwitch.Themes
 		{
 			try
 			{
-				//var lvi = c_list.SelectedItems.Cast<ListViewItem>().FirstOrDefault();
-				//if (lvi == null) return;
+				var item = SelectedItems.FirstOrDefault();
+				if (item == null) return;
 
-				//var item = lvi.Tag as ItemInfo;
-				//if (item == null) return;
+				var fileName = item.ImageRec.LocationOnDisk;
+				if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
+				{
+					this.ShowError(Res.Error_ImageFileMissing);
+					return;
+				}
 
-				//var fileName = item.img.LocationOnDisk;
-				//if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
-				//{
-				//	this.ShowError(Res.Error_ImageFileMissing);
-				//	return;
-				//}
-
-				//FileUtil.ExploreFile(fileName);
+				FileUtil.ExploreFile(fileName);
 			}
 			catch (Exception ex)
 			{
@@ -134,24 +173,21 @@ namespace WallSwitch.Themes
 		{
 			try
 			{
-				//var lvi = c_list.SelectedItems.Cast<ListViewItem>().FirstOrDefault();
-				//if (lvi == null) return;
+				var item = SelectedItems.FirstOrDefault();
+				if (item == null) return;
 
-				//var item = lvi.Tag as ItemInfo;
-				//if (item == null) return;
+				var fileName = item.ImageRec.LocationOnDisk;
+				if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
+				{
+					this.ShowError(Res.Error_ImageFileMissing);
+					return;
+				}
 
-				//var fileName = item.img.LocationOnDisk;
-				//if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
-				//{
-				//	this.ShowError(Res.Error_ImageFileMissing);
-				//	return;
-				//}
-
-				//if (MessageBox.Show(this, Res.Confirm_DeleteHistoryFile, Res.Confirm_DeleteHistoryFile_Caption,
-				//	MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
-				//{
-				//	MainWindow.Current.DeleteImageFile(fileName);
-				//}
+				if (MessageBox.Show(this, Res.Confirm_DeleteHistoryFile, Res.Confirm_DeleteHistoryFile_Caption,
+					MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+				{
+					MainWindow.Current.DeleteImageFile(fileName);
+				}
 			}
 			catch (Exception ex)
 			{
@@ -166,30 +202,6 @@ namespace WallSwitch.Themes
 			c_openContextMenuItem.Enabled = selectCount == 1;
 			c_exploreContextMenuItem.Enabled = selectCount == 1;
 			c_deleteContextMenuItem.Enabled = selectCount == 1;
-		}
-
-		private void MainWindow_ImageFileDeleted(object sender, MainWindow.ImageFileEventArgs e)
-		{
-			if (InvokeRequired)
-			{
-				BeginInvoke(new Action(() => { MainWindow_ImageFileDeleted(sender, e); }));
-				return;
-			}
-
-			// TODO: re-implement this
-			//var delFileName = e.FileName;
-
-			//foreach (var lvi in c_list.Items.Cast<ListViewItem>())
-			//{
-			//	var item = lvi.Tag as ItemInfo;
-			//	if (delFileName.Equals(item.img.LocationOnDisk, StringComparison.OrdinalIgnoreCase))
-			//	{
-			//		c_list.Items.Remove(lvi);
-			//		break;
-			//	}
-			//}
-
-			RefreshStatusCounts();
 		}
 		#endregion
 
@@ -399,17 +411,6 @@ namespace WallSwitch.Themes
 		{
 			var itemBounds = GetItemDocBounds(index);
 			return itemBounds.IntersectsWith(_visibleRect);
-		}
-
-		private int GetItemIndex(LBItem item)
-		{
-			var index = 0;
-			foreach (var i in _items)
-			{
-				if (i == item) return index;
-				index++;
-			}
-			return -1;
 		}
 
 		public void InvalidateItem(int index)
@@ -692,10 +693,15 @@ namespace WallSwitch.Themes
 					lock (_thumbnailLock)
 					{
 						item = _thumbnailQueue.Peek();  // Don't remove it from the queue until the image is fully loaded
+
+						if (!ItemIsVisible(item.Index))	// If item is no longer visible on the screen, then don't spend time getting the thumbnail.
+						{
+							_thumbnailQueue.Dequeue();
+							item = null;
+						}
 					}
 
-					// If item is no longer visible on the screen, then don't spend time getting the thumbnail.
-					if (ItemIsVisible(item.Index))
+					if (item != null)
 					{
 						SetStatusMessage(string.Format("Getting Thumbnail: {0}", item.ImageRec.Location));
 
@@ -703,15 +709,15 @@ namespace WallSwitch.Themes
 						item.ImageRec.Release();
 						var thumb = item.ImageRec.Thumbnail;
 						BeginInvoke(new Action(() => { OnThumbnailUpdated(item); }));
-					}
 
-					lock (_thumbnailLock)
-					{
-						_thumbnailQueue.Dequeue();
-						if (_thumbnailQueue.Count == 0)
+						lock (_thumbnailLock)
 						{
-							_thumbnailQueue = null;
-							return;
+							_thumbnailQueue.Dequeue();
+							if (_thumbnailQueue.Count == 0)
+							{
+								_thumbnailQueue = null;
+								return;
+							}
 						}
 					}
 				}
@@ -761,6 +767,21 @@ namespace WallSwitch.Themes
 				if (_selStart == -1) return 0;
 				if (_selStart <= _selEnd) return _selEnd - _selStart + 1;
 				return _selStart - _selEnd + 1;
+			}
+		}
+
+		private IEnumerable<LBItem> SelectedItems
+		{
+			get
+			{
+				if (_selStart <= _selEnd)
+				{
+					for (int i = _selStart; i <= _selEnd; i++) yield return _items[i];
+				}
+				else
+				{
+					for (int i = _selStart; i >= _selEnd; i--) yield return _items[i];
+				}
 			}
 		}
 		#endregion

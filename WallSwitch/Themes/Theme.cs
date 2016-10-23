@@ -1458,20 +1458,25 @@ namespace WallSwitch
 			var guid = Guid.NewGuid().ToString();
 			var now = DateTime.Now;
 
-			foreach (var imgLayout in images)
+			using (var tran = db.BeginTransaction())
 			{
-				db.Insert("history", new object[]
-					{
-						"theme_id", _rowid,
-						"display_date", now,
-						"guid", guid,
-						"monitors", imgLayout.GetMonitorsSaveString(),
-						"type", imgLayout.ImageRec.Type.ToString(),
-						"path", imgLayout.ImageRec.Location,
-						"pub_date", imgLayout.ImageRec.PubDate.HasValue ? (object)imgLayout.ImageRec.PubDate.Value : null,
-						"rating", imgLayout.ImageRec.Rating,
-						"thumb", imgLayout.ImageRec.Thumbnail?.Data
-					});
+				foreach (var imgLayout in images)
+				{
+					db.Insert("history", new object[]
+						{
+							"theme_id", _rowid,
+							"display_date", now,
+							"guid", guid,
+							"monitors", imgLayout.GetMonitorsSaveString(),
+							"type", imgLayout.ImageRec.Type.ToString(),
+							"path", imgLayout.ImageRec.Location,
+							"pub_date", imgLayout.ImageRec.PubDate.HasValue ? (object)imgLayout.ImageRec.PubDate.Value : null,
+							"rating", imgLayout.ImageRec.Rating,
+							"thumb", imgLayout.ImageRec.Thumbnail?.Data
+						});
+				}
+
+				tran.Commit();
 			}
 
 			var allGuids = db.SelectStringList("select distinct guid from history where theme_id = @theme_id order by display_date",

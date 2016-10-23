@@ -1310,15 +1310,20 @@ namespace WallSwitch
 		{
 			try
 			{
-				Settings.Save(db);
-				SaveHotKeys(db);
-
-				foreach (var theme in _themes)
+				using (var tran = db.BeginTransaction())
 				{
-					theme.Save(db);
-				}
+					Settings.Save(db);
+					SaveHotKeys(db);
 
-				PurgeDatabaseOrphans(db);
+					foreach (var theme in _themes)
+					{
+						theme.Save(db);
+					}
+
+					PurgeDatabaseOrphans(db);
+
+					tran.Commit();
+				}
 
 				// As good time as any to flush the log.
 				Log.Flush();
@@ -3116,19 +3121,10 @@ namespace WallSwitch
 		#endregion
 
 		#region Image Management
-		public event EventHandler<ImageFileEventArgs> ImageFileDeleted;
-
-		public class ImageFileEventArgs : EventArgs
-		{
-			public string FileName { get; set; }
-		}
-
 		public void DeleteImageFile(string fileName)
 		{
 			FileUtil.RecycleFile(fileName);
-
-			ImageFileDeleted?.Invoke(this, new ImageFileEventArgs { FileName = fileName });
-
+			Global.OnFileDeleted(fileName);
 			c_historyTab.RemoveItem(fileName);
 		}
 		#endregion

@@ -86,29 +86,29 @@ namespace WallSwitch
 
 		private void SyncDatabaseToImageRecList(IEnumerable<ImageRec> filesOnDisk, Theme theme, Database db, CancellationToken cancel)
 		{
+			var table = db.SelectDataTable("select rowid, * from img where location_id = @id", "@id", _rowid);
+
+			// Find files in the database that don't exist on disk
+			var filesToRemove = new List<long>();
+			foreach (DataRow row in table.Rows)
+			{
+				if (cancel.IsCancellationRequested) return;
+
+				var path = (string)row["path"];
+				var found = false;
+				foreach (var file in filesOnDisk)
+				{
+					if (string.Equals(file.Location, path, StringComparison.OrdinalIgnoreCase))
+					{
+						found = true;
+						break;
+					}
+				}
+				if (!found) filesToRemove.Add((long)row["rowid"]);
+			}
+
 			using (var tran = db.BeginTransaction())
 			{
-				var table = db.SelectDataTable("select rowid, * from img where location_id = @id", "@id", _rowid);
-
-				// Find files in the database that don't exist on disk
-				var filesToRemove = new List<long>();
-				foreach (DataRow row in table.Rows)
-				{
-					if (cancel.IsCancellationRequested) return;
-
-					var path = (string)row["path"];
-					var found = false;
-					foreach (var file in filesOnDisk)
-					{
-						if (string.Equals(file.Location, path, StringComparison.OrdinalIgnoreCase))
-						{
-							found = true;
-							break;
-						}
-					}
-					if (!found) filesToRemove.Add((long)row["rowid"]);
-				}
-
 				if (filesToRemove.Count > 0)
 				{
 					using (var cmd = db.CreateCommand("delete from img where rowid = @rowid"))

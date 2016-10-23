@@ -46,6 +46,7 @@ namespace WallSwitch.Themes
 		public int Index
 		{
 			get { return _index; }
+			set { _index = value; }
 		}
 
 		public string RelativeLocation

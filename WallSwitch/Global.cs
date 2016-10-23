@@ -31,5 +31,24 @@ namespace WallSwitch
 			RatingUpdated?.Invoke(null, new RatingUpdatedEventArgs(location, rating));
 		}
 		#endregion
+
+		#region Delete File
+		public static event EventHandler<DeleteFileEventArgs> FileDeleted;
+
+		public class DeleteFileEventArgs : EventArgs
+		{
+			public string LocationOnDisk { get; private set; }
+
+			public DeleteFileEventArgs(string locationOnDisk)
+			{
+				LocationOnDisk = locationOnDisk;
+			}
+		}
+
+		public static void OnFileDeleted(string locationOnDisk)
+		{
+			FileDeleted?.Invoke(null, new DeleteFileEventArgs(locationOnDisk));
+		}
+		#endregion
 	}
 }

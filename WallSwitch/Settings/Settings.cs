@@ -62,17 +62,12 @@ namespace WallSwitch
 
 		public static void Save(Database db)
 		{
-			using (var tran = db.BeginTransaction())
-			{
-				db.WriteSetting("CheckForUpdates", _checkForUpdatesOnStartup.ToString());
-				db.WriteSetting("StartUpDelay", _startUpDelay.ToString());
-				db.WriteSetting("IgnoreHiddenFiles", _ignoreHiddenFiles.ToString());
-				db.WriteSetting("LogLevel", _logLevel.ToString());
-				db.WriteSetting("Transparency", _transparency.ToString());
-				db.WriteSetting("LoadHistoryImages", _loadHistoryImages.ToString());
-
-				tran.Commit();
-			}
+			db.WriteSetting("CheckForUpdates", _checkForUpdatesOnStartup.ToString());
+			db.WriteSetting("StartUpDelay", _startUpDelay.ToString());
+			db.WriteSetting("IgnoreHiddenFiles", _ignoreHiddenFiles.ToString());
+			db.WriteSetting("LogLevel", _logLevel.ToString());
+			db.WriteSetting("Transparency", _transparency.ToString());
+			db.WriteSetting("LoadHistoryImages", _loadHistoryImages.ToString());
 		}
 
 		public static void Load(Database db)
