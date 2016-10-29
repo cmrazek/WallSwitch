@@ -32,6 +32,8 @@ namespace WallSwitch
 		private TimeSpan _updateInterval;
 		private bool _disabled = false;
 
+		public event EventHandler ContentUpdated;
+
 		public Location(LocationType type, string path)
 		{
 			_type = type;
@@ -107,6 +109,8 @@ namespace WallSwitch
 				if (!found) filesToRemove.Add((long)row["rowid"]);
 			}
 
+			var changesMade = false;
+
 			using (var tran = db.BeginTransaction())
 			{
 				if (filesToRemove.Count > 0)
@@ -121,6 +125,8 @@ namespace WallSwitch
 							cmd.Parameters.AddWithValue("@rowid", rowid);
 
 							cmd.ExecuteNonQuery();
+
+							changesMade = true;
 						}
 					}
 				}
@@ -161,6 +167,8 @@ namespace WallSwitch
 								db.ExecuteNonQuery("update history set cache_path = @cache_path where path = @path",
 									"@cache_path", cachePathName,
 									"@path", file.Location);
+
+								changesMade = true;
 							}
 						}
 
@@ -176,6 +184,8 @@ namespace WallSwitch
 									"@path", file.Location);
 
 								// No need to update history since it doesn't care about the size.
+
+								changesMade = true;
 							}
 						}
 					}
@@ -206,11 +216,18 @@ namespace WallSwitch
 							else cmd.Parameters.AddWithValue("@size", null);
 
 							cmd.ExecuteNonQuery();
+
+							changesMade = true;
 						}
 					}
 				}
 
 				tran.Commit();
+			}
+
+			if (changesMade)
+			{
+				ContentUpdated?.Invoke(this, EventArgs.Empty);
 			}
 		}
 

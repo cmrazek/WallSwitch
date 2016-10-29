@@ -34,6 +34,7 @@ namespace WallSwitch.Themes
 			if (loc == null) throw new ArgumentNullException(nameof(loc));
 
 			_loc = loc;
+			_loc.ContentUpdated += Location_ContentUpdated;
 
 			InitializeComponent();
 
@@ -47,29 +48,44 @@ namespace WallSwitch.Themes
 		{
 			try
 			{
-				using (var db = new Database())
-				{
-					var table = db.SelectDataTable("select * from img where location_id = @location_id", "@location_id", _loc.RowId);
-					foreach (DataRow row in table.Rows)
-					{
-						var item = new LBItem(this, ImageRec.FromDataRow(row), _loc, _items.Count);
-						_rawItems.Add(item);
-					}
-				}
-
-				_items = _rawItems.ToList();
-				ApplySort();
-
-				RenumberItems();
-				RefreshStatusCounts();
-				UpdateScroll();
-
+				LoadItems();
 				Global.FileDeleted += Global_FileDeleted;
 			}
 			catch (Exception ex)
 			{
 				this.ShowError(ex);
 			}
+		}
+
+		private void LoadItems()
+		{
+			_rawItems.Clear();
+
+			using (var db = new Database())
+			{
+				var table = db.SelectDataTable("select * from img where location_id = @location_id", "@location_id", _loc.RowId);
+				foreach (DataRow row in table.Rows)
+				{
+					var item = new LBItem(this, ImageRec.FromDataRow(row), _loc, _items.Count);
+					_rawItems.Add(item);
+				}
+			}
+
+			lock (_thumbnailLock)
+			{
+				_items = _rawItems.ToList();
+				ApplySort();
+
+				_itemLayoutUpdateRequired = true;
+
+				RenumberItems();
+				RefreshStatusCounts();
+				UpdateScroll();
+				SetSelection(-1, -1);
+				Invalidate();
+			}
+
+			Global.FileDeleted += Global_FileDeleted;
 		}
 
 		private void LocationBrowser_FormClosed(object sender, FormClosedEventArgs e)
@@ -80,6 +96,24 @@ namespace WallSwitch.Themes
 		public Location LocationObject
 		{
 			get { return _loc; }
+		}
+
+		private void Location_ContentUpdated(object sender, EventArgs e)
+		{
+			if (InvokeRequired)
+			{
+				BeginInvoke(new Action(() => { Location_ContentUpdated(sender, e); }));
+				return;
+			}
+
+			try
+			{
+				LoadItems();
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
 		}
 		#endregion
 
@@ -778,7 +812,10 @@ namespace WallSwitch.Themes
 						item.ImageRec.Retrieve(db);
 						item.ImageRec.Release();
 						var thumb = item.ImageRec.Thumbnail;
-						BeginInvoke(new Action(() => { OnThumbnailUpdated(item); }));
+						if (thumb != null)
+						{
+							BeginInvoke(new Action(() => { OnThumbnailUpdated(item); }));
+						}
 
 						lock (_thumbnailLock)
 						{
