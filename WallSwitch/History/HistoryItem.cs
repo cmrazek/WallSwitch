@@ -77,7 +77,11 @@ namespace WallSwitch
 		{
 			try
 			{
-				_list.InvalidateItem(this);
+				if (string.Equals(e.Location, _location, StringComparison.OrdinalIgnoreCase))
+				{
+					_rating = e.Rating;
+					_list.InvalidateItem(this);
+				}
 			}
 			catch (Exception ex)
 			{

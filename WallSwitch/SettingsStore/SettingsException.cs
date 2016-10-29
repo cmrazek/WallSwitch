@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace WallSwitch
+namespace WallSwitch.SettingsStore
 {
 	/// <summary>
 	/// An exception caused by an error in the settings file.

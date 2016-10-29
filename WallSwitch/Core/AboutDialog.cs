@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Reflection;
+using WallSwitch.SettingsStore;
 
 namespace WallSwitch
 {

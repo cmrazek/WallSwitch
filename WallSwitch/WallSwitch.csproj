@@ -125,6 +125,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Res.resx</DependentUpon>
     </Compile>
+    <Compile Include="SettingsStore\CsvReader.cs" />
+    <Compile Include="SettingsStore\CsvWriter.cs" />
     <Compile Include="Themes\FeedDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -196,14 +198,14 @@
       <DependentUpon>PromptDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Settings\Settings.cs" />
-    <Compile Include="Settings\SettingsDialog.cs">
+    <Compile Include="SettingsStore\Settings.cs" />
+    <Compile Include="SettingsStore\SettingsDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Settings\SettingsDialog.Designer.cs">
+    <Compile Include="SettingsStore\SettingsDialog.Designer.cs">
       <DependentUpon>SettingsDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Settings\SettingsException.cs" />
+    <Compile Include="SettingsStore\SettingsException.cs" />
     <Compile Include="Rendering\SetWallpaper.cs" />
     <Compile Include="Core\shlobj.cs" />
     <Compile Include="Database\SQLiteDataReaderEx.cs" />
@@ -215,7 +217,7 @@
     <Compile Include="Themes\ThemeMode.cs" />
     <Compile Include="Themes\Period.cs" />
     <Compile Include="Themes\ThemeOrder.cs" />
-    <Compile Include="Settings\UpdateCheck.cs" />
+    <Compile Include="SettingsStore\UpdateCheck.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="Core\VStackPanel.cs">
       <SubType>Component</SubType>
@@ -230,7 +232,7 @@
     </Compile>
     <Compile Include="Widgets\WidgetManager.cs" />
     <Compile Include="Widgets\WidgetType.cs" />
-    <Compile Include="Settings\Xml.cs" />
+    <Compile Include="Xml.cs" />
     <EmbeddedResource Include="Core\AboutDialog.resx">
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -276,7 +278,7 @@
       <SubType>Designer</SubType>
       <LastGenOutput>Res.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="Settings\SettingsDialog.resx">
+    <EmbeddedResource Include="SettingsStore\SettingsDialog.resx">
       <DependentUpon>SettingsDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Widgets\WidgetLayoutControl.resx">

@@ -5,7 +5,7 @@ using System.Xml;
 using Microsoft.Win32;
 using System.Windows.Forms;
 
-namespace WallSwitch
+namespace WallSwitch.SettingsStore
 {
 	class Settings
 	{

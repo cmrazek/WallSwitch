@@ -1173,6 +1173,72 @@ namespace WallSwitch {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ratings exported successfully..
+        /// </summary>
+        internal static string RatingsExport_Success {
+            get {
+                return ResourceManager.GetString("RatingsExport_Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ratings Export.
+        /// </summary>
+        internal static string RatingsExport_Success_Caption {
+            get {
+                return ResourceManager.GetString("RatingsExport_Success_Caption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The CSV file does not contain a header row..
+        /// </summary>
+        internal static string RatingsImport_NoHeaderRow {
+            get {
+                return ResourceManager.GetString("RatingsImport_NoHeaderRow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The CSV file does not contain a column named &apos;path&apos;..
+        /// </summary>
+        internal static string RatingsImport_NoPathColumn {
+            get {
+                return ResourceManager.GetString("RatingsImport_NoPathColumn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The CSV file does not contain a column named &apos;rating&apos;..
+        /// </summary>
+        internal static string RatingsImport_NoRatingColumn {
+            get {
+                return ResourceManager.GetString("RatingsImport_NoRatingColumn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ratings import completed:
+        ///
+        ///Image Records Updated: {0}
+        ///History Records Updated: {1}.
+        /// </summary>
+        internal static string RatingsImport_Success {
+            get {
+                return ResourceManager.GetString("RatingsImport_Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ratings Import.
+        /// </summary>
+        internal static string RatingsImport_Success_Caption {
+            get {
+                return ResourceManager.GetString("RatingsImport_Success_Caption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enter the new name for the theme:.
         /// </summary>
         internal static string RenameThemePrompt {

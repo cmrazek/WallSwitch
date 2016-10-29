@@ -593,4 +593,28 @@ Click 'yes' to be taken to the download page.</value>
   <data name="Confirm_DeleteFiles_Caption" xml:space="preserve">
     <value>Delete Files?</value>
   </data>
+  <data name="RatingsExport_Success" xml:space="preserve">
+    <value>Ratings exported successfully.</value>
+  </data>
+  <data name="RatingsExport_Success_Caption" xml:space="preserve">
+    <value>Ratings Export</value>
+  </data>
+  <data name="RatingsImport_Success" xml:space="preserve">
+    <value>Ratings import completed:
+
+Image Records Updated: {0}
+History Records Updated: {1}</value>
+  </data>
+  <data name="RatingsImport_Success_Caption" xml:space="preserve">
+    <value>Ratings Import</value>
+  </data>
+  <data name="RatingsImport_NoHeaderRow" xml:space="preserve">
+    <value>The CSV file does not contain a header row.</value>
+  </data>
+  <data name="RatingsImport_NoPathColumn" xml:space="preserve">
+    <value>The CSV file does not contain a column named 'path'.</value>
+  </data>
+  <data name="RatingsImport_NoRatingColumn" xml:space="preserve">
+    <value>The CSV file does not contain a column named 'rating'.</value>
+  </data>
 </root>

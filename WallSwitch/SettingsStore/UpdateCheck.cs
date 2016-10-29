@@ -10,7 +10,7 @@ using System.Threading;
 using System.Net;
 using System.Xml;
 
-namespace WallSwitch
+namespace WallSwitch.SettingsStore
 {
 	public class UpdateCheckEventArgs : EventArgs
 	{
