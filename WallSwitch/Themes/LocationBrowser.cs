@@ -268,6 +268,7 @@ namespace WallSwitch.Themes
 
 		#region Layout and Paint
 		private Pen _borderPen;
+		private Font _sizeFont;
 
 		private void UpdateItemLayout(Graphics g)
 		{
@@ -365,10 +366,11 @@ namespace WallSwitch.Themes
 				var imgSize = item.ImageRec.Size;
 				if (imgSize.HasValue)
 				{
-					// TODO: this should be drawn using a slightly smaller font
+					if (_sizeFont == null) _sizeFont = new Font(Font.FontFamily, Font.Size * .9f);
+
 					var str = imgSize.Value.ToSizeString();
-					stringSize = g.MeasureString(str, Font);
-					g.DrawString(str, Font, selected ? SystemBrushes.HighlightText : SystemBrushes.WindowText,
+					stringSize = g.MeasureString(str, _sizeFont);
+					g.DrawString(str, _sizeFont, selected ? SystemBrushes.HighlightText : SystemBrushes.WindowText,
 						new RectangleF(infoPt, stringSize));
 					infoPt.Y += (int)Math.Ceiling(stringSize.Height);
 				}
