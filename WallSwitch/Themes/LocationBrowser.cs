@@ -49,7 +49,7 @@ namespace WallSwitch.Themes
 			{
 				using (var db = new Database())
 				{
-					var table = db.SelectDataTable("select * from img where location_id = @location_id order by img.path", "@location_id", _loc.RowId);
+					var table = db.SelectDataTable("select * from img where location_id = @location_id", "@location_id", _loc.RowId);
 					foreach (DataRow row in table.Rows)
 					{
 						var item = new LBItem(this, ImageRec.FromDataRow(row), _loc, _items.Count);
@@ -58,6 +58,7 @@ namespace WallSwitch.Themes
 				}
 
 				_items = _rawItems.ToList();
+				ApplySort();
 
 				RenumberItems();
 				RefreshStatusCounts();
@@ -937,12 +938,137 @@ namespace WallSwitch.Themes
 			lock (_thumbnailLock)
 			{
 				_items = items;
+				ApplySort();
 				RenumberItems();
 				RefreshStatusCounts();
 				SetScroll(0);
 				SetSelection(-1, -1);
 				_itemLayoutUpdateRequired = true;
 				Invalidate();
+			}
+		}
+		#endregion
+
+		#region Sorting
+		private SortMode _sortMode = SortMode.Location;
+		private bool _sortDesc;
+
+		private enum SortMode
+		{
+			Location,
+			Rating,
+			Size
+		}
+
+		private void ApplySort()
+		{
+			switch (_sortMode)
+			{
+				case SortMode.Location:
+					if (_sortDesc)
+					{
+						_items.Sort((a, b) => string.Compare(a.RelativeLocation, b.RelativeLocation, true) * -1);
+					}
+					else
+					{
+						_items.Sort((a, b) => string.Compare(a.RelativeLocation, b.RelativeLocation, true));
+					}
+					break;
+				case SortMode.Rating:
+					if (_sortDesc)
+					{
+						_items.Sort((a, b) => a.ImageRec.Rating.CompareTo(b.ImageRec.Rating) * -1);
+					}
+					else
+					{
+						_items.Sort((a, b) => a.ImageRec.Rating.CompareTo(b.ImageRec.Rating));
+					}
+					break;
+				case SortMode.Size:
+					if (_sortDesc)
+					{
+						_items.Sort((a, b) => a.ImageRec.Size.GetValueOrDefault().CompareTo(b.ImageRec.Size.GetValueOrDefault()) * -1);
+					}
+					else
+					{
+						_items.Sort((a, b) => a.ImageRec.Size.GetValueOrDefault().CompareTo(b.ImageRec.Size.GetValueOrDefault()));
+					}
+					break;
+			}
+		}
+
+		private void SortPathContextMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (_sortMode != SortMode.Location)
+				{
+					_sortMode = SortMode.Location;
+					_sortDesc = false;
+				}
+				else
+				{
+					_sortDesc = !_sortDesc;
+				}
+
+				ApplySort();
+				RenumberItems();
+				_itemLayoutUpdateRequired = true;
+				Invalidate();
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void SortRatingContextMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (_sortMode != SortMode.Rating)
+				{
+					_sortMode = SortMode.Rating;
+					_sortDesc = true;
+				}
+				else
+				{
+					_sortDesc = !_sortDesc;
+				}
+
+				ApplySort();
+				RenumberItems();
+				_itemLayoutUpdateRequired = true;
+				Invalidate();
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void SortSizeContextMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (_sortMode != SortMode.Size)
+				{
+					_sortMode = SortMode.Size;
+					_sortDesc = true;
+				}
+				else
+				{
+					_sortDesc = !_sortDesc;
+				}
+
+				ApplySort();
+				RenumberItems();
+				_itemLayoutUpdateRequired = true;
+				Invalidate();
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
 			}
 		}
 		#endregion

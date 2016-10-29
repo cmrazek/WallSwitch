@@ -43,6 +43,11 @@
 			this.c_clearFilterButton = new System.Windows.Forms.Button();
 			this.c_filterTextBox = new System.Windows.Forms.TextBox();
 			this.c_filterTimer = new System.Windows.Forms.Timer(this.components);
+			this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
+			this.sortToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.c_sortPathContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.c_sortRatingContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.c_sortSizeContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.c_contextMenu.SuspendLayout();
 			this.c_statusBar.SuspendLayout();
 			this.c_filterPanel.SuspendLayout();
@@ -55,33 +60,35 @@
             this.c_openContextMenuItem,
             this.c_exploreContextMenuItem,
             this.toolStripMenuItem1,
-            this.c_deleteContextMenuItem});
+            this.c_deleteContextMenuItem,
+            this.toolStripMenuItem2,
+            this.sortToolStripMenuItem});
 			this.c_contextMenu.Name = "c_listContextMenu";
-			this.c_contextMenu.Size = new System.Drawing.Size(135, 88);
+			this.c_contextMenu.Size = new System.Drawing.Size(182, 148);
 			// 
 			// c_openContextMenuItem
 			// 
 			this.c_openContextMenuItem.Name = "c_openContextMenuItem";
-			this.c_openContextMenuItem.Size = new System.Drawing.Size(134, 26);
+			this.c_openContextMenuItem.Size = new System.Drawing.Size(181, 26);
 			this.c_openContextMenuItem.Text = "&Open";
 			this.c_openContextMenuItem.Click += new System.EventHandler(this.OpenContextMenuItem_Click);
 			// 
 			// c_exploreContextMenuItem
 			// 
 			this.c_exploreContextMenuItem.Name = "c_exploreContextMenuItem";
-			this.c_exploreContextMenuItem.Size = new System.Drawing.Size(134, 26);
+			this.c_exploreContextMenuItem.Size = new System.Drawing.Size(181, 26);
 			this.c_exploreContextMenuItem.Text = "&Explore";
 			this.c_exploreContextMenuItem.Click += new System.EventHandler(this.ExploreContextMenuItem_Click);
 			// 
 			// toolStripMenuItem1
 			// 
 			this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-			this.toolStripMenuItem1.Size = new System.Drawing.Size(131, 6);
+			this.toolStripMenuItem1.Size = new System.Drawing.Size(178, 6);
 			// 
 			// c_deleteContextMenuItem
 			// 
 			this.c_deleteContextMenuItem.Name = "c_deleteContextMenuItem";
-			this.c_deleteContextMenuItem.Size = new System.Drawing.Size(134, 26);
+			this.c_deleteContextMenuItem.Size = new System.Drawing.Size(181, 26);
 			this.c_deleteContextMenuItem.Text = "&Delete";
 			this.c_deleteContextMenuItem.Click += new System.EventHandler(this.DeleteContextMenuItem_Click);
 			// 
@@ -157,6 +164,42 @@
 			this.c_filterTimer.Interval = 1000;
 			this.c_filterTimer.Tick += new System.EventHandler(this.FilterTimer_Tick);
 			// 
+			// toolStripMenuItem2
+			// 
+			this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+			this.toolStripMenuItem2.Size = new System.Drawing.Size(178, 6);
+			// 
+			// sortToolStripMenuItem
+			// 
+			this.sortToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.c_sortPathContextMenuItem,
+            this.c_sortRatingContextMenuItem,
+            this.c_sortSizeContextMenuItem});
+			this.sortToolStripMenuItem.Name = "sortToolStripMenuItem";
+			this.sortToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+			this.sortToolStripMenuItem.Text = "&Sort";
+			// 
+			// c_sortPathContextMenuItem
+			// 
+			this.c_sortPathContextMenuItem.Name = "c_sortPathContextMenuItem";
+			this.c_sortPathContextMenuItem.Size = new System.Drawing.Size(181, 26);
+			this.c_sortPathContextMenuItem.Text = "&Path";
+			this.c_sortPathContextMenuItem.Click += new System.EventHandler(this.SortPathContextMenuItem_Click);
+			// 
+			// c_sortRatingContextMenuItem
+			// 
+			this.c_sortRatingContextMenuItem.Name = "c_sortRatingContextMenuItem";
+			this.c_sortRatingContextMenuItem.Size = new System.Drawing.Size(181, 26);
+			this.c_sortRatingContextMenuItem.Text = "&Rating";
+			this.c_sortRatingContextMenuItem.Click += new System.EventHandler(this.SortRatingContextMenuItem_Click);
+			// 
+			// c_sortSizeContextMenuItem
+			// 
+			this.c_sortSizeContextMenuItem.Name = "c_sortSizeContextMenuItem";
+			this.c_sortSizeContextMenuItem.Size = new System.Drawing.Size(181, 26);
+			this.c_sortSizeContextMenuItem.Text = "&Size";
+			this.c_sortSizeContextMenuItem.Click += new System.EventHandler(this.SortSizeContextMenuItem_Click);
+			// 
 			// LocationBrowser
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -201,5 +244,10 @@
 		private System.Windows.Forms.Button c_clearFilterButton;
 		private System.Windows.Forms.TextBox c_filterTextBox;
 		private System.Windows.Forms.Timer c_filterTimer;
+		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
+		private System.Windows.Forms.ToolStripMenuItem sortToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem c_sortPathContextMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem c_sortRatingContextMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem c_sortSizeContextMenuItem;
 	}
 }
