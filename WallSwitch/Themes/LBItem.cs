@@ -38,6 +38,12 @@ namespace WallSwitch.Themes
 			_img.RatingUpdated += Image_RatingUpdated;
 		}
 
+		public void OnBrowserClosed()
+		{
+			_img.RatingUpdated -= Image_RatingUpdated;
+			_img = null;
+		}
+
 		public ImageRec ImageRec
 		{
 			get { return _img; }
@@ -78,7 +84,10 @@ namespace WallSwitch.Themes
 		{
 			try
 			{
-				_lb.InvalidateItem(_index);
+				if (_index >= 0)
+				{
+					_lb.InvalidateItem(_index);
+				}
 			}
 			catch (Exception ex)
 			{

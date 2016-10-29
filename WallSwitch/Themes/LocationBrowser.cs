@@ -59,6 +59,7 @@ namespace WallSwitch.Themes
 
 		private void LoadItems()
 		{
+			foreach (var item in _rawItems) item.OnBrowserClosed();
 			_rawItems.Clear();
 
 			using (var db = new Database())
@@ -91,6 +92,11 @@ namespace WallSwitch.Themes
 		private void LocationBrowser_FormClosed(object sender, FormClosedEventArgs e)
 		{
 			Global.FileDeleted -= Global_FileDeleted;
+
+			foreach (var item in _rawItems)
+			{
+				item.OnBrowserClosed();
+			}
 		}
 
 		public Location LocationObject
@@ -543,6 +549,21 @@ namespace WallSwitch.Themes
 				c_vScroll.Value = value;
 			}
 		}
+
+		private void EnsureItemVisible(int index)
+		{
+			if (index < 0 || index >= _items.Count) throw new ArgumentOutOfRangeException(nameof(index));
+
+			var bounds = GetItemDocBounds(index);
+			if (bounds.Top < _visibleRect.Top)
+			{
+				SetScroll(bounds.Top);
+			}
+			else if (bounds.Bottom > _visibleRect.Bottom)
+			{
+				SetScroll(bounds.Bottom - _visibleRect.Height);
+			}
+		}
 		#endregion
 
 		#region Mouse
@@ -767,11 +788,55 @@ namespace WallSwitch.Themes
 			{
 				if (e.KeyCode == Keys.PageDown)
 				{
-					SetScroll(_scroll + c_vScroll.LargeChange);
+					if (IsAnySelected)
+					{
+						var index = BottomSelection + _visibleRect.Height / _itemHeight;
+						if (index >= _items.Count) index = _items.Count - 1;
+
+						SetSelection(index, ModifierKeys.HasFlag(Keys.Shift));
+					}
+					else if (_items.Count > 0)
+					{
+						SetSelection(0, false);
+					}
 				}
 				else if (e.KeyCode == Keys.PageUp)
 				{
-					SetScroll(_scroll - c_vScroll.LargeChange);
+					if (IsAnySelected)
+					{
+						var index = TopSelection - _visibleRect.Height / _itemHeight;
+						if (index < 0) index = 0;
+
+						SetSelection(index, ModifierKeys.HasFlag(Keys.Shift));
+					}
+					else if (_items.Count > 0)
+					{
+						SetSelection(0, false);
+					}
+				}
+				else if (e.KeyCode == Keys.Down)
+				{
+					if (IsAnySelected)
+					{
+						var index = BottomSelection + 1;
+						if (index < _items.Count) SetSelection(index, ModifierKeys.HasFlag(Keys.Shift));
+					}
+					else
+					{
+						if (_items.Count > 0) SetSelection(0, false);
+					}
+				}
+				else if (e.KeyCode == Keys.Up)
+				{
+					if (IsAnySelected)
+					{
+						var index = TopSelection - 1;
+						if (index > 0) SetSelection(index, ModifierKeys.HasFlag(Keys.Shift));
+					}
+					else
+					{
+						if (_items.Count > 0) SetSelection(0, false);
+					}
 				}
 			}
 			catch (Exception ex)
@@ -882,9 +947,22 @@ namespace WallSwitch.Themes
 			{
 				_selStart = start;
 				_selEnd = end;
+
+				if (_selEnd >= 0) EnsureItemVisible(_selEnd);
 				Invalidate();
 				EnableContextMenuItems();
 			}
+		}
+
+		private void SetSelection(int index, bool extend)
+		{
+			if (index < 0 || index >= _items.Count) throw new ArgumentOutOfRangeException(nameof(index));
+
+			var end = index;
+			var start = _selStart;
+			if (!extend || start < 0) start = index;
+
+			SetSelection(start, end);
 		}
 
 		private bool ItemIsSelected(int index)
@@ -923,6 +1001,26 @@ namespace WallSwitch.Themes
 				}
 			}
 		}
+
+		private bool SingleItemSelected
+		{
+			get { return _selStart >= 0 && _selStart == _selEnd; }
+		}
+
+		private bool IsAnySelected
+		{
+			get { return _selStart >= 0; }
+		}
+
+		private int BottomSelection
+		{
+			get { return _selStart <= _selEnd ? _selEnd : _selStart; }
+		}
+
+		private int TopSelection
+		{
+			get { return _selStart <= _selEnd ? _selStart : _selEnd; }
+		}
 		#endregion
 
 		#region Filter Text Box
@@ -946,6 +1044,19 @@ namespace WallSwitch.Themes
 				if (e.KeyCode == Keys.Enter)
 				{
 					FilterTimer_Tick(sender, e);
+				}
+				else
+				{
+					switch (e.KeyCode)
+					{
+						case Keys.PageDown:
+						case Keys.PageUp:
+						case Keys.Down:
+						case Keys.Up:
+							LocationBrowser_PreviewKeyDown(sender, e);
+							e.IsInputKey = false;
+							break;
+					}
 				}
 			}
 			catch (Exception ex)
