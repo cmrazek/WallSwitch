@@ -23,7 +23,6 @@ namespace WallSwitch
 		private static SolidBrush _selBrush = null;
 
 		public const int Margin = 2;
-		public const int RatingSpacer = 1;
 		public const int RatingImageSpacer = 2;
 		public const int SelectColorFade = 128;
 
@@ -120,10 +119,10 @@ namespace WallSwitch
 			}
 		}
 
-		public static Size GetRequiredSize(Size thumbnailSize)
+		public static Size GetRequiredSize(Size thumbnailSize, PointF dpi)
 		{
-			var ratingHeight = Images.StarUnrated.Height;
-			var ratingWidth = (Images.StarUnrated.Width + RatingSpacer) * 5;
+			var ratingHeight = (int)Math.Round(Images.StarUnrated.Height * dpi.Y / 96.0);
+			var ratingWidth = (int)Math.Round(Images.StarUnrated.Width * dpi.X / 96.0) * 5;
 
 			var widthRequired = thumbnailSize.Width;
 			if (widthRequired < ratingWidth) widthRequired = ratingWidth;
@@ -134,7 +133,7 @@ namespace WallSwitch
 			return new Size(widthRequired, heightRequired);
 		}
 
-		public void SetBounds(Rectangle bounds, Size thumbnailSize)
+		public void SetBounds(Rectangle bounds, Size thumbnailSize, PointF dpi)
 		{
 			_bounds = bounds;
 
@@ -155,15 +154,15 @@ namespace WallSwitch
 				_thumbnailRect = Rectangle.Empty;
 			}
 
-			var starWidth = Images.StarUnrated.Width;
-			var starHeight = Images.StarUnrated.Height;
+			var starWidth = (int)Math.Round(Images.StarUnrated.Width * dpi.Y / 96.0);
+			var starHeight = (int)Math.Round(Images.StarUnrated.Height * dpi.X / 96.0);
 			var ratingTop = _bounds.Bottom - Margin - starHeight;
-			var ratingLeft = bounds.Left + (bounds.Width - (starWidth + RatingSpacer) * 5) / 2;
+			var ratingLeft = bounds.Left + (bounds.Width - starWidth * 5) / 2;
 
 			for (int s = 0; s < 5; s++)
 			{
 				_starRects[s] = new Rectangle(ratingLeft, ratingTop, starWidth, starHeight);
-				ratingLeft += starWidth + RatingSpacer;
+				ratingLeft += starWidth;
 			}
 		}
 

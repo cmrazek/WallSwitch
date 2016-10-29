@@ -703,6 +703,11 @@ namespace WallSwitch
 				g.DrawImage(i, rect);
 			}
 		}
+
+		public static PointF DpiPoint(this Graphics g)
+		{
+			return new PointF(g.DpiX, g.DpiY);
+		}
 	}
 
 	public static class VersionUtil

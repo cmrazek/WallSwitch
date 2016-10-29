@@ -164,15 +164,17 @@ namespace WallSwitch
 			int currentY = k_itemSpacer;
 
 			float xScale, yScale;
+			PointF dpi;
 			using (var g = this.CreateGraphics())
 			{
+				dpi = g.DpiPoint();
 				xScale = g.DpiX / 96.0f;
 				yScale = g.DpiY / 96.0f;
 			}
 			var imageSize = new Size((int)Math.Round(k_unscaledImageWidth * xScale),
 				(int)Math.Round(k_unscaledImageHeight * yScale));
 
-			var itemSize = HistoryItem.GetRequiredSize(imageSize);
+			var itemSize = HistoryItem.GetRequiredSize(imageSize, dpi);
 
 			foreach (var item in _items)
 			{
@@ -182,7 +184,7 @@ namespace WallSwitch
 					currentY += itemSize.Height + k_itemSpacer;
 				}
 
-				item.SetBounds(new Rectangle(currentX , currentY, itemSize.Width, itemSize.Height), imageSize);
+				item.SetBounds(new Rectangle(currentX , currentY, itemSize.Width, itemSize.Height), imageSize, dpi);
 				currentX += itemSize.Width + k_itemSpacer;
 			}
 			currentY += itemSize.Height;

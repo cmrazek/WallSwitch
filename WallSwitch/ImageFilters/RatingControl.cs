@@ -16,8 +16,7 @@ namespace WallSwitch.ImageFilters
 		
 		private int _rating;
 		private int _mouseOverRating;
-
-		private const int k_spacer = 1;
+		private bool _refreshLayoutRequired;
 
 		public event EventHandler RatingChanged;
 
@@ -32,7 +31,8 @@ namespace WallSwitch.ImageFilters
 		{
 			try
 			{
-				RefreshLayout();
+				_refreshLayoutRequired = true;
+				Invalidate();
 			}
 			catch (Exception ex)
 			{
@@ -44,7 +44,8 @@ namespace WallSwitch.ImageFilters
 		{
 			try
 			{
-				RefreshLayout();
+				_refreshLayoutRequired = true;
+				Invalidate();
 			}
 			catch (Exception ex)
 			{
@@ -52,10 +53,11 @@ namespace WallSwitch.ImageFilters
 			}
 		}
 
-		private void RefreshLayout()
+		private void RefreshLayout(Graphics g)
 		{
-			var starSize = Images.StarUnrated.Size;
-			var totalWidth = starSize.Width * 5 + k_spacer * 4;
+			var starSize = new Size((int)Math.Round(Images.StarUnrated.Size.Width * g.DpiX / 96.0),
+				(int)Math.Round(Images.StarUnrated.Size.Height * g.DpiY / 96.0));
+			var totalWidth = starSize.Width * 5;
 
 			var rect = new Rectangle((ClientSize.Width - totalWidth) / 2, (ClientSize.Height - starSize.Height) / 2,
 				starSize.Width, starSize.Height);
@@ -65,7 +67,7 @@ namespace WallSwitch.ImageFilters
 			for (int i = 0; i < 5; i++)
 			{
 				_starRects[i] = rect;
-				rect.X += starSize.Width + k_spacer;
+				rect.X += starSize.Width;
 			}
 		}
 
@@ -74,6 +76,12 @@ namespace WallSwitch.ImageFilters
 			try
 			{
 				var g = e.Graphics;
+
+				if (_refreshLayoutRequired)
+				{
+					_refreshLayoutRequired = false;
+					RefreshLayout(g);
+				}
 
 				if (_mouseOverRating > 0 && _mouseOverRating != _rating)
 				{
