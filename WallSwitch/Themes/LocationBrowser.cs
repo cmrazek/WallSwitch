@@ -784,6 +784,9 @@ namespace WallSwitch.Themes
 		#region Thumbnail Retrieval
 		private object _thumbnailLock = new object();
 		private Queue<LBItem> _thumbnailQueue;
+		private DateTime _lastThumbnailGenerate = DateTime.MinValue;
+
+		private const int k_thumbnailWait = 200;
 
 		private void QueueThumbnailRetrieval(LBItem item)
 		{
@@ -828,6 +831,12 @@ namespace WallSwitch.Themes
 
 					if (item != null)
 					{
+						var now = DateTime.Now;
+						if (now.Subtract(_lastThumbnailGenerate).TotalMilliseconds < k_thumbnailWait)
+						{
+							Thread.Sleep(k_thumbnailWait - (int)now.Subtract(_lastThumbnailGenerate).TotalMilliseconds);
+						}
+
 						SetStatusMessage(string.Format("Getting Thumbnail: {0}", item.ImageRec.Location));
 
 						item.ImageRec.Retrieve(db);
@@ -847,6 +856,8 @@ namespace WallSwitch.Themes
 								return;
 							}
 						}
+
+						_lastThumbnailGenerate = DateTime.Now;
 					}
 				}
 			}
