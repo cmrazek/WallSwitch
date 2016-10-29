@@ -164,6 +164,19 @@ namespace WallSwitch.Themes
 			foreach (var item in _rawItems) item.Index = -1;
 			foreach (var item in _items) item.Index = index++;
 		}
+
+		private void OpenItem(LBItem item)
+		{
+			var fileName = item.ImageRec.LocationOnDisk;
+			if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
+			{
+				this.ShowError(Res.Error_ImageFileMissing, fileName);
+				Global.OnFileDeleted(item.ImageRec.LocationOnDisk);
+				return;
+			}
+
+			System.Diagnostics.Process.Start(fileName);
+		}
 		#endregion
 
 		#region Context Menu
@@ -174,15 +187,7 @@ namespace WallSwitch.Themes
 				var item = SelectedItems.FirstOrDefault();
 				if (item == null) return;
 
-				var fileName = item.ImageRec.LocationOnDisk;
-				if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
-				{
-					this.ShowError(Res.Error_ImageFileMissing, fileName);
-					Global.OnFileDeleted(item.ImageRec.LocationOnDisk);
-					return;
-				}
-
-				System.Diagnostics.Process.Start(fileName);
+				OpenItem(item);
 			}
 			catch (Exception ex)
 			{
@@ -676,6 +681,22 @@ namespace WallSwitch.Themes
 						var rating = HitTestRating(index, e.Location);
 						if (rating != -1) SetItemRating(index, rating);
 					}
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void LocationBrowser_MouseDoubleClick(object sender, MouseEventArgs e)
+		{
+			try
+			{
+				var index = HitTest(e.Location);
+				if (index != -1)
+				{
+					OpenItem(_items[index]);
 				}
 			}
 			catch (Exception ex)
