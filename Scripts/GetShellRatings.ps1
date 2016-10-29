@@ -1,4 +1,10 @@
-﻿param(
+﻿# GetShellRatings.ps1
+#
+# This script will extract the Windows metadata ratings from all files in a folder
+# and create a CSV file that can be used to import your ratings into WallSwitch via
+# The Import Ratings button in Tools -> Settings, Images tab.
+
+param(
 [Parameter(Mandatory=$true)][string]$folder,
 [Parameter(Mandatory=$true)][string]$csvFileName
 )
@@ -31,6 +37,7 @@ function Scan-Folder()
                         $ret | Add-Member "Path" $file.FullName
                         $ret | Add-Member "Rating" $rating
                         Write-Output $ret
+                        break;
                     }
                 }
             }

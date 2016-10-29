@@ -1,7 +1,7 @@
 WallSwitch
 Switches desktop wallpapers from a variety of sources.
 http://wallswitch.codeplex.com/
-Current Version: 1.4.3
+Current Version: 1.5
 
 Requirements:
 	.NET Framework 4:  http://www.microsoft.com/download/en/details.aspx?id=17718
@@ -12,7 +12,12 @@ Contact:
 
 ChangeLog:
 
-Version 1.4.3 - (WIP):
+Version 1.5 - (WIP):
+- Ratings for images can now be stored in the database.
+- Ratings can be set through the history tab.
+- Added a Browse window to theme locations to view all images and ratings.
+- Added a Filter tab to allow filtering images by rating or file name.
+- Added ratings import/export buttons to the Tools -> Settings dialog.
 - Improved icons in location list, which looked bad in recent versions of Windows.
 
 Version 1.4.2 - 2016-10-23:
