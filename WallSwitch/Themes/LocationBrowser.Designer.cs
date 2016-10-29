@@ -174,11 +174,11 @@
 			// 
 			this.c_clearFilterButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.c_clearFilterButton.Image = ((System.Drawing.Image)(resources.GetObject("c_clearFilterButton.Image")));
 			this.c_clearFilterButton.Location = new System.Drawing.Point(694, 3);
 			this.c_clearFilterButton.Name = "c_clearFilterButton";
-			this.c_clearFilterButton.Size = new System.Drawing.Size(23, 23);
+			this.c_clearFilterButton.Size = new System.Drawing.Size(23, 24);
 			this.c_clearFilterButton.TabIndex = 1;
-			this.c_clearFilterButton.Text = "X";
 			this.c_clearFilterButton.UseVisualStyleBackColor = true;
 			this.c_clearFilterButton.Click += new System.EventHandler(this.ClearFilterButton_Click);
 			// 
@@ -189,7 +189,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.c_filterTextBox.Location = new System.Drawing.Point(3, 4);
 			this.c_filterTextBox.Name = "c_filterTextBox";
-			this.c_filterTextBox.Size = new System.Drawing.Size(685, 22);
+			this.c_filterTextBox.Size = new System.Drawing.Size(689, 22);
 			this.c_filterTextBox.TabIndex = 0;
 			this.c_filterTextBox.TextChanged += new System.EventHandler(this.FilterTextBox_TextChanged);
 			this.c_filterTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.c_filterTextBox_KeyDown);

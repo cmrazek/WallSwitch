@@ -123,10 +123,18 @@
   <metadata name="c_statusBar.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>199, 17</value>
   </metadata>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="c_clearFilterButton.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfgCh0PIDsdgKx6AAAAVklEQVQ4T6WLAQoAIAgD
+        /Vj/f1ZltCiZGnUwIreTX0pPna8H3egBYTIkZGGLXY66ARukErDDPa4EmJxKypPIJMSVraR/djuIBqHs
+        FhMrL1AwCdxsMkQaJ/hEWS7bINEAAAAASUVORK5CYII=
+</value>
+  </data>
   <metadata name="c_filterTimer.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>331, 17</value>
   </metadata>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         AAABAAYAQEAAAAEAGAAoMgAAZgAAAEBAAAABAAgAKBYAAI4yAAAgIAAAAQAYAKgMAAC2SAAAICAAAAEA
