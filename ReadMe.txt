@@ -4,7 +4,7 @@ http://wallswitch.codeplex.com/
 Current Version: 1.5
 
 Requirements:
-	.NET Framework 4:  http://www.microsoft.com/download/en/details.aspx?id=17718
+	.NET Framework 4.5.2:  https://www.microsoft.com/en-ca/download/details.aspx?id=42643
 
 Contact:
 	Chris Mrazek (cmrazek)
@@ -12,7 +12,7 @@ Contact:
 
 ChangeLog:
 
-Version 1.5 - (WIP):
+Version 1.5 - 2016-10-30:
 - Ratings for images can now be stored in the database.
 - Ratings can be set through the history tab.
 - Added a Browse window to theme locations to view all images and ratings.
