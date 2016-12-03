@@ -342,7 +342,7 @@ namespace WallSwitch
 					break;
 
 				case ImageFit.Fill:
-					if (imgRect.Width < screenRect.Width) imgRect = imgRect.ScaleRectWidth(screenRect.Width);
+					if (imgRect.Width != screenRect.Width) imgRect = imgRect.ScaleRectWidth(screenRect.Width);
 					if (imgRect.Height < screenRect.Height) imgRect = imgRect.ScaleRectHeight(screenRect.Height);
 					imgRect = imgRect.CenterInside(screenRect);
 					CheckImageRectSize(theme, ref imgRect, imgSize);

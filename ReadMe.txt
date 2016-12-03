@@ -1,7 +1,7 @@
 WallSwitch
 Switches desktop wallpapers from a variety of sources.
 http://wallswitch.codeplex.com/
-Current Version: 1.5
+Current Version: 1.5.1
 
 Requirements:
 	.NET Framework 4.5.2:  https://www.microsoft.com/en-ca/download/details.aspx?id=42643
@@ -11,6 +11,9 @@ Contact:
 	Email: chrismrazek@gmail.com
 
 ChangeLog:
+
+Version 1.5.1 - 2016-12-03:
+- Fix issue with wallpaper 'fill' not scaling properly, when the image is larger than the screen.
 
 Version 1.5 - 2016-10-30:
 - Ratings for images can now be stored in the database.
