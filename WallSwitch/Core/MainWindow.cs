@@ -156,7 +156,7 @@ namespace WallSwitch
 					if (Program.SwitchThread != null)
 					{
 						var exitTheme = MainWindow.Current.Themes.FirstOrDefault(t => t.ActivateOnExit);
-						if (exitTheme != null && exitTheme != _currentTheme)
+						if (exitTheme != null && exitTheme != Program.SwitchThread.Theme)
 						{
 							Log.Write(LogLevel.Info, "Switching to theme '{0}' on exit...", exitTheme.Name);
 							int randomGroupCounter = Program.SwitchThread.RandomGroupCounter;
