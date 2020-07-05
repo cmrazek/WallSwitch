@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Product Id="*" Name="WallSwitch" Language="1033" Version="1.5.1" Manufacturer="Chris Mrazek" UpgradeCode="e762d06c-68ce-43b7-b423-527cf651db2b">
+	<Product Id="*" Name="WallSwitch" Language="1033" Version="1.5.2" Manufacturer="Chris Mrazek" UpgradeCode="e762d06c-68ce-43b7-b423-527cf651db2b">
 		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 		<WixVariable Id="WixUILicenseRtf" Value="..\License.rtf" />
 
@@ -45,6 +45,9 @@
 			<ComponentRef Id="EntityFramework.SqlServer.dll"/>
 			<ComponentRef Id="EntityFramework.SqlServer.xml"/>
 			<ComponentRef Id="EntityFramework.xml"/>
+      <ComponentRef Id="libwebp.dll"/>
+      <ComponentRef Id="Newtonsoft.Json.dll"/>
+      <ComponentRef Id="Newtonsoft.Json.xml"/>
 
 			<ComponentRef Id="ApplicationShortcut"/>
 
@@ -116,6 +119,15 @@
 			<Component Id="EntityFramework.xml" Guid="472a54a3-62d9-4bd9-a1a8-419b935d83ea">
 				<File Id="EntityFramework.xml" Source="..\Release\EntityFramework.xml" KeyPath="yes"/>
 			</Component>
+      <Component Id="libwebp.dll" Guid="D966733B-32CC-492F-B26B-5BC2E81992F9">
+        <File Id="libwebp.dll" Source="..\Release\libwebp.dll" KeyPath="yes"/>
+      </Component>
+      <Component Id="Newtonsoft.Json.dll" Guid="718DCDF0-AD6F-4327-8707-B2443E8E9804">
+        <File Id="Newtonsoft.Json.dll" Source="..\Release\Newtonsoft.Json.dll" KeyPath="yes"/>
+      </Component>
+      <Component Id="Newtonsoft.Json.xml" Guid="0DE40704-46D0-4641-ABFF-24C123534E42">
+        <File Id="Newtonsoft.Json.xml" Source="..\Release\Newtonsoft.Json.xml" KeyPath="yes"/>
+      </Component>
 		</DirectoryRef>
 		<DirectoryRef Id="WIDGETSFOLDER">
 			<Component Id="WallSwitchWidgets.dll" Guid="c93b72b0-841a-42f6-8c41-b7b4d50c4dbf">
