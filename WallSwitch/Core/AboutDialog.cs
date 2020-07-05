@@ -8,12 +8,14 @@ using System.Text;
 using System.Windows.Forms;
 using System.Reflection;
 using WallSwitch.SettingsStore;
+using System.Threading.Tasks;
 
 namespace WallSwitch
 {
 	public partial class AboutDialog : Form
 	{
 		private string _downloadUpdateUrl = null;
+		private UpdateChecker _updateChecker;
 
 		public AboutDialog()
 		{
@@ -28,11 +30,11 @@ namespace WallSwitch
 
 				lnkDownloadUpdate.Visible = false;
 
-				var checker = new UpdateChecker();
-				checker.UpdateAvailable += new EventHandler<UpdateCheckEventArgs>(checker_UpdateAvailable);
-				checker.NoUpdateAvailable += new EventHandler<UpdateCheckEventArgs>(checker_NoUpdateAvailable);
-				checker.UpdateCheckFailed += new EventHandler<UpdateCheckEventArgs>(checker_UpdateCheckFailed);
-				checker.Check();
+				_updateChecker = new UpdateChecker();
+				_updateChecker.UpdateAvailable += new EventHandler<UpdateCheckEventArgs>(checker_UpdateAvailable);
+				_updateChecker.NoUpdateAvailable += new EventHandler<UpdateCheckEventArgs>(checker_NoUpdateAvailable);
+				_updateChecker.UpdateCheckFailed += new EventHandler<UpdateCheckEventArgs>(checker_UpdateCheckFailed);
+				Task.Run(() => _updateChecker.CheckAsync());
 			}
 			catch (Exception ex)
 			{

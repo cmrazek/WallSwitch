@@ -414,9 +414,6 @@ Click here to be taken to the download page.</value>
 (version {0})</value>
     <comment>{0} = Version number</comment>
   </data>
-  <data name="UpdateRssUrl" xml:space="preserve">
-    <value>https://wallswitch.codeplex.com/project/feeds/rss?ProjectRSSFeed=codeplex%3a%2f%2frelease%2fwallswitch</value>
-  </data>
   <data name="DuplicateThemeDirtyPrompt" xml:space="preserve">
     <value>You have made changes to this theme.  Do you want to save changes before creating a duplicate?</value>
   </data>
@@ -497,7 +494,7 @@ Click 'yes' to be taken to the download page.</value>
     <value>Wall Switch is up to date</value>
   </data>
   <data name="Website" xml:space="preserve">
-    <value>http://wallswitch.codeplex.com/</value>
+    <value>https://github.com/cmrazek/WallSwitch</value>
   </data>
   <data name="Error_InvalidNumCollageImages" xml:space="preserve">
     <value>Invalid number of images per switch.</value>
@@ -616,5 +613,11 @@ History Records Updated: {1}</value>
   </data>
   <data name="RatingsImport_NoRatingColumn" xml:space="preserve">
     <value>The CSV file does not contain a column named 'rating'.</value>
+  </data>
+  <data name="UpdateCheckLatestReleaseUrl" xml:space="preserve">
+    <value>https://api.github.com/repos/cmrazek/WallSwitch/releases/latest</value>
+  </data>
+  <data name="UpdateCheckUserAgent" xml:space="preserve">
+    <value>cmrazek/WallSwitch</value>
   </data>
 </root>

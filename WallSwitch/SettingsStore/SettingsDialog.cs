@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace WallSwitch.SettingsStore
@@ -101,7 +102,7 @@ namespace WallSwitch.SettingsStore
 				_updateChecker.UpdateAvailable += new EventHandler<UpdateCheckEventArgs>(UpdateChecker_UpdateAvailable);
 				_updateChecker.NoUpdateAvailable += new EventHandler<UpdateCheckEventArgs>(UpdateChecker_NoUpdateAvailable);
 				_updateChecker.UpdateCheckFailed += new EventHandler<UpdateCheckEventArgs>(UpdateChecker_UpdateCheckFailed);
-				_updateChecker.Check();
+				Task.Run(() => _updateChecker.CheckAsync());
 				c_checkForUpdatesButton.Enabled = false;
 			}
 			catch (Exception ex)

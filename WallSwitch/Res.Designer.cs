@@ -1423,21 +1423,30 @@ namespace WallSwitch {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to https://api.github.com/repos/cmrazek/WallSwitch/releases/latest.
+        /// </summary>
+        internal static string UpdateCheckLatestReleaseUrl {
+            get {
+                return ResourceManager.GetString("UpdateCheckLatestReleaseUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to cmrazek/WallSwitch.
+        /// </summary>
+        internal static string UpdateCheckUserAgent {
+            get {
+                return ResourceManager.GetString("UpdateCheckUserAgent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You already have the most recent version of Wall Switch.
         ///(version {0}).
         /// </summary>
         internal static string UpdateNotAvailableBalloonText {
             get {
                 return ResourceManager.GetString("UpdateNotAvailableBalloonText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to https://wallswitch.codeplex.com/project/feeds/rss?ProjectRSSFeed=codeplex%3a%2f%2frelease%2fwallswitch.
-        /// </summary>
-        internal static string UpdateRssUrl {
-            get {
-                return ResourceManager.GetString("UpdateRssUrl", resourceCulture);
             }
         }
         
@@ -1461,7 +1470,7 @@ namespace WallSwitch {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to http://wallswitch.codeplex.com/.
+        ///   Looks up a localized string similar to https://github.com/cmrazek/WallSwitch.
         /// </summary>
         internal static string Website {
             get {

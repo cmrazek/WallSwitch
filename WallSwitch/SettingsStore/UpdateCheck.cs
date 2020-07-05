@@ -7,8 +7,12 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Xml;
+using Newtonsoft.Json.Linq;
 
 namespace WallSwitch.SettingsStore
 {
@@ -30,16 +34,13 @@ namespace WallSwitch.SettingsStore
 		private Version _webVersion = null;
 		private string _updateUrl = "";
 
+		private static HttpClient _httpClient;
+
 		public event EventHandler<UpdateCheckEventArgs> UpdateAvailable;
 		public event EventHandler<UpdateCheckEventArgs> NoUpdateAvailable;
 		public event EventHandler<UpdateCheckEventArgs> UpdateCheckFailed;
 
-		public void Check()
-		{
-			ThreadPool.QueueUserWorkItem(new WaitCallback(DoCheck));
-		}
-
-		private void DoCheck(object obj)
+		public async Task CheckAsync()
 		{
 			try
 			{
@@ -48,7 +49,7 @@ namespace WallSwitch.SettingsStore
 				_exeVersion = AssemblyVersion;
 				Log.Write(LogLevel.Info, "Current version: {0}", _exeVersion.ToAppFormat());
 
-				_webVersion = GetLatestVersion();
+				_webVersion = await GetLatestVersionAsync();
 				if (_webVersion == null)
 				{
 					Log.Write(LogLevel.Info, "No version could be found from the web.");
@@ -94,37 +95,37 @@ namespace WallSwitch.SettingsStore
 			get { return Assembly.GetExecutingAssembly().GetName().Version; }
 		}
 
-		private Version GetLatestVersion()
+		private async Task<Version> GetLatestVersionAsync()
 		{
-			var xmlDoc = GetFeedXml();
-			if (xmlDoc == null) return null;
+			if (_httpClient == null) _httpClient = new HttpClient();
 
-			var rx = new Regex(@"^.*release.*:\s+WallSwitch\s+(\d+\.\d+\.*\d*)", RegexOptions.IgnoreCase);
+			var rq = new HttpRequestMessage(HttpMethod.Get, Res.UpdateCheckLatestReleaseUrl);
+			rq.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+			rq.Headers.TryAddWithoutValidation("User-Agent", Res.UpdateCheckUserAgent);
 
-			var titleNode = (from n in xmlDoc.SelectNodes("/rss/channel/item/title").Cast<XmlNode>()
-			                 where rx.IsMatch(n.InnerText)
-			                 select n).FirstOrDefault();
-			if (titleNode == null) return null;	// No version information?
-
-			var linkNode = titleNode.ParentNode.SelectSingleNode("link");
-			if (linkNode == null) return null;
-			_updateUrl = linkNode.InnerText;
-
-			return new Version(rx.Match(titleNode.InnerText).Groups[1].Value);
-		}
-
-		private XmlDocument GetFeedXml()
-		{
-			var request = (HttpWebRequest)HttpWebRequest.Create(Res.UpdateRssUrl);
-			request.Method = "GET";
-
-			var response = request.GetResponse();
-			using (var sr = new StreamReader(response.GetResponseStream()))
+			var rs = await _httpClient.SendAsync(rq);
+			if (!rs.IsSuccessStatusCode)
 			{
-				var xmlDoc = new XmlDocument();
-				xmlDoc.LoadXml(sr.ReadToEnd());
-				return xmlDoc;
+				Log.Warning("Server returned status code {0} {1} when checking for updates.", (int)rs.StatusCode, rs.StatusCode);
+				return new Version(0, 0);
 			}
+
+			var rspBody = await rs.Content.ReadAsStringAsync();
+			var rspJson = JToken.Parse(rspBody);
+
+			var rspObject = rspJson as JObject;
+			if (rspObject != null)
+			{
+				var tagNameProp = rspObject["tag_name"];
+				if (tagNameProp != null)
+				{
+					var versionString = tagNameProp.Value<string>();
+					if (versionString.StartsWith("v")) versionString = versionString.Substring(1);
+					return Version.Parse(versionString);
+				}
+			}
+
+			return new Version(0, 0);
 		}
 
 		public string Url

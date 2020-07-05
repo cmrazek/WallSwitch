@@ -133,7 +133,10 @@ namespace WallSwitch
 
 				RegisterHotKeys();
 
-				if (Settings.CheckForUpdatesOnStartup) CheckForUpdates();
+				if (Settings.CheckForUpdatesOnStartup)
+				{
+					Task.Run(async () => await CheckForUpdatesAsync());
+				}
 			}
 			catch (Exception ex)
 			{
@@ -2810,13 +2813,13 @@ namespace WallSwitch
 		#endregion
 
 		#region Auto-Update Check
-		public void CheckForUpdates()
+		public async Task CheckForUpdatesAsync()
 		{
 			try
 			{
 				var checker = new UpdateChecker();
 				checker.UpdateAvailable += new EventHandler<UpdateCheckEventArgs>(checker_UpdateAvailable);
-				checker.Check();
+				await checker.CheckAsync();
 			}
 			catch (Exception ex)
 			{
