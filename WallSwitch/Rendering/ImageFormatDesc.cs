@@ -83,6 +83,13 @@ namespace WallSwitch
 				ContentTypes = new string[0]
 			});
 
+			formats.Add(new ImageFormatDesc
+			{
+				Format = ImageFormat.Png,
+				Extensions = new string[] { ".webp" },
+				ContentTypes = new string[] { "image/webp" }
+			});
+
 			return formats;
 		}
 

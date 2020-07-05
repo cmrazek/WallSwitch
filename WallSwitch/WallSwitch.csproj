@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WallSwitch</RootNamespace>
     <AssemblyName>WallSwitch</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -104,6 +104,7 @@
     </Compile>
     <Compile Include="Global.cs" />
     <Compile Include="ImageFilters\Operator.cs" />
+    <Compile Include="ImageLoading.cs" />
     <Compile Include="Images.cs" />
     <Compile Include="Rendering\ColorEffect.cs" />
     <Compile Include="Rendering\ColorSample.cs">
@@ -223,6 +224,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Rendering\WallpaperRenderer.cs" />
+    <Compile Include="WallSwitchImgProc.cs" />
     <Compile Include="Widgets\WidgetInstance.cs" />
     <Compile Include="Widgets\WidgetLayoutControl.cs">
       <SubType>UserControl</SubType>

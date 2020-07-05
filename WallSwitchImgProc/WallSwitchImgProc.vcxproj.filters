@@ -31,5 +31,11 @@
     <ClCompile Include="ShellEx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="WebpLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

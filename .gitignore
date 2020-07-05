@@ -6,6 +6,7 @@
 *.user
 *.VC.db
 
+/.vs/*
 /Debug/*
 /Release/*
 /Setup/Archive/*

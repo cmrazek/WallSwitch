@@ -11,3 +11,4 @@
 #define E_INVALID_STRIDE		3
 #define E_INVALID_CHANNEL		4
 #define E_INVALID_BLUR_DIST		5
+#define E_WEBP_ERROR			6

@@ -392,12 +392,9 @@ namespace WallSwitch
 
 	public static class FileUtil
 	{
-		[DllImport("WallSwitchImgProc.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-		private static extern void ShowFileInExplorer(string fileName);
-
 		public static void ExploreFile(string fileName)
 		{
-			ShowFileInExplorer(fileName);
+			WallSwitchImgProc.ShowFileInExplorer(fileName);
 		}
 
 		public static void ExploreDir(string dirPath)
@@ -748,17 +745,6 @@ namespace WallSwitch
 		public static SizeF Scale(this SizeF size, float scale)
 		{
 			return new SizeF(size.Width * scale, size.Height * scale);
-		}
-	}
-
-	public static class ImageUtil
-	{
-		public static Image LoadFromFile(string fileName)
-		{
-			using (var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
-			{
-				return Image.FromStream(stream);
-			}
 		}
 	}
 }

@@ -154,7 +154,7 @@ double Gauss(double x, double m, double d)
 double GaussElement(int index, int arrayLength)
 {
 	int center = arrayLength / 2;
-	double extent = arrayLength - center;
-	double x = static_cast<double>(center - index) / extent * 3.0;
+	double extent = double(arrayLength) - double(center);
+	double x = (double(center) - double(index)) / extent * 3.0;
 	return Gauss(x, 0.0, 1.0) / (extent / 3.0);
 }

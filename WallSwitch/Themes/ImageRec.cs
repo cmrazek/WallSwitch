@@ -219,7 +219,7 @@ namespace WallSwitch
 						lock (this)
 						{
 							_imageFormat = ImageFormatDesc.FileNameToImageFormat(_location);
-							_image = ImageUtil.LoadFromFile(_location);
+							_image = ImageLoading.LoadFromFile(_location);
 							_size = FileUtil.GetFileSize(_location);
 							MakeThumbnail(db);
 						}
@@ -248,7 +248,7 @@ namespace WallSwitch
 								Log.Write(LogLevel.Debug, "Loading cached image from '{0}'.", fileName);
 								lock (this)
 								{
-									_image = ImageUtil.LoadFromFile(fileName);
+									_image = ImageLoading.LoadFromFile(fileName);
 									_size = FileUtil.GetFileSize(fileName);
 									MakeThumbnail(db);
 								}

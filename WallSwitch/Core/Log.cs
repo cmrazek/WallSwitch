@@ -298,6 +298,16 @@ namespace WallSwitch
 			Write(LogLevel.Error, ex.ToString());
 		}
 
+		public static void Error(Exception ex, string message)
+		{
+			Write(LogLevel.Error, string.Concat(message, " - ", ex));
+		}
+
+		public static void Error(Exception ex, string format, params object[] args)
+		{
+			Write(LogLevel.Error, string.Concat(string.Format(format, args), " - ", ex));
+		}
+
 		public static void Flush()
 		{
 			if (_file != null)

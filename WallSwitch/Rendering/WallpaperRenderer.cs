@@ -11,12 +11,6 @@ namespace WallSwitch
 {
 	class WallpaperRenderer : IDisposable
 	{
-		[DllImport("WallSwitchImgProc.dll", CallingConvention = CallingConvention.Cdecl)]
-		private static extern int BlurImage(IntPtr pImageBits, int width, int height, int iImageFormat, int stride, int blurDist);
-
-		[DllImport("WallSwitchImgProc.dll", CallingConvention = CallingConvention.Cdecl)]
-		private static extern int TransferChannel32(IntPtr pSrcImageBits, int srcChannel, int srcStride, IntPtr pDstImageBits, int dstChannel, int dstStride, int width, int height);
-
 		private Size _fullSize = new Size(0, 0);
 		private List<Rectangle> _screenRects = new List<Rectangle>();
 		private Bitmap _bitmap = null;
@@ -455,7 +449,7 @@ namespace WallSwitch
 				var dstData = dstBitmap.LockBits(new Rectangle(0, 0, dstBitmap.Width, dstBitmap.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
 				try
 				{
-					var ret = TransferChannel32(srcData.Scan0, (int)srcChannel, srcData.Stride,
+					var ret = WallSwitchImgProc.TransferChannel32(srcData.Scan0, (int)srcChannel, srcData.Stride,
 						dstData.Scan0, (int)dstChannel, dstData.Stride,
 						srcBitmap.Width, srcBitmap.Height);
 					if (ret != 0)
@@ -519,7 +513,7 @@ namespace WallSwitch
 			var imgData = img.LockBits(new Rectangle(0, 0, img.Width, img.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
 			try
 			{
-				BlurImage(imgData.Scan0, img.Width, img.Height, 0, imgData.Stride, blurDist);
+				WallSwitchImgProc.BlurImage(imgData.Scan0, img.Width, img.Height, 0, imgData.Stride, blurDist);
 			}
 			finally
 			{
