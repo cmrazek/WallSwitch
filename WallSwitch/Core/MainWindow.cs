@@ -606,7 +606,7 @@ namespace WallSwitch
 			{
 				if (showErrors)
 				{
-					c_themeTabControl.SelectedTab = c_settingsTab;
+					tcTheme.SelectedTab = c_settingsTab;
 					txtThemeFreq.Focus();
 					this.ShowError(Res.Error_InvalidThemeFreq);
 				}
@@ -631,7 +631,7 @@ namespace WallSwitch
 				default:
 					if (showErrors)
 					{
-						c_themeTabControl.SelectedTab = c_settingsTab;
+						tcTheme.SelectedTab = c_settingsTab;
 						cmbThemePeriod.Focus();
 						this.ShowError(Res.Error_InvalidThemePeriod);
 					}
@@ -642,7 +642,7 @@ namespace WallSwitch
 			{
 				if (showErrors)
 				{
-					c_themeTabControl.SelectedTab = c_settingsTab;
+					tcTheme.SelectedTab = c_settingsTab;
 					txtThemeFreq.Focus();
 					this.ShowError(Res.Error_ShortUpdateInterval);
 				}
@@ -661,7 +661,7 @@ namespace WallSwitch
 				default:
 					if (showErrors)
 					{
-						c_themeTabControl.SelectedTab = c_settingsTab;
+						tcTheme.SelectedTab = c_settingsTab;
 						c_themeMode.Focus();
 						this.ShowError(Res.Error_InvalidThemeMode);
 					}
@@ -680,7 +680,7 @@ namespace WallSwitch
 				default:
 					if (showErrors)
 					{
-						c_themeTabControl.SelectedTab = c_settingsTab;
+						tcTheme.SelectedTab = c_settingsTab;
 						c_themeOrder.Focus();
 						this.ShowError(Res.Error_InvalidThemeOrder);
 					}
@@ -694,7 +694,7 @@ namespace WallSwitch
 				{
 					if (showErrors)
 					{
-						c_themeTabControl.SelectedTab = c_settingsTab;
+						tcTheme.SelectedTab = c_settingsTab;
 						c_maxScale.Focus();
 						this.ShowError(Res.Error_InvalidMaxImageScale);
 					}
@@ -704,7 +704,7 @@ namespace WallSwitch
 				{
 					if (showErrors)
 					{
-						c_themeTabControl.SelectedTab = c_settingsTab;
+						tcTheme.SelectedTab = c_settingsTab;
 						c_maxScale.Focus();
 						this.ShowError(Res.Error_NegativeMaxImageScale);
 					}
@@ -716,7 +716,7 @@ namespace WallSwitch
 			{
 				if (showErrors)
 				{
-					c_themeTabControl.SelectedTab = c_settingsTab;
+					tcTheme.SelectedTab = c_settingsTab;
 					c_numCollageImages.Focus();
 					this.ShowError(Res.Error_InvalidNumCollageImages);
 				}
@@ -726,7 +726,7 @@ namespace WallSwitch
 			{
 				if (showErrors)
 				{
-					c_themeTabControl.SelectedTab = c_settingsTab;
+					tcTheme.SelectedTab = c_settingsTab;
 					c_numCollageImages.Focus();
 					this.ShowError(Res.Error_OutOfRangeNumCollageImages);
 				}
@@ -741,7 +741,7 @@ namespace WallSwitch
 				{
 					if (showErrors)
 					{
-						c_themeTabControl.SelectedTab = c_settingsTab;
+						tcTheme.SelectedTab = c_settingsTab;
 						c_randomGroupCount.Focus();
 						this.ShowError(Res.Error_InvalidRandomGroupCount);
 					}
@@ -3175,7 +3175,7 @@ namespace WallSwitch
 				{
 					if (showErrors)
 					{
-						c_themeTabControl.SelectedTab = c_filterTab;
+						tcTheme.SelectedTab = c_filterTab;
 						ctrl.TypeComboBox.Focus();
 						this.ShowError(Res.Error_ImageFilterConditionTypeBlank);
 					}
@@ -3189,7 +3189,7 @@ namespace WallSwitch
 				{
 					if (showErrors)
 					{
-						c_themeTabControl.SelectedTab = c_filterTab;
+						tcTheme.SelectedTab = c_filterTab;
 						ctrl.CompareComboBox.Focus();
 						this.ShowError(Res.Error_ImageFilterConditionCompareBlank);
 					}
@@ -3203,7 +3203,7 @@ namespace WallSwitch
 				{
 					if (showErrors)
 					{
-						c_themeTabControl.SelectedTab = c_filterTab;
+						tcTheme.SelectedTab = c_filterTab;
 						var focusCtrl = cond.ValueControl;
 						if (focusCtrl != null) focusCtrl.Focus();
 						this.ShowError(error);
