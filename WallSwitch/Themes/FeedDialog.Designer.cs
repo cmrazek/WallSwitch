@@ -60,7 +60,7 @@
 			this.txtUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.txtUrl.Location = new System.Drawing.Point(135, 39);
-			this.txtUrl.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.txtUrl.Margin = new System.Windows.Forms.Padding(4);
 			this.txtUrl.Name = "txtUrl";
 			this.txtUrl.Size = new System.Drawing.Size(382, 22);
 			this.txtUrl.TabIndex = 0;
@@ -70,7 +70,7 @@
 			// txtFreq
 			// 
 			this.txtFreq.Location = new System.Drawing.Point(135, 71);
-			this.txtFreq.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.txtFreq.Margin = new System.Windows.Forms.Padding(4);
 			this.txtFreq.MaxLength = 5;
 			this.txtFreq.Name = "txtFreq";
 			this.txtFreq.Size = new System.Drawing.Size(79, 22);
@@ -88,7 +88,7 @@
             "Hours",
             "Days"});
 			this.cmbPeriod.Location = new System.Drawing.Point(223, 71);
-			this.cmbPeriod.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.cmbPeriod.Margin = new System.Windows.Forms.Padding(4);
 			this.cmbPeriod.Name = "cmbPeriod";
 			this.cmbPeriod.Size = new System.Drawing.Size(99, 24);
 			this.cmbPeriod.TabIndex = 3;
@@ -109,7 +109,7 @@
 			// 
 			this.btnOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.btnOk.Location = new System.Drawing.Point(370, 5);
-			this.btnOk.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.btnOk.Margin = new System.Windows.Forms.Padding(4);
 			this.btnOk.Name = "btnOk";
 			this.btnOk.Size = new System.Drawing.Size(100, 28);
 			this.btnOk.TabIndex = 4;
@@ -123,7 +123,7 @@
 			this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
 			this.btnCancel.Location = new System.Drawing.Point(478, 5);
-			this.btnCancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.btnCancel.Margin = new System.Windows.Forms.Padding(4);
 			this.btnCancel.Name = "btnCancel";
 			this.btnCancel.Size = new System.Drawing.Size(100, 28);
 			this.btnCancel.TabIndex = 5;
@@ -145,7 +145,7 @@
 			// txtType
 			// 
 			this.txtType.Location = new System.Drawing.Point(135, 7);
-			this.txtType.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.txtType.Margin = new System.Windows.Forms.Padding(4);
 			this.txtType.Name = "txtType";
 			this.txtType.ReadOnly = true;
 			this.txtType.Size = new System.Drawing.Size(132, 22);
@@ -156,7 +156,7 @@
 			// 
 			this.btnBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.btnBrowse.Location = new System.Drawing.Point(526, 37);
-			this.btnBrowse.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.btnBrowse.Margin = new System.Windows.Forms.Padding(4);
 			this.btnBrowse.Name = "btnBrowse";
 			this.btnBrowse.Size = new System.Drawing.Size(40, 28);
 			this.btnBrowse.TabIndex = 9;
@@ -172,7 +172,7 @@
 			this.panel1.Controls.Add(this.btnCancel);
 			this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
 			this.panel1.Location = new System.Drawing.Point(0, 108);
-			this.panel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.panel1.Margin = new System.Windows.Forms.Padding(4);
 			this.panel1.Name = "panel1";
 			this.panel1.Size = new System.Drawing.Size(582, 37);
 			this.panel1.TabIndex = 10;
@@ -194,8 +194,9 @@
 			this.Controls.Add(this.txtFreq);
 			this.Controls.Add(this.txtUrl);
 			this.Controls.Add(this.label1);
+			this.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-			this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.Margin = new System.Windows.Forms.Padding(4);
 			this.MaximumSize = new System.Drawing.Size(43683, 192);
 			this.MinimumSize = new System.Drawing.Size(463, 192);
 			this.Name = "FeedDialog";
