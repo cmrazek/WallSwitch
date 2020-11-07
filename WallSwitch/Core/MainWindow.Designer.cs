@@ -701,7 +701,7 @@
             this.toolStripMenuItem2,
             this.miFileExit});
 			this.menuFile.Name = "menuFile";
-			this.menuFile.Size = new System.Drawing.Size(46, 24);
+			this.menuFile.Size = new System.Drawing.Size(46, 26);
 			this.menuFile.Text = "&File";
 			// 
 			// miFileNewTheme
@@ -768,32 +768,32 @@
             this.miHotKeys,
             this.settingsToolStripMenuItem});
 			this.menuTools.Name = "menuTools";
-			this.menuTools.Size = new System.Drawing.Size(58, 24);
+			this.menuTools.Size = new System.Drawing.Size(58, 26);
 			this.menuTools.Text = "&Tools";
 			// 
 			// miClearHistory
 			// 
 			this.miClearHistory.Name = "miClearHistory";
-			this.miClearHistory.Size = new System.Drawing.Size(224, 26);
+			this.miClearHistory.Size = new System.Drawing.Size(177, 26);
 			this.miClearHistory.Text = "&Clear History";
 			this.miClearHistory.Click += new System.EventHandler(this.miClearHistory_Click);
 			// 
 			// toolStripMenuItem11
 			// 
 			this.toolStripMenuItem11.Name = "toolStripMenuItem11";
-			this.toolStripMenuItem11.Size = new System.Drawing.Size(221, 6);
+			this.toolStripMenuItem11.Size = new System.Drawing.Size(174, 6);
 			// 
 			// miHotKeys
 			// 
 			this.miHotKeys.Name = "miHotKeys";
-			this.miHotKeys.Size = new System.Drawing.Size(224, 26);
+			this.miHotKeys.Size = new System.Drawing.Size(177, 26);
 			this.miHotKeys.Text = "&Hot Keys";
 			this.miHotKeys.Click += new System.EventHandler(this.miHotKeys_Click);
 			// 
 			// settingsToolStripMenuItem
 			// 
 			this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-			this.settingsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+			this.settingsToolStripMenuItem.Size = new System.Drawing.Size(177, 26);
 			this.settingsToolStripMenuItem.Text = "&Settings";
 			this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
 			// 
@@ -802,7 +802,7 @@
 			this.menuHelp.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.miHelpAbout});
 			this.menuHelp.Name = "menuHelp";
-			this.menuHelp.Size = new System.Drawing.Size(55, 24);
+			this.menuHelp.Size = new System.Drawing.Size(55, 26);
 			this.menuHelp.Text = "&Help";
 			// 
 			// miHelpAbout
@@ -878,7 +878,7 @@
 			this.grpBackgroundColorEffects.AutoSize = true;
 			this.grpBackgroundColorEffects.Controls.Add(this.flowBackgroundImageEffects);
 			this.grpBackgroundColorEffects.Dock = System.Windows.Forms.DockStyle.Top;
-			this.grpBackgroundColorEffects.Location = new System.Drawing.Point(3, 723);
+			this.grpBackgroundColorEffects.Location = new System.Drawing.Point(3, 851);
 			this.grpBackgroundColorEffects.Name = "grpBackgroundColorEffects";
 			this.grpBackgroundColorEffects.Size = new System.Drawing.Size(764, 158);
 			this.grpBackgroundColorEffects.TabIndex = 6;
@@ -925,7 +925,7 @@
 			this.cmbColorEffectBack.Anchor = System.Windows.Forms.AnchorStyles.Left;
 			this.cmbColorEffectBack.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmbColorEffectBack.FormattingEnabled = true;
-			this.cmbColorEffectBack.Location = new System.Drawing.Point(94, 18);
+			this.cmbColorEffectBack.Location = new System.Drawing.Point(94, 19);
 			this.cmbColorEffectBack.Name = "cmbColorEffectBack";
 			this.cmbColorEffectBack.Size = new System.Drawing.Size(139, 25);
 			this.cmbColorEffectBack.TabIndex = 0;
@@ -966,7 +966,7 @@
 			this.flowBackgroundBlur.Controls.Add(this.lblBackgroundBlurDistValue);
 			this.flowBackgroundBlur.Location = new System.Drawing.Point(3, 71);
 			this.flowBackgroundBlur.Name = "flowBackgroundBlur";
-			this.flowBackgroundBlur.Size = new System.Drawing.Size(253, 62);
+			this.flowBackgroundBlur.Size = new System.Drawing.Size(256, 62);
 			this.flowBackgroundBlur.TabIndex = 1;
 			// 
 			// chkBackgroundBlur
@@ -975,7 +975,7 @@
 			this.chkBackgroundBlur.AutoSize = true;
 			this.chkBackgroundBlur.Location = new System.Drawing.Point(3, 20);
 			this.chkBackgroundBlur.Name = "chkBackgroundBlur";
-			this.chkBackgroundBlur.Size = new System.Drawing.Size(52, 21);
+			this.chkBackgroundBlur.Size = new System.Drawing.Size(55, 21);
 			this.chkBackgroundBlur.TabIndex = 4;
 			this.chkBackgroundBlur.Text = "Blur";
 			this.toolTip1.SetToolTip(this.chkBackgroundBlur, "Blur the background?");
@@ -986,7 +986,7 @@
 			// 
 			this.trkBackgroundBlurDist.BackColor = System.Drawing.SystemColors.Window;
 			this.trkBackgroundBlurDist.LargeChange = 20;
-			this.trkBackgroundBlurDist.Location = new System.Drawing.Point(61, 3);
+			this.trkBackgroundBlurDist.Location = new System.Drawing.Point(64, 3);
 			this.trkBackgroundBlurDist.Maximum = 20;
 			this.trkBackgroundBlurDist.Name = "trkBackgroundBlurDist";
 			this.trkBackgroundBlurDist.Size = new System.Drawing.Size(140, 56);
@@ -1001,7 +1001,7 @@
 			// 
 			this.lblBackgroundBlurDistValue.Anchor = System.Windows.Forms.AnchorStyles.Left;
 			this.lblBackgroundBlurDistValue.AutoSize = true;
-			this.lblBackgroundBlurDistValue.Location = new System.Drawing.Point(207, 22);
+			this.lblBackgroundBlurDistValue.Location = new System.Drawing.Point(210, 22);
 			this.lblBackgroundBlurDistValue.Name = "lblBackgroundBlurDistValue";
 			this.lblBackgroundBlurDistValue.Size = new System.Drawing.Size(43, 17);
 			this.lblBackgroundBlurDistValue.TabIndex = 6;
@@ -1013,7 +1013,7 @@
 			this.grpImageEffects.AutoSize = true;
 			this.grpImageEffects.Controls.Add(this.flowLayoutPanel6);
 			this.grpImageEffects.Dock = System.Windows.Forms.DockStyle.Top;
-			this.grpImageEffects.Location = new System.Drawing.Point(3, 664);
+			this.grpImageEffects.Location = new System.Drawing.Point(3, 792);
 			this.grpImageEffects.Name = "grpImageEffects";
 			this.grpImageEffects.Size = new System.Drawing.Size(764, 53);
 			this.grpImageEffects.TabIndex = 5;
@@ -1059,7 +1059,7 @@
 			this.grpCollageDisplay.AutoSize = true;
 			this.grpCollageDisplay.Controls.Add(this.tblCollageDisplay);
 			this.grpCollageDisplay.Dock = System.Windows.Forms.DockStyle.Top;
-			this.grpCollageDisplay.Location = new System.Drawing.Point(3, 326);
+			this.grpCollageDisplay.Location = new System.Drawing.Point(3, 454);
 			this.grpCollageDisplay.Name = "grpCollageDisplay";
 			this.grpCollageDisplay.Size = new System.Drawing.Size(764, 332);
 			this.grpCollageDisplay.TabIndex = 4;
@@ -1222,7 +1222,7 @@
 			this.chkDropShadowFeather.AutoSize = true;
 			this.chkDropShadowFeather.Location = new System.Drawing.Point(3, 268);
 			this.chkDropShadowFeather.Name = "chkDropShadowFeather";
-			this.chkDropShadowFeather.Size = new System.Drawing.Size(130, 21);
+			this.chkDropShadowFeather.Size = new System.Drawing.Size(133, 21);
 			this.chkDropShadowFeather.TabIndex = 16;
 			this.chkDropShadowFeather.Text = "Feather Shadow";
 			this.toolTip1.SetToolTip(this.chkDropShadowFeather, "Enable feathering on shadows?");
@@ -1250,7 +1250,7 @@
 			this.chkDropShadow.AutoSize = true;
 			this.chkDropShadow.Location = new System.Drawing.Point(3, 144);
 			this.chkDropShadow.Name = "chkDropShadow";
-			this.chkDropShadow.Size = new System.Drawing.Size(112, 21);
+			this.chkDropShadow.Size = new System.Drawing.Size(115, 21);
 			this.chkDropShadow.TabIndex = 10;
 			this.chkDropShadow.Text = "Drop Shadow";
 			this.toolTip1.SetToolTip(this.chkDropShadow, "Enable drop shadows?");
@@ -1367,7 +1367,7 @@
 			this.grpBackgroundColor.AutoSize = true;
 			this.grpBackgroundColor.Controls.Add(this.tblBackgroundColor);
 			this.grpBackgroundColor.Dock = System.Windows.Forms.DockStyle.Top;
-			this.grpBackgroundColor.Location = new System.Drawing.Point(3, 230);
+			this.grpBackgroundColor.Location = new System.Drawing.Point(3, 358);
 			this.grpBackgroundColor.Name = "grpBackgroundColor";
 			this.grpBackgroundColor.Size = new System.Drawing.Size(764, 90);
 			this.grpBackgroundColor.TabIndex = 3;
@@ -1512,7 +1512,7 @@
 			this.grpFrequency.AutoSize = true;
 			this.grpFrequency.Controls.Add(this.tblChangeFrequency);
 			this.grpFrequency.Dock = System.Windows.Forms.DockStyle.Top;
-			this.grpFrequency.Location = new System.Drawing.Point(3, 103);
+			this.grpFrequency.Location = new System.Drawing.Point(3, 231);
 			this.grpFrequency.Name = "grpFrequency";
 			this.grpFrequency.Size = new System.Drawing.Size(764, 121);
 			this.grpFrequency.TabIndex = 2;
@@ -1540,7 +1540,7 @@
 			this.c_activateOnExitCheckBox.AutoSize = true;
 			this.c_activateOnExitCheckBox.Location = new System.Drawing.Point(3, 75);
 			this.c_activateOnExitCheckBox.Name = "c_activateOnExitCheckBox";
-			this.c_activateOnExitCheckBox.Size = new System.Drawing.Size(269, 21);
+			this.c_activateOnExitCheckBox.Size = new System.Drawing.Size(272, 21);
 			this.c_activateOnExitCheckBox.TabIndex = 6;
 			this.c_activateOnExitCheckBox.Text = "Temporarily activate this theme on exit";
 			this.toolTip1.SetToolTip(this.c_activateOnExitCheckBox, "When WallSwitch is closing, this theme will be displayed until the next time Wall" +
@@ -1635,7 +1635,7 @@
 			this.chkFadeTransition.AutoSize = true;
 			this.chkFadeTransition.Location = new System.Drawing.Point(451, 8);
 			this.chkFadeTransition.Name = "chkFadeTransition";
-			this.chkFadeTransition.Size = new System.Drawing.Size(174, 21);
+			this.chkFadeTransition.Size = new System.Drawing.Size(177, 21);
 			this.chkFadeTransition.TabIndex = 3;
 			this.chkFadeTransition.Text = "Cross-Fade Transitions";
 			this.toolTip1.SetToolTip(this.chkFadeTransition, "Use smooth cross-fading between wallpapers (Windows 7 or higher)");
@@ -1656,10 +1656,11 @@
 			// 
 			this.grpDisplayMode.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.grpDisplayMode.AutoSize = true;
 			this.grpDisplayMode.Controls.Add(this.tblDisplayModeRows);
 			this.grpDisplayMode.Location = new System.Drawing.Point(3, 3);
 			this.grpDisplayMode.Name = "grpDisplayMode";
-			this.grpDisplayMode.Size = new System.Drawing.Size(764, 94);
+			this.grpDisplayMode.Size = new System.Drawing.Size(764, 222);
 			this.grpDisplayMode.TabIndex = 1;
 			this.grpDisplayMode.TabStop = false;
 			this.grpDisplayMode.Text = "Display Mode";
@@ -1680,11 +1681,11 @@
 			this.tblDisplayModeRows.Name = "tblDisplayModeRows";
 			this.tblDisplayModeRows.RowCount = 5;
 			this.tblDisplayModeRows.RowStyles.Add(new System.Windows.Forms.RowStyle());
-			this.tblDisplayModeRows.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 100F));
 			this.tblDisplayModeRows.RowStyles.Add(new System.Windows.Forms.RowStyle());
 			this.tblDisplayModeRows.RowStyles.Add(new System.Windows.Forms.RowStyle());
 			this.tblDisplayModeRows.RowStyles.Add(new System.Windows.Forms.RowStyle());
-			this.tblDisplayModeRows.Size = new System.Drawing.Size(758, 72);
+			this.tblDisplayModeRows.RowStyles.Add(new System.Windows.Forms.RowStyle());
+			this.tblDisplayModeRows.Size = new System.Drawing.Size(758, 200);
 			this.tblDisplayModeRows.TabIndex = 15;
 			// 
 			// flowLayoutPanel1
@@ -1750,7 +1751,7 @@
 			this.c_separateMonitors.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.c_separateMonitors.Location = new System.Drawing.Point(3, 40);
 			this.c_separateMonitors.Name = "c_separateMonitors";
-			this.c_separateMonitors.Size = new System.Drawing.Size(234, 21);
+			this.c_separateMonitors.Size = new System.Drawing.Size(237, 21);
 			this.c_separateMonitors.TabIndex = 3;
 			this.c_separateMonitors.Text = "Separate image for each monitor";
 			this.toolTip1.SetToolTip(this.c_separateMonitors, "Display a separate image on each monitor");
@@ -1770,7 +1771,7 @@
 			this.tableLayoutPanel2.Controls.Add(this.c_maxClipLabel, 1, 0);
 			this.tableLayoutPanel2.Controls.Add(this.c_maxClipPercent, 3, 0);
 			this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 140);
+			this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 67);
 			this.tableLayoutPanel2.Name = "tableLayoutPanel2";
 			this.tableLayoutPanel2.RowCount = 1;
 			this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -1792,6 +1793,7 @@
         "age may be offscreen. This setting limits how much of the image WallSwitch will " +
         "allow to be clipped.");
 			this.c_maxClipTrackBar.Value = 15;
+			this.c_maxClipTrackBar.Scroll += new System.EventHandler(this.MaxClipTrackBar_Scroll);
 			// 
 			// c_allowSpanning
 			// 
@@ -1801,11 +1803,12 @@
 			this.c_allowSpanning.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.c_allowSpanning.Location = new System.Drawing.Point(3, 20);
 			this.c_allowSpanning.Name = "c_allowSpanning";
-			this.c_allowSpanning.Size = new System.Drawing.Size(225, 21);
+			this.c_allowSpanning.Size = new System.Drawing.Size(228, 21);
 			this.c_allowSpanning.TabIndex = 4;
 			this.c_allowSpanning.Text = "Allow spanning across monitors";
 			this.toolTip1.SetToolTip(this.c_allowSpanning, "If an image is the correct aspect ratio, span it across multiple monitors.");
 			this.c_allowSpanning.UseVisualStyleBackColor = true;
+			this.c_allowSpanning.CheckedChanged += new System.EventHandler(this.AllowSpanning_CheckedChanged);
 			// 
 			// c_maxClipLabel
 			// 
@@ -1840,7 +1843,7 @@
 			this.flowDisplayModeScalingLimit.Controls.Add(this.c_maxScale);
 			this.flowDisplayModeScalingLimit.Controls.Add(this.c_maxScalePct);
 			this.flowDisplayModeScalingLimit.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.flowDisplayModeScalingLimit.Location = new System.Drawing.Point(3, 208);
+			this.flowDisplayModeScalingLimit.Location = new System.Drawing.Point(3, 135);
 			this.flowDisplayModeScalingLimit.Name = "flowDisplayModeScalingLimit";
 			this.flowDisplayModeScalingLimit.Size = new System.Drawing.Size(752, 29);
 			this.flowDisplayModeScalingLimit.TabIndex = 5;
@@ -1850,24 +1853,26 @@
 			this.c_limitScale.AutoSize = true;
 			this.c_limitScale.Location = new System.Drawing.Point(3, 3);
 			this.c_limitScale.Name = "c_limitScale";
-			this.c_limitScale.Size = new System.Drawing.Size(162, 21);
+			this.c_limitScale.Size = new System.Drawing.Size(165, 21);
 			this.c_limitScale.TabIndex = 8;
 			this.c_limitScale.Text = "Limit image scaling to";
 			this.toolTip1.SetToolTip(this.c_limitScale, "Limit the magnification of images?");
 			this.c_limitScale.UseVisualStyleBackColor = true;
+			this.c_limitScale.CheckedChanged += new System.EventHandler(this.chkLimitScale_CheckedChanged);
 			// 
 			// c_maxScale
 			// 
-			this.c_maxScale.Location = new System.Drawing.Point(171, 3);
+			this.c_maxScale.Location = new System.Drawing.Point(174, 3);
 			this.c_maxScale.Name = "c_maxScale";
 			this.c_maxScale.Size = new System.Drawing.Size(50, 23);
 			this.c_maxScale.TabIndex = 9;
 			this.toolTip1.SetToolTip(this.c_maxScale, "Maximum amount of magnification (in percent)");
+			this.c_maxScale.TextChanged += new System.EventHandler(this.ControlChanged);
 			// 
 			// c_maxScalePct
 			// 
 			this.c_maxScalePct.AutoSize = true;
-			this.c_maxScalePct.Location = new System.Drawing.Point(227, 0);
+			this.c_maxScalePct.Location = new System.Drawing.Point(230, 0);
 			this.c_maxScalePct.Name = "c_maxScalePct";
 			this.c_maxScalePct.Padding = new System.Windows.Forms.Padding(0, 4, 0, 0);
 			this.c_maxScalePct.Size = new System.Drawing.Size(20, 21);
@@ -1883,7 +1888,7 @@
 			this.flowLayoutPanel2.Controls.Add(this.c_randomGroupCountLabel);
 			this.flowLayoutPanel2.Controls.Add(this.c_clearBetweenRandomGroups);
 			this.flowLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Top;
-			this.flowLayoutPanel2.Location = new System.Drawing.Point(3, 243);
+			this.flowLayoutPanel2.Location = new System.Drawing.Point(3, 170);
 			this.flowLayoutPanel2.Name = "flowLayoutPanel2";
 			this.flowLayoutPanel2.Size = new System.Drawing.Size(752, 27);
 			this.flowLayoutPanel2.TabIndex = 6;
@@ -1894,26 +1899,28 @@
 			this.c_randomGroup.Location = new System.Drawing.Point(2, 2);
 			this.c_randomGroup.Margin = new System.Windows.Forms.Padding(2);
 			this.c_randomGroup.Name = "c_randomGroup";
-			this.c_randomGroup.Size = new System.Drawing.Size(153, 21);
+			this.c_randomGroup.Size = new System.Drawing.Size(156, 21);
 			this.c_randomGroup.TabIndex = 11;
 			this.c_randomGroup.Text = "Sequential Groups?";
 			this.toolTip1.SetToolTip(this.c_randomGroup, "Enable groups of sequential images to be displayed before selecting the next rand" +
         "om image?");
 			this.c_randomGroup.UseVisualStyleBackColor = true;
+			this.c_randomGroup.CheckedChanged += new System.EventHandler(this.ControlChanged);
 			// 
 			// c_randomGroupCount
 			// 
-			this.c_randomGroupCount.Location = new System.Drawing.Point(159, 2);
+			this.c_randomGroupCount.Location = new System.Drawing.Point(162, 2);
 			this.c_randomGroupCount.Margin = new System.Windows.Forms.Padding(2);
 			this.c_randomGroupCount.Name = "c_randomGroupCount";
 			this.c_randomGroupCount.Size = new System.Drawing.Size(50, 23);
 			this.c_randomGroupCount.TabIndex = 12;
 			this.toolTip1.SetToolTip(this.c_randomGroupCount, "The number of sequential images chosen between random selections.");
+			this.c_randomGroupCount.TextChanged += new System.EventHandler(this.ControlChanged);
 			// 
 			// c_randomGroupCountLabel
 			// 
 			this.c_randomGroupCountLabel.AutoSize = true;
-			this.c_randomGroupCountLabel.Location = new System.Drawing.Point(213, 0);
+			this.c_randomGroupCountLabel.Location = new System.Drawing.Point(216, 0);
 			this.c_randomGroupCountLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.c_randomGroupCountLabel.Name = "c_randomGroupCountLabel";
 			this.c_randomGroupCountLabel.Padding = new System.Windows.Forms.Padding(0, 4, 0, 0);
@@ -1925,13 +1932,14 @@
 			// c_clearBetweenRandomGroups
 			// 
 			this.c_clearBetweenRandomGroups.AutoSize = true;
-			this.c_clearBetweenRandomGroups.Location = new System.Drawing.Point(336, 2);
+			this.c_clearBetweenRandomGroups.Location = new System.Drawing.Point(339, 2);
 			this.c_clearBetweenRandomGroups.Margin = new System.Windows.Forms.Padding(2);
 			this.c_clearBetweenRandomGroups.Name = "c_clearBetweenRandomGroups";
-			this.c_clearBetweenRandomGroups.Size = new System.Drawing.Size(173, 21);
+			this.c_clearBetweenRandomGroups.Size = new System.Drawing.Size(176, 21);
 			this.c_clearBetweenRandomGroups.TabIndex = 14;
 			this.c_clearBetweenRandomGroups.Text = "Clear between groups?";
 			this.c_clearBetweenRandomGroups.UseVisualStyleBackColor = true;
+			this.c_clearBetweenRandomGroups.CheckedChanged += new System.EventHandler(this.ControlChanged);
 			// 
 			// c_filterTab
 			// 
@@ -1941,7 +1949,7 @@
 			this.c_filterTab.Margin = new System.Windows.Forms.Padding(2);
 			this.c_filterTab.Name = "c_filterTab";
 			this.c_filterTab.Padding = new System.Windows.Forms.Padding(2);
-			this.c_filterTab.Size = new System.Drawing.Size(776, 405);
+			this.c_filterTab.Size = new System.Drawing.Size(776, 402);
 			this.c_filterTab.TabIndex = 5;
 			this.c_filterTab.Text = "Filter";
 			this.c_filterTab.UseVisualStyleBackColor = true;
@@ -1953,7 +1961,7 @@
 			this.c_filterFlow.Location = new System.Drawing.Point(2, 33);
 			this.c_filterFlow.Margin = new System.Windows.Forms.Padding(0);
 			this.c_filterFlow.Name = "c_filterFlow";
-			this.c_filterFlow.Size = new System.Drawing.Size(772, 370);
+			this.c_filterFlow.Size = new System.Drawing.Size(772, 367);
 			this.c_filterFlow.TabIndex = 0;
 			this.toolTip1.SetToolTip(this.c_filterFlow, "Conditions to narrow images selected");
 			// 
@@ -1987,7 +1995,7 @@
 			this.c_widgetsTab.Location = new System.Drawing.Point(4, 26);
 			this.c_widgetsTab.Name = "c_widgetsTab";
 			this.c_widgetsTab.Padding = new System.Windows.Forms.Padding(3);
-			this.c_widgetsTab.Size = new System.Drawing.Size(776, 405);
+			this.c_widgetsTab.Size = new System.Drawing.Size(776, 402);
 			this.c_widgetsTab.TabIndex = 4;
 			this.c_widgetsTab.Text = "Widgets";
 			this.c_widgetsTab.UseVisualStyleBackColor = true;
@@ -2007,7 +2015,7 @@
 			// c_widgetPanelSplitter.Panel2
 			// 
 			this.c_widgetPanelSplitter.Panel2.Controls.Add(this.c_widgetPanelPropSplitter);
-			this.c_widgetPanelSplitter.Size = new System.Drawing.Size(770, 399);
+			this.c_widgetPanelSplitter.Size = new System.Drawing.Size(770, 396);
 			this.c_widgetPanelSplitter.SplitterDistance = 534;
 			this.c_widgetPanelSplitter.TabIndex = 2;
 			// 
@@ -2017,7 +2025,7 @@
 			this.c_widgetLayout.Location = new System.Drawing.Point(0, 33);
 			this.c_widgetLayout.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
 			this.c_widgetLayout.Name = "c_widgetLayout";
-			this.c_widgetLayout.Size = new System.Drawing.Size(534, 366);
+			this.c_widgetLayout.Size = new System.Drawing.Size(534, 363);
 			this.c_widgetLayout.TabIndex = 0;
 			this.c_widgetLayout.WidgetsChanged += new System.EventHandler(this.c_widgetLayout_WidgetsChanged);
 			this.c_widgetLayout.SelectedWidgetChanged += new System.EventHandler<WallSwitch.WidgetLayoutControl.WidgetEventArgs>(this.c_widgetLayout_SelectedWidgetChanged);
@@ -2101,8 +2109,8 @@
 			// c_widgetPanelPropSplitter.Panel2
 			// 
 			this.c_widgetPanelPropSplitter.Panel2.Controls.Add(this.c_widgetPropertyGrid);
-			this.c_widgetPanelPropSplitter.Size = new System.Drawing.Size(232, 399);
-			this.c_widgetPanelPropSplitter.SplitterDistance = 133;
+			this.c_widgetPanelPropSplitter.Size = new System.Drawing.Size(232, 396);
+			this.c_widgetPanelPropSplitter.SplitterDistance = 131;
 			this.c_widgetPanelPropSplitter.TabIndex = 0;
 			// 
 			// c_widgetList
@@ -2114,7 +2122,7 @@
 			this.c_widgetList.Location = new System.Drawing.Point(0, 0);
 			this.c_widgetList.MultiSelect = false;
 			this.c_widgetList.Name = "c_widgetList";
-			this.c_widgetList.Size = new System.Drawing.Size(207, 133);
+			this.c_widgetList.Size = new System.Drawing.Size(207, 131);
 			this.c_widgetList.TabIndex = 0;
 			this.c_widgetList.UseCompatibleStateImageBehavior = false;
 			this.c_widgetList.View = System.Windows.Forms.View.Details;
@@ -2133,14 +2141,14 @@
 			this.c_widgetControlRightPanel.Dock = System.Windows.Forms.DockStyle.Right;
 			this.c_widgetControlRightPanel.Location = new System.Drawing.Point(207, 0);
 			this.c_widgetControlRightPanel.Name = "c_widgetControlRightPanel";
-			this.c_widgetControlRightPanel.Size = new System.Drawing.Size(25, 133);
+			this.c_widgetControlRightPanel.Size = new System.Drawing.Size(25, 131);
 			this.c_widgetControlRightPanel.TabIndex = 4;
 			// 
 			// panel2
 			// 
 			this.panel2.Controls.Add(this.c_widgetDeleteButton);
 			this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.panel2.Location = new System.Drawing.Point(0, 110);
+			this.panel2.Location = new System.Drawing.Point(0, 108);
 			this.panel2.Name = "panel2";
 			this.panel2.Size = new System.Drawing.Size(25, 23);
 			this.panel2.TabIndex = 4;
@@ -2181,7 +2189,7 @@
 			this.c_widgetPropertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.c_widgetPropertyGrid.Location = new System.Drawing.Point(0, 0);
 			this.c_widgetPropertyGrid.Name = "c_widgetPropertyGrid";
-			this.c_widgetPropertyGrid.Size = new System.Drawing.Size(232, 262);
+			this.c_widgetPropertyGrid.Size = new System.Drawing.Size(232, 261);
 			this.c_widgetPropertyGrid.TabIndex = 0;
 			this.c_widgetPropertyGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.c_widgetPropertyGrid_PropertyValueChanged);
 			// 
@@ -2191,7 +2199,7 @@
 			this.tabHistory.Location = new System.Drawing.Point(4, 26);
 			this.tabHistory.Name = "tabHistory";
 			this.tabHistory.Padding = new System.Windows.Forms.Padding(3);
-			this.tabHistory.Size = new System.Drawing.Size(776, 405);
+			this.tabHistory.Size = new System.Drawing.Size(776, 402);
 			this.tabHistory.TabIndex = 3;
 			this.tabHistory.Text = "History";
 			this.tabHistory.UseVisualStyleBackColor = true;
@@ -2204,7 +2212,7 @@
 			this.c_historyTab.Location = new System.Drawing.Point(3, 3);
 			this.c_historyTab.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
 			this.c_historyTab.Name = "c_historyTab";
-			this.c_historyTab.Size = new System.Drawing.Size(770, 399);
+			this.c_historyTab.Size = new System.Drawing.Size(770, 396);
 			this.c_historyTab.TabIndex = 0;
 			this.c_historyTab.SelectionChanged += new System.EventHandler(this.lstHistory_SelectionChanged);
 			this.c_historyTab.ItemActivated += new System.EventHandler<WallSwitch.HistoryList.ItemActivatedEventArgs>(this.lstHistory_ItemActivated);
