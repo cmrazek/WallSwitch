@@ -12,6 +12,9 @@ Contact:
 
 ChangeLog:
 
+Version 1.6.3 - WIP:
+- Fix null reference exceptions in the history list.
+
 Version 1.6.2 - 2020-11-07:
 - Fixed missing controls on Settings tab.
 
