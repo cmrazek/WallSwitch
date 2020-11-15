@@ -47,6 +47,8 @@ namespace WallSwitch
 
 		public static void OnFileDeleted(string locationOnDisk, Database db = null)
 		{
+			if (string.IsNullOrEmpty(locationOnDisk)) return;
+
 			FileDeleted?.Invoke(null, new DeleteFileEventArgs(locationOnDisk));
 
 			var selfDb = false;

@@ -391,9 +391,9 @@ namespace WallSwitch
 			{
 				if (_selectedItem != null)
 				{
+					Invalidate(DocToClient(_selectedItem.Bounds));
 					_selectedItem = null;
 					FireSelectionChanged();
-					Invalidate(DocToClient(_selectedItem.Bounds));
 				}
 			}
 		}
