@@ -34,27 +34,31 @@
 			// vScroll
 			// 
 			this.vScroll.Dock = System.Windows.Forms.DockStyle.Right;
-			this.vScroll.Location = new System.Drawing.Point(133, 0);
+			this.vScroll.Location = new System.Drawing.Point(183, 0);
 			this.vScroll.Name = "vScroll";
-			this.vScroll.Size = new System.Drawing.Size(17, 150);
+			this.vScroll.Size = new System.Drawing.Size(17, 185);
 			this.vScroll.TabIndex = 0;
 			this.vScroll.ValueChanged += new System.EventHandler(this.vScroll_ValueChanged);
 			// 
 			// HistoryList
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.Controls.Add(this.vScroll);
 			this.DoubleBuffered = true;
+			this.Margin = new System.Windows.Forms.Padding(4);
 			this.Name = "HistoryList";
+			this.Size = new System.Drawing.Size(200, 185);
 			this.Load += new System.EventHandler(this.HistoryList_Load);
 			this.Paint += new System.Windows.Forms.PaintEventHandler(this.HistoryList_Paint);
 			this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HistoryList_KeyDown);
 			this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.HistoryList_MouseClick);
 			this.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.HistoryList_MouseDoubleClick);
 			this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.HistoryList_MouseDown);
+			this.MouseLeave += new System.EventHandler(this.HistoryList_MouseLeave);
 			this.MouseHover += new System.EventHandler(this.HistoryList_MouseHover);
 			this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.HistoryList_MouseMove);
+			this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.HistoryList_MouseUp);
 			this.Resize += new System.EventHandler(this.HistoryList_Resize);
 			this.ResumeLayout(false);
 

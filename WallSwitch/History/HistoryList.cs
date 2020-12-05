@@ -24,7 +24,8 @@ namespace WallSwitch
 		private int _scroll;
 		private int _maxScroll;
 		private HistoryItem _selectedItem;
-		private HistoryItem _mouseOverItem;
+		private Rectangle _mouseDragRect;
+		private HistoryItem _mouseDragItem;
 		private int _maxHistory = k_maxHistory;
 		private ToolTip _imageToolTip = null;
 
@@ -403,6 +404,41 @@ namespace WallSwitch
 			try
 			{
 				Focus();
+
+				this.ResetMouseEventArgs();
+
+				var item = HitTest(e.Location);
+				if (item != null)
+				{
+					_mouseDragItem = item;
+
+					var dragSize = SystemInformation.DragSize;
+					_mouseDragRect = new Rectangle(e.Location.X - dragSize.Width / 2, e.Y - dragSize.Height / 2, dragSize.Width, dragSize.Height);
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void HistoryList_MouseUp(object sender, MouseEventArgs e)
+		{
+			try
+			{
+				_mouseDragItem = null;
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+		}
+
+		private void HistoryList_MouseLeave(object sender, EventArgs e)
+		{
+			try
+			{
+				_mouseDragItem = null;
 			}
 			catch (Exception ex)
 			{
@@ -457,27 +493,10 @@ namespace WallSwitch
 			{
 				this.ResetMouseEventArgs();
 
-				var item = HitTest(e.Location);
-				if (item != null)
+				if (_mouseDragItem != null && !_mouseDragRect.Contains(e.Location))
 				{
-					if (_mouseOverItem != item && _mouseOverItem != null)
-					{
-						_mouseOverItem = item;
-						_mouseOverItem.OnMouseLeave();
-					}
-
-					var pt = e.Location;
-					pt.Offset(0, _scroll);
-					_mouseOverItem = item;
-					_mouseOverItem.OnMouseOver(pt);
-				}
-				else
-				{
-					if (_mouseOverItem != null)
-					{
-						_mouseOverItem.OnMouseLeave();
-						_mouseOverItem = null;
-					}
+					var data = new DataObject(DataFormats.FileDrop, new string[] { _mouseDragItem.LocationOnDisk });
+					DoDragDrop(data, DragDropEffects.All);
 				}
 			}
 			catch (Exception ex)
