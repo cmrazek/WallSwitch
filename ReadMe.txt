@@ -1,7 +1,7 @@
 WallSwitch
 Switches desktop wallpapers from a variety of sources.
 https://github.com/cmrazek/WallSwitch
-Current Version: 1.6.3
+Current Version: 1.6.4
 
 Requirements:
 	.NET Framework 4.7.2:  https://dotnet.microsoft.com/download/dotnet-framework/thank-you/net472-web-installer
