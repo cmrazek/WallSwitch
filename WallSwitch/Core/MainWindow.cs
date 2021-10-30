@@ -2342,6 +2342,9 @@ namespace WallSwitch
 			foreach (var theme in _themes) theme.ClearHistory(db);
 			c_historyTab.Clear();
 			ClearExpiredCache(db);
+
+			var switchThread = Program.SwitchThread;
+			if (switchThread != null) switchThread.SwitchNow(db, SwitchDir.Clear);
 		}
 
 		private void miClearHistory_Click(object sender, EventArgs e)
@@ -2351,9 +2354,6 @@ namespace WallSwitch
 				using (var db = new Database())
 				{
 					ClearHistory(db);
-
-					var switchThread = Program.SwitchThread;
-					if (switchThread != null) switchThread.SwitchNow(db, SwitchDir.Clear);
 				}
 			}
 			catch (Exception ex)

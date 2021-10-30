@@ -11,6 +11,8 @@ namespace WallSwitch
 {
 	static class ImageLoading
 	{
+		private static int ExifOrientationProperty = 0x112;
+
 		public static Image LoadFromFile(string fileName)
 		{
 			if (Path.GetExtension(fileName).Equals(".webp", StringComparison.OrdinalIgnoreCase))
@@ -21,7 +23,27 @@ namespace WallSwitch
 			{
 				using (var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
 				{
-					return Image.FromStream(stream);
+					var img = Image.FromStream(stream);
+
+					if (img.PropertyIdList.Contains(ExifOrientationProperty))
+					{
+						var prop = img.GetPropertyItem(ExifOrientationProperty);
+						var value = BitConverter.ToUInt16(prop.Value, 0);
+						var rotate = RotateFlipType.RotateNoneFlipNone;
+
+						if (value == 3 || value == 4) rotate = RotateFlipType.Rotate180FlipNone;
+						else if (value == 5 || value == 6) rotate = RotateFlipType.Rotate90FlipNone;
+						else if (value == 7 || value == 8) rotate = RotateFlipType.Rotate270FlipNone;
+
+						if (value == 2 || value == 4 || value == 5 || value == 7) rotate |= RotateFlipType.RotateNoneFlipX;
+
+						if (rotate != RotateFlipType.RotateNoneFlipNone)
+						{
+							img.RotateFlip(rotate);
+						}
+					}
+
+					return img;
 				}
 			}
 		}

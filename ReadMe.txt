@@ -12,7 +12,11 @@ Contact:
 
 ChangeLog:
 
-Version 1.6.3 - WIP:
+Version 1.6.4 - 2021-10-30:
+- Obey image exif orientation, if present.
+- Fixed bug where clearing history via a hotkey would not clear the screen.
+
+Version 1.6.3 - 2020-12-05:
 - Allow files to be dragged out of the history list.
 - Fix null reference exceptions in the history list.
 
