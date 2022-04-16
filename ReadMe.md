@@ -30,4 +30,4 @@ WallSwitch supports the following features:
 
 ## Requirements
 
-WallSwitch is built using Microsoft .NET Framework 4.7.2. If needed, you can download this [here](https://dotnet.microsoft.com/download/dotnet-framework/thank-you/net472-web-installer).
+WallSwitch is built using Microsoft .NET Framework 4.8. If needed, you can download this [here](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48).
