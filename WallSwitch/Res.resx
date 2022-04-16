@@ -620,4 +620,10 @@ History Records Updated: {1}</value>
   <data name="UpdateCheckUserAgent" xml:space="preserve">
     <value>cmrazek/WallSwitch</value>
   </data>
+  <data name="Error_InvalidInputIdleMaxTime" xml:space="preserve">
+    <value>Invalid number of seconds.</value>
+  </data>
+  <data name="Error_InvalidInputIdleMinTime" xml:space="preserve">
+    <value>Invalid number of seconds.</value>
+  </data>
 </root>

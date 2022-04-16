@@ -43,6 +43,23 @@ namespace WallSwitch
 		public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, ref bool pvParam, uint fWinIni);
 
 		public const uint SPI_GETSCREENSAVERRUNNING = 0x0072;
+
+		[DllImport("user32.dll")]
+		static extern bool GetLastInputInfo(ref LASTINPUTINFO plii);
+
+		[StructLayout(LayoutKind.Sequential)]
+		struct LASTINPUTINFO
+		{
+			public static readonly int SizeOf = Marshal.SizeOf(typeof(LASTINPUTINFO));
+
+			[MarshalAs(UnmanagedType.U4)]
+			public UInt32 cbSize;
+			[MarshalAs(UnmanagedType.U4)]
+			public UInt32 dwTime;
+		}
+
+		[DllImport("kernel32.dll")]
+		static extern uint GetTickCount();
 		#endregion
 
 		#region Construction
@@ -249,6 +266,11 @@ namespace WallSwitch
 							return SwitchDir.None;
 						}
 
+						if (!CanSwitchForTheme(_theme))
+						{
+							return SwitchDir.None;
+						}
+
 						return SwitchDir.Next;
 					}
 				}
@@ -276,6 +298,42 @@ namespace WallSwitch
 				if (!SystemParametersInfo(SPI_GETSCREENSAVERRUNNING, 0, ref ssRunning, 0)) ssRunning = false;
 				return ssRunning;
 			}
+		}
+
+		private uint? GetLastInputTime()
+		{
+			var lii = new LASTINPUTINFO
+			{
+				cbSize = (uint)LASTINPUTINFO.SizeOf,
+				dwTime = 0
+			};
+
+			if (!GetLastInputInfo(ref lii)) { return null; }
+			var liTime = lii.dwTime;
+			var tickCount = GetTickCount();
+
+			if (liTime > tickCount) { return null; }    // Wrapped around uint boundary
+			return tickCount - liTime;
+		}
+
+		private bool CanSwitchForTheme(Theme theme)
+		{
+			if (theme.InputIdleEnabled)
+			{
+				var idleTime = GetLastInputTime();
+				if (theme.InputIdleMinTime > 0 && idleTime < theme.InputIdleMinTime * 1000)
+				{
+					Log.Debug("Idle time [{0}] less than minimum [{1}].", idleTime, theme.InputIdleMinTime * 1000);
+					return false;
+				}
+				if (theme.InputIdleMaxTime > 0 && idleTime > theme.InputIdleMaxTime * 1000)
+				{
+					Log.Debug("Idle time [{0}] greater than maximum [{1}].", idleTime, theme.InputIdleMaxTime * 1000);
+					return false;
+				}
+			}
+
+			return true;
 		}
 		#endregion
 

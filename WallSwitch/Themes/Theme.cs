@@ -83,6 +83,9 @@ namespace WallSwitch
 		private bool _activateOnExit = false;
 		private int _randomGroupCount = 1;
 		private bool _clearBetweenRandomGroups = false;
+		private bool _inputIdleEnabled = false;
+		private int _inputIdleMinTime = 0;
+		private int _inputIdleMaxTime = 0;
 
 		private ColorEffect _colorEffectFore = k_defaultColorEffectFore;
 		private ColorEffect _colorEffectBack = k_defaultColorEffectBack;
@@ -302,6 +305,12 @@ namespace WallSwitch
 			get { return _filter; }
 			set { _filter = value; }
 		}
+
+		public bool InputIdleEnabled { get => _inputIdleEnabled; set => _inputIdleEnabled = value; }
+
+		public int InputIdleMinTime { get => _inputIdleMinTime; set => _inputIdleMinTime = value; }
+
+		public int InputIdleMaxTime { get => _inputIdleMaxTime; set => _inputIdleMaxTime = value; }
 		#endregion
 
 		#region Save/Load
@@ -347,7 +356,10 @@ namespace WallSwitch
 				"hot_key", _hotKey.ToSaveString(),
 				"history_guid", _historyGuid,
 				"latest_guid", _historyLatestGuid,
-				"filter_xml", _filter?.ToSaveString()
+				"filter_xml", _filter?.ToSaveString(),
+				"input_idle_enable", _inputIdleEnabled ? 1 : 0,
+				"input_idle_min_time", _inputIdleMinTime,
+				"input_idle_max_time", _inputIdleMaxTime
 			};
 
 			var newRecord = false;
@@ -455,6 +467,10 @@ namespace WallSwitch
 			_historyGuid = row.GetString("history_guid");
 			_historyLatestGuid = row.GetString("latest_guid");
 			_filter = ImageFilters.ImageFilter.FromSaveString(row.GetString("filter_xml"));
+
+			_inputIdleEnabled = row.GetBoolean("input_idle_enable");
+			_inputIdleMinTime = row.GetInt("input_idle_min_time");
+			_inputIdleMaxTime = row.GetInt("input_idle_max_time");
 
 			foreach (DataRow locRow in db.SelectDataTable("select rowid, * from location where theme_id = @theme_id", "@theme_id", _rowid).Rows)
 			{

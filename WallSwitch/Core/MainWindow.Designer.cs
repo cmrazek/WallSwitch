@@ -155,6 +155,14 @@
 			this.c_activateThemeLabel = new System.Windows.Forms.Label();
 			this.chkFadeTransition = new System.Windows.Forms.CheckBox();
 			this.lblFrequency = new System.Windows.Forms.Label();
+			this.InputIdleCheckBox = new System.Windows.Forms.CheckBox();
+			this.InputIdleTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+			this.InputIdleMinTimeLabel = new System.Windows.Forms.Label();
+			this.InputIdleMaxTimeLabel = new System.Windows.Forms.Label();
+			this.InputIdleMinTimeTextBox = new System.Windows.Forms.TextBox();
+			this.InputIdleMaxTimeTextBox = new System.Windows.Forms.TextBox();
+			this.InputIdleMinTimeSecondsLabel = new System.Windows.Forms.Label();
+			this.InputIdleMaxTimeSecondsLabel = new System.Windows.Forms.Label();
 			this.grpDisplayMode = new System.Windows.Forms.GroupBox();
 			this.tblDisplayModeRows = new System.Windows.Forms.TableLayoutPanel();
 			this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
@@ -249,6 +257,7 @@
 			this.tblChangeFrequency.SuspendLayout();
 			this.tblChangeFrequencyGrid.SuspendLayout();
 			this.flowLayoutPanel3.SuspendLayout();
+			this.InputIdleTableLayoutPanel.SuspendLayout();
 			this.grpDisplayMode.SuspendLayout();
 			this.tblDisplayModeRows.SuspendLayout();
 			this.flowLayoutPanel1.SuspendLayout();
@@ -701,7 +710,7 @@
             this.toolStripMenuItem2,
             this.miFileExit});
 			this.menuFile.Name = "menuFile";
-			this.menuFile.Size = new System.Drawing.Size(46, 26);
+			this.menuFile.Size = new System.Drawing.Size(46, 24);
 			this.menuFile.Text = "&File";
 			// 
 			// miFileNewTheme
@@ -768,7 +777,7 @@
             this.miHotKeys,
             this.settingsToolStripMenuItem});
 			this.menuTools.Name = "menuTools";
-			this.menuTools.Size = new System.Drawing.Size(58, 26);
+			this.menuTools.Size = new System.Drawing.Size(58, 24);
 			this.menuTools.Text = "&Tools";
 			// 
 			// miClearHistory
@@ -802,7 +811,7 @@
 			this.menuHelp.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.miHelpAbout});
 			this.menuHelp.Name = "menuHelp";
-			this.menuHelp.Size = new System.Drawing.Size(55, 26);
+			this.menuHelp.Size = new System.Drawing.Size(55, 24);
 			this.menuHelp.Text = "&Help";
 			// 
 			// miHelpAbout
@@ -878,7 +887,7 @@
 			this.grpBackgroundColorEffects.AutoSize = true;
 			this.grpBackgroundColorEffects.Controls.Add(this.flowBackgroundImageEffects);
 			this.grpBackgroundColorEffects.Dock = System.Windows.Forms.DockStyle.Top;
-			this.grpBackgroundColorEffects.Location = new System.Drawing.Point(3, 851);
+			this.grpBackgroundColorEffects.Location = new System.Drawing.Point(3, 915);
 			this.grpBackgroundColorEffects.Name = "grpBackgroundColorEffects";
 			this.grpBackgroundColorEffects.Size = new System.Drawing.Size(764, 158);
 			this.grpBackgroundColorEffects.TabIndex = 6;
@@ -925,7 +934,7 @@
 			this.cmbColorEffectBack.Anchor = System.Windows.Forms.AnchorStyles.Left;
 			this.cmbColorEffectBack.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmbColorEffectBack.FormattingEnabled = true;
-			this.cmbColorEffectBack.Location = new System.Drawing.Point(94, 19);
+			this.cmbColorEffectBack.Location = new System.Drawing.Point(94, 18);
 			this.cmbColorEffectBack.Name = "cmbColorEffectBack";
 			this.cmbColorEffectBack.Size = new System.Drawing.Size(139, 25);
 			this.cmbColorEffectBack.TabIndex = 0;
@@ -1013,7 +1022,7 @@
 			this.grpImageEffects.AutoSize = true;
 			this.grpImageEffects.Controls.Add(this.flowLayoutPanel6);
 			this.grpImageEffects.Dock = System.Windows.Forms.DockStyle.Top;
-			this.grpImageEffects.Location = new System.Drawing.Point(3, 792);
+			this.grpImageEffects.Location = new System.Drawing.Point(3, 856);
 			this.grpImageEffects.Name = "grpImageEffects";
 			this.grpImageEffects.Size = new System.Drawing.Size(764, 53);
 			this.grpImageEffects.TabIndex = 5;
@@ -1059,7 +1068,7 @@
 			this.grpCollageDisplay.AutoSize = true;
 			this.grpCollageDisplay.Controls.Add(this.tblCollageDisplay);
 			this.grpCollageDisplay.Dock = System.Windows.Forms.DockStyle.Top;
-			this.grpCollageDisplay.Location = new System.Drawing.Point(3, 454);
+			this.grpCollageDisplay.Location = new System.Drawing.Point(3, 518);
 			this.grpCollageDisplay.Name = "grpCollageDisplay";
 			this.grpCollageDisplay.Size = new System.Drawing.Size(764, 332);
 			this.grpCollageDisplay.TabIndex = 4;
@@ -1146,7 +1155,7 @@
 			this.c_edgeMode.Anchor = System.Windows.Forms.AnchorStyles.Left;
 			this.c_edgeMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.c_edgeMode.FormattingEnabled = true;
-			this.c_edgeMode.Location = new System.Drawing.Point(3, 80);
+			this.c_edgeMode.Location = new System.Drawing.Point(3, 81);
 			this.c_edgeMode.Name = "c_edgeMode";
 			this.c_edgeMode.Size = new System.Drawing.Size(150, 25);
 			this.c_edgeMode.TabIndex = 5;
@@ -1367,7 +1376,7 @@
 			this.grpBackgroundColor.AutoSize = true;
 			this.grpBackgroundColor.Controls.Add(this.tblBackgroundColor);
 			this.grpBackgroundColor.Dock = System.Windows.Forms.DockStyle.Top;
-			this.grpBackgroundColor.Location = new System.Drawing.Point(3, 358);
+			this.grpBackgroundColor.Location = new System.Drawing.Point(3, 422);
 			this.grpBackgroundColor.Name = "grpBackgroundColor";
 			this.grpBackgroundColor.Size = new System.Drawing.Size(764, 90);
 			this.grpBackgroundColor.TabIndex = 3;
@@ -1514,7 +1523,7 @@
 			this.grpFrequency.Dock = System.Windows.Forms.DockStyle.Top;
 			this.grpFrequency.Location = new System.Drawing.Point(3, 231);
 			this.grpFrequency.Name = "grpFrequency";
-			this.grpFrequency.Size = new System.Drawing.Size(764, 121);
+			this.grpFrequency.Size = new System.Drawing.Size(764, 185);
 			this.grpFrequency.TabIndex = 2;
 			this.grpFrequency.TabStop = false;
 			this.grpFrequency.Text = "Change Frequency";
@@ -1532,13 +1541,13 @@
 			this.tblChangeFrequency.RowCount = 2;
 			this.tblChangeFrequency.RowStyles.Add(new System.Windows.Forms.RowStyle());
 			this.tblChangeFrequency.RowStyles.Add(new System.Windows.Forms.RowStyle());
-			this.tblChangeFrequency.Size = new System.Drawing.Size(758, 99);
+			this.tblChangeFrequency.Size = new System.Drawing.Size(758, 163);
 			this.tblChangeFrequency.TabIndex = 8;
 			// 
 			// c_activateOnExitCheckBox
 			// 
 			this.c_activateOnExitCheckBox.AutoSize = true;
-			this.c_activateOnExitCheckBox.Location = new System.Drawing.Point(3, 75);
+			this.c_activateOnExitCheckBox.Location = new System.Drawing.Point(3, 139);
 			this.c_activateOnExitCheckBox.Name = "c_activateOnExitCheckBox";
 			this.c_activateOnExitCheckBox.Size = new System.Drawing.Size(272, 21);
 			this.c_activateOnExitCheckBox.TabIndex = 6;
@@ -1560,13 +1569,16 @@
 			this.tblChangeFrequencyGrid.Controls.Add(this.c_activateThemeLabel, 0, 1);
 			this.tblChangeFrequencyGrid.Controls.Add(this.chkFadeTransition, 2, 0);
 			this.tblChangeFrequencyGrid.Controls.Add(this.lblFrequency, 0, 0);
+			this.tblChangeFrequencyGrid.Controls.Add(this.InputIdleCheckBox, 0, 2);
+			this.tblChangeFrequencyGrid.Controls.Add(this.InputIdleTableLayoutPanel, 1, 2);
 			this.tblChangeFrequencyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tblChangeFrequencyGrid.Location = new System.Drawing.Point(3, 3);
 			this.tblChangeFrequencyGrid.Name = "tblChangeFrequencyGrid";
-			this.tblChangeFrequencyGrid.RowCount = 2;
+			this.tblChangeFrequencyGrid.RowCount = 3;
 			this.tblChangeFrequencyGrid.RowStyles.Add(new System.Windows.Forms.RowStyle());
 			this.tblChangeFrequencyGrid.RowStyles.Add(new System.Windows.Forms.RowStyle());
-			this.tblChangeFrequencyGrid.Size = new System.Drawing.Size(752, 66);
+			this.tblChangeFrequencyGrid.RowStyles.Add(new System.Windows.Forms.RowStyle());
+			this.tblChangeFrequencyGrid.Size = new System.Drawing.Size(752, 130);
 			this.tblChangeFrequencyGrid.TabIndex = 7;
 			// 
 			// flowLayoutPanel3
@@ -1651,6 +1663,102 @@
 			this.lblFrequency.Size = new System.Drawing.Size(138, 17);
 			this.lblFrequency.TabIndex = 0;
 			this.lblFrequency.Text = "Change image every";
+			// 
+			// InputIdleCheckBox
+			// 
+			this.InputIdleCheckBox.AutoSize = true;
+			this.InputIdleCheckBox.Location = new System.Drawing.Point(3, 69);
+			this.InputIdleCheckBox.Name = "InputIdleCheckBox";
+			this.InputIdleCheckBox.Size = new System.Drawing.Size(87, 21);
+			this.InputIdleCheckBox.TabIndex = 6;
+			this.InputIdleCheckBox.Text = "Input Idle";
+			this.toolTip1.SetToolTip(this.InputIdleCheckBox, "Stop wallpaper switching if the mouse/keyboard have been idle for a specific peri" +
+        "od of time.");
+			this.InputIdleCheckBox.UseVisualStyleBackColor = true;
+			this.InputIdleCheckBox.CheckedChanged += new System.EventHandler(this.ControlChanged);
+			// 
+			// InputIdleTableLayoutPanel
+			// 
+			this.InputIdleTableLayoutPanel.AutoSize = true;
+			this.InputIdleTableLayoutPanel.ColumnCount = 3;
+			this.InputIdleTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+			this.InputIdleTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+			this.InputIdleTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+			this.InputIdleTableLayoutPanel.Controls.Add(this.InputIdleMinTimeLabel, 0, 0);
+			this.InputIdleTableLayoutPanel.Controls.Add(this.InputIdleMaxTimeLabel, 0, 1);
+			this.InputIdleTableLayoutPanel.Controls.Add(this.InputIdleMinTimeTextBox, 1, 0);
+			this.InputIdleTableLayoutPanel.Controls.Add(this.InputIdleMaxTimeTextBox, 1, 1);
+			this.InputIdleTableLayoutPanel.Controls.Add(this.InputIdleMinTimeSecondsLabel, 2, 0);
+			this.InputIdleTableLayoutPanel.Controls.Add(this.InputIdleMaxTimeSecondsLabel, 2, 1);
+			this.InputIdleTableLayoutPanel.Location = new System.Drawing.Point(147, 69);
+			this.InputIdleTableLayoutPanel.Name = "InputIdleTableLayoutPanel";
+			this.InputIdleTableLayoutPanel.RowCount = 2;
+			this.InputIdleTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
+			this.InputIdleTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
+			this.InputIdleTableLayoutPanel.Size = new System.Drawing.Size(294, 58);
+			this.InputIdleTableLayoutPanel.TabIndex = 7;
+			// 
+			// InputIdleMinTimeLabel
+			// 
+			this.InputIdleMinTimeLabel.AutoSize = true;
+			this.InputIdleMinTimeLabel.Location = new System.Drawing.Point(3, 3);
+			this.InputIdleMinTimeLabel.Margin = new System.Windows.Forms.Padding(3);
+			this.InputIdleMinTimeLabel.Name = "InputIdleMinTimeLabel";
+			this.InputIdleMinTimeLabel.Size = new System.Drawing.Size(102, 17);
+			this.InputIdleMinTimeLabel.TabIndex = 0;
+			this.InputIdleMinTimeLabel.Text = "Minimum Time:";
+			this.toolTip1.SetToolTip(this.InputIdleMinTimeLabel, "Don\'t switch if the mouse/keyboard have been used within the last X seconds. (zer" +
+        "o/blank for no limit)");
+			// 
+			// InputIdleMaxTimeLabel
+			// 
+			this.InputIdleMaxTimeLabel.AutoSize = true;
+			this.InputIdleMaxTimeLabel.Location = new System.Drawing.Point(3, 32);
+			this.InputIdleMaxTimeLabel.Margin = new System.Windows.Forms.Padding(3);
+			this.InputIdleMaxTimeLabel.Name = "InputIdleMaxTimeLabel";
+			this.InputIdleMaxTimeLabel.Size = new System.Drawing.Size(105, 17);
+			this.InputIdleMaxTimeLabel.TabIndex = 1;
+			this.InputIdleMaxTimeLabel.Text = "Maximum Time:";
+			this.toolTip1.SetToolTip(this.InputIdleMaxTimeLabel, "Don\'t switch if the mouse/keyboard haven\'t been used within the last X seconds. (" +
+        "zero/blank for no limit)");
+			// 
+			// InputIdleMinTimeTextBox
+			// 
+			this.InputIdleMinTimeTextBox.Location = new System.Drawing.Point(114, 3);
+			this.InputIdleMinTimeTextBox.Name = "InputIdleMinTimeTextBox";
+			this.InputIdleMinTimeTextBox.Size = new System.Drawing.Size(100, 23);
+			this.InputIdleMinTimeTextBox.TabIndex = 2;
+			this.toolTip1.SetToolTip(this.InputIdleMinTimeTextBox, "Don\'t switch if the mouse/keyboard have been used within the last X seconds. (zer" +
+        "o/blank for no limit)");
+			this.InputIdleMinTimeTextBox.TextChanged += new System.EventHandler(this.ControlChanged);
+			// 
+			// InputIdleMaxTimeTextBox
+			// 
+			this.InputIdleMaxTimeTextBox.Location = new System.Drawing.Point(114, 32);
+			this.InputIdleMaxTimeTextBox.Name = "InputIdleMaxTimeTextBox";
+			this.InputIdleMaxTimeTextBox.Size = new System.Drawing.Size(100, 23);
+			this.InputIdleMaxTimeTextBox.TabIndex = 3;
+			this.toolTip1.SetToolTip(this.InputIdleMaxTimeTextBox, "Don\'t switch if the mouse/keyboard haven\'t been used within the last X seconds. (" +
+        "zero/blank for no limit)");
+			this.InputIdleMaxTimeTextBox.TextChanged += new System.EventHandler(this.ControlChanged);
+			// 
+			// InputIdleMinTimeSecondsLabel
+			// 
+			this.InputIdleMinTimeSecondsLabel.AutoSize = true;
+			this.InputIdleMinTimeSecondsLabel.Location = new System.Drawing.Point(220, 0);
+			this.InputIdleMinTimeSecondsLabel.Name = "InputIdleMinTimeSecondsLabel";
+			this.InputIdleMinTimeSecondsLabel.Size = new System.Drawing.Size(71, 17);
+			this.InputIdleMinTimeSecondsLabel.TabIndex = 4;
+			this.InputIdleMinTimeSecondsLabel.Text = "(seconds)";
+			// 
+			// InputIdleMaxTimeSecondsLabel
+			// 
+			this.InputIdleMaxTimeSecondsLabel.AutoSize = true;
+			this.InputIdleMaxTimeSecondsLabel.Location = new System.Drawing.Point(220, 29);
+			this.InputIdleMaxTimeSecondsLabel.Name = "InputIdleMaxTimeSecondsLabel";
+			this.InputIdleMaxTimeSecondsLabel.Size = new System.Drawing.Size(71, 17);
+			this.InputIdleMaxTimeSecondsLabel.TabIndex = 5;
+			this.InputIdleMaxTimeSecondsLabel.Text = "(seconds)";
 			// 
 			// grpDisplayMode
 			// 
@@ -1949,7 +2057,7 @@
 			this.c_filterTab.Margin = new System.Windows.Forms.Padding(2);
 			this.c_filterTab.Name = "c_filterTab";
 			this.c_filterTab.Padding = new System.Windows.Forms.Padding(2);
-			this.c_filterTab.Size = new System.Drawing.Size(776, 402);
+			this.c_filterTab.Size = new System.Drawing.Size(776, 405);
 			this.c_filterTab.TabIndex = 5;
 			this.c_filterTab.Text = "Filter";
 			this.c_filterTab.UseVisualStyleBackColor = true;
@@ -1961,7 +2069,7 @@
 			this.c_filterFlow.Location = new System.Drawing.Point(2, 33);
 			this.c_filterFlow.Margin = new System.Windows.Forms.Padding(0);
 			this.c_filterFlow.Name = "c_filterFlow";
-			this.c_filterFlow.Size = new System.Drawing.Size(772, 367);
+			this.c_filterFlow.Size = new System.Drawing.Size(772, 370);
 			this.c_filterFlow.TabIndex = 0;
 			this.toolTip1.SetToolTip(this.c_filterFlow, "Conditions to narrow images selected");
 			// 
@@ -1995,7 +2103,7 @@
 			this.c_widgetsTab.Location = new System.Drawing.Point(4, 26);
 			this.c_widgetsTab.Name = "c_widgetsTab";
 			this.c_widgetsTab.Padding = new System.Windows.Forms.Padding(3);
-			this.c_widgetsTab.Size = new System.Drawing.Size(776, 402);
+			this.c_widgetsTab.Size = new System.Drawing.Size(776, 405);
 			this.c_widgetsTab.TabIndex = 4;
 			this.c_widgetsTab.Text = "Widgets";
 			this.c_widgetsTab.UseVisualStyleBackColor = true;
@@ -2015,7 +2123,7 @@
 			// c_widgetPanelSplitter.Panel2
 			// 
 			this.c_widgetPanelSplitter.Panel2.Controls.Add(this.c_widgetPanelPropSplitter);
-			this.c_widgetPanelSplitter.Size = new System.Drawing.Size(770, 396);
+			this.c_widgetPanelSplitter.Size = new System.Drawing.Size(770, 399);
 			this.c_widgetPanelSplitter.SplitterDistance = 534;
 			this.c_widgetPanelSplitter.TabIndex = 2;
 			// 
@@ -2025,7 +2133,7 @@
 			this.c_widgetLayout.Location = new System.Drawing.Point(0, 33);
 			this.c_widgetLayout.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
 			this.c_widgetLayout.Name = "c_widgetLayout";
-			this.c_widgetLayout.Size = new System.Drawing.Size(534, 363);
+			this.c_widgetLayout.Size = new System.Drawing.Size(534, 366);
 			this.c_widgetLayout.TabIndex = 0;
 			this.c_widgetLayout.WidgetsChanged += new System.EventHandler(this.c_widgetLayout_WidgetsChanged);
 			this.c_widgetLayout.SelectedWidgetChanged += new System.EventHandler<WallSwitch.WidgetLayoutControl.WidgetEventArgs>(this.c_widgetLayout_SelectedWidgetChanged);
@@ -2109,7 +2217,7 @@
 			// c_widgetPanelPropSplitter.Panel2
 			// 
 			this.c_widgetPanelPropSplitter.Panel2.Controls.Add(this.c_widgetPropertyGrid);
-			this.c_widgetPanelPropSplitter.Size = new System.Drawing.Size(232, 396);
+			this.c_widgetPanelPropSplitter.Size = new System.Drawing.Size(232, 399);
 			this.c_widgetPanelPropSplitter.SplitterDistance = 131;
 			this.c_widgetPanelPropSplitter.TabIndex = 0;
 			// 
@@ -2189,7 +2297,7 @@
 			this.c_widgetPropertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.c_widgetPropertyGrid.Location = new System.Drawing.Point(0, 0);
 			this.c_widgetPropertyGrid.Name = "c_widgetPropertyGrid";
-			this.c_widgetPropertyGrid.Size = new System.Drawing.Size(232, 261);
+			this.c_widgetPropertyGrid.Size = new System.Drawing.Size(232, 264);
 			this.c_widgetPropertyGrid.TabIndex = 0;
 			this.c_widgetPropertyGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.c_widgetPropertyGrid_PropertyValueChanged);
 			// 
@@ -2199,7 +2307,7 @@
 			this.tabHistory.Location = new System.Drawing.Point(4, 26);
 			this.tabHistory.Name = "tabHistory";
 			this.tabHistory.Padding = new System.Windows.Forms.Padding(3);
-			this.tabHistory.Size = new System.Drawing.Size(776, 402);
+			this.tabHistory.Size = new System.Drawing.Size(776, 405);
 			this.tabHistory.TabIndex = 3;
 			this.tabHistory.Text = "History";
 			this.tabHistory.UseVisualStyleBackColor = true;
@@ -2210,9 +2318,9 @@
 			this.c_historyTab.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.c_historyTab.ImageToolTip = this.toolTip1;
 			this.c_historyTab.Location = new System.Drawing.Point(3, 3);
-			this.c_historyTab.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.c_historyTab.Margin = new System.Windows.Forms.Padding(4);
 			this.c_historyTab.Name = "c_historyTab";
-			this.c_historyTab.Size = new System.Drawing.Size(770, 396);
+			this.c_historyTab.Size = new System.Drawing.Size(770, 399);
 			this.c_historyTab.TabIndex = 0;
 			this.c_historyTab.SelectionChanged += new System.EventHandler(this.lstHistory_SelectionChanged);
 			this.c_historyTab.ItemActivated += new System.EventHandler<WallSwitch.HistoryList.ItemActivatedEventArgs>(this.lstHistory_ItemActivated);
@@ -2435,6 +2543,8 @@
 			this.tblChangeFrequencyGrid.PerformLayout();
 			this.flowLayoutPanel3.ResumeLayout(false);
 			this.flowLayoutPanel3.PerformLayout();
+			this.InputIdleTableLayoutPanel.ResumeLayout(false);
+			this.InputIdleTableLayoutPanel.PerformLayout();
 			this.grpDisplayMode.ResumeLayout(false);
 			this.grpDisplayMode.PerformLayout();
 			this.tblDisplayModeRows.ResumeLayout(false);
@@ -2672,6 +2782,14 @@
 		private System.Windows.Forms.TextBox c_randomGroupCount;
 		private System.Windows.Forms.Label c_randomGroupCountLabel;
 		private System.Windows.Forms.CheckBox c_clearBetweenRandomGroups;
+		private System.Windows.Forms.CheckBox InputIdleCheckBox;
+		private System.Windows.Forms.TableLayoutPanel InputIdleTableLayoutPanel;
+		private System.Windows.Forms.Label InputIdleMinTimeLabel;
+		private System.Windows.Forms.Label InputIdleMaxTimeLabel;
+		private System.Windows.Forms.TextBox InputIdleMinTimeTextBox;
+		private System.Windows.Forms.TextBox InputIdleMaxTimeTextBox;
+		private System.Windows.Forms.Label InputIdleMinTimeSecondsLabel;
+		private System.Windows.Forms.Label InputIdleMaxTimeSecondsLabel;
 	}
 }
 

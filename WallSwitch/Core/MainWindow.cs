@@ -585,6 +585,10 @@ namespace WallSwitch
 				c_clearBetweenRandomGroups.Checked = false;
 			}
 
+			InputIdleCheckBox.Checked = _currentTheme.InputIdleEnabled;
+			InputIdleMinTimeTextBox.Text = _currentTheme.InputIdleMinTime > 0 ? _currentTheme.InputIdleMinTime.ToString() : string.Empty;
+			InputIdleMaxTimeTextBox.Text = _currentTheme.InputIdleMaxTime > 0 ? _currentTheme.InputIdleMaxTime.ToString() : string.Empty;
+
 			RefreshTransparency();
 			RefreshFilter();
 
@@ -756,6 +760,40 @@ namespace WallSwitch
 				clearBetweenRandomGroups = false;
 			}
 
+			var inputIdleEnabled = InputIdleCheckBox.Checked;
+			var inputIdleMinTime = 0;
+			var inputIdleMaxTime = 0;
+			if (inputIdleEnabled)
+			{
+				if (!string.IsNullOrWhiteSpace(InputIdleMinTimeTextBox.Text))
+				{
+					if (!int.TryParse(InputIdleMinTimeTextBox.Text, out inputIdleMinTime) || inputIdleMinTime < 0)
+					{
+						if (showErrors)
+						{
+							tcTheme.SelectedTab = c_settingsTab;
+							InputIdleMinTimeTextBox.Focus();
+							this.ShowError(Res.Error_InvalidInputIdleMinTime);
+						}
+						return false;
+					}
+				}
+
+				if (!string.IsNullOrWhiteSpace(InputIdleMaxTimeTextBox.Text))
+				{
+					if (!int.TryParse(InputIdleMaxTimeTextBox.Text, out inputIdleMaxTime) || inputIdleMaxTime < 0)
+					{
+						if (showErrors)
+						{
+							tcTheme.SelectedTab = c_settingsTab;
+							InputIdleMaxTimeTextBox.Focus();
+							this.ShowError(Res.Error_InvalidInputIdleMaxTime);
+						}
+						return false;
+					}
+				}
+			}
+
 			ImageFilter filter;
 			if (!SaveFilter(showErrors, out filter))
 			{
@@ -819,6 +857,10 @@ namespace WallSwitch
 			_currentTheme.ClearBetweenRandomGroups = clearBetweenRandomGroups;
 
 			_currentTheme.Filter = filter;
+
+			_currentTheme.InputIdleEnabled = inputIdleEnabled;
+			_currentTheme.InputIdleMinTime = inputIdleMinTime;
+			_currentTheme.InputIdleMaxTime = inputIdleMaxTime;
 
 			c_widgetLayout.SaveToTheme(_currentTheme);
 
@@ -908,6 +950,7 @@ namespace WallSwitch
 
 			// Change Frequency Group
 			chkFadeTransition.Visible = Program.OsVersion >= OsVersion.Windows7;
+			InputIdleTableLayoutPanel.Visible = InputIdleCheckBox.Checked;
 
 			// Background Color Group
 

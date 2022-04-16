@@ -64,7 +64,10 @@ clear_between_random_groups	tinyint,
 hot_key						varchar(100),
 history_guid				varchar(40),
 latest_guid					varchar(40),
-filter_xml					text
+filter_xml					text,
+input_idle_enable			tinyint,
+input_idle_min_time			int,
+input_idle_max_time			int
 )",
 @"create index theme_ix_name on theme (name)",
 
@@ -228,6 +231,9 @@ pub_date			datetime
 		private void RunExistingScripts()
 		{
 			AddTableColumnIfMissing("theme", "filter_xml", "text");
+			AddTableColumnIfMissing("theme", "input_idle_enable", "tinyint");
+			AddTableColumnIfMissing("theme", "input_idle_min_time", "int");
+			AddTableColumnIfMissing("theme", "input_idle_max_time", "int");
 
 			AddTableColumnIfMissing("img", "rating", "integer");
 			AddTableColumnIfMissing("img", "thumb", "blob");

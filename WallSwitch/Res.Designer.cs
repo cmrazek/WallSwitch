@@ -524,6 +524,24 @@ namespace WallSwitch {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid number of seconds..
+        /// </summary>
+        internal static string Error_InvalidInputIdleMaxTime {
+            get {
+                return ResourceManager.GetString("Error_InvalidInputIdleMaxTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid number of seconds..
+        /// </summary>
+        internal static string Error_InvalidInputIdleMinTime {
+            get {
+                return ResourceManager.GetString("Error_InvalidInputIdleMinTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid maximum image scale..
         /// </summary>
         internal static string Error_InvalidMaxImageScale {

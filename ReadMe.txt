@@ -4,13 +4,17 @@ https://github.com/cmrazek/WallSwitch
 Current Version: 1.6.4
 
 Requirements:
-	.NET Framework 4.7.2:  https://dotnet.microsoft.com/download/dotnet-framework/thank-you/net472-web-installer
+	.NET Framework 4.8:  https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48
 
 Contact:
 	Chris Mrazek (cmrazek)
 	Email: chrismrazek@gmail.com
 
 ChangeLog:
+
+Version 1.7 - 2022-04-16:
+- Upgraded to .NET Framework 4.8.
+- Added theme setting to suppress switching if mouse/keyboard have been idle.
 
 Version 1.6.4 - 2021-10-30:
 - Obey image exif orientation, if present.
