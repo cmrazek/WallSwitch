@@ -8,6 +8,7 @@
 
 /.vs/*
 /Debug/*
+/packages/*
 /Release/*
 /Setup/Archive/*
 /Setup/bin/*
