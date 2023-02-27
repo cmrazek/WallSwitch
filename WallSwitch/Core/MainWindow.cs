@@ -27,7 +27,6 @@ namespace WallSwitch
 		private bool _reallyClose;
 		private bool _refreshing;
 		private bool _dirty;
-		//private ImageList _locationImages = new ImageList();		TODO: remove
 		private bool _winStart;
 		private HotKey _changeThemeHotKey = new HotKey();
 		private Dictionary<Location, LocationBrowser> _locationBrowsers = new Dictionary<Location, LocationBrowser>();

@@ -752,6 +752,9 @@ namespace WallSwitch
 				return (int)((float)_backOpacity * 255.0f / 100.0f);
 			}
 		}
+
+		public Color BackColorTopWithOpacity => Color.FromArgb(BackOpacity255, BackColorTop);
+		public Color BackColorBottomWithOpacity => Color.FromArgb(BackOpacity255, BackColorBottom);
 		#endregion
 
 		#region History
@@ -1721,6 +1724,8 @@ namespace WallSwitch
 				else if (_dropShadowOpacity > 100) _dropShadowOpacity = 100;
 			}
 		}
+
+		public int DropShadowOpacity255 => ((int)((_dropShadowOpacity / 100.0f) * 255.0f)).Clamp(0, 255);
 		#endregion
 
 		#region Background Blur
