@@ -29,6 +29,7 @@ namespace WallSwitch.SettingsStore
 				c_ignoreHiddenFilesCheckbox.Checked = Settings.IgnoreHiddenFiles;
 				c_logLevelCombo.InitForEnum<LogLevel>(Settings.LogLevel);
 				c_loadHistoryImages.Checked = Settings.LoadHistoryImages;
+				c_disableHardwareAccelerationCheckBox.Checked = Settings.DisableHardwareAcceleration;
 			}
 			catch (Exception ex)
 			{
@@ -58,6 +59,7 @@ namespace WallSwitch.SettingsStore
 				Settings.IgnoreHiddenFiles = c_ignoreHiddenFilesCheckbox.Checked;
 				Settings.LogLevel = c_logLevelCombo.GetEnumValue<LogLevel>();
 				Settings.LoadHistoryImages = c_loadHistoryImages.Checked;
+				Settings.DisableHardwareAcceleration = c_disableHardwareAccelerationCheckBox.Checked;
 			}
 
 			return true;

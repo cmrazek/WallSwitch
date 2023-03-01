@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using WallSwitch.Rendering;
+using WallSwitch.SettingsStore;
 
 namespace WallSwitch
 {
@@ -10,9 +14,9 @@ namespace WallSwitch
     {
         private Size _fullSize = new Size(0, 0);
         private List<Rectangle> _screenRects = new List<Rectangle>();
-        private IImageRenderer _renderer;
         private Theme _theme = null;
         private Random _rand = new Random();
+        private IImageRenderer _renderer;
 
         private const int k_randomRectRetries = 10;
 
@@ -31,7 +35,30 @@ namespace WallSwitch
             }
         }
 
-        public Bitmap WallpaperImage => (_renderer ?? throw new InvalidOperationException("No image has been rendered yet.")).Image;
+        private IImageRenderer GetImageRenderer()
+        {
+            if (Program.OsVersion >= OsVersion.Windows10 && !Settings.DisableHardwareAcceleration)
+            {
+                try
+                {
+                    var fileName = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar + "WallSwitch.DX11.dll";
+                    var asm = Assembly.LoadFrom(fileName);
+                    var type = asm.GetTypes().FirstOrDefault(x => typeof(IImageRenderer).IsAssignableFrom(x) && x.IsPublic);
+                    if (type == null) throw new InvalidOperationException("Hardware accelerated renderer type not found in WallSwitch.DX11.dll");
+
+                    return (IImageRenderer)Activator.CreateInstance(type);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Failed to load hardware accelerated renderer.");
+                    return new SoftwareRenderer();
+                }
+            }
+            else
+            {
+                return new SoftwareRenderer();
+            }
+        }
 
         public bool InitFrame(Rectangle[] screenRects, Theme theme, Bitmap lastImage)
         {
@@ -56,17 +83,28 @@ namespace WallSwitch
 
             if (_renderer == null)
             {
-                _renderer = new SoftwareRenderer(); // TODO: support accelerated renderer later
+                _renderer = GetImageRenderer();
             }
 
-            if (lastImage != null && lastImage.Width == _fullSize.Width && lastImage.Height == _fullSize.Height)
+            var timer = new Stopwatch();
+            timer.Start();
+
+            try
             {
-                _renderer.InitializeFrame(lastImage);
+                if (lastImage != null && lastImage.Width == _fullSize.Width && lastImage.Height == _fullSize.Height)
+                {
+                    _renderer.InitializeFrame(_fullSize.Width, _fullSize.Height);
+                }
+                else
+                {
+                    _renderer.InitializeFrame(_fullSize.Width, _fullSize.Height);
+                    _theme.ClearImageRectHistory();
+                }
             }
-            else
+            catch (HardwareAccelerationException ex)
             {
-                _renderer.InitializeFrame(_fullSize.Width, _fullSize.Height);
-                _theme.ClearImageRectHistory();
+                Log.Error(ex);
+                _renderer = new SoftwareRenderer();
             }
 
             if (_theme.Mode == ThemeMode.Collage)
@@ -106,19 +144,15 @@ namespace WallSwitch
                 }
             }
 
-            if (_theme.Mode == ThemeMode.Collage &&
-                lastImage != null &&
-                lastImage.Width == _fullSize.Width &&
-                lastImage.Height == _fullSize.Height)
-            {
-                // Draw the previous image
-                _renderer.DrawImage(lastImage, new Rectangle(0, 0, lastImage.Width, lastImage.Height),
-                    colorEffect: _theme.ColorEffectBack,
-                    colorEffectRatio: _theme.ColorEffectBackRatio / 100.0f,
-                    blurDistance: _theme.BackgroundBlur ? _theme.BackgroundBlurDist : 0);
-            }
+            timer.Stop();
+            Log.Debug("Background rendering elapsed time: {0}", timer.Elapsed);
 
             return true;
+        }
+
+        public Bitmap EndFrame()
+        {
+            return _renderer.EndFrame();
         }
 
         public void RenderCollageImageOnScreen(Database db, ImageRec file, Rectangle screenRect)
@@ -322,5 +356,10 @@ namespace WallSwitch
             _theme.AddImageRectHistory(db, bestRect, _screenRects.Count);
             return bestRect;
         }
+    }
+
+    public class HardwareAccelerationException : Exception
+    {
+        public HardwareAccelerationException(string message) : base(message) { }
     }
 }

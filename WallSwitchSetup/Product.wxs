@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Product Id="*" Name="WallSwitch" Language="1033" Version="1.6.1" Manufacturer="Chris Mrazek" UpgradeCode="e762d06c-68ce-43b7-b423-527cf651db2b">
+	<Product Id="*" Name="WallSwitch" Language="1033" Version="1.8.0" Manufacturer="Chris Mrazek" UpgradeCode="e762d06c-68ce-43b7-b423-527cf651db2b">
 		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 		<WixVariable Id="WixUILicenseRtf" Value="..\License.rtf" />
 
 		<MajorUpgrade DowngradeErrorMessage="A newer version of WallSwitch is already installed." />
 		<Media Id="1" Cabinet="WallSwitch.cab" EmbedCab="yes"/>
-		
+
 		<Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
 		<UI>
 			<UIRef Id="WixUI_InstallDir" />
@@ -15,7 +15,7 @@
 				Event="DoAction"
 				Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed</Publish>
 		</UI>
-		
+
 		<Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch WallSwitch" />
 		<Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1"/>
 		<Property Id="WixShellExecTarget" Value="[#WallSwitch.exe]" />
@@ -33,6 +33,7 @@
 			<ComponentRef Id="HtmlAgilityPack.xml"/>
 			<ComponentRef Id="ReadMe.txt"/>
 			<ComponentRef Id="WallSwitchImgProc.dll"/>
+			<ComponentRef Id="WallSwitch.DX11.dll"/>
 			<ComponentRef Id="WallSwitch.WidgetInterface.dll"/>
 			<ComponentRef Id="WallSwitch.WidgetInterface.xml"/>
 			<ComponentRef Id="WallSwitchWidgets.dll"/>
@@ -45,9 +46,11 @@
 			<ComponentRef Id="EntityFramework.SqlServer.dll"/>
 			<ComponentRef Id="EntityFramework.SqlServer.xml"/>
 			<ComponentRef Id="EntityFramework.xml"/>
-      <ComponentRef Id="libwebp.dll"/>
-      <ComponentRef Id="Newtonsoft.Json.dll"/>
-      <ComponentRef Id="Newtonsoft.Json.xml"/>
+			<ComponentRef Id="libwebp.dll"/>
+			<ComponentRef Id="Newtonsoft.Json.dll"/>
+			<ComponentRef Id="Newtonsoft.Json.xml"/>
+			<ComponentRef Id="ImageShader.hlsl"/>
+			<ComponentRef Id="SolidColorShader.hlsl"/>
 
 			<ComponentRef Id="ApplicationShortcut"/>
 
@@ -86,6 +89,9 @@
 			<Component Id="WallSwitchImgProc.dll" Guid="c03816f3-b188-4a41-bf0d-2f308621201e">
 				<File Id="WallSwitchImgProc.dll" Source="..\Release\WallSwitchImgProc.dll" KeyPath="yes" Checksum="yes"/>
 			</Component>
+			<Component Id="WallSwitch.DX11.dll" Guid="CE7DCC13-342D-4BB5-9F72-B2C7495B85AF">
+				<File Id="WallSwitch.DX11.dll" Source="..\Release\WallSwitch.DX11.dll" KeyPath="yes"/>
+			</Component>
 			<Component Id="WallSwitch.WidgetInterface.dll" Guid="7218642c-3066-46a7-ba4b-a8eaf2efc978">
 				<File Id="WallSwitch.WidgetInterface.dll" Source="..\Release\WallSwitch.WidgetInterface.dll" KeyPath="yes" Checksum="yes" Assembly=".net"/>
 			</Component>
@@ -119,15 +125,21 @@
 			<Component Id="EntityFramework.xml" Guid="472a54a3-62d9-4bd9-a1a8-419b935d83ea">
 				<File Id="EntityFramework.xml" Source="..\Release\EntityFramework.xml" KeyPath="yes"/>
 			</Component>
-      <Component Id="libwebp.dll" Guid="D966733B-32CC-492F-B26B-5BC2E81992F9">
-        <File Id="libwebp.dll" Source="..\Release\libwebp.dll" KeyPath="yes"/>
-      </Component>
-      <Component Id="Newtonsoft.Json.dll" Guid="718DCDF0-AD6F-4327-8707-B2443E8E9804">
-        <File Id="Newtonsoft.Json.dll" Source="..\Release\Newtonsoft.Json.dll" KeyPath="yes"/>
-      </Component>
-      <Component Id="Newtonsoft.Json.xml" Guid="0DE40704-46D0-4641-ABFF-24C123534E42">
-        <File Id="Newtonsoft.Json.xml" Source="..\Release\Newtonsoft.Json.xml" KeyPath="yes"/>
-      </Component>
+			<Component Id="libwebp.dll" Guid="D966733B-32CC-492F-B26B-5BC2E81992F9">
+				<File Id="libwebp.dll" Source="..\Release\libwebp.dll" KeyPath="yes"/>
+			</Component>
+			<Component Id="Newtonsoft.Json.dll" Guid="718DCDF0-AD6F-4327-8707-B2443E8E9804">
+				<File Id="Newtonsoft.Json.dll" Source="..\Release\Newtonsoft.Json.dll" KeyPath="yes"/>
+			</Component>
+			<Component Id="Newtonsoft.Json.xml" Guid="0DE40704-46D0-4641-ABFF-24C123534E42">
+				<File Id="Newtonsoft.Json.xml" Source="..\Release\Newtonsoft.Json.xml" KeyPath="yes"/>
+			</Component>
+			<Component Id="ImageShader.hlsl" Guid="D8CB4814-88C5-44E0-9722-68848029357F">
+				<File Id="ImageShader.hlsl" Source="..\Release\ImageShader.hlsl" KeyPath="yes"/>
+			</Component>
+			<Component Id="SolidColorShader.hlsl" Guid="F48B8190-C686-4C88-ADFD-36F00D7259A1">
+				<File Id="SolidColorShader.hlsl" Source="..\Release\SolidColorShader.hlsl" KeyPath="yes"/>
+			</Component>
 		</DirectoryRef>
 		<DirectoryRef Id="WIDGETSFOLDER">
 			<Component Id="WallSwitchWidgets.dll" Guid="c93b72b0-841a-42f6-8c41-b7b4d50c4dbf">
@@ -159,6 +171,6 @@
 				<RemoveFile Id="Uninstall.lnk" Directory="ApplicationProgramsFolder" Name="WallSwitch.ico" On="install"/>
 			</Component>
 		</DirectoryRef>
-		
+
 	</Product>
 </Wix>

@@ -110,10 +110,7 @@ namespace WallSwitch
 				{
 					var ver = Environment.OSVersion.Version;
 
-					if (ver.Major < 6)
-					{
-						_osVersion = OsVersion.Legacy;
-					}
+					if (ver.Major < 6) _osVersion = OsVersion.Legacy;
 					else if (ver.Major == 6)
 					{
 						if (ver.Minor == 0) _osVersion = OsVersion.Vista;
@@ -122,10 +119,8 @@ namespace WallSwitch
 						else if (ver.Minor == 3) _osVersion = OsVersion.Windows81;
 						else _osVersion = OsVersion.Future;
 					}
-					else
-					{
-						_osVersion = OsVersion.Future;
-					}
+					else if (ver.Major == 10) _osVersion = OsVersion.Windows10;
+					else _osVersion = OsVersion.Future;
 
 					Log.Debug("OS Version: {0} ({1})", ver, _osVersion.Value);
 				}
@@ -142,6 +137,7 @@ namespace WallSwitch
 		Windows7,
 		Windows8,
 		Windows81,
+		Windows10,
 		Future
 	}
 }

@@ -23,3 +23,5 @@
 /WidgetInterface/obj/*
 /WallSwitchSetup/bin/*
 /WallSwitchSetup/obj/*
+/WallSwitch.DX11/Debug/*
+/WallSwitch.DX11/Release/*

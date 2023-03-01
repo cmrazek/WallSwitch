@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Microsoft.Win32;
+using System;
 using System.Xml;
-using Microsoft.Win32;
 using System.Windows.Forms;
 
 namespace WallSwitch.SettingsStore
@@ -21,8 +19,10 @@ namespace WallSwitch.SettingsStore
 #endif
 		private const double k_defaultTransparency = 1.0;
 		private const bool k_defaultLoadHistoryImages = true;
+		private const bool k_defaultDisableHardwareAcceleration = false;
 
-		public const string RegistryKey = "Software\\WallSwitch";
+
+        public const string RegistryKey = "Software\\WallSwitch";
 		#endregion
 
 		#region Variables
@@ -33,6 +33,7 @@ namespace WallSwitch.SettingsStore
 		private static LogLevel _logLevel = k_defaultLogLevel;
 		private static double _transparency = k_defaultTransparency;
 		private static bool _loadHistoryImages = k_defaultLoadHistoryImages;
+		private static bool _disableHardwareAcceleration = k_defaultDisableHardwareAcceleration;
 		#endregion
 
 		/// <summary>
@@ -68,6 +69,7 @@ namespace WallSwitch.SettingsStore
 			db.WriteSetting("LogLevel", _logLevel.ToString());
 			db.WriteSetting("Transparency", _transparency.ToString());
 			db.WriteSetting("LoadHistoryImages", _loadHistoryImages.ToString());
+			db.WriteSetting("DisableHardwareAcceleration", _disableHardwareAcceleration.ToString());
 		}
 
 		public static void Load(Database db)
@@ -88,6 +90,8 @@ namespace WallSwitch.SettingsStore
 			if (double.TryParse(db.LoadSetting("Transparency"), out dValue)) _transparency = dValue;
 
 			if (bool.TryParse(db.LoadSetting("LoadHistoryImages"), out bValue)) _loadHistoryImages = bValue;
+
+			if (bool.TryParse(db.LoadSetting("DisableHardwareAcceleration"), out bValue)) _disableHardwareAcceleration = bValue;
 		}
 
 		public static void Load(XmlElement xmlSettings)
@@ -230,6 +234,12 @@ namespace WallSwitch.SettingsStore
 		{
 			get { return _loadHistoryImages; }
 			set { _loadHistoryImages = value; }
+		}
+
+		public static bool DisableHardwareAcceleration
+		{
+			get => _disableHardwareAcceleration;
+			set => _disableHardwareAcceleration = value;
 		}
 	}
 }

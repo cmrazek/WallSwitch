@@ -19,23 +19,22 @@ namespace WallSwitch.Rendering
             _bitmap = null;
         }
 
-        public void InitializeFrame(Bitmap lastImage)
-        {
-            _bitmap = lastImage ?? throw new ArgumentNullException(nameof(lastImage));
-            _g = Graphics.FromImage(_bitmap);
-        }
-
         public void InitializeFrame(int width, int height)
         {
             if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width));
             if (height <= 0) throw new ArgumentOutOfRangeException(nameof(height));
+
+            Log.Debug("Software renderer starting up...");
 
             _bitmap = new Bitmap(width, height);
             _g = Graphics.FromImage(_bitmap);
             _g.SetClip(new Rectangle(0, 0, width, height));
         }
 
-        public Bitmap Image => _bitmap;
+        public Bitmap EndFrame()
+        {
+            return _bitmap;
+        }
 
         public void Clear(Color color)
         {

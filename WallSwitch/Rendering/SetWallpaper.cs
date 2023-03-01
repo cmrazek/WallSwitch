@@ -1448,7 +1448,7 @@ namespace WallSwitch
 						}
 
 						// Draw widgets
-						var baseImage = _renderer.WallpaperImage;
+						var baseImage = _renderer.EndFrame();
 						Bitmap displayImage = null;
 						DrawWidgets(theme, baseImage, out displayImage);
 
