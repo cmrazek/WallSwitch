@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Windows.Forms;
 using System.IO;
-using System.Threading;
-#if DEBUG
-using System.Diagnostics;
-#endif
+using WallSwitch.Core;
 
 namespace WallSwitch
 {
@@ -24,6 +20,7 @@ namespace WallSwitch
 		private static StreamWriter _file = null;
 		private static bool _enabled = false;
 		private static LogLevel _level = LogLevel.Debug;
+		private static List<LogEntry> _cache = new List<LogEntry>();
 
 		/// <summary>
 		/// Locked
@@ -34,6 +31,7 @@ namespace WallSwitch
 		#region Constants
 		public const string DateFormat = "yyyy/MM/dd HH:mm:ss.fff";
 		private const int PurgeDays = 14;
+		public const int MaxCache = 300;
 		#endregion
 
 		#region Construction
@@ -48,9 +46,8 @@ namespace WallSwitch
 
 				string logFileName = LogFileName;
 				_file = new StreamWriter(logFileName, false);
-				Write(LogLevel.Info, "Log file opened: {0}", logFileName);
-
-				_enabled = true;
+                _enabled = true;
+                Write(LogLevel.Info, "Log file opened: {0}", logFileName);
 			}
 #if DEBUG
 			catch (Exception ex)
@@ -73,7 +70,7 @@ namespace WallSwitch
 			{
 				if (_file != null)
 				{
-					_file.WriteLine("[" + TimeStamp + "] Closing log file.");
+					_file.WriteLine("[" + DateTime.Now.ToString(DateFormat) + "] Closing log file.");
 					_file.Close();
 					_file = null;
 				}
@@ -148,6 +145,17 @@ namespace WallSwitch
 		#endregion
 
 		#region Writing
+		public static event EventHandler<LogEntryEventArgs> LogEntryAdded;
+		public struct LogEntryEventArgs
+		{
+			public LogEntry Entry { get; private set; }
+
+			public LogEntryEventArgs(LogEntry entry)
+			{
+				Entry = entry ?? throw new ArgumentNullException(nameof(entry));
+			}
+		}
+
 		/// <summary>
 		/// Writes an entry to the log file.
 		/// The log entry will be prefixed with the current date/time.
@@ -159,11 +167,13 @@ namespace WallSwitch
 			{
 				if (!_enabled || level < _level) return;
 
+				var timeStamp = DateTime.Now;
+
 				lock (_sb)
 				{
 					_sb.Clear();
 					_sb.Append("[");
-					_sb.Append(TimeStamp);
+					_sb.Append(timeStamp.ToString(DateFormat));
 					_sb.Append("] (");
 					_sb.Append(level.ToString());
 					_sb.Append(") ");
@@ -178,18 +188,14 @@ namespace WallSwitch
 #if DEBUG
                     System.Diagnostics.Debug.WriteLine(logEntry);
 #endif
-				}
+					var entry = new LogEntry(timeStamp, level, line);
+                    AddToCache(entry);
+                    LogEntryAdded?.Invoke(null, new LogEntryEventArgs(entry));
+                }
+
 			}
 			catch (Exception)
 			{ }
-		}
-
-		private static string TimeStamp
-		{
-			get
-			{
-				return DateTime.Now.ToString(DateFormat);
-			}
 		}
 
 		/// <summary>
@@ -200,34 +206,8 @@ namespace WallSwitch
 		/// <param name="comment">A comment to accompany this exception</param>
 		public static void Write(Exception ex, string comment)
 		{
-			try
-			{
-				if (!_enabled) return;
-
-				lock (_sb)
-				{
-					_sb.Clear();
-					_sb.Append("[");
-					_sb.Append(TimeStamp);
-					_sb.Append("] (Error) ");
-					_sb.Append(comment);
-
-					var logEntry = _sb.ToString();
-					if (_file != null)
-					{
-						_file.WriteLine(logEntry);
-						_file.WriteLine(ex.ToString());
-						//_file.Flush();
-					}
-
-#if DEBUG
-                    System.Diagnostics.Debug.WriteLine(logEntry);
-                    System.Diagnostics.Debug.WriteLine(ex.ToString());
-#endif
-				}
-			}
-			catch (Exception)
-			{ }
+			if (!_enabled) return;
+			Write(LogLevel.Error, String.Concat(comment, Environment.NewLine, ex));
 		}
 
 		public static void Write(LogLevel level, string format, params object[] args)
@@ -313,6 +293,45 @@ namespace WallSwitch
 			if (_file != null)
 			{
 				_file.Flush();
+			}
+		}
+		#endregion
+
+		#region Cache
+		private static void AddToCache(LogEntry entry)
+		{
+			lock (_cache)
+			{
+				_cache.Add(entry);
+				while (_cache.Count > MaxCache) _cache.RemoveAt(0);
+			}
+		}
+
+		public static IEnumerable<LogEntry> GetLogs(LogLevel? levelFilter)
+		{
+			lock (_cache)
+			{
+				foreach (var entry in _cache)
+				{
+					if (levelFilter.HasValue && entry.Severity < levelFilter.Value) continue;
+					yield return entry;
+				}
+			}
+		}
+
+		public static void Clear()
+		{
+			lock (_cache)
+			{
+				_cache.Clear();
+			}
+		}
+
+		public static void RemoveEntry(LogEntry entry)
+		{
+			lock (_cache)
+			{
+				_cache.Remove(entry);
 			}
 		}
 		#endregion

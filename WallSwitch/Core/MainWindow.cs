@@ -14,6 +14,7 @@ using System.Xml;
 using WallSwitch.ImageFilters;
 using WallSwitch.Themes;
 using WallSwitch.SettingsStore;
+using WallSwitch.Core;
 
 namespace WallSwitch
 {
@@ -131,6 +132,7 @@ namespace WallSwitch
 				if (_winStart) HideToTray();
 
 				RegisterHotKeys();
+				InitializeLogs();
 
 				if (Settings.CheckForUpdatesOnStartup)
 				{
@@ -3330,5 +3332,198 @@ namespace WallSwitch
 					select c as ConditionControl).ToArray();
 		}
 		#endregion
-	}
+
+		#region Logs
+		private int _logErrorCount = 0;
+		private const string LogTabText = "Logs";
+		private const string LogTabErrorCountText = "Logs ({0})";
+
+		private void InitializeLogs()
+		{
+			var entries = Log.GetLogs(LogLevel.Info);
+			foreach (var entry in entries)
+			{
+				AppendLogEntry(entry);
+			}
+
+			Log.LogEntryAdded += Log_LogEntryAdded;
+		}
+
+		private void Log_LogEntryAdded(object sender, Log.LogEntryEventArgs e)
+		{
+			if (e.Entry.Severity >= LogLevel.Info)
+			{
+				AppendLogEntry(e.Entry);
+			}
+		}
+
+		private void AppendLogEntry(LogEntry entry)
+		{
+			if (InvokeRequired)
+			{
+				BeginInvoke(new Action(() => { AppendLogEntry(entry); }));
+				return;
+			}
+
+			var scrollToBottom = false;
+			if (LogListView.SelectedItems.Count == 0 || (LogListView.SelectedItems.Count == 1 && LogListView.SelectedItems[0].Index == LogListView.Items.Count - 1))
+			{
+				scrollToBottom = true;
+			}
+
+			Color color;
+			switch (entry.Severity)
+			{
+				case LogLevel.Error:
+					color = Color.Red;
+					break;
+				case LogLevel.Warning:
+					color = Color.Orange;
+					break;
+				case LogLevel.Debug:
+					color = Color.Gray;
+					break;
+				default:
+					color = SystemColors.WindowText;
+					break;
+			}
+
+			var lvi = new ListViewItem();
+			lvi.ForeColor = color;
+			lvi.Text = entry.Entered.ToLongTimeString();
+			lvi.SubItems.Add(entry.Severity.ToString(), color, Color.Transparent, DefaultFont);
+			lvi.SubItems.Add(entry.Message, color, Color.Transparent, DefaultFont);
+			lvi.Tag = entry;
+
+			var logErrorCountChanged = false;
+            while (LogListView.Items.Count >= Log.MaxCache)
+			{
+				var purgeEntry = LogListView.Items[0].Tag as LogEntry;
+				if (purgeEntry != null && purgeEntry.Severity == LogLevel.Error)
+				{
+					_logErrorCount--;
+					logErrorCountChanged = true;
+                }
+				LogListView.Items.RemoveAt(0);
+			}
+
+            LogListView.Items.Add(lvi);
+			if (scrollToBottom)
+			{
+				var selectedItems = LogListView.SelectedItems.Cast<ListViewItem>().ToList();
+				foreach (var i in selectedItems) i.Selected = false;
+
+				lvi.EnsureVisible();
+				lvi.Focused = true;
+			}
+
+			if (entry.Severity == LogLevel.Error)
+			{
+				_logErrorCount++;
+				logErrorCountChanged = true;
+			}
+
+			if (logErrorCountChanged) UpdateLogTabText();
+		}
+
+        private void copyLogMenuItem_Click(object sender, EventArgs e)
+        {
+			try
+			{
+				var sb = new StringBuilder();
+
+				foreach (var item in LogListView.SelectedItems.Cast<ListViewItem>())
+				{
+					var entry = item.Tag as LogEntry;
+					if (entry == null) continue;
+
+					if (sb.Length > 0) sb.AppendLine();
+					sb.Append(entry.Entered.ToString(Log.DateFormat));
+					sb.Append('\t');
+					sb.Append(entry.Severity.ToString());
+					sb.Append('\t');
+					sb.Append(entry.Message);
+				}
+
+				if (sb.Length > 0)
+				{
+					Clipboard.SetText(sb.ToString());
+				}
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+        }
+
+        private void clearLogMenuItem_Click(object sender, EventArgs e)
+        {
+			try
+			{
+				Log.Clear();
+				LogListView.Items.Clear();
+				tabLogs.Text = LogTabText;
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+        }
+
+        private void deleteLogEntryMenuItem_Click(object sender, EventArgs e)
+        {
+			try
+			{
+				var selectedItems = LogListView.SelectedItems.Cast<ListViewItem>().ToList();
+				var logErrorCountChanged = false;
+
+				foreach (var lvi in selectedItems)
+				{
+					LogListView.Items.Remove(lvi);
+
+					var entry = lvi.Tag as LogEntry;
+					if (entry != null)
+					{
+						Log.RemoveEntry(entry);
+
+						if (entry.Severity == LogLevel.Error)
+						{
+							_logErrorCount--;
+							if (_logErrorCount < 0) _logErrorCount = 0;
+							logErrorCountChanged = true;
+						}
+					}
+				}
+
+				if (logErrorCountChanged) UpdateLogTabText();
+			}
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+        }
+
+		private void UpdateLogTabText()
+		{
+			if (_logErrorCount < 0) _logErrorCount = 0;
+
+			if (_logErrorCount == 0) tabLogs.Text = LogTabText;
+			else tabLogs.Text = string.Format(LogTabErrorCountText, _logErrorCount);
+        }
+
+        private void cmLog_Opening(object sender, CancelEventArgs e)
+        {
+			try
+			{
+				var itemSelected = LogListView.SelectedItems.Count != 0;
+				copyLogMenuItem.Enabled = itemSelected;
+				deleteLogMenuItem.Enabled = itemSelected;
+            }
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+        }
+        #endregion
+    }
 }

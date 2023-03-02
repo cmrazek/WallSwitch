@@ -12,9 +12,10 @@ Contact:
 
 ChangeLog:
 
-Version 1.8 - 2023-03-01:
+Version 1.8 - 2023-03-02:
 - Added hardware acceleration for wallpaper rendering. (can be disabled in settings, if needed)
 - The 'paused' state now persists after a restart.
+- Logs are now visible in the UI.
 
 Version 1.7 - 2022-04-16:
 - Upgraded to .NET Framework 4.8.

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Product Id="*" Name="WallSwitch" Language="1033" Version="1.8.1" Manufacturer="Chris Mrazek" UpgradeCode="e762d06c-68ce-43b7-b423-527cf651db2b">
+	<Product Id="*" Name="WallSwitch" Language="1033" Version="1.8.3" Manufacturer="Chris Mrazek" UpgradeCode="e762d06c-68ce-43b7-b423-527cf651db2b">
 		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 		<WixVariable Id="WixUILicenseRtf" Value="..\License.rtf" />
 
