@@ -1,7 +1,7 @@
 WallSwitch
 Switches desktop wallpapers from a variety of sources.
 https://github.com/cmrazek/WallSwitch
-Current Version: 1.6.4
+Current Version: 1.8
 
 Requirements:
 	.NET Framework 4.8:  https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48
@@ -11,6 +11,10 @@ Contact:
 	Email: chrismrazek@gmail.com
 
 ChangeLog:
+
+Version 1.8 - 2023-03-01:
+- Added hardware acceleration for wallpaper rendering. (can be disabled in settings, if needed)
+- The 'paused' state now persists after a restart.
 
 Version 1.7 - 2022-04-16:
 - Upgraded to .NET Framework 4.8.

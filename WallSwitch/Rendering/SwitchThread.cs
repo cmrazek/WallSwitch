@@ -80,6 +80,8 @@ namespace WallSwitch
 				}
 			}
 
+			if (bool.TryParse(db.LoadSetting("Paused"), out var paused)) _paused = paused;
+
 			_thread = new Thread(new ThreadStart(ThreadProc));
 			_thread.Name = "Switch Thread";
 			_thread.SetApartmentState(ApartmentState.STA);
@@ -391,8 +393,18 @@ namespace WallSwitch
 
 		public bool Paused
 		{
-			get { return _paused; }
-			set { _paused = value; }
+			get => _paused;
+			set
+			{
+				if (_paused != value)
+				{
+					_paused = value;
+					using (var db = new Database())
+					{
+						db.WriteSetting("Paused", _paused.ToString());
+					}
+				}
+			}
 		}
 
 		public SetWallpaper WallpaperSetter
