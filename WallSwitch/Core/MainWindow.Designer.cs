@@ -947,7 +947,7 @@
             this.cmbColorEffectBack.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.cmbColorEffectBack.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbColorEffectBack.FormattingEnabled = true;
-            this.cmbColorEffectBack.Location = new System.Drawing.Point(94, 19);
+            this.cmbColorEffectBack.Location = new System.Drawing.Point(94, 18);
             this.cmbColorEffectBack.Name = "cmbColorEffectBack";
             this.cmbColorEffectBack.Size = new System.Drawing.Size(139, 25);
             this.cmbColorEffectBack.TabIndex = 0;
@@ -1168,7 +1168,7 @@
             this.c_edgeMode.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.c_edgeMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.c_edgeMode.FormattingEnabled = true;
-            this.c_edgeMode.Location = new System.Drawing.Point(3, 80);
+            this.c_edgeMode.Location = new System.Drawing.Point(3, 81);
             this.c_edgeMode.Name = "c_edgeMode";
             this.c_edgeMode.Size = new System.Drawing.Size(150, 25);
             this.c_edgeMode.TabIndex = 5;
@@ -2436,34 +2436,34 @@
             this.deleteLogMenuItem,
             this.clearAllLogsMenuItem});
             this.cmLog.Name = "cmLog";
-            this.cmLog.Size = new System.Drawing.Size(211, 110);
+            this.cmLog.Size = new System.Drawing.Size(164, 82);
             this.cmLog.Opening += new System.ComponentModel.CancelEventHandler(this.cmLog_Opening);
             // 
             // copyLogMenuItem
             // 
             this.copyLogMenuItem.Name = "copyLogMenuItem";
             this.copyLogMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.copyLogMenuItem.Size = new System.Drawing.Size(210, 24);
+            this.copyLogMenuItem.Size = new System.Drawing.Size(163, 24);
             this.copyLogMenuItem.Text = "&Copy";
             this.copyLogMenuItem.Click += new System.EventHandler(this.copyLogMenuItem_Click);
             // 
             // toolStripMenuItem12
             // 
             this.toolStripMenuItem12.Name = "toolStripMenuItem12";
-            this.toolStripMenuItem12.Size = new System.Drawing.Size(207, 6);
+            this.toolStripMenuItem12.Size = new System.Drawing.Size(160, 6);
             // 
             // deleteLogMenuItem
             // 
             this.deleteLogMenuItem.Name = "deleteLogMenuItem";
             this.deleteLogMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
-            this.deleteLogMenuItem.Size = new System.Drawing.Size(210, 24);
+            this.deleteLogMenuItem.Size = new System.Drawing.Size(163, 24);
             this.deleteLogMenuItem.Text = "&Delete";
             this.deleteLogMenuItem.Click += new System.EventHandler(this.deleteLogEntryMenuItem_Click);
             // 
             // clearAllLogsMenuItem
             // 
             this.clearAllLogsMenuItem.Name = "clearAllLogsMenuItem";
-            this.clearAllLogsMenuItem.Size = new System.Drawing.Size(210, 24);
+            this.clearAllLogsMenuItem.Size = new System.Drawing.Size(163, 24);
             this.clearAllLogsMenuItem.Text = "C&lear All";
             this.clearAllLogsMenuItem.Click += new System.EventHandler(this.clearLogMenuItem_Click);
             // 

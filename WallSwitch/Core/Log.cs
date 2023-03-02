@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using WallSwitch.Core;
+using System.Linq;
 
 namespace WallSwitch
 {
@@ -332,6 +333,14 @@ namespace WallSwitch
 			lock (_cache)
 			{
 				_cache.Remove(entry);
+			}
+		}
+
+		public static int GetErrorCount()
+		{
+			lock (_cache)
+			{
+				return _cache.Count(x => x.Severity == LogLevel.Error);
 			}
 		}
 		#endregion

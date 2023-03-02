@@ -3334,7 +3334,6 @@ namespace WallSwitch
 		#endregion
 
 		#region Logs
-		private int _logErrorCount = 0;
 		private const string LogTabText = "Logs";
 		private const string LogTabErrorCountText = "Logs ({0})";
 
@@ -3395,17 +3394,7 @@ namespace WallSwitch
 			lvi.SubItems.Add(entry.Message, color, Color.Transparent, DefaultFont);
 			lvi.Tag = entry;
 
-			var logErrorCountChanged = false;
-            while (LogListView.Items.Count >= Log.MaxCache)
-			{
-				var purgeEntry = LogListView.Items[0].Tag as LogEntry;
-				if (purgeEntry != null && purgeEntry.Severity == LogLevel.Error)
-				{
-					_logErrorCount--;
-					logErrorCountChanged = true;
-                }
-				LogListView.Items.RemoveAt(0);
-			}
+            while (LogListView.Items.Count >= Log.MaxCache) LogListView.Items.RemoveAt(0);
 
             LogListView.Items.Add(lvi);
 			if (scrollToBottom)
@@ -3417,13 +3406,7 @@ namespace WallSwitch
 				lvi.Focused = true;
 			}
 
-			if (entry.Severity == LogLevel.Error)
-			{
-				_logErrorCount++;
-				logErrorCountChanged = true;
-			}
-
-			if (logErrorCountChanged) UpdateLogTabText();
+			UpdateLogTabText();
 		}
 
         private void copyLogMenuItem_Click(object sender, EventArgs e)
@@ -3475,27 +3458,16 @@ namespace WallSwitch
 			try
 			{
 				var selectedItems = LogListView.SelectedItems.Cast<ListViewItem>().ToList();
-				var logErrorCountChanged = false;
 
 				foreach (var lvi in selectedItems)
 				{
 					LogListView.Items.Remove(lvi);
 
 					var entry = lvi.Tag as LogEntry;
-					if (entry != null)
-					{
-						Log.RemoveEntry(entry);
-
-						if (entry.Severity == LogLevel.Error)
-						{
-							_logErrorCount--;
-							if (_logErrorCount < 0) _logErrorCount = 0;
-							logErrorCountChanged = true;
-						}
-					}
+					if (entry != null) Log.RemoveEntry(entry);
 				}
 
-				if (logErrorCountChanged) UpdateLogTabText();
+				UpdateLogTabText();
 			}
 			catch (Exception ex)
 			{
@@ -3505,10 +3477,22 @@ namespace WallSwitch
 
 		private void UpdateLogTabText()
 		{
-			if (_logErrorCount < 0) _logErrorCount = 0;
-
-			if (_logErrorCount == 0) tabLogs.Text = LogTabText;
-			else tabLogs.Text = string.Format(LogTabErrorCountText, _logErrorCount);
+			try
+			{
+                var count = Log.GetErrorCount();
+                if (count == 0)
+                {
+                    tabLogs.Text = LogTabText;
+					if (!_reallyClose) trayIcon.Icon = Res.AppIcon;
+                }
+                else
+                {
+                    tabLogs.Text = string.Format(LogTabErrorCountText, count);
+                    if (!_reallyClose) trayIcon.Icon = Res.AppIcon_Error;
+                }
+            }
+			catch (Exception)
+			{ }
         }
 
         private void cmLog_Opening(object sender, CancelEventArgs e)

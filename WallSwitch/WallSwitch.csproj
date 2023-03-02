@@ -309,6 +309,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AppIcon.ico" />
+    <None Include="Resources\AppIcon-Error.ico" />
     <None Include="Resources\StarMouseOver0.png" />
     <None Include="Resources\StarMouseOver1.png" />
     <None Include="Resources\StarMouseOver0.jpg" />

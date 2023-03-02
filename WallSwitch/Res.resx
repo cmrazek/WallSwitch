@@ -626,4 +626,7 @@ History Records Updated: {1}</value>
   <data name="Error_InvalidInputIdleMinTime" xml:space="preserve">
     <value>Invalid number of seconds.</value>
   </data>
+  <data name="AppIcon_Error" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\AppIcon-Error.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>
