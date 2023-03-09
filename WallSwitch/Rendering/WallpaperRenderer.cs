@@ -17,6 +17,7 @@ namespace WallSwitch
         private Theme _theme = null;
         private Random _rand = new Random();
         private IImageRenderer _renderer;
+        private static Type _imageRendererType = null;
 
         private const int k_randomRectRetries = 10;
 
@@ -35,27 +36,55 @@ namespace WallSwitch
             }
         }
 
-        private IImageRenderer GetImageRenderer()
+        private static Type GetImageRendererType()
         {
-            if (Program.OsVersion >= OsVersion.Windows10 && !Settings.DisableHardwareAcceleration)
+            if (Settings.DisableHardwareAcceleration ||
+                Program.OsVersion < OsVersion.Windows10)
+            {
+                return typeof(SoftwareRenderer);
+            }
+
+            if (_imageRendererType == null)
             {
                 try
                 {
+                    Log.Info("Attempting to create hardware renderer.");
                     var fileName = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar + "WallSwitch.DX11.dll";
                     var asm = Assembly.LoadFrom(fileName);
-                    var type = asm.GetTypes().FirstOrDefault(x => typeof(IImageRenderer).IsAssignableFrom(x) && x.IsPublic);
-                    if (type == null) throw new InvalidOperationException("Hardware accelerated renderer type not found in WallSwitch.DX11.dll");
-
-                    return (IImageRenderer)Activator.CreateInstance(type);
+                    _imageRendererType = asm.GetTypes().FirstOrDefault(x => typeof(IImageRenderer).IsAssignableFrom(x) && x.IsPublic);
+                    if (_imageRendererType == null) throw new InvalidOperationException("Hardware accelerated renderer type not found in WallSwitch.DX11.dll");
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "Failed to load hardware accelerated renderer.");
-                    return new SoftwareRenderer();
+                    Log.Error(ex, "Failed to load hardware accelerated renderer assembly.");
+                    _imageRendererType = typeof(SoftwareRenderer);
                 }
             }
-            else
+
+            return _imageRendererType;
+        }
+
+        public static void ResetHardwareAccelerationSettings()
+        {
+            _imageRendererType = null;
+        }
+
+        private static void DisableHardwareAcceleration()
+        {
+            Log.Info("Disabling hardware acceleration for now.");
+            _imageRendererType = typeof(SoftwareRenderer);
+        }
+
+        private IImageRenderer GetImageRenderer()
+        {
+            try
             {
+                return (IImageRenderer)Activator.CreateInstance(GetImageRendererType());
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to load hardware accelerated renderer.");
+                DisableHardwareAcceleration();
                 return new SoftwareRenderer();
             }
         }
@@ -104,6 +133,7 @@ namespace WallSwitch
             catch (HardwareAccelerationException ex)
             {
                 Log.Error(ex);
+                DisableHardwareAcceleration();
                 _renderer = new SoftwareRenderer();
             }
 

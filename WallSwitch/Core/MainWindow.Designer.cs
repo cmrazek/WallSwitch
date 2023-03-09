@@ -231,6 +231,11 @@
             this.c_transparencyTrackBar = new System.Windows.Forms.TrackBar();
             this.tblMain = new System.Windows.Forms.TableLayoutPanel();
             this.tblTopControls = new System.Windows.Forms.TableLayoutPanel();
+            this.toolStripMenuItem13 = new System.Windows.Forms.ToolStripSeparator();
+            this.filterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filterInfoMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filterWarningMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filterErrorMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmLocations.SuspendLayout();
             this.grpTheme.SuspendLayout();
             this.tblTheme.SuspendLayout();
@@ -947,7 +952,7 @@
             this.cmbColorEffectBack.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.cmbColorEffectBack.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbColorEffectBack.FormattingEnabled = true;
-            this.cmbColorEffectBack.Location = new System.Drawing.Point(94, 18);
+            this.cmbColorEffectBack.Location = new System.Drawing.Point(94, 19);
             this.cmbColorEffectBack.Name = "cmbColorEffectBack";
             this.cmbColorEffectBack.Size = new System.Drawing.Size(139, 25);
             this.cmbColorEffectBack.TabIndex = 0;
@@ -1168,7 +1173,7 @@
             this.c_edgeMode.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.c_edgeMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.c_edgeMode.FormattingEnabled = true;
-            this.c_edgeMode.Location = new System.Drawing.Point(3, 81);
+            this.c_edgeMode.Location = new System.Drawing.Point(3, 80);
             this.c_edgeMode.Name = "c_edgeMode";
             this.c_edgeMode.Size = new System.Drawing.Size(150, 25);
             this.c_edgeMode.TabIndex = 5;
@@ -2434,36 +2439,38 @@
             this.copyLogMenuItem,
             this.toolStripMenuItem12,
             this.deleteLogMenuItem,
-            this.clearAllLogsMenuItem});
+            this.clearAllLogsMenuItem,
+            this.toolStripMenuItem13,
+            this.filterToolStripMenuItem});
             this.cmLog.Name = "cmLog";
-            this.cmLog.Size = new System.Drawing.Size(164, 82);
+            this.cmLog.Size = new System.Drawing.Size(211, 140);
             this.cmLog.Opening += new System.ComponentModel.CancelEventHandler(this.cmLog_Opening);
             // 
             // copyLogMenuItem
             // 
             this.copyLogMenuItem.Name = "copyLogMenuItem";
             this.copyLogMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.copyLogMenuItem.Size = new System.Drawing.Size(163, 24);
+            this.copyLogMenuItem.Size = new System.Drawing.Size(210, 24);
             this.copyLogMenuItem.Text = "&Copy";
             this.copyLogMenuItem.Click += new System.EventHandler(this.copyLogMenuItem_Click);
             // 
             // toolStripMenuItem12
             // 
             this.toolStripMenuItem12.Name = "toolStripMenuItem12";
-            this.toolStripMenuItem12.Size = new System.Drawing.Size(160, 6);
+            this.toolStripMenuItem12.Size = new System.Drawing.Size(207, 6);
             // 
             // deleteLogMenuItem
             // 
             this.deleteLogMenuItem.Name = "deleteLogMenuItem";
             this.deleteLogMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
-            this.deleteLogMenuItem.Size = new System.Drawing.Size(163, 24);
+            this.deleteLogMenuItem.Size = new System.Drawing.Size(210, 24);
             this.deleteLogMenuItem.Text = "&Delete";
             this.deleteLogMenuItem.Click += new System.EventHandler(this.deleteLogEntryMenuItem_Click);
             // 
             // clearAllLogsMenuItem
             // 
             this.clearAllLogsMenuItem.Name = "clearAllLogsMenuItem";
-            this.clearAllLogsMenuItem.Size = new System.Drawing.Size(163, 24);
+            this.clearAllLogsMenuItem.Size = new System.Drawing.Size(210, 24);
             this.clearAllLogsMenuItem.Text = "C&lear All";
             this.clearAllLogsMenuItem.Click += new System.EventHandler(this.clearLogMenuItem_Click);
             // 
@@ -2561,6 +2568,42 @@
             this.tblTopControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tblTopControls.Size = new System.Drawing.Size(784, 90);
             this.tblTopControls.TabIndex = 0;
+            // 
+            // toolStripMenuItem13
+            // 
+            this.toolStripMenuItem13.Name = "toolStripMenuItem13";
+            this.toolStripMenuItem13.Size = new System.Drawing.Size(207, 6);
+            // 
+            // filterToolStripMenuItem
+            // 
+            this.filterToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.filterInfoMenuItem,
+            this.filterWarningMenuItem,
+            this.filterErrorMenuItem});
+            this.filterToolStripMenuItem.Name = "filterToolStripMenuItem";
+            this.filterToolStripMenuItem.Size = new System.Drawing.Size(210, 24);
+            this.filterToolStripMenuItem.Text = "&Filter";
+            // 
+            // filterInfoMenuItem
+            // 
+            this.filterInfoMenuItem.Name = "filterInfoMenuItem";
+            this.filterInfoMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.filterInfoMenuItem.Text = "&Info";
+            this.filterInfoMenuItem.Click += new System.EventHandler(this.filterInfoMenuItem_Click);
+            // 
+            // filterWarningMenuItem
+            // 
+            this.filterWarningMenuItem.Name = "filterWarningMenuItem";
+            this.filterWarningMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.filterWarningMenuItem.Text = "&Warning";
+            this.filterWarningMenuItem.Click += new System.EventHandler(this.filterWarningMenuItem_Click);
+            // 
+            // filterErrorMenuItem
+            // 
+            this.filterErrorMenuItem.Name = "filterErrorMenuItem";
+            this.filterErrorMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.filterErrorMenuItem.Text = "&Error";
+            this.filterErrorMenuItem.Click += new System.EventHandler(this.filterErrorMenuItem_Click);
             // 
             // MainWindow
             // 
@@ -2898,6 +2941,11 @@
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem12;
         private System.Windows.Forms.ToolStripMenuItem clearAllLogsMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteLogMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem13;
+        private System.Windows.Forms.ToolStripMenuItem filterToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem filterInfoMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem filterWarningMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem filterErrorMenuItem;
     }
 }
 

@@ -73,6 +73,7 @@ namespace WallSwitch.SettingsStore
 				{
 					DialogResult = DialogResult.OK;
 					Close();
+					WallpaperRenderer.ResetHardwareAccelerationSettings();
 				}
 			}
 			catch (Exception ex)

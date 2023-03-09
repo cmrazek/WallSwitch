@@ -34,6 +34,9 @@ namespace WallSwitch.SettingsStore
 		private static double _transparency = k_defaultTransparency;
 		private static bool _loadHistoryImages = k_defaultLoadHistoryImages;
 		private static bool _disableHardwareAcceleration = k_defaultDisableHardwareAcceleration;
+		private static bool _filterInfoLog = true;
+		private static bool _filterWarningLog = true;
+		private static bool _filterErrorLog = true;
 		#endregion
 
 		/// <summary>
@@ -70,6 +73,9 @@ namespace WallSwitch.SettingsStore
 			db.WriteSetting("Transparency", _transparency.ToString());
 			db.WriteSetting("LoadHistoryImages", _loadHistoryImages.ToString());
 			db.WriteSetting("DisableHardwareAcceleration", _disableHardwareAcceleration.ToString());
+			db.WriteSetting("FilterInfoLog", _filterInfoLog.ToString());
+			db.WriteSetting("FilterWarningLog", _filterWarningLog.ToString());
+			db.WriteSetting("FilterErrorLog", _filterErrorLog.ToString());
 		}
 
 		public static void Load(Database db)
@@ -92,6 +98,10 @@ namespace WallSwitch.SettingsStore
 			if (bool.TryParse(db.LoadSetting("LoadHistoryImages"), out bValue)) _loadHistoryImages = bValue;
 
 			if (bool.TryParse(db.LoadSetting("DisableHardwareAcceleration"), out bValue)) _disableHardwareAcceleration = bValue;
+
+			if (bool.TryParse(db.LoadSetting("FilterInfoLog"), out bValue)) _filterInfoLog = bValue;
+			if (bool.TryParse(db.LoadSetting("FilterWarningLog"), out bValue)) _filterWarningLog = bValue;
+			if (bool.TryParse(db.LoadSetting("FilterErrorLog"), out bValue)) _filterErrorLog = bValue;
 		}
 
 		public static void Load(XmlElement xmlSettings)
@@ -241,5 +251,38 @@ namespace WallSwitch.SettingsStore
 			get => _disableHardwareAcceleration;
 			set => _disableHardwareAcceleration = value;
 		}
-	}
+
+		public static bool FilterInfoLog
+		{
+			get => _filterInfoLog;
+			set => _filterInfoLog = value;
+		}
+
+        public static bool FilterWarningLog
+        {
+            get => _filterWarningLog;
+            set => _filterWarningLog = value;
+        }
+
+        public static bool FilterErrorLog
+        {
+            get => _filterErrorLog;
+            set => _filterErrorLog = value;
+        }
+
+		public static bool FilterLog(LogLevel level)
+		{
+			switch (level)
+			{
+				case LogLevel.Info:
+					return _filterInfoLog;
+				case LogLevel.Warning:
+					return _filterWarningLog;
+				case LogLevel.Error:
+					return _filterErrorLog;
+				default:
+					return false;
+			}
+		}
+    }
 }

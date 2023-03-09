@@ -3339,55 +3339,66 @@ namespace WallSwitch
 
 		private void InitializeLogs()
 		{
-			var entries = Log.GetLogs(LogLevel.Info);
-			foreach (var entry in entries)
-			{
-				AppendLogEntry(entry);
-			}
+			PopulateLogListView();
 
-			Log.LogEntryAdded += Log_LogEntryAdded;
+            Log.LogEntryAdded += Log_LogEntryAdded;
 		}
+
+		private void PopulateLogListView()
+		{
+			LogListView.Items.Clear();
+
+            var entries = Log.GetLogs(LogLevel.Info);
+            foreach (var entry in entries)
+            {
+                AppendLogEntry(entry);
+            }
+
+			ScrollLogToBottom();
+        }
 
 		private void Log_LogEntryAdded(object sender, Log.LogEntryEventArgs e)
 		{
-			if (e.Entry.Severity >= LogLevel.Info)
+			if (InvokeRequired)
 			{
+				BeginInvoke(new Action(() => { Log_LogEntryAdded(sender, e); }));
+				return;
+			}
+
+			if (Settings.FilterLog(e.Entry.Severity))
+			{
+				var scrollToBottom = LogIsPinnedToBottom();
 				AppendLogEntry(e.Entry);
+				if (scrollToBottom) ScrollLogToBottom();
+			}
+
+			if (e.Entry.Severity == LogLevel.Error)
+			{
+				UpdateLogTabText();
 			}
 		}
 
 		private void AppendLogEntry(LogEntry entry)
 		{
-			if (InvokeRequired)
-			{
-				BeginInvoke(new Action(() => { AppendLogEntry(entry); }));
-				return;
-			}
-
-			var scrollToBottom = false;
-			if (LogListView.SelectedItems.Count == 0 || (LogListView.SelectedItems.Count == 1 && LogListView.SelectedItems[0].Index == LogListView.Items.Count - 1))
-			{
-				scrollToBottom = true;
-			}
+			if (!Settings.FilterLog(entry.Severity)) return;
 
 			Color color;
 			switch (entry.Severity)
 			{
 				case LogLevel.Error:
-					color = Color.Red;
+                    color = Color.Red;
 					break;
 				case LogLevel.Warning:
 					color = Color.Orange;
 					break;
 				case LogLevel.Debug:
-					color = Color.Gray;
-					break;
+					return;
 				default:
 					color = SystemColors.WindowText;
 					break;
 			}
 
-			var lvi = new ListViewItem();
+            var lvi = new ListViewItem();
 			lvi.ForeColor = color;
 			lvi.Text = entry.Entered.ToLongTimeString();
 			lvi.SubItems.Add(entry.Severity.ToString(), color, Color.Transparent, DefaultFont);
@@ -3397,17 +3408,22 @@ namespace WallSwitch
             while (LogListView.Items.Count >= Log.MaxCache) LogListView.Items.RemoveAt(0);
 
             LogListView.Items.Add(lvi);
-			if (scrollToBottom)
-			{
-				var selectedItems = LogListView.SelectedItems.Cast<ListViewItem>().ToList();
-				foreach (var i in selectedItems) i.Selected = false;
-
-				lvi.EnsureVisible();
-				lvi.Focused = true;
-			}
-
-			UpdateLogTabText();
 		}
+
+		private bool LogIsPinnedToBottom() => LogListView.SelectedItems.Count == 0 ||
+                    (LogListView.SelectedItems.Count == 1 && LogListView.SelectedItems[0].Index == LogListView.Items.Count - 1);
+
+		private void ScrollLogToBottom()
+		{
+			if (LogListView.Items.Count == 0) return;
+
+            var selectedItems = LogListView.SelectedItems.Cast<ListViewItem>().ToList();
+            foreach (var i in selectedItems) i.Selected = false;
+
+			var lvi = LogListView.Items[LogListView.Items.Count - 1];
+            lvi.EnsureVisible();
+            lvi.Focused = true;
+        }
 
         private void copyLogMenuItem_Click(object sender, EventArgs e)
         {
@@ -3445,8 +3461,8 @@ namespace WallSwitch
 			{
 				Log.Clear();
 				LogListView.Items.Clear();
-				tabLogs.Text = LogTabText;
-			}
+                UpdateLogTabText();
+            }
 			catch (Exception ex)
 			{
 				this.ShowError(ex);
@@ -3502,11 +3518,54 @@ namespace WallSwitch
 				var itemSelected = LogListView.SelectedItems.Count != 0;
 				copyLogMenuItem.Enabled = itemSelected;
 				deleteLogMenuItem.Enabled = itemSelected;
+				filterInfoMenuItem.Checked = Settings.FilterInfoLog;
+				filterWarningMenuItem.Checked = Settings.FilterWarningLog;
+				filterErrorMenuItem.Checked = Settings.FilterErrorLog;
             }
 			catch (Exception ex)
 			{
 				this.ShowError(ex);
 			}
+        }
+
+        private void filterInfoMenuItem_Click(object sender, EventArgs e)
+        {
+			try
+			{
+				Settings.FilterInfoLog = !Settings.FilterInfoLog;
+				PopulateLogListView();
+
+            }
+			catch (Exception ex)
+			{
+				this.ShowError(ex);
+			}
+        }
+
+        private void filterWarningMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Settings.FilterWarningLog = !Settings.FilterWarningLog;
+                PopulateLogListView();
+            }
+            catch (Exception ex)
+            {
+                this.ShowError(ex);
+            }
+        }
+
+        private void filterErrorMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Settings.FilterErrorLog = !Settings.FilterErrorLog;
+                PopulateLogListView();
+            }
+            catch (Exception ex)
+            {
+                this.ShowError(ex);
+            }
         }
         #endregion
     }
