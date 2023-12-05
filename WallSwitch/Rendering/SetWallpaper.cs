@@ -1417,7 +1417,7 @@ namespace WallSwitch
 				var screenInits = new bool[screenRects.Length];
 				for (int i = 0; i < screenInits.Length; i++) screenInits[i] = false;
 
-				using (_renderer = new WallpaperRenderer())
+                using (_renderer = new WallpaperRenderer())
 				{
 					Bitmap lastImage = null;
 					if (theme.Mode == ThemeMode.Collage && !clear) lastImage = LoadLastWallpaper(theme, screenList);
@@ -1447,28 +1447,28 @@ namespace WallSwitch
 							}
 						}
 
-						// Draw widgets
-						var baseImage = _renderer.EndFrame();
-						Bitmap displayImage = null;
-						DrawWidgets(theme, baseImage, out displayImage);
+                        // Draw widgets
+                        var baseImage = _renderer.EndFrame();
+                        Bitmap displayImage = null;
+                        DrawWidgets(theme, baseImage, out displayImage);
 
-						if (displayImage == null)
-						{
-							displayImage = baseImage;
-							baseImage = null;
-						}
+                        if (displayImage == null)
+                        {
+                            displayImage = baseImage;
+                            baseImage = null;
+                        }
 
-						// Apply to desktop background.
-						if (!forceQuick && theme.FadeTransition && Program.OsVersion >= OsVersion.Windows7) ChangeWallpaperFade(theme, baseImage, displayImage, screenList);
-						else ChangeWallpaper(theme, baseImage, displayImage, screenList);
-					}
+                        // Apply to desktop background.
+                        if (!forceQuick && theme.FadeTransition && Program.OsVersion >= OsVersion.Windows7) ChangeWallpaperFade(theme, baseImage, displayImage, screenList);
+                        else ChangeWallpaper(theme, baseImage, displayImage, screenList);
+                    }
 					else
 					{
 						Log.Write(LogLevel.Error, "Couldn't initialize the wallpaper frame.");
 					}
-				}
+                }
 
-				GC.Collect();
+                GC.Collect();
 			}
 			catch (Exception ex)
 			{

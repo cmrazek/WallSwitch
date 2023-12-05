@@ -25,3 +25,4 @@
 /WallSwitchSetup/obj/*
 /WallSwitch.DX11/Debug/*
 /WallSwitch.DX11/Release/*
+/WallSwitch.DX11/x64/*

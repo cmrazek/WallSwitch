@@ -162,7 +162,7 @@ namespace WallSwitch::DX11
 				dst += rowSize;
 			}
 		}
-		catch (...)
+		finally
 		{
 			_context->Unmap(_targetTexture, resourceId);
 		}

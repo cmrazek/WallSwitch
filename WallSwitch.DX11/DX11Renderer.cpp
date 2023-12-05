@@ -51,6 +51,10 @@ namespace WallSwitch::DX11
 		{
 			Log::Error(L"Unknown exception when copying image data.");
 		}
+		finally
+		{
+			_bitmap->UnlockBits(bd);
+		}
 
 		_bitmap->UnlockBits(bd);
 		return _bitmap;
