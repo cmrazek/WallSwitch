@@ -67,7 +67,8 @@ latest_guid					varchar(40),
 filter_xml					text,
 input_idle_enable			tinyint,
 input_idle_min_time			int,
-input_idle_max_time			int
+input_idle_max_time			int,
+screen_working_area			tinyint
 )",
 @"create index theme_ix_name on theme (name)",
 
@@ -234,6 +235,7 @@ pub_date			datetime
 			AddTableColumnIfMissing("theme", "input_idle_enable", "tinyint");
 			AddTableColumnIfMissing("theme", "input_idle_min_time", "int");
 			AddTableColumnIfMissing("theme", "input_idle_max_time", "int");
+			AddTableColumnIfMissing("theme", "screen_working_area", "tinyint");
 
 			AddTableColumnIfMissing("img", "rating", "integer");
 			AddTableColumnIfMissing("img", "thumb", "blob");

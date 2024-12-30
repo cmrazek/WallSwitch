@@ -169,6 +169,7 @@
             this.c_themeMode = new System.Windows.Forms.ComboBox();
             this.c_themeOrder = new System.Windows.Forms.ComboBox();
             this.c_imageFit = new System.Windows.Forms.ComboBox();
+            this.c_workingAreaCheckBox = new System.Windows.Forms.CheckBox();
             this.c_separateMonitors = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.c_maxClipTrackBar = new System.Windows.Forms.TrackBar();
@@ -224,6 +225,11 @@
             this.toolStripMenuItem12 = new System.Windows.Forms.ToolStripSeparator();
             this.deleteLogMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clearAllLogsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem13 = new System.Windows.Forms.ToolStripSeparator();
+            this.filterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filterInfoMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filterWarningMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.filterErrorMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.grpNavButtons = new System.Windows.Forms.GroupBox();
             this.tblNavButtons = new System.Windows.Forms.TableLayoutPanel();
             this.grpTransparency = new System.Windows.Forms.GroupBox();
@@ -231,11 +237,6 @@
             this.c_transparencyTrackBar = new System.Windows.Forms.TrackBar();
             this.tblMain = new System.Windows.Forms.TableLayoutPanel();
             this.tblTopControls = new System.Windows.Forms.TableLayoutPanel();
-            this.toolStripMenuItem13 = new System.Windows.Forms.ToolStripSeparator();
-            this.filterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.filterInfoMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.filterWarningMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.filterErrorMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmLocations.SuspendLayout();
             this.grpTheme.SuspendLayout();
             this.tblTheme.SuspendLayout();
@@ -870,7 +871,7 @@
             this.c_settingsTab.Location = new System.Drawing.Point(4, 26);
             this.c_settingsTab.Name = "c_settingsTab";
             this.c_settingsTab.Padding = new System.Windows.Forms.Padding(3);
-            this.c_settingsTab.Size = new System.Drawing.Size(776, 405);
+            this.c_settingsTab.Size = new System.Drawing.Size(776, 404);
             this.c_settingsTab.TabIndex = 1;
             this.c_settingsTab.Text = "Settings";
             this.c_settingsTab.UseVisualStyleBackColor = true;
@@ -897,7 +898,7 @@
             this.tblFlowContent.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tblFlowContent.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tblFlowContent.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tblFlowContent.Size = new System.Drawing.Size(770, 399);
+            this.tblFlowContent.Size = new System.Drawing.Size(770, 398);
             this.tblFlowContent.TabIndex = 15;
             // 
             // grpBackgroundColorEffects
@@ -905,7 +906,7 @@
             this.grpBackgroundColorEffects.AutoSize = true;
             this.grpBackgroundColorEffects.Controls.Add(this.flowBackgroundImageEffects);
             this.grpBackgroundColorEffects.Dock = System.Windows.Forms.DockStyle.Top;
-            this.grpBackgroundColorEffects.Location = new System.Drawing.Point(3, 915);
+            this.grpBackgroundColorEffects.Location = new System.Drawing.Point(3, 942);
             this.grpBackgroundColorEffects.Name = "grpBackgroundColorEffects";
             this.grpBackgroundColorEffects.Size = new System.Drawing.Size(764, 158);
             this.grpBackgroundColorEffects.TabIndex = 6;
@@ -952,7 +953,7 @@
             this.cmbColorEffectBack.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.cmbColorEffectBack.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbColorEffectBack.FormattingEnabled = true;
-            this.cmbColorEffectBack.Location = new System.Drawing.Point(94, 19);
+            this.cmbColorEffectBack.Location = new System.Drawing.Point(94, 18);
             this.cmbColorEffectBack.Name = "cmbColorEffectBack";
             this.cmbColorEffectBack.Size = new System.Drawing.Size(139, 25);
             this.cmbColorEffectBack.TabIndex = 0;
@@ -1040,7 +1041,7 @@
             this.grpImageEffects.AutoSize = true;
             this.grpImageEffects.Controls.Add(this.flowLayoutPanel6);
             this.grpImageEffects.Dock = System.Windows.Forms.DockStyle.Top;
-            this.grpImageEffects.Location = new System.Drawing.Point(3, 856);
+            this.grpImageEffects.Location = new System.Drawing.Point(3, 883);
             this.grpImageEffects.Name = "grpImageEffects";
             this.grpImageEffects.Size = new System.Drawing.Size(764, 53);
             this.grpImageEffects.TabIndex = 5;
@@ -1086,7 +1087,7 @@
             this.grpCollageDisplay.AutoSize = true;
             this.grpCollageDisplay.Controls.Add(this.tblCollageDisplay);
             this.grpCollageDisplay.Dock = System.Windows.Forms.DockStyle.Top;
-            this.grpCollageDisplay.Location = new System.Drawing.Point(3, 518);
+            this.grpCollageDisplay.Location = new System.Drawing.Point(3, 545);
             this.grpCollageDisplay.Name = "grpCollageDisplay";
             this.grpCollageDisplay.Size = new System.Drawing.Size(764, 332);
             this.grpCollageDisplay.TabIndex = 4;
@@ -1173,7 +1174,7 @@
             this.c_edgeMode.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.c_edgeMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.c_edgeMode.FormattingEnabled = true;
-            this.c_edgeMode.Location = new System.Drawing.Point(3, 80);
+            this.c_edgeMode.Location = new System.Drawing.Point(3, 81);
             this.c_edgeMode.Name = "c_edgeMode";
             this.c_edgeMode.Size = new System.Drawing.Size(150, 25);
             this.c_edgeMode.TabIndex = 5;
@@ -1394,7 +1395,7 @@
             this.grpBackgroundColor.AutoSize = true;
             this.grpBackgroundColor.Controls.Add(this.tblBackgroundColor);
             this.grpBackgroundColor.Dock = System.Windows.Forms.DockStyle.Top;
-            this.grpBackgroundColor.Location = new System.Drawing.Point(3, 422);
+            this.grpBackgroundColor.Location = new System.Drawing.Point(3, 449);
             this.grpBackgroundColor.Name = "grpBackgroundColor";
             this.grpBackgroundColor.Size = new System.Drawing.Size(764, 90);
             this.grpBackgroundColor.TabIndex = 3;
@@ -1539,7 +1540,7 @@
             this.grpFrequency.AutoSize = true;
             this.grpFrequency.Controls.Add(this.tblChangeFrequency);
             this.grpFrequency.Dock = System.Windows.Forms.DockStyle.Top;
-            this.grpFrequency.Location = new System.Drawing.Point(3, 231);
+            this.grpFrequency.Location = new System.Drawing.Point(3, 258);
             this.grpFrequency.Name = "grpFrequency";
             this.grpFrequency.Size = new System.Drawing.Size(764, 185);
             this.grpFrequency.TabIndex = 2;
@@ -1786,7 +1787,7 @@
             this.grpDisplayMode.Controls.Add(this.tblDisplayModeRows);
             this.grpDisplayMode.Location = new System.Drawing.Point(3, 3);
             this.grpDisplayMode.Name = "grpDisplayMode";
-            this.grpDisplayMode.Size = new System.Drawing.Size(764, 222);
+            this.grpDisplayMode.Size = new System.Drawing.Size(764, 249);
             this.grpDisplayMode.TabIndex = 1;
             this.grpDisplayMode.TabStop = false;
             this.grpDisplayMode.Text = "Display Mode";
@@ -1811,7 +1812,7 @@
             this.tblDisplayModeRows.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tblDisplayModeRows.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tblDisplayModeRows.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tblDisplayModeRows.Size = new System.Drawing.Size(758, 200);
+            this.tblDisplayModeRows.Size = new System.Drawing.Size(758, 227);
             this.tblDisplayModeRows.TabIndex = 15;
             // 
             // flowLayoutPanel1
@@ -1820,6 +1821,7 @@
             this.flowLayoutPanel1.Controls.Add(this.c_themeMode);
             this.flowLayoutPanel1.Controls.Add(this.c_themeOrder);
             this.flowLayoutPanel1.Controls.Add(this.c_imageFit);
+            this.flowLayoutPanel1.Controls.Add(this.c_workingAreaCheckBox);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
@@ -1869,6 +1871,19 @@
             this.c_imageFit.TabIndex = 2;
             this.toolTip1.SetToolTip(this.c_imageFit, "Image sizing method");
             this.c_imageFit.SelectedIndexChanged += new System.EventHandler(this.ControlChanged);
+            // 
+            // c_workingAreaCheckBox
+            // 
+            this.c_workingAreaCheckBox.AutoSize = true;
+            this.c_workingAreaCheckBox.Location = new System.Drawing.Point(444, 3);
+            this.c_workingAreaCheckBox.Name = "c_workingAreaCheckBox";
+            this.c_workingAreaCheckBox.Size = new System.Drawing.Size(165, 21);
+            this.c_workingAreaCheckBox.TabIndex = 3;
+            this.c_workingAreaCheckBox.Text = "Screen Working Area";
+            this.toolTip1.SetToolTip(this.c_workingAreaCheckBox, "Keep images confined to the screen\'s working area (excludes task bar and tool win" +
+        "dows)");
+            this.c_workingAreaCheckBox.UseVisualStyleBackColor = true;
+            this.c_workingAreaCheckBox.CheckedChanged += new System.EventHandler(this.ControlChanged);
             // 
             // c_separateMonitors
             // 
@@ -2236,7 +2251,7 @@
             // 
             this.c_widgetPanelPropSplitter.Panel2.Controls.Add(this.c_widgetPropertyGrid);
             this.c_widgetPanelPropSplitter.Size = new System.Drawing.Size(232, 399);
-            this.c_widgetPanelPropSplitter.SplitterDistance = 131;
+            this.c_widgetPanelPropSplitter.SplitterDistance = 130;
             this.c_widgetPanelPropSplitter.TabIndex = 0;
             // 
             // c_widgetList
@@ -2248,7 +2263,7 @@
             this.c_widgetList.Location = new System.Drawing.Point(0, 0);
             this.c_widgetList.MultiSelect = false;
             this.c_widgetList.Name = "c_widgetList";
-            this.c_widgetList.Size = new System.Drawing.Size(207, 131);
+            this.c_widgetList.Size = new System.Drawing.Size(207, 130);
             this.c_widgetList.TabIndex = 0;
             this.c_widgetList.UseCompatibleStateImageBehavior = false;
             this.c_widgetList.View = System.Windows.Forms.View.Details;
@@ -2267,14 +2282,14 @@
             this.c_widgetControlRightPanel.Dock = System.Windows.Forms.DockStyle.Right;
             this.c_widgetControlRightPanel.Location = new System.Drawing.Point(207, 0);
             this.c_widgetControlRightPanel.Name = "c_widgetControlRightPanel";
-            this.c_widgetControlRightPanel.Size = new System.Drawing.Size(25, 131);
+            this.c_widgetControlRightPanel.Size = new System.Drawing.Size(25, 130);
             this.c_widgetControlRightPanel.TabIndex = 4;
             // 
             // panel2
             // 
             this.panel2.Controls.Add(this.c_widgetDeleteButton);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel2.Location = new System.Drawing.Point(0, 108);
+            this.panel2.Location = new System.Drawing.Point(0, 107);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(25, 23);
             this.panel2.TabIndex = 4;
@@ -2315,7 +2330,7 @@
             this.c_widgetPropertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
             this.c_widgetPropertyGrid.Location = new System.Drawing.Point(0, 0);
             this.c_widgetPropertyGrid.Name = "c_widgetPropertyGrid";
-            this.c_widgetPropertyGrid.Size = new System.Drawing.Size(232, 264);
+            this.c_widgetPropertyGrid.Size = new System.Drawing.Size(232, 265);
             this.c_widgetPropertyGrid.TabIndex = 0;
             this.c_widgetPropertyGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.c_widgetPropertyGrid_PropertyValueChanged);
             // 
@@ -2443,36 +2458,72 @@
             this.toolStripMenuItem13,
             this.filterToolStripMenuItem});
             this.cmLog.Name = "cmLog";
-            this.cmLog.Size = new System.Drawing.Size(211, 140);
+            this.cmLog.Size = new System.Drawing.Size(164, 112);
             this.cmLog.Opening += new System.ComponentModel.CancelEventHandler(this.cmLog_Opening);
             // 
             // copyLogMenuItem
             // 
             this.copyLogMenuItem.Name = "copyLogMenuItem";
             this.copyLogMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.copyLogMenuItem.Size = new System.Drawing.Size(210, 24);
+            this.copyLogMenuItem.Size = new System.Drawing.Size(163, 24);
             this.copyLogMenuItem.Text = "&Copy";
             this.copyLogMenuItem.Click += new System.EventHandler(this.copyLogMenuItem_Click);
             // 
             // toolStripMenuItem12
             // 
             this.toolStripMenuItem12.Name = "toolStripMenuItem12";
-            this.toolStripMenuItem12.Size = new System.Drawing.Size(207, 6);
+            this.toolStripMenuItem12.Size = new System.Drawing.Size(160, 6);
             // 
             // deleteLogMenuItem
             // 
             this.deleteLogMenuItem.Name = "deleteLogMenuItem";
             this.deleteLogMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
-            this.deleteLogMenuItem.Size = new System.Drawing.Size(210, 24);
+            this.deleteLogMenuItem.Size = new System.Drawing.Size(163, 24);
             this.deleteLogMenuItem.Text = "&Delete";
             this.deleteLogMenuItem.Click += new System.EventHandler(this.deleteLogEntryMenuItem_Click);
             // 
             // clearAllLogsMenuItem
             // 
             this.clearAllLogsMenuItem.Name = "clearAllLogsMenuItem";
-            this.clearAllLogsMenuItem.Size = new System.Drawing.Size(210, 24);
+            this.clearAllLogsMenuItem.Size = new System.Drawing.Size(163, 24);
             this.clearAllLogsMenuItem.Text = "C&lear All";
             this.clearAllLogsMenuItem.Click += new System.EventHandler(this.clearLogMenuItem_Click);
+            // 
+            // toolStripMenuItem13
+            // 
+            this.toolStripMenuItem13.Name = "toolStripMenuItem13";
+            this.toolStripMenuItem13.Size = new System.Drawing.Size(160, 6);
+            // 
+            // filterToolStripMenuItem
+            // 
+            this.filterToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.filterInfoMenuItem,
+            this.filterWarningMenuItem,
+            this.filterErrorMenuItem});
+            this.filterToolStripMenuItem.Name = "filterToolStripMenuItem";
+            this.filterToolStripMenuItem.Size = new System.Drawing.Size(163, 24);
+            this.filterToolStripMenuItem.Text = "&Filter";
+            // 
+            // filterInfoMenuItem
+            // 
+            this.filterInfoMenuItem.Name = "filterInfoMenuItem";
+            this.filterInfoMenuItem.Size = new System.Drawing.Size(147, 26);
+            this.filterInfoMenuItem.Text = "&Info";
+            this.filterInfoMenuItem.Click += new System.EventHandler(this.filterInfoMenuItem_Click);
+            // 
+            // filterWarningMenuItem
+            // 
+            this.filterWarningMenuItem.Name = "filterWarningMenuItem";
+            this.filterWarningMenuItem.Size = new System.Drawing.Size(147, 26);
+            this.filterWarningMenuItem.Text = "&Warning";
+            this.filterWarningMenuItem.Click += new System.EventHandler(this.filterWarningMenuItem_Click);
+            // 
+            // filterErrorMenuItem
+            // 
+            this.filterErrorMenuItem.Name = "filterErrorMenuItem";
+            this.filterErrorMenuItem.Size = new System.Drawing.Size(147, 26);
+            this.filterErrorMenuItem.Text = "&Error";
+            this.filterErrorMenuItem.Click += new System.EventHandler(this.filterErrorMenuItem_Click);
             // 
             // grpNavButtons
             // 
@@ -2569,42 +2620,6 @@
             this.tblTopControls.Size = new System.Drawing.Size(784, 90);
             this.tblTopControls.TabIndex = 0;
             // 
-            // toolStripMenuItem13
-            // 
-            this.toolStripMenuItem13.Name = "toolStripMenuItem13";
-            this.toolStripMenuItem13.Size = new System.Drawing.Size(207, 6);
-            // 
-            // filterToolStripMenuItem
-            // 
-            this.filterToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.filterInfoMenuItem,
-            this.filterWarningMenuItem,
-            this.filterErrorMenuItem});
-            this.filterToolStripMenuItem.Name = "filterToolStripMenuItem";
-            this.filterToolStripMenuItem.Size = new System.Drawing.Size(210, 24);
-            this.filterToolStripMenuItem.Text = "&Filter";
-            // 
-            // filterInfoMenuItem
-            // 
-            this.filterInfoMenuItem.Name = "filterInfoMenuItem";
-            this.filterInfoMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.filterInfoMenuItem.Text = "&Info";
-            this.filterInfoMenuItem.Click += new System.EventHandler(this.filterInfoMenuItem_Click);
-            // 
-            // filterWarningMenuItem
-            // 
-            this.filterWarningMenuItem.Name = "filterWarningMenuItem";
-            this.filterWarningMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.filterWarningMenuItem.Text = "&Warning";
-            this.filterWarningMenuItem.Click += new System.EventHandler(this.filterWarningMenuItem_Click);
-            // 
-            // filterErrorMenuItem
-            // 
-            this.filterErrorMenuItem.Name = "filterErrorMenuItem";
-            this.filterErrorMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.filterErrorMenuItem.Text = "&Error";
-            this.filterErrorMenuItem.Click += new System.EventHandler(this.filterErrorMenuItem_Click);
-            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 17F);
@@ -2689,6 +2704,7 @@
             this.tblDisplayModeRows.ResumeLayout(false);
             this.tblDisplayModeRows.PerformLayout();
             this.flowLayoutPanel1.ResumeLayout(false);
+            this.flowLayoutPanel1.PerformLayout();
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.c_maxClipTrackBar)).EndInit();
@@ -2946,6 +2962,7 @@
         private System.Windows.Forms.ToolStripMenuItem filterInfoMenuItem;
         private System.Windows.Forms.ToolStripMenuItem filterWarningMenuItem;
         private System.Windows.Forms.ToolStripMenuItem filterErrorMenuItem;
+        private System.Windows.Forms.CheckBox c_workingAreaCheckBox;
     }
 }
 

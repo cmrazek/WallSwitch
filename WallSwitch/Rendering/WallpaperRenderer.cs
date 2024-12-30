@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using WallSwitch.Rendering;
 using WallSwitch.SettingsStore;
+using WI = WallSwitch.WidgetInterface;
 
 namespace WallSwitch
 {
@@ -185,7 +186,7 @@ namespace WallSwitch
             return _renderer.EndFrame();
         }
 
-        public void RenderCollageImageOnScreen(Database db, ImageRec file, Rectangle screenRect)
+        public void RenderCollageImageOnScreen(Database db, ImageRec file, WI.Screen screen)
         {
             try
             {
@@ -200,6 +201,7 @@ namespace WallSwitch
                     float imgHeight = file.Image.Height;
                     float imgArea = imgWidth * imgHeight;
                     float imgSize = (float)_theme.ImageSize / 100.0f;
+                    var screenRect = _theme.GetDrawableBounds(screen);
                     float screenArea = screenRect.Width * imgSize * screenRect.Height * imgSize;
                     float scale = (float)Math.Sqrt(screenArea / imgArea);
 
@@ -235,6 +237,8 @@ namespace WallSwitch
                     }
 
                     var imgRect = GetRandomImageRect(db, screenRect, imgWidth, imgHeight).ToRectangle();
+
+                    Log.Debug("Drawing image '{0}' to rect '{1}'.", file.Location, imgRect);
 
                     if (_theme.DropShadow && _theme.DropShadowDist > 0)
                     {

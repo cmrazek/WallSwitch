@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Xml;
+using WallSwitch.WidgetInterface;
 
 namespace WallSwitch
 {
@@ -31,7 +32,8 @@ namespace WallSwitch
 		private const int k_defaultImageSize = 50;
 		private const int k_defaultBackOpacity = 15;
 		private const ImageFit k_defaultImageFit = ImageFit.Fit;
-		private const bool k_defaultFeatherEnable = true;	// Deprecated
+		private const bool k_defaultScreenWorkingArea = false;
+        private const bool k_defaultFeatherEnable = true;	// Deprecated
 		private const EdgeMode k_defaultEdgeMode = EdgeMode.Feather;
 		private const int k_defaultEdgeDist = 15;
 		private static readonly Color k_defaultBorderColor = Color.White;
@@ -69,6 +71,7 @@ namespace WallSwitch
 		private Color _backColorBottom = k_defaultBackColor;
 		private int _backOpacity = k_defaultBackOpacity;
 		private ImageFit _imageFit = k_defaultImageFit;
+		private bool _screenWorkingArea = k_defaultScreenWorkingArea;
 		private List<RectangleF> _imageRectHistory = new List<RectangleF>();
 		private string _historyGuid;
 		private string _historyLatestGuid;
@@ -258,7 +261,14 @@ namespace WallSwitch
 			set { _imageFit = value; }
 		}
 
-		public bool FadeTransition
+		public bool ScreenWorkingArea
+		{
+			get => _screenWorkingArea;
+			set => _screenWorkingArea = value;
+		}
+
+
+        public bool FadeTransition
 		{
 			get { return _fadeTransition; }
 			set { _fadeTransition = value; }
@@ -359,8 +369,9 @@ namespace WallSwitch
 				"filter_xml", _filter?.ToSaveString(),
 				"input_idle_enable", _inputIdleEnabled ? 1 : 0,
 				"input_idle_min_time", _inputIdleMinTime,
-				"input_idle_max_time", _inputIdleMaxTime
-			};
+				"input_idle_max_time", _inputIdleMaxTime,
+                "screen_working_area", _screenWorkingArea
+            };
 
 			var newRecord = false;
 			if (_rowid == 0L)
@@ -436,6 +447,7 @@ namespace WallSwitch
 
 			_backOpacity = row.GetInt("back_opacity", k_defaultBackOpacity);
 			_imageFit = row.GetEnum("image_fit", k_defaultImageFit);
+			_screenWorkingArea = row.GetBoolean("screen_working_area", k_defaultScreenWorkingArea);
 			_edgeMode = row.GetEnum("edge_mode", k_defaultEdgeMode);
 			_edgeDist = row.GetInt("edge_dist", k_defaultEdgeDist);
 			_borderColor = ColorUtil.ParseColor(row.GetString("border_color"), k_defaultBorderColor);
@@ -548,6 +560,7 @@ namespace WallSwitch
 
 			_backOpacity = Util.ParseInt(xmlTheme, "BackOpacity", k_defaultBackOpacity);
 			_imageFit = Util.ParseEnum<ImageFit>(xmlTheme, "ImageFit", k_defaultImageFit);
+			_screenWorkingArea = k_defaultScreenWorkingArea;
 			if (xmlTheme.HasAttribute("Feather"))	// Deprecated
 			{
 				_edgeMode = Util.ParseBool(xmlTheme, "Feather", k_defaultFeatherEnable) ? EdgeMode.Feather : WallSwitch.EdgeMode.None;
@@ -855,7 +868,7 @@ namespace WallSwitch
 		#endregion
 
 		#region ImageSelection
-		public IEnumerable<ImageLayout> GetNextImages(Database db, Rectangle[] monitorRects,
+		public IEnumerable<ImageLayout> GetNextImages(Database db, ScreenList screenList,
 			ref int randomGroupCounter, ref bool randomGroupClear, CancellationToken cancel)
 		{
 			IEnumerable<ImageLayout> ret = null;
@@ -889,7 +902,7 @@ namespace WallSwitch
 			}
 
 			foreach (var loc in _locations) loc.UpdateIfRequired(db, this, cancel);
-			ret = PickImages(db, monitorRects, ref randomGroupCounter, ref randomGroupClear);
+			ret = PickImages(db, screenList, ref randomGroupCounter, ref randomGroupClear);
 			AddHistoryImages(db, ret);
 			return ret;
 		}
@@ -901,12 +914,12 @@ namespace WallSwitch
 		/// <param name="allFiles">A list of all available image files</param>
 		/// <param name="monitorRects">A list of all monitor rectangles</param>
 		/// <returns>A list of images to be rendered</returns>
-		private List<ImageLayout> PickImages(Database db, Rectangle[] monitorRects, ref int randomGroupCounter, ref bool randomGroupClear)
+		private List<ImageLayout> PickImages(Database db, ScreenList screenList, ref int randomGroupCounter, ref bool randomGroupClear)
 		{
 			if (_mode == ThemeMode.Collage)
 			{
 				var pickedFiles = new List<ImageLayout>();
-				var numMonitors = _separateMonitors ? monitorRects.Length : 1;
+				var numMonitors = _separateMonitors ? screenList.Count : 1;
 				var sequenceNumber = 0;
 				var maxCount = -1;
 
@@ -925,7 +938,7 @@ namespace WallSwitch
 						else
 						{
 							// This one image will be displayed on all the monitors.
-							for (int layoutMonitor = 0; layoutMonitor < monitorRects.Length; layoutMonitor++)
+							for (int layoutMonitor = 0; layoutMonitor < screenList.Count; layoutMonitor++)
 							{
 								pickedFiles.Add(new ImageLayout(img, new int[] { layoutMonitor }));
 							}
@@ -939,7 +952,7 @@ namespace WallSwitch
 			}
 			else // fullscreen
 			{
-				var monitorSelections = (from m in monitorRects select new MonitorSelection { Rect = m, ImageRec = null }).ToArray();
+				var monitorSelections = screenList.Select(x => new MonitorSelection { Rect = GetDrawableBounds(x), ImageRec = null }).ToArray();
 				var retries = 0;
 				var pickedFiles = new List<ImageLayout>();
 				var sequenceNumber = 0;
@@ -1512,6 +1525,12 @@ namespace WallSwitch
 			_historyGuid = guid;
 
 			FireHistoryAdded(images);
+		}
+
+		public Rectangle GetDrawableBounds(Screen screen)
+		{
+			if (_mode == ThemeMode.Collage && _screenWorkingArea) return screen.WorkingArea;
+			return screen.Bounds;
 		}
 		#endregion
 

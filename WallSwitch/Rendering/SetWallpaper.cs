@@ -1374,8 +1374,7 @@ namespace WallSwitch
 				case SwitchDir.Next:
 					{
 						var screenList = new ScreenList();
-						var monitorRects = (from s in screenList select s.Bounds).ToArray();
-						images = theme.GetNextImages(db, monitorRects, ref randomGroupCounter, ref randomGroupClear, cancel);
+						images = theme.GetNextImages(db, screenList, ref randomGroupCounter, ref randomGroupClear, cancel);
 					}
 					break;
 
@@ -1411,10 +1410,10 @@ namespace WallSwitch
 			{
 				var screenList = new ScreenList();
 				DumpScreenLayoutToDebugLog(screenList);
-				var screenRects = (from s in screenList select s.Bounds).ToArray();
+                var screenRects = (from s in screenList select s.Bounds).ToArray();
 
-				// Keep track of which screens have been cleared.
-				var screenInits = new bool[screenRects.Length];
+                // Keep track of which screens have been cleared.
+                var screenInits = new bool[screenRects.Length];
 				for (int i = 0; i < screenInits.Length; i++) screenInits[i] = false;
 
                 using (_renderer = new WallpaperRenderer())
@@ -1429,7 +1428,7 @@ namespace WallSwitch
 							{
 								if (imgLayout.Monitors.Length >= 1 && imgLayout.Monitors[0] < screenRects.Length)
 								{
-									_renderer.RenderCollageImageOnScreen(db, imgLayout.ImageRec, screenRects[imgLayout.Monitors[0]]);
+									_renderer.RenderCollageImageOnScreen(db, imgLayout.ImageRec, screenList[imgLayout.Monitors[0]]);
 								}
 							}
 							else

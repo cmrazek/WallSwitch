@@ -12,8 +12,9 @@ Contact:
 
 ChangeLog:
 
-Version 1.8 - 2023-03-02:
+Version 1.8 - 2024-12-30:
 - Added hardware acceleration for wallpaper rendering. (can be disabled in settings, if needed)
+- Added ability to limit collage images to the screen working area.
 - The 'paused' state now persists after a restart.
 - Logs are now visible in the UI.
 - Fixed bug in widget rendering which made them inoperable.

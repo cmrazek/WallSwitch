@@ -530,6 +530,7 @@ namespace WallSwitch
 			_changeThemeHotKey.Copy(_currentTheme.HotKey);
 
 			c_imageFit.SelectedIndex = (int)_currentTheme.ImageFit;
+			c_workingAreaCheckBox.Checked = _currentTheme.ScreenWorkingArea;
 
 			trkOpacity.Value = _currentTheme.BackOpacity.Clamp(trkOpacity.Minimum, trkOpacity.Maximum);
 			UpdateBackOpacityDisplay();
@@ -832,6 +833,7 @@ namespace WallSwitch
 			}
 
 			_currentTheme.ImageFit = (ImageFit)c_imageFit.SelectedIndex;
+			_currentTheme.ScreenWorkingArea = c_workingAreaCheckBox.Checked;
 			_currentTheme.BackOpacity = trkOpacity.Value;
 			_currentTheme.FadeTransition = chkFadeTransition.Checked;
 			_currentTheme.MaxImageScale = maxImageScale;
@@ -948,6 +950,7 @@ namespace WallSwitch
 
 			c_imageFit.Visible = c_themeMode.SelectedIndex != k_modeCollage;
 			c_maxScale.Enabled = c_limitScale.Checked;
+			c_workingAreaCheckBox.Visible = c_themeMode.SelectedIndex == k_modeCollage;
 
 			// Change Frequency Group
 			chkFadeTransition.Visible = Program.OsVersion >= OsVersion.Windows7;
@@ -3080,6 +3083,7 @@ namespace WallSwitch
 			{
 				var selectedWidget = (from l in c_widgetList.SelectedItems.Cast<ListViewItem>() select l.Tag as WidgetInstance).FirstOrDefault();
 				c_widgetLayout.SelectWidget(selectedWidget, false);
+				c_widgetPropertyGrid.SelectedObject = selectedWidget?.Properties;
 				EnableWidgetControls();
 			}
 			catch (Exception ex)
